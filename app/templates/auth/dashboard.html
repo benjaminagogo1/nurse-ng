@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Your account — Nurse.ng{% endblock %}
+
+{% block content %}
+<section class="form-page">
+  <p class="eyebrow">Signed in</p>
+  <h1>Your account</h1>
+  <p class="lede">
+    You are signed in as <strong>{{ user.phone }}</strong>. Your profile is not
+    visible to anyone yet; profiles are private until you choose otherwise.
+  </p>
+  <p class="form-alt"><a href="/">Back to home</a></p>
+</section>
+{% endblock %}

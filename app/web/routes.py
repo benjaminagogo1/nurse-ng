@@ -1,11 +1,9 @@
-from pathlib import Path
+from fastapi import APIRouter, Depends, Request, Response
+from fastapi.responses import PlainTextResponse
 
-from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+from app.models.user import User
+from app.web.deps import get_current_user
+from app.web.templating import render
 
 router = APIRouter()
 
@@ -16,10 +14,15 @@ def healthz() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@router.get("/", response_class=HTMLResponse)
-def home(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(
-        request=request,
-        name="home.html",
-        context={"title": "Nurse.ng"},
-    )
+@router.get("/robots.txt", response_class=PlainTextResponse)
+def robots_txt() -> str:
+    """Keep the invite-only pilot out of search indexes."""
+    return "User-agent: *\nDisallow: /\n"
+
+
+@router.get("/")
+def home(
+    request: Request,
+    user: User | None = Depends(get_current_user),
+) -> Response:
+    return render(request, "home.html", {"title": "Nurse.ng", "user": user})

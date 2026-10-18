@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}{{ fields.get('display_name', 'Nurse profile') }} — Nurse.ng{% endblock %}
+
+{% block content %}
+<section class="form-page public-profile">
+  <p class="eyebrow">Shared profile</p>
+  <h1>{{ fields.get('display_name', 'Nurse profile') }}</h1>
+
+  {% if fields.get('headline') %}
+    <p class="lede">{{ fields.get('headline') }}</p>
+  {% endif %}
+
+  {% if fields.get('professional_status') or fields.get('location') %}
+    <dl class="profile-meta">
+      {% if fields.get('professional_status') %}
+        <dt>Professional status</dt>
+        <dd>
+          {{ fields.get('professional_status') }}
+          <span class="optional">(self-declared)</span>
+        </dd>
+      {% endif %}
+      {% if fields.get('location') %}
+        <dt>Location</dt>
+        <dd>{{ fields.get('location') }}</dd>
+      {% endif %}
+    </dl>
+  {% endif %}
+
+  {% if fields.get('bio') %}
+    <div class="profile-bio">{{ fields.get('bio') }}</div>
+  {% endif %}
+
+  {% if not fields %}
+    <p class="lede">This profile is active but shares no details yet.</p>
+  {% endif %}
+
+  <p class="form-alt">
+    Shared by its owner. Nurse.ng has not verified these details.
+  </p>
+</section>
+{% endblock %}

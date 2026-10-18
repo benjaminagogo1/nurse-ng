@@ -10,7 +10,17 @@
     <header class="site-header">
       <a class="brand" href="/">Nurse.ng</a>
       <nav class="site-nav">
-        <a href="/healthz">Status</a>
+        {% if user %}
+          <a href="/profile">Profile</a>
+          <a href="/auth/dashboard">Account</a>
+          <form method="post" action="/auth/logout" class="inline-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="link-button">Sign out</button>
+          </form>
+        {% else %}
+          <a href="/auth/login">Sign in</a>
+          <a href="/auth/register">Create account</a>
+        {% endif %}
       </nav>
     </header>
 

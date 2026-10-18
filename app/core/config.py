@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -12,9 +13,15 @@ class Settings(BaseSettings):
 
     app_name: str = "Nurse.ng"
     debug: bool = False
+    # Signs the session cookie. Production must set NURSE_NG_SECRET_KEY.
     secret_key: str = "insecure-dev-key-change-me"
     database_url: str = "sqlite:///./nurse_ng.db"
     allowed_hosts: str = "localhost,127.0.0.1"
+
+    session_cookie_name: str = "nurse_ng_session"
+    session_max_age: int = 60 * 60 * 24 * 14  # 14 days
+    session_https_only: bool = False
+    session_same_site: Literal["lax", "strict", "none"] = "lax"
 
 
 @lru_cache

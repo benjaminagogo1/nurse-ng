@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}{{ profile.display_name }} — Nurse.ng{% endblock %}
+
+{% block content %}
+<section class="form-page">
+  <p class="eyebrow">
+    {% if is_active %}Active · shared by link{% else %}Private profile · Draft{% endif %}
+  </p>
+  <h1>{{ profile.display_name }}</h1>
+
+  {% if error %}
+    <p class="form-error" role="alert">{{ error }}</p>
+  {% endif %}
+
+  {% if profile.headline %}
+    <p class="lede">{{ profile.headline }}</p>
+  {% endif %}
+
+  <dl class="profile-meta">
+    <dt>Professional status</dt>
+    <dd>{{ status_label }} <span class="optional">(self-declared)</span></dd>
+    {% if profile.location %}
+      <dt>Location</dt>
+      <dd>{{ profile.location }}</dd>
+    {% endif %}
+  </dl>
+
+  {% if profile.bio %}
+    <div class="profile-bio">{{ profile.bio }}</div>
+  {% endif %}
+
+  <div class="profile-actions">
+    {% if is_active %}
+      <p class="field-hint">
+        This profile is not listed in any directory. Only people with the link
+        can see the fields you marked public ({{ public_field_count }} public).
+      </p>
+      {% if share_url %}
+        <label for="share-url">Share link</label>
+        <input id="share-url" type="text" value="{{ share_url }}" readonly
+               onclick="this.select()">
+      {% endif %}
+      {% if not display_name_shared %}
+        <p class="field-hint">
+          Your display name is private, so the shared page will not show your name.
+        </p>
+      {% endif %}
+      <div class="button-row">
+        <a class="button-secondary" href="/profile/sharing">Sharing controls</a>
+        <form method="post" action="/profile/deactivate">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button type="submit" class="button-secondary">Stop sharing</button>
+        </form>
+      </div>
+    {% else %}
+      <p class="field-hint">
+        Activating creates a private share link. It does not list your profile
+        in any directory, and it does not verify your details.
+      </p>
+      <div class="button-row">
+        <form method="post" action="/profile/activate">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button type="submit" class="button-primary">Activate profile</button>
+        </form>
+        <a class="button-secondary" href="/profile/sharing">Sharing controls</a>
+      </div>
+    {% endif %}
+
+    <p class="form-alt"><a href="/profile/edit">Edit profile</a></p>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}{% if profile %}Edit{% else %}Create{% endif %} your profile — Nurse.ng{% endblock %}
+
+{% block content %}
+<section class="form-page">
+  <p class="eyebrow">{% if profile %}Edit{% else %}Create{% endif %} profile</p>
+  <h1>Your professional profile</h1>
+  <p class="lede">
+    This profile is private. It is visible only to you until you activate it and
+    choose fields to share, and your professional status is self-declared until
+    verification exists.
+  </p>
+
+  {% if error %}
+    <p class="form-error" role="alert">{{ error }}</p>
+  {% endif %}
+
+  <form method="post" action="/profile/edit" class="stacked-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+    <label for="display_name">Display name</label>
+    <input id="display_name" name="display_name" type="text" maxlength="120"
+           value="{{ values.display_name }}" required>
+
+    <label for="professional_status">Professional status</label>
+    <select id="professional_status" name="professional_status">
+      {% for value, label in status_options %}
+        <option value="{{ value }}"{% if values.professional_status == value %} selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <p class="field-hint">Self-declared. Verification is not available yet.</p>
+
+    <label for="headline">Headline <span class="optional">(optional)</span></label>
+    <input id="headline" name="headline" type="text" maxlength="160"
+           value="{{ values.headline }}">
+
+    <label for="location">Location <span class="optional">(optional)</span></label>
+    <input id="location" name="location" type="text" maxlength="120"
+           value="{{ values.location }}">
+
+    <label for="bio">About you <span class="optional">(optional)</span></label>
+    <textarea id="bio" name="bio" rows="6" maxlength="5000">{{ values.bio }}</textarea>
+
+    <button type="submit">Save profile</button>
+  </form>
+</section>
+{% endblock %}
