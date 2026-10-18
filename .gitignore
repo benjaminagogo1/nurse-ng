@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+db.sqlite3
+db.sqlite3-journal
+*.db
+nurse_ng.db
+.env
+staticfiles/
+media/
+*.log
+.DS_Store

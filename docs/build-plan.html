@@ -1,0 +1,1258 @@
+<title>Nurse.ng Build Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<style>
+  /* Layout: technical memo with a sticky contents rail, full-width phase track, and diagram-led decision sections. */
+  :root {
+    --bg: #f4f6f2;
+    --surface: #ffffff;
+    --surface-2: #eaf0e9;
+    --fg: #14201c;
+    --muted: #56675f;
+    --line: #d3ddd5;
+    --line-strong: #b7c6bc;
+    --accent: #0b6b5b;
+    --accent-ink: #075247;
+    --accent-soft: #dcefe9;
+    --warn: #8a5300;
+    --warn-soft: #f6ead3;
+    --danger: #9c2f2f;
+    --danger-soft: #f5dede;
+    --ok: #22663b;
+    --ok-soft: #dcefe1;
+    --code-bg: #0f1c18;
+    --code-fg: #d7e7e0;
+    --shadow: 0 1px 2px rgba(20, 32, 28, 0.06), 0 8px 24px rgba(20, 32, 28, 0.05);
+    --radius: 10px;
+    --font-display: "Newsreader", Georgia, "Times New Roman", serif;
+    --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b1411;
+      --surface: #111d18;
+      --surface-2: #17251f;
+      --fg: #e6eee9;
+      --muted: #9aada4;
+      --line: #293a33;
+      --line-strong: #3b5047;
+      --accent: #63d6bb;
+      --accent-ink: #8ce5cf;
+      --accent-soft: #11332b;
+      --warn: #e0a34c;
+      --warn-soft: #32250f;
+      --danger: #ee8f8f;
+      --danger-soft: #381b1b;
+      --ok: #82d79d;
+      --ok-soft: #14301e;
+      --code-bg: #060f0c;
+      --code-fg: #d7e7e0;
+      --shadow: none;
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0b1411;
+    --surface: #111d18;
+    --surface-2: #17251f;
+    --fg: #e6eee9;
+    --muted: #9aada4;
+    --line: #293a33;
+    --line-strong: #3b5047;
+    --accent: #63d6bb;
+    --accent-ink: #8ce5cf;
+    --accent-soft: #11332b;
+    --warn: #e0a34c;
+    --warn-soft: #32250f;
+    --danger: #ee8f8f;
+    --danger-soft: #381b1b;
+    --ok: #82d79d;
+    --ok-soft: #14301e;
+    --code-bg: #060f0c;
+    --code-fg: #d7e7e0;
+    --shadow: none;
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  * { box-sizing: border-box; }
+
+  .page {
+    max-width: 1220px;
+    margin-inline: auto;
+    padding-left: max(20px, env(safe-area-inset-left, 0px));
+    padding-right: max(20px, env(safe-area-inset-right, 0px));
+    padding-block: 0 72px;
+  }
+
+  a { color: var(--accent); text-underline-offset: 3px; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+  .masthead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-block: 15px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .brand { display: flex; align-items: center; gap: 10px; }
+
+  .monogram {
+    width: 29px;
+    height: 29px;
+    display: grid;
+    place-items: center;
+    border-radius: 7px;
+    background: var(--accent);
+    color: var(--surface);
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .brand-text { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+  .brand-sub { color: var(--muted); font-weight: 400; }
+
+  .masthead-meta {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .hero { max-width: 800px; padding-block: 54px 38px; }
+
+  .eyebrow {
+    margin: 0 0 14px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  h1 {
+    margin: 0 0 18px;
+    font-family: var(--font-display);
+    font-size: clamp(38px, 7vw, 58px);
+    font-weight: 500;
+    line-height: 1.03;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .lede {
+    margin: 0 0 28px;
+    max-width: 65ch;
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--muted);
+  }
+
+  .verdict {
+    padding: 18px 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    box-shadow: var(--shadow);
+  }
+
+  .verdict p { margin: 0; max-width: 66ch; }
+
+  .verdict-label {
+    margin-bottom: 6px !important;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 15px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .chip::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: none;
+  }
+
+  .chip.ok { color: var(--ok); background: var(--ok-soft); border-color: transparent; }
+  .chip.warn { color: var(--warn); background: var(--warn-soft); border-color: transparent; }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    margin-top: 28px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .fact { padding: 15px 16px; background: var(--surface); min-width: 0; }
+
+  .fact .num {
+    font-family: var(--font-display);
+    font-size: 27px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .fact .lab { margin-top: 6px; font-size: 12px; line-height: 1.35; color: var(--muted); }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
+  }
+
+  .toc { position: sticky; top: 24px; padding-top: 6px; }
+
+  .toc-title {
+    margin: 0 0 12px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .toc ol { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+
+  .toc a {
+    display: block;
+    padding: 5px 0 5px 12px;
+    border-left: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.35;
+    text-decoration: none;
+  }
+
+  .toc a:hover { color: var(--accent); border-left-color: var(--accent); }
+
+  main { min-width: 0; }
+
+  .section { padding-block: 46px; border-top: 1px solid var(--line); }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+
+  .sec-num {
+    flex: none;
+    padding-top: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(26px, 4vw, 34px);
+    font-weight: 500;
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  h3 { margin: 0 0 8px; font-size: 17px; font-weight: 600; line-height: 1.35; }
+
+  p { margin: 0 0 14px; max-width: 68ch; }
+
+  .muted { color: var(--muted); }
+
+  .note {
+    margin: 22px 0;
+    padding: 18px 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .note p:last-child { margin-bottom: 0; }
+
+  .note.warn { background: var(--warn-soft); border-color: transparent; }
+  .note.ok { background: var(--ok-soft); border-color: transparent; }
+
+  .note-label {
+    margin-bottom: 6px !important;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--warn);
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 22px;
+  }
+
+  .card {
+    padding: 18px 18px 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    min-width: 0;
+  }
+
+  .card .k { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+  .card h3 { margin-top: 6px; font-size: 15.5px; }
+  .card p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--muted); }
+
+  ul.clean {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 16px 0;
+    padding: 0;
+    max-width: 68ch;
+    list-style: none;
+  }
+
+  ul.clean li { position: relative; padding-left: 22px; }
+
+  ul.clean li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.58em;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--accent);
+    opacity: 0.75;
+  }
+
+  ul.clean li strong { font-weight: 600; }
+
+  .table-wrap {
+    margin: 20px 0;
+    overflow-x: auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .table-decisions table { min-width: 820px; }
+  .table-entities table { min-width: 720px; }
+  .table-sprints table { min-width: 780px; }
+  .table-epics table { min-width: 520px; }
+  .table-slas table { min-width: 480px; }
+  .table-tools table { min-width: 560px; }
+
+  th {
+    padding: 12px 14px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  td strong { font-weight: 600; }
+  td .rev { display: block; margin-top: 4px; font-size: 12px; color: var(--muted); }
+
+  code {
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: var(--surface-2);
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+  }
+
+  pre {
+    margin: 20px 0;
+    padding: 18px;
+    overflow-x: auto;
+    background: var(--code-bg);
+    color: var(--code-fg);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.65;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  pre code { padding: 0; background: none; color: inherit; font-size: inherit; }
+
+  figure.diagram {
+    margin: 26px 0;
+    padding: 18px 16px 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  figure.diagram svg { display: block; width: 100%; height: auto; }
+
+  figcaption {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  .dbox { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1; }
+  .dbox-a { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; }
+  .dbox-w { fill: var(--warn-soft); stroke: var(--warn); stroke-width: 1; }
+  .dbox-o { fill: var(--ok-soft); stroke: var(--ok); stroke-width: 1; }
+  .dl { fill: var(--fg); font-family: var(--font-body); font-size: 13px; font-weight: 600; }
+  .ds { fill: var(--muted); font-family: var(--font-body); font-size: 11px; }
+  .dm { fill: var(--muted); font-family: var(--font-mono); font-size: 10px; }
+  .dflow { fill: none; stroke: var(--line-strong); stroke-width: 1.5; }
+  .dflow-a { fill: none; stroke: var(--accent); stroke-width: 1.8; }
+  .dash { stroke-dasharray: 5 5; }
+
+  .timeline {
+    display: grid;
+    grid-template-columns: 4fr 4fr 8fr 6fr;
+    gap: 6px;
+    margin: 24px 0 10px;
+  }
+
+  .phase {
+    min-width: 0;
+    padding: 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+
+  .phase.p0 { border-top: 3px solid var(--line-strong); }
+  .phase.p1 { border-top: 3px solid var(--accent); }
+  .phase.p2 { border-top: 3px solid var(--accent); }
+  .phase.p3 { border-top: 3px solid var(--ok); }
+
+  .phase .wk {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .phase h3 { margin: 6px 0; font-size: 14px; }
+  .phase p { margin: 0; font-size: 12px; line-height: 1.45; color: var(--muted); }
+
+  .gates {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+  }
+
+  .gate {
+    padding: 16px 18px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    min-width: 0;
+  }
+
+  .gate h3 { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; font-size: 14px; }
+  .gate h3 span { font-family: var(--font-mono); font-size: 10px; font-weight: 400; color: var(--muted); white-space: nowrap; }
+  .gate ul { display: flex; flex-direction: column; gap: 6px; margin: 0; padding-left: 17px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+
+  .days { display: flex; flex-direction: column; gap: 0; margin: 18px 0; border-top: 1px solid var(--line); }
+
+  .day {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 14px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .day .n { font-family: var(--font-mono); font-size: 11px; color: var(--accent); padding-top: 3px; }
+  .day p { margin: 0; font-size: 14px; line-height: 1.55; max-width: 64ch; }
+
+  .footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px 28px;
+    margin-top: 24px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--muted);
+  }
+
+  .footer p { margin: 0; max-width: 60ch; }
+
+  @media (max-width: 980px) {
+    .layout { grid-template-columns: 1fr; gap: 0; }
+    .toc { display: none; }
+  }
+
+  @media (max-width: 700px) {
+    .masthead-meta { display: none; }
+    .hero { padding-block: 38px 28px; }
+    .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cards, .gates { grid-template-columns: 1fr; }
+    .timeline { grid-template-columns: 1fr; }
+    .section { padding-block: 36px; }
+    .section-head { gap: 10px; }
+  }
+</style>
+
+<div class="page">
+  <header class="masthead">
+    <div class="brand">
+      <span class="monogram" aria-hidden="true">N</span>
+      <span class="brand-text">Nurse.ng <span class="brand-sub">/ build plan</span></span>
+    </div>
+    <p class="masthead-meta">v1.0 &middot; 17 Oct 2026</p>
+  </header>
+
+  <section class="hero" aria-labelledby="page-title">
+    <p class="eyebrow">Technical review &amp; delivery plan</p>
+    <h1 id="page-title">Nurse.ng Build Plan</h1>
+    <p class="lede">A review of the strategic roadmap, the stack decisions it still needs, and a 22-week path to a trust-first MVP that a small team can actually operate.</p>
+    <div class="verdict">
+      <p class="verdict-label">Verdict</p>
+      <p>The strategy is disciplined and the scope is right. The build risk sits in one place: whether professional status can be verified lawfully, and reviewed at a cost the business can carry. This plan makes that a Phase 0 kill criterion before verification code is written.</p>
+      <ul class="chips">
+        <li class="chip ok">Scope: strong</li>
+        <li class="chip warn">Verification source: unresolved</li>
+        <li class="chip warn">Economics: under-modelled</li>
+        <li class="chip ok">Technical plan: sound</li>
+      </ul>
+    </div>
+    <div class="facts">
+      <div class="fact"><div class="num">22</div><div class="lab">weeks to end of pilot</div></div>
+      <div class="fact"><div class="num">3</div><div class="lab">engineers recommended</div></div>
+      <div class="fact"><div class="num">4</div><div class="lab">release gates</div></div>
+      <div class="fact"><div class="num">1</div><div class="lab">kill criterion</div></div>
+    </div>
+  </section>
+
+  <div class="layout">
+    <aside class="toc" aria-label="Contents">
+      <p class="toc-title">On this page</p>
+      <ol>
+        <li><a href="#review">Review</a></li>
+        <li><a href="#decisions">Decision ledger</a></li>
+        <li><a href="#architecture">Architecture</a></li>
+        <li><a href="#repository">Repository</a></li>
+        <li><a href="#data">Data &amp; trust model</a></li>
+        <li><a href="#build">Build plan</a></li>
+        <li><a href="#gates">Gates &amp; budgets</a></li>
+        <li><a href="#start">First 10 days</a></li>
+        <li><a href="#tools">Toolchain</a></li>
+      </ol>
+    </aside>
+
+    <main>
+      <section class="section" id="review">
+        <div class="section-head">
+          <span class="sec-num">01</span>
+          <h2>Review</h2>
+        </div>
+        <p class="muted">What the proposal gets right, and the ten changes that should happen before implementation spending begins.</p>
+
+        <h3 style="margin-top:26px;">What holds up</h3>
+        <ul class="clean">
+          <li><strong>Trust-first scope.</strong> Profiles, verification, and controlled employer contact come before jobs, CPD, and mobility. The sequencing follows operational maturity, not feature ambition.</li>
+          <li><strong>Explicit non-goals.</strong> Not a regulator, not a licence issuer, no patient records, no unmoderated messaging. These prevent the most common failure modes in this category.</li>
+          <li><strong>A real verification taxonomy.</strong> Self-declared, document reviewed, source-confirmed, expired, disputed, and unable to verify is already better than most marketplaces.</li>
+          <li><strong>Exit gates and a risk register.</strong> Rare in a product proposal. The structure is correct; the thresholds are missing.</li>
+          <li><strong>Privacy designed in.</strong> Field-level visibility, data minimisation, appeal rights, and separation of public profiles from private evidence are treated as product requirements.</li>
+          <li><strong>Users separated from payers.</strong> The document refuses to charge nurses for basic discoverability, which protects the supply side.</li>
+        </ul>
+
+        <h3 style="margin-top:32px;">What must change before build</h3>
+        <div class="cards">
+          <div class="card">
+            <span class="k">Change 01</span>
+            <h3>Make the source a kill gate</h3>
+            <p>Does NMCN expose a lawful verification route? Can any authoritative source be queried reliably? If the answer is documents only, every label, price, and claim changes. Decide this before schema work.</p>
+          </div>
+          <div class="card">
+            <span class="k">Change 02</span>
+            <h3>Price the review labour</h3>
+            <p>Time ten real cases. Measure minutes per case, queue SLA, and appeal rate. Cost per verified profile is loaded reviewer cost divided by cases per reviewer per day. If that does not fit under a plausible employer price, the model fails.</p>
+          </div>
+          <div class="card">
+            <span class="k">Change 03</span>
+            <h3>Name the legal regime</h3>
+            <p>Nigeria Data Protection Act 2023: registration where applicable, DPIA, lawful basis, data subject rights, cross-border transfers, and breach notification. Counsel in Phase 0, not launch week.</p>
+          </div>
+          <div class="card">
+            <span class="k">Change 04</span>
+            <h3>Turn gates into numbers</h3>
+            <p>&ldquo;Evidence of repeat use&rdquo; is not a gate. Agree thresholds in Phase 0 and publish them internally. The proposals are in section 07.</p>
+          </div>
+          <div class="card">
+            <span class="k">Change 05</span>
+            <h3>Start invite-only</h3>
+            <p>Public employer search is the largest abuse surface and the hardest operation to staff. A curated cohort and 5 to 8 verified employers proves the workflow without opening the scrape surface.</p>
+          </div>
+          <div class="card">
+            <span class="k">Change 06</span>
+            <h3>Ship a verification receipt</h3>
+            <p>A badge is not trust. Every public &ldquo;verified&rdquo; claim needs a page stating what was checked, against which source, by whom, when, and what it does not mean. Product requirement, not a footnote.</p>
+          </div>
+          <div class="card">
+            <span class="k">Change 07</span>
+            <h3>Baseline the competition</h3>
+            <p>The roadmap says to test against competitors but names none. Document the register, job boards, associations and WhatsApp groups, agencies, and international pathway firms, then name the one workflow you serve better.</p>
+          </div>
+          <div class="card">
+            <span class="k">Change 08</span>
+            <h3>Fix the team and timeline math</h3>
+            <p>Eight weeks to MVP is achievable with three engineers and a narrowed scope. With two, it is not, unless verification and moderation run on spreadsheets. Staff the plan or cut the scope.</p>
+          </div>
+          <div class="card">
+            <span class="k">Change 09</span>
+            <h3>Build the trust surface</h3>
+            <p>Name the operating entity, a physical address, a grievance officer, response SLAs, and a status page. Nurses will upload identity documents. Anonymity is a conversion killer.</p>
+          </div>
+          <div class="card">
+            <span class="k">Change 10</span>
+            <h3>Keep one source of truth</h3>
+            <p>Treat the Markdown as canonical and generate the PDF in CI. Two hand-maintained copies will drift, and the drift will land in front of a funder or a lawyer.</p>
+          </div>
+        </div>
+
+        <div class="note warn" style="margin-top:26px;">
+          <p class="note-label">Also add to the roadmap</p>
+          <p>Market baseline, verification-source decision memo, retention schedule, incident response and breach communications, a WhatsApp support model, an accessibility and performance budget, and a data-processing register with vendor DPAs.</p>
+        </div>
+      </section>
+
+      <section class="section" id="decisions">
+        <div class="section-head">
+          <span class="sec-num">02</span>
+          <h2>Decision ledger</h2>
+        </div>
+        <p class="muted">Thirteen decisions that unblock implementation. Each records the choice, the reason, and the condition that would reopen it. These become ADRs in the repository.</p>
+
+        <div class="table-wrap table-decisions">
+          <table>
+            <thead>
+              <tr><th>Decision</th><th>Choice</th><th>Why, and when to revisit</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Architecture</strong></td><td>Modular monolith: one Django project, Celery worker, Celery Beat</td><td>Team size, transactional invariants, and a simple audit model.<span class="rev">Revisit beyond roughly 10 engineers or independent scaling needs.</span></td></tr>
+              <tr><td><strong>Backend</strong></td><td>Python, Django 5.2 LTS</td><td>Server-rendered pages, mature auth and admin, strong security defaults, a large Python hiring pool.<span class="rev">Revisit if async-first services or a different runtime become a committed need.</span></td></tr>
+              <tr><td><strong>Frontend</strong></td><td>Django templates, HTMX, vanilla JavaScript, Tailwind CSS</td><td>Low JS payload, progressive enhancement, one deployable, no SPA build.<span class="rev">Revisit if a reviewer console or employer experience genuinely demands a SPA.</span></td></tr>
+              <tr><td><strong>Database</strong></td><td>Managed PostgreSQL</td><td>Relational invariants, full-text search, JSONB, proven operations.<span class="rev">Revisit when search outgrows Postgres FTS.</span></td></tr>
+              <tr><td><strong>ORM &amp; migrations</strong></td><td>Django ORM and migrations</td><td>Built in, reviewable migrations, admin integration.<span class="rev">Revisit if complex SQL or performance forces raw SQL or another ORM.</span></td></tr>
+              <tr><td><strong>Evidence storage</strong></td><td>Cloudflare R2 via django-storages and boto3; private bucket, signed URLs</td><td>Cheap egress, S3 API, no public object path.<span class="rev">Revisit if residency or procurement requires another provider.</span></td></tr>
+              <tr><td><strong>Background jobs</strong></td><td>Celery + Redis; Celery Beat for expiry and rechecks</td><td>Retries, scheduling, and a broad ecosystem.<span class="rev">Revisit if operational overhead is too high: use RQ or Django-Q2.</span></td></tr>
+              <tr><td><strong>Authentication</strong></td><td>Django auth, custom user model, django-otp, phone OTP</td><td>Control, auditability, MFA for privileged roles.<span class="rev">Revisit if social login is needed (django-allauth) or a managed provider saves more than four weeks.</span></td></tr>
+              <tr><td><strong>Search</strong></td><td>Django <code>contrib.postgres</code> SearchVector and TrigramSimilarity, permission-aware querysets</td><td>No separate search cluster; adequate at pilot scale.<span class="rev">Revisit above roughly 100k profiles or when ranking requirements grow.</span></td></tr>
+              <tr><td><strong>API</strong></td><td>Server-rendered first; DRF <code>/api/v1</code> deferred until a mobile or partner client is committed</td><td>Avoids duplicating every workflow; the service layer keeps the API possible.<span class="rev">Revisit at Release 2 or a signed mobile or partner commitment.</span></td></tr>
+              <tr><td><strong>Hosting</strong></td><td>Fly.io (<code>jnb</code> / <code>cpt</code>) behind Cloudflare; Gunicorn or Uvicorn, WhiteNoise</td><td>Low latency to Nigeria, low cost, Docker-portable.<span class="rev">Revisit if compliance or procurement requires a specific region.</span></td></tr>
+              <tr><td><strong>Payments</strong></td><td>Paystack, Release 2 only</td><td>Nigerian market fit; no payment code in the MVP.<span class="rev">Revisit for expansion corridors.</span></td></tr>
+              <tr><td><strong>SMS</strong></td><td>Termii primary, Twilio fallback</td><td>Nigerian deliverability and sender IDs.<span class="rev">Revisit if delivery data favours another provider.</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note">
+          <p><strong>Frontend boundary.</strong> HTMX handles partial updates and form submissions. Vanilla JavaScript modules handle uploads, visibility controls, and small interactions. No React or Vue in the MVP. If a console later needs a SPA, the Django service layer and a versioned API are the boundary; do not start there.</p>
+        </div>
+      </section>
+
+      <section class="section" id="architecture">
+        <div class="section-head">
+          <span class="sec-num">03</span>
+          <h2>Architecture</h2>
+        </div>
+        <p>One Django web application, one Celery worker, one Celery Beat scheduler, one relational database, one private object store. No microservices until organisational boundaries justify them.</p>
+
+        <figure class="diagram">
+          <svg viewBox="0 0 880 540" role="img" aria-label="Three clients connect over HTTPS to a Django application. The application reads and writes PostgreSQL, enqueues jobs in Redis, and requests presigned URLs for a private R2 bucket. A Celery worker consumes Redis jobs, scans evidence in quarantine, and writes decisions; Celery Beat schedules expiry and rechecks.">
+            <defs>
+              <marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+                <path d="M0,0 L8,4 L0,8 z" fill="var(--line-strong)"></path>
+              </marker>
+              <marker id="ar-a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+                <path d="M0,0 L8,4 L0,8 z" fill="var(--accent)"></path>
+              </marker>
+            </defs>
+
+            <text x="40" y="16" class="dm">CLIENTS</text>
+            <rect x="40" y="24" width="160" height="58" rx="8" class="dbox"></rect>
+            <text x="54" y="48" class="dl">Nurse web</text>
+            <text x="54" y="65" class="ds">mobile-first &middot; HTMX</text>
+
+            <rect x="230" y="24" width="160" height="58" rx="8" class="dbox"></rect>
+            <text x="244" y="48" class="dl">Employer web</text>
+            <text x="244" y="65" class="ds">search, requests</text>
+
+            <rect x="420" y="24" width="180" height="58" rx="8" class="dbox"></rect>
+            <text x="434" y="48" class="dl">Reviewer console</text>
+            <text x="434" y="65" class="ds">claims, evidence</text>
+
+            <rect x="180" y="126" width="400" height="104" rx="10" class="dbox-a"></rect>
+            <text x="198" y="152" class="dl">Django application</text>
+            <text x="198" y="174" class="ds">Django views and templates</text>
+            <text x="198" y="196" class="ds">Django auth, RBAC, policies</text>
+            <text x="198" y="214" class="ds">Profiles, verification, employers, requests</text>
+
+            <rect x="50" y="290" width="180" height="80" rx="8" class="dbox"></rect>
+            <text x="66" y="318" class="dl">PostgreSQL</text>
+            <text x="66" y="336" class="ds">profiles, claims, cases,</text>
+            <text x="66" y="353" class="ds">decisions, audit, FTS</text>
+
+            <rect x="300" y="290" width="150" height="80" rx="8" class="dbox"></rect>
+            <text x="316" y="318" class="dl">Redis / Celery</text>
+            <text x="316" y="336" class="ds">scan, notify, expire</text>
+
+            <rect x="560" y="290" width="190" height="80" rx="8" class="dbox-w"></rect>
+            <text x="576" y="318" class="dl">R2 evidence</text>
+            <text x="576" y="336" class="ds">quarantine &rarr; scanned</text>
+            <text x="576" y="353" class="ds">private &middot; signed URLs</text>
+
+            <rect x="300" y="430" width="450" height="70" rx="8" class="dbox-a"></rect>
+            <text x="318" y="458" class="dl">Celery worker + Beat</text>
+            <text x="318" y="477" class="ds">scan evidence &middot; notify &middot; expire &middot; write decisions</text>
+
+            <line x1="120" y1="82" x2="210" y2="126" class="dflow" marker-end="url(#ar)"></line>
+            <line x1="310" y1="82" x2="330" y2="126" class="dflow" marker-end="url(#ar)"></line>
+            <line x1="510" y1="82" x2="480" y2="126" class="dflow" marker-end="url(#ar)"></line>
+            <text x="126" y="112" class="dm">HTTPS</text>
+
+            <line x1="210" y1="230" x2="140" y2="290" class="dflow" marker-end="url(#ar)"></line>
+            <text x="142" y="266" class="dm">SQL</text>
+
+            <line x1="375" y1="230" x2="375" y2="290" class="dflow" marker-end="url(#ar)"></line>
+            <text x="383" y="264" class="dm">enqueue</text>
+
+            <line x1="540" y1="230" x2="640" y2="290" class="dflow-a" marker-end="url(#ar-a)"></line>
+            <text x="566" y="256" class="dm">presign</text>
+
+            <line x1="375" y1="370" x2="375" y2="430" class="dflow" marker-end="url(#ar)"></line>
+            <text x="383" y="404" class="dm">jobs</text>
+
+            <line x1="655" y1="430" x2="655" y2="370" class="dflow-a" marker-end="url(#ar-a)"></line>
+            <text x="663" y="404" class="dm">scan</text>
+
+            <path d="M 300 465 L 140 465 L 140 370" class="dflow dash" marker-end="url(#ar)"></path>
+            <text x="196" y="457" class="dm">writes</text>
+          </svg>
+          <figcaption>Public requests never read evidence. Uploads land in a private quarantine prefix, the worker scans them, and reviewers receive short-lived signed URLs. Every evidence read is written to the audit log.</figcaption>
+        </figure>
+
+        <h3 style="margin-top:28px;">Evidence path</h3>
+        <ul class="clean">
+          <li>A Django view issues a short-lived presigned upload URL.</li>
+          <li>The file lands in the quarantine prefix. The view records SHA-256, MIME type, size, and uploader.</li>
+          <li>A Celery task scans the object, rejects malware, re-encodes images where applicable, and moves accepted files to the clean prefix.</li>
+          <li>The reviewer console requests a five-minute download URL. The read is audited.</li>
+          <li>A decision row is created, and the claim plus public projection update in one transaction.</li>
+        </ul>
+        <p class="muted">No path exists from the public profile to an evidence object. That is a testable invariant, not a policy statement.</p>
+      </section>
+
+      <section class="section" id="repository">
+        <div class="section-head">
+          <span class="sec-num">04</span>
+          <h2>Repository structure</h2>
+        </div>
+        <p>A single Django project with apps by domain, one Celery worker, and one Beat scheduler. No separate service yet. The tree is designed so an app can be extracted later without moving business rules.</p>
+
+        <pre class="tree"><code>nurse-ng/
+├── README.md
+├── manage.py
+├── pyproject.toml
+├── uv.lock
+├── docs/
+│   ├── BUILD_PLAN.md
+│   ├── strategy/            # roadmap and generated PDF
+│   ├── adr/                 # one file per decision in section 02
+│   ├── policies/            # verification, retention, acceptable use, incidents
+│   ├── runbooks/            # queue, abuse report, restore drill
+│   └── diagrams/
+├── config/
+│   ├── settings/            # base, dev, test, prod
+│   ├── urls.py
+│   ├── asgi.py
+│   ├── wsgi.py
+│   └── celery.py
+├── apps/
+│   ├── core/                # base models, UUIDs, storage helpers, middleware
+│   ├── identity/            # custom user, auth, MFA, phone verification
+│   ├── profiles/            # nurse profile, visibility, credential claims
+│   ├── verification/        # cases, evidence, decisions, reviewer console
+│   ├── employers/           # organizations, memberships, verification
+│   ├── requests/            # contact requests, consent, blocks
+│   ├── moderation/          # reports, appeals, case management
+│   ├── search/              # permission-aware queries, projections
+│   ├── notifications/       # email/SMS templates and delivery log
+│   ├── audit/               # append-only events
+│   └── api/                 # DRF v1 when committed
+├── templates/
+│   ├── base.html
+│   ├── components/          # badges, cards, HTMX partials
+│   ├── marketing/           # home, trust, privacy, terms
+│   ├── auth/                # sign-in, sign-up, verify-phone, recover
+│   ├── nurse/               # dashboard, profile, verification, account
+│   ├── employer/            # dashboard, candidates, requests, organization
+│   ├── reviewer/            # verification queue, evidence, decisions
+│   ├── admin/               # admin overrides
+│   └── emails/
+├── static/
+│   ├── css/                 # design tokens, compiled Tailwind
+│   ├── js/                  # app modules, upload, HTMX
+│   └── img/
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   ├── authz/               # role × resource matrix
+│   ├── api/                 # contract tests
+│   └── e2e/                 # Playwright
+├── scripts/                 # create-admin, export-audit, check-env
+├── .github/workflows/       # ci, security, deploy
+├── docker-compose.yml       # Postgres, Redis, MinIO, Mailpit, ClamAV
+├── Dockerfile
+└── .env.example</code></pre>
+
+        <h3 style="margin-top:28px;">Boundary rules</h3>
+        <ul class="clean">
+          <li><strong>Views compose; services decide.</strong> <code>views.py</code> handles HTTP and template context; <code>services.py</code> holds business rules; <code>selectors.py</code> holds query logic. No business rules in templates.</li>
+          <li><strong>Apps own their models and migrations.</strong> Cross-app access goes through services or selectors, not another app&rsquo;s models directly.</li>
+          <li><strong>Authorize at the boundary.</strong> Every view and HTMX action calls <code>authorize(actor, action, resource)</code>, never only in the template.</li>
+          <li><strong>Public reads use projections.</strong> Public profile pages use a dedicated selector. They never load evidence or private fields.</li>
+          <li><strong>Evidence stays opaque.</strong> Storage keys are never returned to clients; signed URLs are minted server-side only.</li>
+          <li><strong>Tasks stay framework-free.</strong> Celery tasks import services, never views or templates.</li>
+          <li><strong>Forms are adapters.</strong> Domain validation lives in services or shared validators. Do not duplicate rules between forms, API serializers, and tasks.</li>
+          <li><strong>Templates escape by default.</strong> Any <code>mark_safe</code> or <code>|safe</code> requires review.</li>
+          <li><strong>Custom user model from day one.</strong> Use <code>identity.User</code> from the first migration. Never use <code>auth.User</code> directly.</li>
+          <li><strong>Uploads are hostile.</strong> Enforce MIME, size, extension, and scan status before any processing.</li>
+        </ul>
+      </section>
+
+      <section class="section" id="data">
+        <div class="section-head">
+          <span class="sec-num">05</span>
+          <h2>Data &amp; trust model</h2>
+        </div>
+        <p>The trust model is a small set of invariants enforced by the schema and the authorization layer, not by careful UI. The two most important: a claim cannot become verified without a decision row, and evidence has no public path.</p>
+
+        <div class="note warn">
+          <p class="note-label">Before the first migration</p>
+          <p>Use a custom user model, <code>identity.User</code>, from the first migration. Changing it after data exists is painful, and Django&rsquo;s built-in <code>auth.User</code> is not suitable for phone-first accounts or role assignment.</p>
+        </div>
+
+        <div class="table-wrap table-entities">
+          <table>
+            <thead>
+              <tr><th>Entity</th><th>Key fields</th><th>Invariant</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>User</strong></td><td>id, contact, password_hash, mfa, status</td><td>Custom user model; one active contact per account; sessions are revocable.</td></tr>
+              <tr><td><strong>NurseProfile</strong></td><td>user_id, public_id, status, discoverable</td><td>One profile per user; public reads use a projection.</td></tr>
+              <tr><td><strong>CredentialClaim</strong></td><td>profile_id, type, value, status</td><td>A claim never becomes verified without a decision row.</td></tr>
+              <tr><td><strong>VerificationCase</strong></td><td>claim_id, state, assignee, sla_due_at</td><td>At most one open case per claim.</td></tr>
+              <tr><td><strong>EvidenceObject</strong></td><td>case_id, storage_key, sha256, mime, scan_status</td><td>Never public; every read audited.</td></tr>
+              <tr><td><strong>VerificationDecision</strong></td><td>case_id, reviewer_id, outcome, source, rationale, decided_at</td><td>Append-only; current status is a projection.</td></tr>
+              <tr><td><strong>EmployerOrganization</strong></td><td>name, cac_number, status, verified_at</td><td>Only verified organisations can contact nurses.</td></tr>
+              <tr><td><strong>EmployerMembership</strong></td><td>org_id, user_id, role, scopes</td><td>Permissions are scoped per organisation.</td></tr>
+              <tr><td><strong>ContactRequest</strong></td><td>employer_user_id, nurse_id, purpose, status</td><td>Requires consent; nurse can block or report.</td></tr>
+              <tr><td><strong>ReportCase / AppealCase</strong></td><td>subject, state, assignee, sla_due_at</td><td>SLA tracked; decisions recorded with reason codes.</td></tr>
+              <tr><td><strong>AuditEvent</strong></td><td>actor, action, resource, before/after, ts</td><td>Append-only; no sensitive payloads.</td></tr>
+              <tr><td><strong>NotificationDelivery</strong></td><td>channel, template, status</td><td>No sensitive content in messages.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <figure class="diagram">
+          <svg viewBox="0 0 880 320" role="img" aria-label="Verification moves from draft to submitted, queued and in review, then to one of three outcomes: source-confirmed, document reviewed, or unable to verify. An appeal returns the case to review. Every transition writes an audit event.">
+            <defs>
+              <marker id="sar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+                <path d="M0,0 L8,4 L0,8 z" fill="var(--line-strong)"></path>
+              </marker>
+              <marker id="sar-a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+                <path d="M0,0 L8,4 L0,8 z" fill="var(--accent)"></path>
+              </marker>
+            </defs>
+
+            <rect x="18" y="112" width="98" height="46" rx="7" class="dbox"></rect>
+            <text x="67" y="140" class="dl" text-anchor="middle">Draft</text>
+
+            <rect x="146" y="112" width="112" height="46" rx="7" class="dbox"></rect>
+            <text x="202" y="140" class="dl" text-anchor="middle">Submitted</text>
+
+            <rect x="288" y="112" width="94" height="46" rx="7" class="dbox"></rect>
+            <text x="335" y="140" class="dl" text-anchor="middle">Queued</text>
+
+            <rect x="412" y="112" width="118" height="46" rx="7" class="dbox-a"></rect>
+            <text x="471" y="140" class="dl" text-anchor="middle">In review</text>
+
+            <rect x="600" y="28" width="176" height="44" rx="7" class="dbox-o"></rect>
+            <text x="688" y="55" class="dl" text-anchor="middle">Source-confirmed</text>
+
+            <rect x="600" y="113" width="176" height="44" rx="7" class="dbox-a"></rect>
+            <text x="688" y="140" class="dl" text-anchor="middle">Document reviewed</text>
+
+            <rect x="600" y="198" width="176" height="44" rx="7" class="dbox-w"></rect>
+            <text x="688" y="225" class="dl" text-anchor="middle">Unable to verify</text>
+
+            <rect x="600" y="268" width="176" height="38" rx="7" class="dbox"></rect>
+            <text x="688" y="292" class="dl" text-anchor="middle">Appeal</text>
+
+            <line x1="116" y1="135" x2="146" y2="135" class="dflow" marker-end="url(#sar)"></line>
+            <line x1="258" y1="135" x2="288" y2="135" class="dflow" marker-end="url(#sar)"></line>
+            <line x1="382" y1="135" x2="412" y2="135" class="dflow" marker-end="url(#sar)"></line>
+
+            <line x1="530" y1="128" x2="600" y2="55" class="dflow-a" marker-end="url(#sar-a)"></line>
+            <line x1="530" y1="135" x2="600" y2="135" class="dflow-a" marker-end="url(#sar-a)"></line>
+            <line x1="530" y1="145" x2="600" y2="215" class="dflow" marker-end="url(#sar)"></line>
+
+            <path d="M 776 50 L 806 50 L 806 287 L 776 287" class="dflow dash" marker-end="url(#sar)"></path>
+            <text x="812" y="170" class="dm">appeal</text>
+
+            <path d="M 600 287 L 520 287 L 520 158" class="dflow dash" marker-end="url(#sar)"></path>
+            <text x="530" y="305" class="dm">re-review</text>
+
+            <text x="18" y="196" class="dm">DRAFT &rarr; SUBMITTED &rarr; QUEUED</text>
+            <text x="18" y="216" class="ds">Every transition writes an AuditEvent in the same transaction.</text>
+            <text x="18" y="236" class="ds">Only a VerificationDecision row can produce a verified state.</text>
+            <text x="18" y="256" class="ds">Expiry is a scheduled transition, never an assumption.</text>
+          </svg>
+          <figcaption>A claim only becomes verified through a decision row. Appeals return the case to review. Expired and revoked states require a source and a documented process; revocation is never inferred from silence.</figcaption>
+        </figure>
+
+        <h3 style="margin-top:28px;">Core invariants</h3>
+        <ul class="clean">
+          <li>IDs are UUIDv7. A licence or registration number is never a primary key or a public identifier.</li>
+          <li><code>VerificationDecision</code> and <code>AuditEvent</code> are append-only. Corrections are new rows.</li>
+          <li>Field-level visibility defaults to private. Public fields are explicitly opted in.</li>
+          <li>Search returns only profiles where <code>discoverable = true</code>. Contact details never appear in search results.</li>
+          <li>Account deletion follows a documented workflow: revoke sessions, remove the public projection, retain audit records per policy, delete evidence on schedule.</li>
+          <li>Every case transition writes an audit event in the same transaction as the state change.</li>
+        </ul>
+      </section>
+
+      <section class="section" id="build">
+        <div class="section-head">
+          <span class="sec-num">06</span>
+          <h2>Build plan</h2>
+        </div>
+        <p>The plan assumes three engineers, one product and domain lead, one verification operations lead, and part-time security, privacy, and legal support. Verification starts manual. Automation is added only where a lawful source exists and volume justifies it.</p>
+
+        <div class="timeline" aria-label="Phase timeline">
+          <div class="phase p0">
+            <div class="wk">Weeks 1&ndash;4</div>
+            <h3>Phase 0</h3>
+            <p>Discover and decide. Interviews, source feasibility, legal brief, numeric gates.</p>
+          </div>
+          <div class="phase p1">
+            <div class="wk">Weeks 5&ndash;8</div>
+            <h3>Phase 1</h3>
+            <p>Foundation. Repo, CI, auth, RBAC, audit, storage pipeline.</p>
+          </div>
+          <div class="phase p2">
+            <div class="wk">Weeks 9&ndash;16</div>
+            <h3>Phase 2</h3>
+            <p>Trust-first MVP. Profiles, verification, employers, search, contact, appeals, hardening.</p>
+          </div>
+          <div class="phase p3">
+            <div class="wk">Weeks 17&ndash;22</div>
+            <h3>Phase 3</h3>
+            <p>Closed pilot. Curated cohort, support tooling, cost measurement, go/no-go.</p>
+          </div>
+        </div>
+
+        <div class="table-wrap table-sprints">
+          <table>
+            <thead>
+              <tr><th>Sprint</th><th>Weeks</th><th>Focus</th><th>Gate</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>S0</strong></td><td>1&ndash;2</td><td>Discovery, source memo, competitor baseline, technical spikes</td><td>Lawful route identified, or fallback accepted</td></tr>
+              <tr><td><strong>S1</strong></td><td>3&ndash;4</td><td>Synthesis, data map, threat model, schema draft, numeric gates</td><td>Phase 0 go/no-go</td></tr>
+              <tr><td><strong>S2</strong></td><td>5&ndash;6</td><td>Django project, custom user, auth, RBAC, audit primitive, Tailwind/HTMX pipeline, storage</td><td>Authz matrix v0 green</td></tr>
+              <tr><td><strong>S3</strong></td><td>7&ndash;8</td><td>Profiles, field visibility, claims, evidence upload, reviewer queue</td><td>Phase 1 gate</td></tr>
+              <tr><td><strong>S4</strong></td><td>9&ndash;10</td><td>Reviewer console, decisions, notifications, SLAs, verification receipt</td><td>Ten cases end to end</td></tr>
+              <tr><td><strong>S5</strong></td><td>11&ndash;12</td><td>Employer onboarding, organisation verification, scoped seats</td><td>Three employers onboarded</td></tr>
+              <tr><td><strong>S6</strong></td><td>13&ndash;14</td><td>Permission-aware search, contact requests, consent, block and report</td><td>Abuse paths tested</td></tr>
+              <tr><td><strong>S7</strong></td><td>15&ndash;16</td><td>Appeals, admin cases, rate limits, pen test, load test, restore drill</td><td>Phase 2 gate</td></tr>
+              <tr><td><strong>S8</strong></td><td>17&ndash;18</td><td>Cohort onboarding, support tooling, dashboards</td><td>20 nurses, 3 employers active</td></tr>
+              <tr><td><strong>S9</strong></td><td>19&ndash;20</td><td>Weekly operations review, defect fixes, cost measurement</td><td>SLAs met</td></tr>
+              <tr><td><strong>S10</strong></td><td>21&ndash;22</td><td>Pilot report, unit economics, Release 2 recommendation</td><td>Go/no-go for jobs</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="margin-top:30px;">Epic estimates</h3>
+        <div class="table-wrap table-epics">
+          <table>
+            <thead>
+              <tr><th>Epic</th><th>Sprints</th><th>Engineer-days</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Foundation: Django project, custom user, auth, audit, storage, observability, Tailwind/HTMX</td><td>S2</td><td>30</td></tr>
+              <tr><td>Profiles and field-level visibility</td><td>S3</td><td>16</td></tr>
+              <tr><td>Verification queue, reviewer console, and decisions</td><td>S4</td><td>18</td></tr>
+              <tr><td>Employer onboarding and organisation verification</td><td>S5</td><td>8</td></tr>
+              <tr><td>Search and contact requests</td><td>S6</td><td>14</td></tr>
+              <tr><td>Moderation, appeals, admin case management</td><td>S7</td><td>10</td></tr>
+              <tr><td>Data export, deletion, retention jobs</td><td>S7</td><td>6</td></tr>
+              <tr><td>Hardening, performance, security fixes</td><td>S7</td><td>10</td></tr>
+              <tr><td>Pilot tooling and instrumentation</td><td>S8&ndash;S10</td><td>25</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note warn">
+          <p class="note-label">Capacity check</p>
+          <p>The six build sprints (S2&ndash;S7) total <strong>112 engineer-days</strong>; pilot tooling adds 25 more during weeks 17&ndash;22. Three engineers across the twelve build weeks provide 180 person-days, leaving roughly 38% for review, defects, and coordination. Two engineers provide 120 days, roughly 7% buffer, which is effectively none. Staff three engineers, or cut scope to a single employer segment and manual verification.</p>
+        </div>
+
+        <h3 style="margin-top:30px;">Phase 0 technical spikes</h3>
+        <ul class="clean">
+          <li><strong>Verification source.</strong> What NMCN exposes publicly, what lawful access exists, what documents nurses can provide, and what a reviewer can reasonably check.</li>
+          <li><strong>SMS and identity.</strong> Termii and Twilio deliverability, sender ID approval, and phone verification fallback.</li>
+          <li><strong>Low-bandwidth baseline.</strong> Measure a profile page on a mid-range Android over simulated 3G, then set the budget before UI work.</li>
+          <li><strong>Reviewer console shape.</strong> Timebox a comparison of customized Django admin against a dedicated reviewer view for evidence preview, decisions, and audit. Pick one before S4.</li>
+        </ul>
+      </section>
+
+      <section class="section" id="gates">
+        <div class="section-head">
+          <span class="sec-num">07</span>
+          <h2>Gates &amp; budgets</h2>
+        </div>
+        <p>Proposed thresholds, to be agreed in Phase 0. A phase does not advance because its calendar window ended.</p>
+
+        <div class="gates">
+          <div class="gate">
+            <h3>Phase 0 <span>Decide</span></h3>
+            <ul>
+              <li>Verification route documented, with a named fallback and legal sign-off.</li>
+              <li>15 nurse and 5 employer interviews completed.</li>
+              <li>Pilot commitments from at least 3 employers.</li>
+              <li>Numeric pilot gates agreed.</li>
+            </ul>
+          </div>
+          <div class="gate">
+            <h3>Phase 1 <span>Foundation</span></h3>
+            <ul>
+              <li>Authorization matrix 100% green.</li>
+              <li>Threat model signed off.</li>
+              <li>Storage test proves no public read path.</li>
+              <li>Schema reviewed; migrations reversible.</li>
+              <li>CI green; restore drill passed.</li>
+            </ul>
+          </div>
+          <div class="gate">
+            <h3>Phase 2 <span>MVP</span></h3>
+            <ul>
+              <li>Zero unresolved critical or high security findings.</li>
+              <li>p95 candidate search under 800 ms at pilot scale.</li>
+              <li>Profile LCP under 3 s on simulated 3G; initial JS under 100 KB gzipped.</li>
+              <li>Every high-impact action produces an audit event.</li>
+              <li>Pen-test findings closed or formally accepted.</li>
+              <li>Runbooks exercised by someone other than their author.</li>
+            </ul>
+          </div>
+          <div class="gate">
+            <h3>Phase 3 <span>Pilot</span></h3>
+            <ul>
+              <li>40+ nurses onboarded, 5+ employers active.</li>
+              <li>Median verification decision within 3 business days.</li>
+              <li>20+ consent-based contacts; 25%+ nurse response rate.</li>
+              <li>3+ employers willing to pay or sign a paid pilot.</li>
+              <li>Cost per verified profile measured and inside target.</li>
+              <li>Zero reportable data incidents.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 style="margin-top:30px;">Service levels</h3>
+        <div class="table-wrap table-slas">
+          <table>
+            <thead>
+              <tr><th>Workflow</th><th>Pilot target</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Verification first response</td><td>1 business day</td></tr>
+              <tr><td>Verification decision</td><td>3 business days median</td></tr>
+              <tr><td>Serious abuse report acknowledged</td><td>4 hours</td></tr>
+              <tr><td>Abuse action taken</td><td>24 hours</td></tr>
+              <tr><td>Appeal decision</td><td>5 business days</td></tr>
+              <tr><td>Data rights request</td><td>30 days, subject to counsel</td></tr>
+              <tr><td>Incident acknowledged internally</td><td>1 hour</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="margin-top:30px;">Performance budget</h3>
+        <ul class="clean">
+          <li>Initial JavaScript on public profile pages: at most 100 KB gzipped, including HTMX and app modules.</li>
+          <li>No SPA framework in the MVP. Server-rendered pages with HTMX partials come first.</li>
+          <li>LCP at most 3 seconds on a mid-range Android over Slow 4G.</li>
+          <li>TTFB from Lagos at most 800 ms.</li>
+          <li>No web font blocks first render; system fallback first.</li>
+          <li>Public profile and sign-in degrade gracefully without JavaScript.</li>
+        </ul>
+
+        <h3 style="margin-top:30px;">Cost model to instrument from day one</h3>
+        <ul class="clean">
+          <li>Minutes per verification case, and cases per reviewer per day.</li>
+          <li>Cost per verified profile, including scanning and storage.</li>
+          <li>Support and moderation minutes per active user.</li>
+          <li>Employer acquisition cost and revenue per paying employer.</li>
+          <li>Fraud and refund cost per listing.</li>
+          <li>Gross margin after verification and moderation.</li>
+        </ul>
+      </section>
+
+      <section class="section" id="start">
+        <div class="section-head">
+          <span class="sec-num">08</span>
+          <h2>First 10 days</h2>
+        </div>
+        <p>Concrete work that can start before any hiring or procurement decision is final.</p>
+
+        <div class="days">
+          <div class="day"><span class="n">01</span><p>Name accountable owners for product, verification operations, security, and legal.</p></div>
+          <div class="day"><span class="n">02</span><p>Write the verification-source feasibility memo and its kill criterion.</p></div>
+          <div class="day"><span class="n">03</span><p>Brief Nigerian counsel on NDPA 2023, evidence handling, and cross-border hosting.</p></div>
+          <div class="day"><span class="n">04</span><p>Interview 15 nurses and 5 employers. Time ten manual verification cases.</p></div>
+          <div class="day"><span class="n">05</span><p>Draft the data map, retention defaults, and privacy notice outline.</p></div>
+          <div class="day"><span class="n">06</span><p>Stand up the repo, CI, local Docker stack, and secret management.</p></div>
+          <div class="day"><span class="n">07</span><p>Draft schema v1 and the authorization matrix.</p></div>
+          <div class="day"><span class="n">08</span><p>Define the verification receipt fields and wording.</p></div>
+          <div class="day"><span class="n">09</span><p>Agree numeric pilot gates and the pilot cohort.</p></div>
+          <div class="day"><span class="n">10</span><p>Book the day-30 go/no-go review.</p></div>
+        </div>
+
+        <div class="note">
+          <p class="note-label" style="color: var(--accent);">Open decisions</p>
+          <ul class="clean" style="margin-bottom:0;">
+            <li>Which nurse segment first: new graduates, experienced clinicians, or international aspirants?</li>
+            <li>Which employer segment first: hospitals, home care, or recruiters?</li>
+            <li>Is launch verification document-based or source-confirmed?</li>
+            <li>Which legal entity operates the platform?</li>
+            <li>Are three engineers available?</li>
+            <li>Is public search in the MVP, or invite-only discovery?</li>
+            <li>What monthly budget is available for verification operations and counsel?</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section" id="tools">
+        <div class="section-head">
+          <span class="sec-num">09</span>
+          <h2>Toolchain</h2>
+        </div>
+        <p>The full set, chosen so a small team can build and operate the MVP without a dedicated platform engineer.</p>
+
+        <div class="table-wrap table-tools">
+          <table>
+            <thead>
+              <tr><th>Area</th><th>Choice</th><th>Why</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Language</strong></td><td>Python (current stable), Django 5.2 LTS</td><td>Server-rendered, batteries included, strong security defaults.</td></tr>
+              <tr><td><strong>Templates</strong></td><td>Django templates</td><td>HTML-first; no separate frontend build.</td></tr>
+              <tr><td><strong>Interactivity</strong></td><td>HTMX, vanilla JavaScript modules</td><td>Partial updates and small interactions without a SPA.</td></tr>
+              <tr><td><strong>CSS</strong></td><td>Tailwind CSS (standalone CLI), design tokens</td><td>Utility CSS without a Node dependency.</td></tr>
+              <tr><td><strong>Database</strong></td><td>Managed PostgreSQL 16+</td><td>Neon, Supabase, or RDS; full-text search and JSONB.</td></tr>
+              <tr><td><strong>ORM</strong></td><td>Django ORM and migrations</td><td>Built in; reviewable migrations and admin integration.</td></tr>
+              <tr><td><strong>Auth</strong></td><td>Django auth, custom user model, django-otp</td><td>Control and auditability; phone OTP via Termii or Twilio.</td></tr>
+              <tr><td><strong>Validation</strong></td><td>Django forms, DRF serializers, shared validators</td><td>Adapters over domain rules; no duplicated logic.</td></tr>
+              <tr><td><strong>API</strong></td><td>Django REST Framework, drf-spectacular (deferred)</td><td>Only when a mobile or partner client is committed.</td></tr>
+              <tr><td><strong>Evidence</strong></td><td>Cloudflare R2 via django-storages and boto3; ClamAV via Celery</td><td>Private bucket, presigned URLs, quarantine then clean.</td></tr>
+              <tr><td><strong>Jobs</strong></td><td>Celery + Redis; Celery Beat</td><td>Scan, notify, expire, and detect abuse signals.</td></tr>
+              <tr><td><strong>Comms</strong></td><td>django-anymail with Resend or Postmark; Termii, Twilio fallback</td><td>Reliable email; Nigerian SMS deliverability.</td></tr>
+              <tr><td><strong>Search</strong></td><td>Django <code>contrib.postgres</code> SearchVector, TrigramSimilarity</td><td>Permission-aware querysets; no separate search cluster.</td></tr>
+              <tr><td><strong>Observability</strong></td><td>Sentry, structlog, OpenTelemetry, Grafana Cloud or Better Stack</td><td>Errors, structured logs, metrics, and traces with PII redaction.</td></tr>
+              <tr><td><strong>Analytics</strong></td><td>PostHog, EU or self-hosted</td><td>Product metrics without sensitive fields.</td></tr>
+              <tr><td><strong>Testing</strong></td><td>pytest, pytest-django, factory_boy, Playwright, axe-core, Locust</td><td>Unit, end-to-end, accessibility, and load coverage.</td></tr>
+              <tr><td><strong>CI &amp; security</strong></td><td>Ruff, mypy with django-stubs, Bandit, pip-audit, Gitleaks, CodeQL</td><td>Authorization tests, type checks, secret and dependency scanning.</td></tr>
+              <tr><td><strong>Dependencies</strong></td><td>uv with <code>pyproject.toml</code></td><td>Fast, reproducible environments and lockfiles.</td></tr>
+              <tr><td><strong>Hosting</strong></td><td>Fly.io (<code>jnb</code> / <code>cpt</code>), Cloudflare; Gunicorn or Uvicorn, WhiteNoise</td><td>Low latency to Nigeria, Docker-portable, low cost.</td></tr>
+              <tr><td><strong>Local dev</strong></td><td>Docker Compose: Postgres, Redis, MinIO, Mailpit, ClamAV</td><td>Parity with production services from day one.</td></tr>
+              <tr><td><strong>Payments</strong></td><td>Paystack, Release 2 only</td><td>Nigerian market fit; no payment code in the MVP.</td></tr>
+              <tr><td><strong>Docs</strong></td><td>Markdown, ADRs, PDF generated in CI</td><td>One source of truth for the proposal and its decisions.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p>Basis: Nurse.ng Strategic Product Roadmap, version 1.0. Timeline, staffing, and cost figures are planning estimates, not commitments.</p>
+        <p>Legal and regulatory points are for qualified Nigerian counsel to confirm.</p>
+      </footer>
+    </main>
+  </div>
+</div>

@@ -1,0 +1,1 @@
+"""Nurse.ng application package."""
