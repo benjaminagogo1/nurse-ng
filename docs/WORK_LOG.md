@@ -174,6 +174,72 @@ Static type-checking after verification reported one diagnostic: the plain `str`
 
 ---
 
+## Session 2026-10-21
+
+### 1. Reconstruction and direction
+
+- **Action:** Read `docs/WORK_LOG.md`, `docs/DECISIONS.md`, the repository history, and the authentication code. The working tree was clean at commit `d335caf`.
+- **Finding:** the recorded state from 18 October 2026 was 67 tests passing, Ruff clean, and no Alembic drift. The commit title `Add routes, auth, login && Rate limiter` claims a rate limiter that does not exist: there is no limiter dependency, middleware, or code, only a comment at `app/services/auth.py` referring to future rate limiting. This entry overstates the commit; nothing was rewritten.
+- **User direction:** continue with the authentication hardening increment fixed by `DECISIONS.md`: login rate limiting, account lockout, and dummy-hash timing equalisation.
+- **Joint decisions (asked and answered):**
+  - State lives in a hybrid: per-IP counters in memory, account lockout persisted on the user row.
+  - Lockout after 5 consecutive failures for 15 minutes.
+  - Per-IP limits: 10 failed sign-ins per 5 minutes; 5 registration attempts per hour.
+  - Locked accounts return an explicit 429 (Too Many Requests) with a wait message.
+
+### 2. Authentication hardening increment
+
+- **Configuration:** `app/core/config.py` gained six settings: `login_ip_limit` (10), `login_ip_window_seconds` (300), `register_ip_limit` (5), `register_ip_window_seconds` (3600), `login_lockout_threshold` (5), and `login_lockout_seconds` (900). All are overridable through `NURSE_NG_*` environment variables (L44).
+- **Limiter created:** `app/core/ratelimit.py` contains `FixedWindowLimiter`, a thread-safe in-memory fixed-window counter with `is_limited`, `record`, `retry_after`, `reset`, and `clear`, plus `reset_all_limiters()` for tests. State is process-local (L37).
+- **Model extended:** `app/models/user.py` gained `failed_login_attempts` (integer, server default 0) and `locked_until` (nullable timezone-aware timestamp) (L38).
+- **Service extended:** `app/services/auth.py` gained `LoginLockedError`, a module-level dummy Argon2 hash checked for unknown numbers (L39), and lock helpers that release an expired lock (L40), count failures, set the lock, and clear state after a valid sign-in.
+- **Renderer extended:** `app/web/templating.py`'s `render()` now accepts `headers`, so a rate-limited form response can carry `Retry-After`.
+- **Routes extended:** `app/web/auth_routes.py` gained two module-level limiters, `_client_ip()` (the ASGI peer address, L41), `_minutes()`, and `_render_rate_limited()`. `POST /auth/login` checks the IP allowance, catches `LoginLockedError`, records failed sign-ins, and returns 429 with `Retry-After` (L45). `POST /auth/register` checks and records the registration allowance.
+- **Migration created:** `migrations/versions/8f2c1d4a9b6e_add_login_lockout_columns.py`, written by hand because the runner was unavailable, using `op.batch_alter_table` for SQLite compatibility (L42).
+- **Tests created:** `tests/test_auth_hardening.py` with seven cases: lockout after the threshold, expiry releasing the lock, a success resetting the counter, lockout scoped to one account, the dummy hash for unknown numbers, the login IP limit, and the registration IP limit.
+- **Test fixture added:** `tests/conftest.py` has an autouse fixture that clears every limiter before and after each case (L43).
+- **Documentation:** `docs/DECISIONS.md` gained L37–L45 and an updated deferred-authentication section.
+
+### 3. Static review fixes before verification
+
+1. **CSRF token invalidated by registration.** The registration test first reused one CSRF token across five successful registrations. Each success signs the user in through `_start_session`, which clears the session including the CSRF token, so the second POST would have failed with 400. The test now clears the client cookie jar between attempts while the IP counter accumulates.
+2. **Long line.** The `_login_ip_limiter` construction exceeded the 100-character limit; it was wrapped.
+3. **Naive SQLite timestamps.** All comparisons pass through `_as_utc()`, because SQLite stores timestamps without an offset even when the column is timezone-aware. Covered explicitly by the expiry test, which reloads the row from the database.
+
+### 4. Verification (pending)
+
+- **Intended commands:** `./venv/bin/ruff check .`, `./venv/bin/pytest -o addopts="" -q`, `./venv/bin/alembic upgrade head`, and `./venv/bin/alembic check`.
+- **Outcome so far:** the harness safety classifier refused Bash (a command-line shell) execution with `deepseek-v4-flash is temporarily unavailable, so auto mode cannot determine the safety of Bash right now.` The same outage blocked work in the previous sessions. No test, lint, or migration command has run in this session.
+- **Consequence:** the increment is **unverified**. Static review found and fixed three issues, but that is not a substitute for execution. Results must be appended here and to the verification ledger when the runner is available.
+
+### 5. Verification completed (2026-10-21)
+
+The harness classifier still refused Bash execution for `ruff`, `pytest`, and `alembic` in this session, so the user ran the four commands in the terminal and pasted the output, as in section 14 of the previous session.
+
+| Command | Result |
+|---|---|
+| `./venv/bin/ruff check .` | **All checks passed!** |
+| `./venv/bin/pytest -o addopts="" -q` | **74 passed in 31.32s**, exit code 0 |
+| `./venv/bin/alembic upgrade head` | Applied `8f2c1d4a9b6e` (add login lockout columns) to the development SQLite database |
+| `./venv/bin/alembic check` | **No new upgrade operations detected** (no schema drift) |
+
+The total is 74 tests: the previous 67 plus the seven new hardening cases. The increment is verified; no defects surfaced during execution.
+
+### 6. State at end of session
+
+- **Committed:** nothing. The increment is in the working tree; the most recent commit remains `d335caf`.
+- **Next agreed work:** none chosen yet. Open items remain the `.env.example` tracking decision, a dependency lockfile, the Phase 0 O1 (verification-source) memo, and the production items in `DECISIONS.md` (trusted-proxy handling, distributed limiter state, high-entropy secret enforcement).
+
+### 7. Housekeeping (2026-10-21)
+
+- **`.env.example` tracking:** removed `.env.example` from `.gitignore` at the user's direction. `.env` itself remains ignored. The example holds only placeholders (`change-me-in-development`, a local SQLite URL, localhost hosts), so no credential was exposed; the file is now untracked rather than ignored and becomes part of the next commit.
+- **Dependency lockfile:** `uv` (a Python package and project manager, named in D8) is not installed at `~/.local/bin`, `/usr/local/bin`, `/usr/bin`, `~/.cargo/bin`, or inside `venv/bin`, so `uv lock` could not be produced. Created `requirements.lock` instead, pinning all 42 third-party distributions installed in the verified `venv/`; the editable `nurse-ng` install and pip itself are excluded, matching `pip freeze`'s default skip of development tooling. The intended regeneration command is `./venv/bin/pip freeze --exclude-editable`.
+- **Method note:** command execution was blocked by the safety-classifier outage, so the pins were read from the `*.dist-info/METADATA` files and sorted, rather than produced by `pip freeze` itself. Distribution names were normalised to the lowercase-hyphen form pip uses. The declared ranges remain in `pyproject.toml`; L46 records the choice and its trade-offs.
+- **README:** the status paragraph now says 74 tests and names the hardening; a Development section documents the lockfile install, tests, lint, and migration commands.
+- **Scope:** this closes items 2 and 3 of the 2026-10-18 session's next-step list; item 1 (`.env.example`) was the same item recorded there.
+
+---
+
 ## Earlier sessions (reconstructed from transcripts)
 
 ### Session A — build plan and designed page
@@ -207,3 +273,8 @@ Static type-checking after verification reported one diagnostic: the plain `str`
 | 2026-10-18 | Activation/sharing increment tests (21 new, 67 total) | **67 passed** |
 | 2026-10-18 | Ruff and schema-drift check after the sharing increment | **All checks passed; no drift detected** |
 | 2026-10-18 | NMCN (Nursing and Midwifery Council of Nigeria) research memo | **Not started; deferred by user** |
+| 2026-10-21 | Authentication hardening tests (7 new, 74 total) | **74 passed** |
+| 2026-10-21 | Ruff (Python linter) after authentication hardening | **All checks passed** |
+| 2026-10-21 | Lockout migration `8f2c1d4a9b6e` | **Applied to development SQLite database** |
+| 2026-10-21 | Alembic schema drift check after authentication hardening | **No drift detected** |
+| 2026-10-21 | `.env.example` tracking and dependency lockfile | **`.env.example` now trackable; 42 distributions pinned in `requirements.lock`** |

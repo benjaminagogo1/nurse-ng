@@ -5,9 +5,10 @@ unique when present. Roles are not a column; group membership and permissions
 arrive with the authorization layer.
 """
 
+from datetime import datetime
 from enum import StrEnum
 
-from sqlalchemy import Boolean, String
+from sqlalchemy import Boolean, DateTime, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from app.core.security import hash_password, verify_password
@@ -33,6 +34,15 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     mfa_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_staff: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # Login lockout state (DECISIONS L38). Persisted so a restart cannot clear
+    # an active lock and so every worker sees the same counter.
+    failed_login_attempts: Mapped[int] = mapped_column(
+        Integer, default=0, server_default="0"
+    )
+    locked_until: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     @validates("phone")
     def _normalise_phone(self, key: str, value: str) -> str:  # noqa: ARG002

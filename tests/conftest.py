@@ -5,9 +5,22 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 import app.models  # noqa: F401  registers every model on the metadata
+from app.core.ratelimit import reset_all_limiters
 from app.db.base import Base
 from app.db.session import enable_sqlite_foreign_keys, get_db
 from app.main import app
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limiters():
+    """Every TestClient request shares one synthetic client address.
+
+    Without a reset, a case that exhausts an allowance would leak into the next
+    case (DECISIONS L43).
+    """
+    reset_all_limiters()
+    yield
+    reset_all_limiters()
 
 
 @pytest.fixture

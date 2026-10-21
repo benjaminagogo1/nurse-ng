@@ -14,4 +14,3 @@ staticfiles/
 media/
 *.log
 .DS_Store
-.env.example

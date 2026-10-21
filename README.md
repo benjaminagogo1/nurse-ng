@@ -12,4 +12,19 @@ Verified professional infrastructure for nurses in Nigeria and beyond.
 
 ## Status
 
-Backend foundation under construction. Authentication (registration, phone number + password, session login/logout) and nurse profiles (creation, activation, per-field sharing, public share links) are implemented and verified: 67 tests pass, the initial migration is applied, Alembic reports no schema drift, and the linter is clean. Profiles are private drafts by default, activation never lists a profile in a directory, and public share links show only fields the owner explicitly marks public. Every page and link is marked not-for-indexing. The build plan's Phase 0 verification-source gate remains open, and its research is deferred by the user's direction.
+Backend foundation under construction. Authentication (registration, phone number + password, session login/logout), nurse profiles (creation, activation, per-field sharing, public share links), and authentication hardening (per-IP login and registration throttles, account lockout, dummy-hash timing equalisation) are implemented and verified: 74 tests pass, both migrations are applied, Alembic reports no schema drift, and the linter is clean. Profiles are private drafts by default, activation never lists a profile in a directory, and public share links show only fields the owner explicitly marks public. Every page and link is marked not-for-indexing. The build plan's Phase 0 verification-source gate remains open, and its research is deferred by the user's direction.
+
+## Development
+
+Python 3.12 is required. The verified environment is `venv/`, which is not tracked.
+
+```bash
+python3.12 -m venv venv
+./venv/bin/pip install -r requirements.lock
+./venv/bin/pip install -e . --no-deps
+./venv/bin/pytest
+./venv/bin/ruff check .
+./venv/bin/alembic upgrade head
+```
+
+`requirements.lock` is a pinned snapshot of the verified environment (see `docs/DECISIONS.md` L46); `pyproject.toml` remains the source of declared dependency ranges. Copy `.env.example` to `.env` for local overrides: `.env` is ignored by Git and the example is tracked.

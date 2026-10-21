@@ -23,6 +23,17 @@ class Settings(BaseSettings):
     session_https_only: bool = False
     session_same_site: Literal["lax", "strict", "none"] = "lax"
 
+    # Authentication abuse controls (DECISIONS L37-L44).
+    # Per-IP counters live in process memory; account lockout is persisted on
+    # the user row. Both are configurable so operations can tune without a code
+    # change, and so tests can keep the defaults honest.
+    login_ip_limit: int = 10
+    login_ip_window_seconds: int = 300
+    register_ip_limit: int = 5
+    register_ip_window_seconds: int = 3600
+    login_lockout_threshold: int = 5
+    login_lockout_seconds: int = 900
+
 
 @lru_cache
 def get_settings() -> Settings:

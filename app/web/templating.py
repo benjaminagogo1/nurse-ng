@@ -26,8 +26,13 @@ def render(
     name: str,
     context: dict[str, Any] | None = None,
     status_code: int = 200,
+    headers: dict[str, str] | None = None,
 ) -> HTMLResponse:
-    """Render a template with the CSRF token always available."""
+    """Render a template with the CSRF token always available.
+
+    ``headers`` carries response metadata such as ``Retry-After`` when a
+    rate-limited form is re-rendered.
+    """
     template_context: dict[str, Any] = {"csrf_token": csrf_token(request)}
     if context:
         template_context.update(context)
@@ -36,4 +41,5 @@ def render(
         name=name,
         context=template_context,
         status_code=status_code,
+        headers=headers,
     )

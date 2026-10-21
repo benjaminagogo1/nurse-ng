@@ -219,10 +219,61 @@ Implementation choices made after the D-series decisions. Each entry states the 
 - **Reason:** Starlette's (the ASGI (Asynchronous Server Gateway Interface) web framework underlying FastAPI) `SessionMiddleware` accepts only those three values. The type makes the constraint explicit to editors and static checkers, and Pydantic (the validation library behind the settings) rejects a mistyped environment value at startup instead of failing later inside the middleware.
 - **Trade-off:** accepting a new SameSite value requires changing the type as well as the configuration; environment values remain case-sensitive.
 
+### L37 — Per-IP throttling state is in process memory
+- **Choice:** a fixed-window `FixedWindowLimiter` in `app/core/ratelimit.py` counts events per key in a plain dictionary guarded by a `threading.Lock`. Login failures are counted per client address; registration attempts are counted per client address.
+- **Reason:** no new dependency, no write per request, and enough to blunt scripted guessing while the pilot runs one server process.
+- **Trade-off:** counters reset when the process restarts and are not shared between workers. If the deployment moves to multiple workers or instances, this must become Redis or a database-backed counter before the limits are meaningful.
+
+### L38 — Account lockout is persisted on the user row
+- **Choice:** `users.failed_login_attempts` (integer, default 0) and `users.locked_until` (nullable timestamp) hold the lockout state. A failed password check increments the counter; reaching the threshold sets `locked_until`.
+- **Reason:** a persisted lock survives a restart and is visible to every process, unlike the in-memory IP counter. It also keeps the decision on the account, which is the thing being protected.
+- **Trade-off:** an attacker who knows a phone number can deliberately lock that account for the lock window (targeted denial of service). The window is short and IP throttling limits how fast an attacker can cycle accounts; a lock that never expires was rejected for this reason.
+
+### L39 — Unknown numbers still perform a password hash
+- **Choice:** the module holds one Argon2 hash generated at import; an unknown phone, or a user with no stored password, runs `verify_password` against it before returning `None`.
+- **Reason:** removes the most obvious timing difference between "no such account" and "wrong password", complementing the existing uniform message (L8).
+- **Trade-off:** one Argon2 verification is spent on every unknown-number attempt, which an attacker can use to consume CPU. The per-IP throttle bounds that cost per address. Generating the dummy hash at import adds a small fixed startup cost.
+
+### L40 — An expired lock starts a fresh count
+- **Choice:** when a login arrives after `locked_until` has passed, the lock and the failure counter are cleared before the password is checked.
+- **Reason:** otherwise the first mistake after a completed lock immediately re-locks the account, and a user could never recover without operator help.
+- **Trade-off:** the account gets a full new allowance of failures after each lock window. This is intentional; the IP throttle still limits the total rate.
+
+### L41 — The client address is the ASGI peer address
+- **Choice:** `request.client.host` is the throttle key. `X-Forwarded-For` is not read.
+- **Reason:** nothing in the trust chain can yet distinguish a real forwarded header from one an attacker sets. Trusting the header without a configured proxy would let an attacker rotate the key and bypass the limit.
+- **Trade-off:** behind a reverse proxy every request appears to come from the proxy, so one shared counter covers all users. Trusted-proxy parsing must be added with the production deployment configuration before the limits are exercised in production.
+
+### L42 — The lockout migration uses batch alter
+- **Choice:** revision `8f2c1d4a9b6e` adds and drops the columns through `op.batch_alter_table`.
+- **Reason:** SQLite (an embedded, file-based Structured Query Language database) has narrower `ALTER TABLE` support than PostgreSQL (an open-source relational database); batch mode recreates the table and keeps `downgrade()` valid on both.
+- **Trade-off:** the generated SQL is more verbose than a direct `ADD COLUMN`, and the batch copy rewrites the table. At current table sizes this is negligible.
+
+### L43 — Tests reset every limiter between cases
+- **Choice:** an autouse fixture in `tests/conftest.py` calls `reset_all_limiters()` before and after each test.
+- **Reason:** Starlette's `TestClient` reports the same synthetic peer address for every request, so an allowance spent in one case would silently block the next. The reset keeps each case independent without exposing limiter internals through the application.
+- **Trade-off:** the fixture clears global state, so a test that deliberately wants cross-case persistence would need to opt out. None does.
+
+### L44 — Limits are configuration, not constants
+- **Choice:** the six limits live on `Settings` with defaults: login 10 failures per 300 seconds per IP, registration 5 attempts per 3600 seconds per IP, lockout at 5 consecutive failures for 900 seconds. They are overridable through `NURSE_NG_*` environment variables.
+- **Reason:** operational tuning should not require a code change, and tests read the same values rather than duplicating magic numbers.
+- **Trade-off:** a misconfigured environment can weaken the protection; values are not validated against a safe minimum beyond being usable by the limiter.
+
+### L45 — Lockout responses are explicit and carry `Retry-After`
+- **Choice:** a tripped IP limit and a locked account both return 429 (Too Many Requests) with a generic "try again in N minute(s)" message and a `Retry-After` header. A wrong password that has not tripped anything still returns 401 (Unauthorized) with the existing generic message.
+- **Reason:** the user chose clarity for a pilot audience over resisting account enumeration. `Retry-After` lets a client or proxy back off correctly.
+- **Trade-off:** the 429 confirms that a phone number has an account. Mitigations are the uniform 401 before the threshold and the short lock window. A future decision could return 401 during lockout to remove the signal, at the cost of confusing locked-out users.
+
+### L46 — The lockfile is a pip snapshot of the verified environment
+- **Choice:** `requirements.lock` is generated with `pip freeze --exclude-editable` from the `venv/` environment in which the test suite was verified. The project's own editable install is excluded so the file contains only third-party pins.
+- **Reason:** uv (a Python package and project manager) is not installed on the development machine, despite D8 naming it, and installing a new package manager merely to produce a lock would add an unverified tool to the session. The venv snapshot records exactly the versions that passed, including transitive dependencies, with no resolution step or network call.
+- **Trade-off:** the file captures development and runtime dependencies together and is tied to whatever happened to be installed; regenerating it requires the venv. When uv is adopted, `uv.lock` can be generated from the same `pyproject.toml` and this file retired.
+
 ### Deferred authentication work
-- **Not built yet:** email recovery, phone OTP (One-Time Password), MFA (Multi-Factor Authentication), login rate limiting, account lockout, breached-password checks, remember-me, per-device session management, and dummy-hash timing equalisation.
+- **Built on 21 October 2026:** login rate limiting (per-IP), account lockout, and dummy-hash timing equalisation.
+- **Not built yet:** email recovery, phone OTP (One-Time Password), MFA (Multi-Factor Authentication), breached-password checks, remember-me, per-device session management, trusted-proxy address handling (L41), distributed rate-limit state (L37), and startup enforcement of a high-entropy production secret key.
 - **Reason:** none are required to prove the session flow; each adds operational or legal surface.
-- **Trade-off:** the system is not safe for a public launch until at least rate limiting, lockout, and a high-entropy production secret key exist.
+- **Trade-off:** the system is not safe for a public launch until at least the production secret key and trusted-proxy handling exist. Per-IP limits are only meaningful in production once the proxy question is settled.
 
 ### Production configuration required before launch
 - `NURSE_NG_SECRET_KEY` must be set to a high-entropy value; the default `insecure-dev-key-change-me` signs development cookies only.
