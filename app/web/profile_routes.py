@@ -2,10 +2,21 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    Response,
+    UploadFile,
+    status,
+)
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.db.session import get_db
 from app.models.profile import NurseProfile, ProfessionalStatus, ProfileStatus, Visibility
 from app.models.user import User
@@ -23,6 +34,14 @@ from app.services.profiles import (
     save_profile,
     save_sharing_settings,
 )
+from app.services.verification import (
+    EvidenceUpload,
+    VerificationError,
+    has_pending_case,
+    list_cases_for_profile,
+    submit_case,
+)
+from app.web.community_routes import profile_social_context
 from app.web.deps import get_current_user, require_user, verify_csrf
 from app.web.templating import render
 
@@ -89,6 +108,31 @@ def _show_context(
             1 for value in visibility.values() if value == Visibility.PUBLIC.value
         ),
         "display_name_shared": visibility.get("display_name") == Visibility.PUBLIC.value,
+        "document_reviewed_on": _document_reviewed_on(profile),
+        "error": error,
+    }
+
+
+def _document_reviewed_on(profile: NurseProfile) -> str | None:
+    value = profile.document_reviewed_at
+    return value.strftime("%d %B %Y") if value else None
+
+
+def _verification_context(
+    db: Session,
+    profile: NurseProfile,
+    *,
+    registration_number: str = "",
+    error: str | None = None,
+) -> dict[str, object]:
+    return {
+        "title": "Document review",
+        "profile": profile,
+        "cases": list_cases_for_profile(db, profile.id),
+        "pending": has_pending_case(db, profile.id),
+        "document_reviewed_on": _document_reviewed_on(profile),
+        "registration_number": registration_number,
+        "max_megabytes": max(1, settings.evidence_max_bytes // (1024 * 1024)),
         "error": error,
     }
 
@@ -254,6 +298,95 @@ def save_sharing_form(
     return RedirectResponse("/profile", status_code=status.HTTP_303_SEE_OTHER)
 
 
+@router.get("/verification")
+def verification_page(
+    request: Request,
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+) -> Response:
+    profile = get_profile_for_user(db, user.id)
+    if profile is None:
+        return RedirectResponse("/profile/edit", status_code=status.HTTP_303_SEE_OTHER)
+
+    return render(
+        request,
+        "profile/verification.html",
+        {"user": user, **_verification_context(db, profile)},
+    )
+
+
+@router.post("/verification")
+def submit_verification(
+    request: Request,
+    registration_number: str = Form(""),
+    licence: UploadFile | None = File(None),
+    government_id: UploadFile | None = File(None),
+    consent: str = Form(""),
+    user: User = Depends(require_user),
+    _: None = Depends(verify_csrf),
+    db: Session = Depends(get_db),
+) -> Response:
+    profile = get_profile_for_user(db, user.id)
+    if profile is None:
+        return RedirectResponse("/profile/edit", status_code=status.HTTP_303_SEE_OTHER)
+
+    if consent != "on":
+        return render(
+            request,
+            "profile/verification.html",
+            {
+                "user": user,
+                **_verification_context(
+                    db,
+                    profile,
+                    registration_number=registration_number,
+                    error="Consent is required before we can store and review documents.",
+                ),
+            },
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
+    limit = settings.evidence_max_bytes + 1
+    uploads: list[EvidenceUpload] = []
+    for upload in (licence, government_id):
+        if upload is None:
+            uploads.append(EvidenceUpload(data=b"", filename=""))
+            continue
+        uploads.append(
+            EvidenceUpload(
+                data=upload.file.read(limit),
+                filename=upload.filename or "",
+            )
+        )
+
+    try:
+        submit_case(
+            db,
+            user=user,
+            profile=profile,
+            registration_number=registration_number,
+            licence=uploads[0],
+            government_id=uploads[1],
+        )
+    except VerificationError as exc:
+        return render(
+            request,
+            "profile/verification.html",
+            {
+                "user": user,
+                **_verification_context(
+                    db,
+                    profile,
+                    registration_number=registration_number,
+                    error=str(exc),
+                ),
+            },
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
+    return RedirectResponse("/profile/verification", status_code=status.HTTP_303_SEE_OTHER)
+
+
 @router.post("/activate")
 def activate(
     request: Request,
@@ -321,6 +454,9 @@ def public_profile(
             "title": f"{fields.get('display_name', 'Nurse profile')} — Nurse.ng",
             "user": user,
             "fields": fields,
+            "profile_public_id": profile.public_id,
+            "document_reviewed_on": _document_reviewed_on(profile),
+            **profile_social_context(db, user, profile),
         },
     )
     response.headers["X-Robots-Tag"] = "noindex, nofollow"

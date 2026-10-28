@@ -40,6 +40,20 @@ def require_user(user: User | None = Depends(get_current_user)) -> User:
     return user
 
 
+def require_staff(user: User = Depends(require_user)) -> User:
+    """Allow only signed-in staff into the reviewer area.
+
+    Anonymous requests are redirected to sign-in by ``require_user``; signed-in
+    nurses get 403 rather than a redirect so the boundary is unambiguous.
+    """
+    if not user.is_staff:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Staff access required.",
+        )
+    return user
+
+
 def verify_csrf(request: Request, csrf_token: str = Form("")) -> None:
     """Reject state-changing requests without the session's CSRF token."""
     expected = request.session.get("csrf_token")

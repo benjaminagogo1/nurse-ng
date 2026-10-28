@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Find nurses — Nurse.ng{% endblock %}
+
+{% block content %}
+<section class="community-page">
+  <p class="eyebrow">Community</p>
+  <h1>Find nurses</h1>
+  <p class="lede">Only profiles their owners explicitly made public appear here.</p>
+
+  <div class="profile-card-grid">
+    {% for card in cards %}
+      <article class="profile-card">
+        <h2><a href="/p/{{ card.profile.public_id }}">{{ card.fields.get('display_name', 'Nurse profile') }}</a></h2>
+        {% if card.fields.get('headline') %}<p>{{ card.fields.get('headline') }}</p>{% endif %}
+        {% if card.fields.get('location') %}<p class="field-hint">{{ card.fields.get('location') }}</p>{% endif %}
+        {% if card.profile.document_reviewed_at %}<span class="verification-badge">Document reviewed</span>{% endif %}
+      </article>
+    {% else %}
+      <div class="empty-state"><p>No member has published a profile yet.</p></div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

@@ -59,6 +59,7 @@ def test_activation_requires_sign_in(client):
 def test_activation_turns_on_a_share_link(client, db_session):
     register_and_sign_in(client)
     save_profile(client)
+    save_sharing(client, display_name="public")
 
     response = activate(client)
 
@@ -68,10 +69,10 @@ def test_activation_turns_on_a_share_link(client, db_session):
     profile = db_session.scalar(select(NurseProfile))
     assert profile is not None
     assert profile.status == ProfileStatus.ACTIVE
-    assert profile.discoverable is False
+    assert profile.discoverable is True
 
     page = client.get("/profile")
-    assert "Active · shared by link" in page.text
+    assert "Public profile" in page.text
     assert f"/p/{profile.public_id}" in page.text
 
 
@@ -103,19 +104,17 @@ def test_activation_requires_a_display_name(client, db_session):
     assert profile.status == ProfileStatus.DRAFT
 
 
-def test_activation_never_sets_discoverable(client, db_session):
+def test_activation_sets_discoverable(client, db_session):
     register_and_sign_in(client)
     save_profile(client)
-
-    profile = db_session.scalar(select(NurseProfile))
-    assert profile is not None
-    profile.discoverable = True
-    db_session.commit()
+    save_sharing(client, display_name="public")
 
     activate(client)
 
+    profile = db_session.scalar(select(NurseProfile))
+    assert profile is not None
     db_session.refresh(profile)
-    assert profile.discoverable is False
+    assert profile.discoverable is True
 
 
 def test_public_link_shows_only_public_fields(client, db_session):
@@ -135,18 +134,15 @@ def test_public_link_shows_only_public_fields(client, db_session):
     assert "Graduate awaiting licensure" not in response.text
 
 
-def test_public_link_falls_back_when_name_is_private(client, db_session):
+def test_publication_requires_the_display_name_to_be_public(client, db_session):
     register_and_sign_in(client)
     save_profile(client)
     save_sharing(client, headline="public")
-    activate(client)
+    response = activate(client)
 
-    response = client.get(f"/p/{profile_id(db_session)}")
-
-    assert response.status_code == 200
-    assert "Nurse profile" in response.text
-    assert "New graduate seeking a first role" in response.text
-    assert "Ada Obi" not in response.text
+    assert response.status_code == 400
+    assert "Make your display name public" in response.text
+    assert client.get(f"/p/{profile_id(db_session)}").status_code == 404
 
 
 def test_public_link_is_readable_without_signing_in(client, db_session):
@@ -166,6 +162,7 @@ def test_public_link_is_readable_without_signing_in(client, db_session):
 def test_deactivation_turns_the_link_off(client, db_session):
     register_and_sign_in(client)
     save_profile(client)
+    save_sharing(client, display_name="public")
     activate(client)
     identifier = profile_id(db_session)
 
@@ -284,15 +281,16 @@ def test_sharing_requires_a_csrf_token(client, db_session):
     assert db_session.scalars(select(FieldVisibility)).all() == []
 
 
-def test_active_owner_page_warns_when_name_is_private(client, db_session):
+def test_public_owner_page_explains_directory_visibility(client, db_session):
     register_and_sign_in(client)
     save_profile(client)
+    save_sharing(client, display_name="public")
     activate(client)
 
     page = client.get("/profile")
 
-    assert "shared page will not show your name" in page.text
-    assert "(0 public)" in page.text
+    assert "appears in nurse discovery" in page.text
+    assert "(1 public)" in page.text
 
 
 def test_robots_txt_blocks_crawlers(client):

@@ -34,6 +34,21 @@ class Settings(BaseSettings):
     login_lockout_threshold: int = 5
     login_lockout_seconds: int = 900
 
+    # Document-review evidence (DECISIONS L47-L48). Files are private: they are
+    # written outside the static tree and served only through an authenticated
+    # reviewer route. A relative path resolves against the process working
+    # directory; never point this inside ``app/static``.
+    evidence_dir: str = "evidence"
+    evidence_max_bytes: int = 5 * 1024 * 1024
+
+    # Public community media is kept separate from private review evidence.
+    # These are conservative pilot defaults and remain configurable while the
+    # production storage/processing provider is undecided.
+    community_media_dir: str = "media/community"
+    community_image_max_bytes: int = 10 * 1024 * 1024
+    community_video_max_bytes: int = 100 * 1024 * 1024
+    community_video_max_seconds: int = 180
+
 
 @lru_cache
 def get_settings() -> Settings:

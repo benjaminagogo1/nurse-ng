@@ -238,6 +238,34 @@ The total is 74 tests: the previous 67 plus the seven new hardening cases. The i
 - **README:** the status paragraph now says 74 tests and names the hardening; a Development section documents the lockfile install, tests, lint, and migration commands.
 - **Scope:** this closes items 2 and 3 of the 2026-10-18 session's next-step list; item 1 (`.env.example`) was the same item recorded there.
 
+### 8. O1 verification-source memo (blocked, protocol drafted)
+
+- **User direction:** work on the O1 decision memo (launch verification: document-based or source-confirmed), the Phase 0 kill gate.
+- **Sources read:** `docs/PHASE0_PLAN.md` (workstream P1, kill criteria K1 and K3), `docs/BUILD_PLAN.md` review item 1, and the roadmap's verification taxonomy (§9).
+- **Attempted research:** three `WebSearch` queries and one direct `WebFetch` of the NMCN (Nursing and Midwifery Council of Nigeria) site. Every call was refused with `deepseek-v4-flash is temporarily unavailable, so auto mode cannot determine the safety of WebSearch/WebFetch right now.` No page was retrieved and no access date exists.
+- **Action taken:** wrote `docs/O1_VERIFICATION_SOURCE_MEMO.md` as an explicit **draft research protocol**, not a memo with findings. It defines the evidence standard, six candidate routes to test (R1–R6) phrased as hypotheses, the evidence required per route, an empty evaluation matrix, the cost model, the counsel checklist, the K1/K3 mapping, and the three decision options (source-confirmed, document-only downgraded, stop).
+- **Deliberate omission:** no claim about NMCN services is stated as fact. The previous sessions recorded the same outage; inventing findings would manufacture the certainty the gate exists to test.
+- **Gate status:** O1 remains **open**. `docs/DECISIONS.md` O1 and the README document list now point to the draft.
+- **Next action:** rerun the searches when web tooling is restored, record primary sources with access dates in section 10 of the memo, and only then complete the matrix and choose a decision.
+
+### 9. Document-review workflow (2026-10-21)
+
+- **User direction:** "We review the licence/certificate plus identity, label every profile 'document reviewed'. Can you implement this?" Follow-up choices: certificate plus government-issued ID; a staff web review queue; keep all evidence with access auditing.
+- **Scope chosen:** the downgraded label only. No NMCN (Nursing and Midwifery Council of Nigeria) register is consulted, no authenticity is asserted, and no competence is assessed. The O1 gate stays open; the memo records this as a provisional implementation, not a decision (O1 section 9).
+- **Domain model (`app/models/verification.py`):** `VerificationCase` (one profile, registration number, status `pending`/`approved`/`rejected`, decider, decision time, note), `EvidenceDocument` (kind `licence` or `government_id`, opaque storage name, sniffed content type, size, SHA-256), and `EvidenceAccess` (one row per evidence open). `NurseProfile.document_reviewed_at` carries the public label date. Cascades delete evidence rows with a case; reviewer foreign keys use `SET NULL` so a deleted staff account does not erase the record of a decision.
+- **Private storage (`app/core/storage.py`):** files live under `NURSE_NG_EVIDENCE_DIR` (default `evidence/`, now gitignored), outside the static tree, with UUID4 hexadecimal names. Validation is by magic bytes (JPEG, PNG, PDF), not declared type or filename. Each file is capped at 5 MB (`NURSE_NG_EVIDENCE_MAX_BYTES`), hashed, and written atomically; the directory is created with mode `0700` and each file set to `0600`, and a write failure removes the temporary file and returns a form error. Path resolution rejects anything that is not an opaque name under the root.
+- **Service (`app/services/verification.py`):** one pending case per profile; both files must store or the first is deleted; a failed commit removes stored files; a decision requires a pending case; rejection requires a note; approval moves `document_reviewed_at` forward; a reviewer cannot decide their own case; decisions are final and a resubmission is a new case.
+- **Routes:** `GET/POST /profile/verification` (submit with consent, history), `GET /review` (queue and recent decisions), `GET /review/{case_id}`, `GET /review/{case_id}/evidence/{evidence_id}` (private download plus audit row), and `POST /review/{case_id}/decide`. All review routes require `is_staff`; anonymous requests are redirected to sign-in and signed-in non-staff receive 403 (Forbidden).
+- **Staff provisioning (`app/cli.py`):** `python -m app.cli set-staff <phone>` and `unset-staff`. No web route grants the flag.
+- **Consent:** the submission form requires an explicit checkbox, checked again on the server. It states that documents are stored privately and inspected by a reviewer. The registration number is reviewer-only and never published.
+- **Templates:** `profile/verification.html`, `review/queue.html`, `review/case.html`; updates to `profile/public.html` (badge plus receipt), `profile/show.html` (status and link), `profile/edit.html` (status remains self-declared; links to review), and `base.html` (Verification link; Review link for staff).
+- **Copy boundary:** the public receipt says what was inspected, the review date, and that this is not source confirmation — no NMCN register check, no authenticity proof, no competence assessment. The footer distinguishes reviewed from unreviewed profiles. Production and counsel review of this wording is still required (L47, L52).
+- **Migration:** `c4e7a1b9d2f3_add_document_review.py` adds `nurse_profiles.document_reviewed_at` through batch alter and creates `verification_cases`, `evidence_documents`, and `evidence_accesses` with their indexes and cascades.
+- **Tests (`tests/test_verification.py`):** 15 cases covering sign-in, private storage and sniffed types, PDF acceptance, unsupported and oversized files, consent, CSRF, one pending case, staff-only queue, approval label and public receipt, self-review refusal, rejection note, evidence access audit, cross-account history isolation, and service-level ownership. Evidence is redirected to a `tmp_path` directory so the repository store is untouched.
+- **Decisions recorded:** L47 (label and receipt), L48 (storage and validation), L49 (staff-only access and audit), L50 (consent and registration-number boundary), L51 (one pending case, no self-review, final decisions), L52 (badge accompanied by receipt). L13, L22, and L23 were amended where the new workflow changed their wording; O4 and O5 status notes were updated.
+- **Verification (2026-10-21, user-pasted terminal output):** the first run found two unused imports in `app/models/verification.py` (`sqlalchemy.Uuid` and the type-only `User`); both were removed. The rerun was clean: `ruff check .` reported "All checks passed!"; `pytest -q` reported **89 passed** (74 existing plus 15 new); `alembic upgrade head` applied `8f2c1d4a9b6e -> c4e7a1b9d2f3`; and `alembic check` reported "No new upgrade operations detected."
+- **Deliberate exclusions:** no malware scanning, encryption at rest, object storage, retention/deletion job, appeal route, consent withdrawal, or versioned consent record. These are recorded in L48, L50, L51, and the deferred verification list; the store is pilot-grade only.
+
 ---
 
 ## Earlier sessions (reconstructed from transcripts)
@@ -278,3 +306,164 @@ The total is 74 tests: the previous 67 plus the seven new hardening cases. The i
 | 2026-10-21 | Lockout migration `8f2c1d4a9b6e` | **Applied to development SQLite database** |
 | 2026-10-21 | Alembic schema drift check after authentication hardening | **No drift detected** |
 | 2026-10-21 | `.env.example` tracking and dependency lockfile | **`.env.example` now trackable; 42 distributions pinned in `requirements.lock`** |
+| 2026-10-21 | Document-review tests (15 new, 89 total) | **89 passed** |
+| 2026-10-21 | Ruff (Python linter) after document review | **All checks passed** |
+| 2026-10-21 | Document-review migration `c4e7a1b9d2f3` | **Applied to development SQLite database** |
+| 2026-10-21 | Alembic schema drift check after document review | **No drift detected** |
+
+---
+
+## Session 2026-10-26
+
+### 1. Initial repository inspection and scope correction
+
+- **User request:** inspect the repository.
+- **Reads:** repository structure, existing working-tree changes, project configuration, authentication, profile sharing, document review, tests, migrations, and selected planning documents. The working tree already contained modified and untracked files, and `main` was one commit ahead of and one behind `origin/main`; those changes were preserved.
+- **Checks started:** `./venv/bin/ruff check .`, `./venv/bin/pip check`, and `./venv/bin/pytest -o addopts='' -q`.
+- **Results:** Ruff reported "All checks passed!"; the dependency check reported "No broken requirements found", with a warning that the default pip cache directory was not writable. The test run produced no completed suite result and was interrupted with exit code 130 when the user raised a concern about work proceeding without consent. No new passing-test count was established.
+- **Temporary migration check:** all three revisions upgraded successfully in an isolated database under `/tmp`; `alembic check` reported no new upgrade operations, and downgrading that temporary database to the base revision succeeded. The application database was not used for these checks.
+- **Temporary service reproductions:** an approved profile retained its review date after a display-name change; two sessions that had loaded a pending case allowed a later rejection to overwrite an approval; and two simultaneous submissions created two pending cases. The latter two limitations are already recorded as accepted pilot trade-offs in L51. Development session defaults were also inspected. The reproductions used temporary database and evidence directories under `/tmp`; no application source fixes were made.
+- **User concern and correction:** the user asked why implementation was occurring without consent. The assistant stopped the running checks, confirmed that the existing source-file changes and diff summary were unchanged, explained the temporary checks, and committed to reading rather than running further application checks or changing implementation without authorisation.
+
+### 2. Full reading of the project record
+
+- **User direction:** read the work log, decision record, project roadmap, and guidelines carefully before proceeding.
+- **Documents read in full:** `docs/WORK_LOG.md`, `docs/DECISIONS.md`, `Nurse_ng_Strategic_Product_Roadmap.md`, `docs/BUILD_PLAN.md`, `docs/PHASE0_PLAN.md`, `docs/O1_VERIFICATION_SOURCE_MEMO.md`, and `README.md`.
+- **Guidelines located:** the working agreement is recorded in the planning documents; no standalone repository `AGENTS.md` or `CLAUDE.md` was found. The work log records joint decision-making, immediate documentation of every step and choice, reasons and trade-offs, expanded abbreviations, and preservation of history.
+- **Understanding confirmed:** FastAPI supersedes the earlier Django proposal; the current document-review workflow supports the downgraded label only; the latest historical verification remains 89 passing tests on 21 October 2026; and the source memo and Phase 0 gate remain open.
+- **Scope during this reading:** file reading only, with no application tests, migrations, or implementation scripts run.
+
+### 3. User-proposed adoption strategy
+
+- **Proposal:** make enrolment more flexible and permissive, allow registration without professional verification, remove the invite-only launch model, offer public profiles, and introduce verification gradually while people experience interaction with like-minded members.
+- **Clarification selected:** publication is a simple owner choice, rather than automatic publication. Profiles stay private until the member chooses "Make public".
+- **Existing behaviour noted:** registration and profile sharing already work without document review in the current application. Open community discovery and interaction change the intended product direction and add features beyond that existing behaviour.
+- **Working process reaffirmed by the user:** the assistant comes up with suggestions and options, explains a recommendation, and asks the user to choose. An initial ambiguous "yes" about community features was clarified before being recorded as a choice.
+
+### 4. Community choices selected
+
+| Question | User choice | Reason and trade-off record |
+|---|---|---|
+| Which community experiences? | All three: topic discussions, a public feed, and finding and connecting with other nurses | D12, L55 |
+| How do members connect? | Both accepted connection requests and immediate following of public updates | L56 |
+| Who reads and contributes? | Anyone can read the feed and topic discussions; registered members sign in to post and reply | D13, L57 |
+| How do topics and the feed relate? | A topic post also appears in the public feed, with the same conversation and replies in both places | L58 |
+
+### 5. Documentation of the approved direction
+
+- **Decision record:** appended D11–D13 and L53–L58, including the user's option selections, their reasons and trade-offs, the reaffirmed working agreement, and the effect on earlier decisions.
+- **Roadmap:** appended a dated direction revision describing open enrolment, optional public profiles, gradual optional verification, all three community experiences, both relationship types, public reading with member contribution, and shared topic/feed conversations.
+- **History preserved:** earlier entries and the original roadmap sections remain intact. The build plan and Phase 0 plan remain historical documents; their older invite-only and deferred-community assumptions are superseded where the new decisions apply.
+- **Implementation status:** this step records approved product choices. The new community features have not been implemented, and the existing application source was not changed by this documentation step.
+
+### 6. Decisions still to make
+
+- Content formats and starter topics.
+- Moderation, reporting, and blocking behaviour.
+- How discovery, a post author's visible identity, and private profiles work together; publication preview fields and search-engine indexing.
+- Feed ordering and personalisation, relationship notifications, messaging, and any additional permissions for accepted connections.
+- Delivery sequence and launch criteria for the revised public experience. Open decisions O1–O5 remain open; the adoption proposal does not close the Phase 0 gate.
+
+The next design choice will be presented as options with a recommendation, following the user's stated process.
+
+### 7. Documentation review
+
+- **Read-only check:** `git diff --check -- docs/DECISIONS.md docs/WORK_LOG.md Nurse_ng_Strategic_Product_Roadmap.md` passed with no whitespace errors reported.
+- **Review:** read the appended sections and checked that the selected choices, unresolved details, preserved history, and implementation status were represented accurately. This step updated planning documents only; no application test, migration, or implementation script was run.
+
+### 8. Initial community content formats
+
+- **Options proposed:** text posts and replies; text with images; or text, images, and video. The assistant recommended text for the first version to limit the initial build and mobile-data requirements.
+- **User choice:** "All the three: 1, 2, & 3". The agreed initial community formats are therefore text, images, and video; the user chose the full media scope.
+- **Reason and trade-off:** recorded in `docs/DECISIONS.md` L59. The choice supports written and visual contributions; media handling, moderation, and any hosting costs depend on how publishing is designed.
+- **Documentation:** appended L59 to the decision record and a follow-up content-format choice to the roadmap. The earlier notes remain as history, with the previously pending content-format question now resolved.
+- **Still to choose:** video uploads versus external links or both, detailed media limits and handling, and whether media attachments are available in replies. No media-sharing method, storage provider, cost commitment, or application implementation was selected by the format choice.
+- **Documentation review:** read the new records and ran the read-only `git diff --check` for the three planning documents; it passed. This step updated documentation only and ran no application tests or migrations.
+- **Next suggestion:** offer image/video uploads with external video links, image/video uploads alone, or image uploads with external links for video. Recommend uploads plus video links for flexible sharing, with the additional handling and hosting work stated as a trade-off. No media-sharing approach has been chosen yet.
+
+### 9. Community media-sharing approach
+
+- **Options presented:** image/video uploads plus external video links (recommended); image/video uploads only; or image uploads with externally hosted video links.
+- **User choice:** option 1, uploads plus video links. Members can upload images and videos from their devices or share existing videos through links.
+- **Reason and trade-off:** recorded in `docs/DECISIONS.md` L60. The choice permits original media and existing resources; uploaded video needs storage and processing, while linked video depends on its external host.
+- **Documentation:** appended L60 and a matching roadmap follow-up, preserving the earlier records. No application implementation, hosting provider, or cost commitment was selected by this choice.
+- **Next suggestion:** propose initial community-upload counts and video durations as alternative limit sets. Detailed limits have not been agreed; external video links remain a separate sharing route.
+- **Documentation review:** read the appended decision and roadmap records and ran the read-only `git diff --check` for the three planning documents; it passed. Application source, tests, and migrations were not changed or run by this step.
+- **Limit sets proposed next:** per post, up to four images and one uploaded video of up to three minutes (recommended); two images and one video of up to one minute; or ten images and one video of up to ten minutes. The recommendation balances room for professional updates with upload and moderation work. These are proposed upload limits, not selected limits, and do not set the duration of externally linked videos.
+
+### 10. Initial community-post upload limits
+
+- **Options presented:** four images and one uploaded video of up to three minutes (recommended); two images and one video of up to one minute; or ten images and one video of up to ten minutes, per post.
+- **User choice:** option 1. A community post can include up to four uploaded images and one uploaded video of up to three minutes. Longer videos can be shared through external links.
+- **Reason and trade-off:** recorded in `docs/DECISIONS.md` L61. The chosen set provides room for photos and short explanations while bounding an individual post's media; larger albums and longer native video files exceed the selected allowance.
+- **Documentation:** appended L61 and a matching roadmap follow-up, preserving the earlier proposal records. The limits are approved design choices, with application implementation still pending.
+- **Still to choose:** file-size and type limits, processing and storage arrangements, any account-level upload limits, and media attachments in replies.
+- **Documentation review:** read the new limit records and ran the read-only `git diff --check` for the three planning documents; it passed. This step changed planning documents only and ran no application tests or migrations.
+- **Next suggestion:** choose whether posts and replies publish after automatic checks (recommended), require staff approval for every contribution, or require approval only for each member's first contribution. The proposed approaches all include member reporting and staff review/removal. Recommend publication after automatic checks for responsive conversations, with reports handled after publication; no moderation approach has been selected yet.
+
+### 11. Publishing and moderation approach
+
+- **Options presented:** publication after automatic checks (recommended); staff approval for every post and reply; or staff approval for each member's first contribution. All proposed approaches included member reporting and staff review/removal.
+- **User choice:** option 1. Posts and replies become visible after automatic checks and any necessary media processing; members can report content and staff can review and remove it.
+- **Reason and trade-off:** recorded in `docs/DECISIONS.md` L62. Conversations can proceed without routine staff pre-approval; reported issues may need handling after publication.
+- **Documentation:** appended L62 and a matching roadmap follow-up, preserving the earlier proposal records. No application moderation implementation was made by this documentation step.
+- **Still to choose:** community rules, detailed checks and reporting workflows, review response targets, staff moderation permissions, appeals, and the public identity shown on posts when an author's profile is private. Professional verification remains optional.
+
+---
+
+## Session 2026-10-28
+
+### 1. Repository inspection and current implementation
+
+- **User direction:** inspect the latest work, read the repository and roadmap, and explain the current state and remaining work.
+- **Read:** every human-maintained source, configuration, template, test, migration, Markdown document, designed HTML page, and the roadmap PDF (Portable Document Format). Virtual environments, caches, Git internals, bytecode, and binary database contents were excluded from the file-by-file reading.
+- **Finding:** the working tree contains the previously recorded document-review workflow plus a new public-community implementation: feed, topics, posts, replies, image/video uploads, external video links, nurse discovery, following, accepted connections, reports, and staff moderation. The community implementation had not been recorded in this log or the decision record.
+- **Git state at inspection:** `main` was one commit ahead of and one behind `origin/main`; Git's patch comparison marked the two authentication-hardening commits as equivalent despite their different hashes. The working tree contained 24 modified files and 28 untracked files. Those changes were preserved.
+- **Verification boundary:** the last documented complete result remained 89 passing tests from 21 October. Community tests existed, but no new result was treated as authoritative during the read-only inspection.
+
+### 2. Login failure and authorised database migration
+
+- **User report:** signing in returned an internal server error.
+- **Diagnosis:** the running model selected `users.community_name`, but the development database was at revision `c4e7a1b9d2f3` and did not have that column. The pending community revision was `d7a9e3f5b1c2`.
+- **User choice:** back up and migrate.
+- **Backup:** copied the pre-migration SQLite database to `/tmp/opencode/nurse-ng-before-community-20261028.db`.
+- **Migration:** `./venv/bin/alembic upgrade head` applied `c4e7a1b9d2f3 -> d7a9e3f5b1c2`. A read-only check confirmed the new revision and column. No application source was changed during the diagnosis.
+
+### 3. Hardening scope authorised
+
+- **User direction:** update the decision record, work log, README, roadmap, and PDF; remove stale invite-only registration copy; fix review/name and public-profile trust risks; add community rate limits, upload quotas, streaming, malware scanning, and cleanup; close relationship/report races; run the full verification set; split the work into logical commits; and reconcile the patch-equivalent branch histories.
+- **Git clarification:** when asked how to reconcile and publish history, the user reserved that step for themselves. The assistant may create logical local commits but must not merge, rebase, push, or otherwise reconcile `main` with `origin/main`.
+
+### 4. Approved choices and implementation plan
+
+The user selected:
+
+1. Keep a reviewed-name snapshot and distinguish it from any later profile name, rather than invalidating the review or blocking name changes (L63).
+2. Reject hiding the display name while a profile is public; require unpublishing first (L64).
+3. Make community names case-insensitively unique, reserve institutional/staff-like names, and lock a name after the first post or reply (L65).
+4. Use the permissive limits: 10 posts/hour, 60 replies/hour, 20 reports/hour, 500 MB uploaded per 24-hour account window, and 5 GB stored per account (L66).
+5. Stream files in bounded chunks, reserve quota transactionally, remove media after moderated post removal, and provide reconciliation tooling (L67).
+6. Run ClamAV when available but allow an upload when the scanner is unavailable or fails operationally; a positive detection is always rejected (L68).
+7. Add canonical database uniqueness keys and conditional state updates for connection and report races (L69).
+
+Planned sequence:
+
+1. Record the choices before implementation.
+2. Establish the current test/lint baseline with the user's explicit approval.
+3. Add the schema revision, service invariants, streaming/scanning/quota storage path, cleanup command, route controls, interface copy, and focused tests.
+4. Verify tests, Ruff (Python linter), dependencies, schema drift, and migration upgrade/downgrade/upgrade in an isolated database.
+5. Update completion records, README, roadmap, and generated PDF with actual—not planned—results.
+6. Create logical local commits. Leave branch reconciliation and pushing to the user.
+
+### 5. Pre-hardening baseline
+
+The user explicitly approved execution of the full verification set. A first test invocation reached the final portion of the suite but exceeded the command's 120-second harness limit, so its partial output was not counted as a result. Re-running with a longer command limit established the baseline:
+
+| Command | Result |
+|---|---|
+| `./venv/bin/python -m pytest -o addopts='' -q` | **103 passed in 65.21 seconds** |
+| `./venv/bin/ruff check .` | **All checks passed** |
+| `./venv/bin/pip check` | **No broken requirements found** |
+| `git diff --check` | **Passed** (no whitespace errors) |
+
+This is the pre-hardening result: the previously documented 89 cases plus 14 community cases. Migration drift and reversibility remain for the final isolated verification after the new hardening revision is written.

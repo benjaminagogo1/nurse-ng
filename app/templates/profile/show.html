@@ -5,7 +5,7 @@
 {% block content %}
 <section class="form-page">
   <p class="eyebrow">
-    {% if is_active %}Active · shared by link{% else %}Private profile · Draft{% endif %}
+    {% if is_active %}Public profile{% else %}Private profile · Draft{% endif %}
   </p>
   <h1>{{ profile.display_name }}</h1>
 
@@ -30,11 +30,26 @@
     <div class="profile-bio">{{ profile.bio }}</div>
   {% endif %}
 
+  <div class="verification-summary">
+    {% if document_reviewed_on %}
+      <p>
+        <span class="verification-badge">Document reviewed</span>
+        Reviewed on {{ document_reviewed_on }}.
+        <a href="/profile/verification">View details</a>
+      </p>
+    {% else %}
+      <p>
+        <span class="verification-badge muted">Not reviewed</span>
+        <a href="/profile/verification">Submit documents for review</a>.
+      </p>
+    {% endif %}
+  </div>
+
   <div class="profile-actions">
     {% if is_active %}
       <p class="field-hint">
-        This profile is not listed in any directory. Only people with the link
-        can see the fields you marked public ({{ public_field_count }} public).
+        This profile appears in nurse discovery. Visitors see only the fields
+        you explicitly marked public ({{ public_field_count }} public).
       </p>
       {% if share_url %}
         <label for="share-url">Share link</label>
@@ -50,18 +65,18 @@
         <a class="button-secondary" href="/profile/sharing">Sharing controls</a>
         <form method="post" action="/profile/deactivate">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button type="submit" class="button-secondary">Stop sharing</button>
+          <button type="submit" class="button-secondary">Make private</button>
         </form>
       </div>
     {% else %}
       <p class="field-hint">
-        Activating creates a private share link. It does not list your profile
-        in any directory, and it does not verify your details.
+        Making your profile public adds it to nurse discovery. Your display name
+        must be public first. Publication is separate from document review.
       </p>
       <div class="button-row">
         <form method="post" action="/profile/activate">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button type="submit" class="button-primary">Activate profile</button>
+          <button type="submit" class="button-primary">Make public</button>
         </form>
         <a class="button-secondary" href="/profile/sharing">Sharing controls</a>
       </div>

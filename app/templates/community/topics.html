@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Topics — Nurse.ng{% endblock %}
+
+{% block content %}
+<section class="community-page">
+  <p class="eyebrow">Community</p>
+  <div class="page-heading-row">
+    <div>
+      <h1>Discussion topics</h1>
+      <p class="lede">Posts belong to a topic and also appear in the public feed.</p>
+    </div>
+    {% if user %}<a class="button-primary" href="/posts/new">Create post</a>{% endif %}
+  </div>
+
+  <div class="topic-list">
+    {% for topic in topics %}
+      <article class="topic-card">
+        <h2><a href="/topics/{{ topic.slug }}">{{ topic.name }}</a></h2>
+        {% if topic.description %}<p>{{ topic.description }}</p>{% endif %}
+      </article>
+    {% else %}
+      <div class="empty-state">
+        <h2>No topics yet</h2>
+        <p>Staff must create the first topic before members can publish.</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

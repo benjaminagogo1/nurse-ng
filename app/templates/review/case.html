@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Review case — Nurse.ng{% endblock %}
+
+{% block content %}
+<section class="form-page">
+  <p class="eyebrow">Staff only</p>
+  <h1>{{ case.profile.display_name or 'Unnamed profile' }}</h1>
+
+  {% if error %}
+    <p class="form-error" role="alert">{{ error }}</p>
+  {% endif %}
+
+  <dl class="profile-meta">
+    <dt>NMCN registration number</dt>
+    <dd>{{ case.registration_number }}</dd>
+    <dt>Submitted</dt>
+    <dd>{{ case.created_at.strftime('%d %B %Y') }}</dd>
+    <dt>Status</dt>
+    <dd>
+      <span class="status-badge status-{{ case.status }}">{{ case.status|capitalize }}</span>
+    </dd>
+    {% if case.decided_at %}
+      <dt>Decided</dt>
+      <dd>{{ case.decided_at.strftime('%d %B %Y') }}</dd>
+    {% endif %}
+    {% if case.decision_note %}
+      <dt>Reason</dt>
+      <dd>{{ case.decision_note }}</dd>
+    {% endif %}
+  </dl>
+
+  <h2>Evidence</h2>
+  <p class="field-hint">
+    Private files. Opening one writes an access record against your account.
+  </p>
+  <ul class="evidence-list">
+    {% for document in case.evidence %}
+      <li>
+        <span>{{ kinds.get(document.kind, document.kind) }}</span>
+        <span class="field-hint">
+          {{ document.original_filename or 'Submitted file' }} ·
+          {{ document.content_type }} · {{ (document.size_bytes / 1024)|round(1) }} KB
+        </span>
+        <a href="/review/{{ case.id }}/evidence/{{ document.id }}" target="_blank"
+           rel="noopener">Download</a>
+      </li>
+    {% endfor %}
+  </ul>
+
+  {% if case.status == 'pending' %}
+    <form method="post" action="/review/{{ case.id }}/decide" class="stacked-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+      <label for="note">Decision note</label>
+      <textarea id="note" name="note" rows="4" maxlength="2000"></textarea>
+      <p class="field-hint">
+        Required for a rejection; the nurse sees this reason. Optional on
+        approval.
+      </p>
+
+      <div class="button-row">
+        <button type="submit" name="decision" value="approve" class="button-primary">
+          Approve — document reviewed
+        </button>
+        <button type="submit" name="decision" value="reject" class="button-secondary">
+          Reject
+        </button>
+      </div>
+    </form>
+  {% else %}
+    <p class="form-notice">This case has been decided.</p>
+  {% endif %}
+
+  <p class="form-alt"><a href="/review">Back to queue</a></p>
+</section>
+{% endblock %}

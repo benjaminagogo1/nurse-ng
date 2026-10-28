@@ -695,3 +695,92 @@ Before implementation begins, the team should explicitly decide:
 Proceed to a **time-boxed validation phase**, not an unrestricted feature build. Nurse.ng has a credible product direction if it solves a specific trust-and-career workflow better than the current alternatives. Its most important asset will not be the number of profiles; it will be the accuracy and transparency of its claims, the quality of participating employers, and the value it creates for nurses.
 
 The team should build the smallest trustworthy service that proves a nurse can maintain a useful profile and connect with a legitimate employer. Expand only when demand, verification reliability, safety operations, and unit economics justify it.
+
+---
+
+## 25. Approved Direction Revision — 26 October 2026
+
+The builder proposed more flexible enrolment as an early-adoption strategy and selected the choices below through discussion. This dated addendum records the revised direction while preserving the original proposal. The detailed reasons and trade-offs are in `docs/DECISIONS.md` D11–D13 and L53–L58; the discussion and work performed are recorded in `docs/WORK_LOG.md`.
+
+### Enrolment and professional verification
+
+- Open enrolment replaces the invite-only launch policy adopted after the original roadmap.
+- Members can join and participate without professional document review. Verification can be introduced gradually and remains optional for community participation.
+- Self-declared information remains clearly distinguished from reviewed information. The existing "Document reviewed" label still requires a reviewer decision and its explanatory receipt; membership alone provides no verification claim.
+
+### Profile publication
+
+- Profiles remain private until the member explicitly chooses "Make public" instead of "Keep private".
+- The proposed publication step previews the details that will become public. Contact details and identity evidence retain their private boundaries.
+- Publication preview fields, member-discovery rules, and search-engine indexing still require detailed decisions.
+
+### Community experience
+
+- Include all three experiences: topic discussions, a public feed, and finding and connecting with other nurses.
+- Support immediate following of public updates and connection requests that the other nurse accepts.
+- Anyone can read the public feed and topic discussions. Registered members sign in to post and reply.
+- A member posts under a topic, and the same post appears in the public feed. Replies belong to one conversation in both views.
+
+### Validation and remaining scope
+
+The adoption hypothesis is that easy enrolment and useful interaction give people a reason to join and return before seeking verification. It still needs evidence from participation, useful conversations, professional connections, and operating costs.
+
+This revision brings community interaction forward. Formal professional learning services, a jobs marketplace, and international mobility remain separate later feature families. The agreed solo, part-time capacity and the initial focus on new graduates and public hospitals have not been replaced.
+
+Content formats, starter topics, moderation and reporting rules, discovery and identity-display details, feed ordering, notifications, messaging, connection permissions, and the delivery sequence remain to be chosen. The working agreement is to propose options with reasons and trade-offs and let the user select the design.
+
+Open decisions O1–O5 and the original Phase 0 gate remain open. Launch criteria must be reviewed against the revised experience and its actual claims; these choices do not establish a lawful authoritative verification source or settle the legal and privacy questions. This addendum records approved direction, not completion of the new community features.
+
+### Follow-up choice — initial content formats
+
+The user subsequently chose text, images, and video for the first community version (`docs/DECISIONS.md` L59). This resolves the content-format question listed as pending above. The same shared conversation and public audience apply to the selected formats.
+
+The media-sharing approach, detailed limits and handling, and media attachments in replies still require decisions. This choice approves the formats; it does not select a storage provider or establish that media support has been implemented.
+
+### Follow-up choice — media sharing
+
+The user selected image and video uploads plus external video links for the initial community experience (`docs/DECISIONS.md` L60). Members can upload media from their devices and share existing video resources through links. This resolves the media-sharing approach listed as pending above.
+
+Upload counts, file sizes, video duration, permitted types, processing and storage arrangements, and detailed presentation behaviour remain to be chosen. A hosting provider, cost commitment, and media attachments in replies have not been selected by this choice. The community features remain planned rather than implemented.
+
+### Follow-up choice — initial upload limits
+
+The user selected up to four uploaded images and one uploaded video of up to three minutes per community post (`docs/DECISIONS.md` L61). Longer videos can be shared through the agreed external-link route. This resolves the per-post image count, uploaded-video count, and duration listed as pending above.
+
+File-size and type limits, processing and storage arrangements, any account-level upload limits, and media attachments in replies remain to be chosen. These are planned limits; no media-support implementation or performance result is established by the choice.
+
+### Follow-up choice — publishing and moderation
+
+The user selected publication of posts and replies after automatic checks and any necessary media processing, with member reporting and staff review/removal (`docs/DECISIONS.md` L62). Routine staff approval is not required before publication. Professional verification remains optional and is separate from content publication.
+
+Community rules, detailed checks, reporting and review workflows, response targets, moderation permissions, appeals, and public author identity still require design decisions. This records the approved publishing approach; the moderation workflow has not been implemented by this planning step.
+
+---
+
+## 26. Approved Community Hardening Plan — 28 October 2026
+
+An initial implementation now exists in the working tree for the public feed, shared topic conversations, text/image/video posts, external video links, replies, nurse discovery, following, accepted connections, reports, and staff moderation. This section records the hardening choices approved after inspecting that implementation. Completion and verification results must be recorded separately; approval of the plan is not a claim that every item already works.
+
+### Trust boundaries
+
+- A document-review approval stores the display name actually reviewed. If the profile name changes later, the public receipt distinguishes the reviewed name from the current self-declared name.
+- A published discoverable profile must keep its display name public. A member who wants to hide that name must make the profile private first.
+- Public community names are case-insensitively unique, reserve regulator/platform/staff-like identities, and lock after the member's first post or reply. The name remains self-chosen, not professional verification.
+
+### Initial abuse and storage controls
+
+- Per account: up to 10 post attempts per hour, 60 reply attempts per hour, and 20 report attempts per hour.
+- Upload accounting: up to 500 MB per 24-hour account window and 5 GB retained per account, alongside the existing maximum of four images and one three-minute uploaded video per post.
+- Uploads are streamed to temporary files in bounded chunks rather than loaded wholly into application memory.
+- Removing a reported post cleans up its public media and releases retained-storage quota. Operator reconciliation handles filesystem/database crash gaps.
+- ClamAV scanning is optional for the pilot: use it when available and always reject a positive detection, but log and allow the upload if the scanner is absent or fails. This fail-open choice is not production-ready.
+
+### Relationship and moderation integrity
+
+- A canonical unordered connection key prevents reciprocal duplicate connection rows while preserving who requested and who must respond.
+- A unique open-report key prevents duplicate concurrent reports from the same member against the same contribution.
+- Conditional updates ensure that only the first concurrent connection response or moderation decision succeeds.
+
+### Delivery and history boundary
+
+The implementation must be covered by focused tests and then by the complete test, lint, dependency, and migration verification set. Work is split into logical local commits. The builder explicitly retained responsibility for reconciling and publishing the patch-equivalent local and remote branch histories; no merge, rebase, or push is part of this implementation task.

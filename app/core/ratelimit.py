@@ -69,8 +69,10 @@ class FixedWindowLimiter:
             window = self._windows.get(key)
             if window is None:
                 return 0
+            if now - window.started_at >= self.window_seconds:
+                return 0
             remaining = self.window_seconds - (now - window.started_at)
-        return max(1, ceil(remaining))
+            return max(1, ceil(remaining))
 
     def reset(self, key: str) -> None:
         with self._lock:

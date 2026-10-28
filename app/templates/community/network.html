@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Your network — Nurse.ng{% endblock %}
+
+{% block content %}
+<section class="community-page">
+  <p class="eyebrow">Community</p>
+  <h1>Your network</h1>
+  <p class="lede">Following is immediate. Connections become mutual after acceptance.</p>
+
+  <h2>Connection requests</h2>
+  <div class="network-list">
+    {% for item in received %}
+      {% set requester = users.get(item.requester_user_id) %}
+      <article class="network-row">
+        <span>
+          {% if profile_ids.get(item.requester_user_id) %}<a href="/p/{{ profile_ids.get(item.requester_user_id) }}">{% endif %}
+          {{ requester.community_name if requester and requester.community_name else 'Nurse.ng member' }}
+          {% if profile_ids.get(item.requester_user_id) %}</a>{% endif %}
+        </span>
+        <form method="post" action="/connections/{{ item.id }}/respond" class="button-row">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button name="action" value="accept" class="button-primary">Accept</button>
+          <button name="action" value="decline" class="button-secondary">Decline</button>
+        </form>
+      </article>
+    {% else %}
+      <p class="field-hint">No pending requests.</p>
+    {% endfor %}
+  </div>
+
+  <h2>Connections</h2>
+  <div class="network-list">
+    {% for item in connections %}
+      {% set other_id = item.recipient_user_id if item.requester_user_id == user.id else item.requester_user_id %}
+      {% set other = users.get(other_id) %}
+      <article class="network-row">
+        <span>
+          {% if profile_ids.get(other_id) %}<a href="/p/{{ profile_ids.get(other_id) }}">{% endif %}
+          {{ other.community_name if other and other.community_name else 'Nurse.ng member' }}
+          {% if profile_ids.get(other_id) %}</a>{% endif %}
+        </span>
+        <form method="post" action="/connections/{{ item.id }}/remove">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button class="button-secondary">Remove</button>
+        </form>
+      </article>
+    {% else %}
+      <p class="field-hint">No accepted connections yet.</p>
+    {% endfor %}
+  </div>
+
+  <h2>Sent requests</h2>
+  <ul class="plain-list">
+    {% for item in sent %}
+      {% set person = users.get(item.recipient_user_id) %}
+      <li>{{ person.community_name if person and person.community_name else 'Nurse.ng member' }} · Pending</li>
+    {% else %}<li class="field-hint">No pending sent requests.</li>{% endfor %}
+  </ul>
+
+  <h2>Following</h2>
+  <div class="profile-card-grid">
+    {% for profile in following %}
+      <article class="profile-card"><a href="/p/{{ profile.public_id }}">{{ profile.display_name }}</a></article>
+    {% else %}
+      <p class="field-hint">You are not following anyone yet. <a href="/nurses">Find nurses</a>.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

@@ -100,8 +100,8 @@ Implementation choices made after the D-series decisions. Each entry states the 
 - **Trade-off:** the annotation is less precise than the concrete response class.
 
 ### L13 — Ruff (a Python linter) B008 exception
-- **Choice:** add `fastapi.Depends` and `fastapi.Form` to `extend-immutable-calls`.
-- **Reason:** B008 (a Bugbear lint rule) forbids function calls in argument defaults; FastAPI dependency declarations are calls in defaults by design.
+- **Choice:** add `fastapi.Depends`, `fastapi.Form`, and `fastapi.File` to `extend-immutable-calls`.
+- **Reason:** B008 (a Bugbear lint rule) forbids function calls in argument defaults; FastAPI dependency and upload declarations are calls in defaults by design.
 - **Trade-off:** the exception applies to all Bugbear checks in the project.
 
 ### L14 — Installable application package
@@ -147,12 +147,12 @@ Implementation choices made after the D-series decisions. Each entry states the 
 ### L22 — Profile ownership comes from the session, not the URL (Uniform Resource Locator)
 - **Choice:** every profile read and write filters by the signed-in user's `user_id`; no profile identifier appears in a route.
 - **Reason:** prevents IDOR (Insecure Direct Object Reference), where changing an identifier in a URL exposes another person's profile.
-- **Trade-off:** there is no administrator or reviewer route to open another nurse's profile; such access needs a separate, authorised path with audit logging.
+- **Trade-off:** there is no administrator or reviewer route to open another nurse's profile from the profile domain; the only cross-profile path is the staff document-review queue, which is scoped to submitted cases and audited (L49).
 
 ### L23 — Professional status is labelled self-declared
-- **Choice:** the profile page shows the status with the words "(self-declared)" and the edit form says verification is not available yet.
-- **Reason:** the verification domain does not exist; the product must not imply that an unverified value has been checked.
-- **Trade-off:** the page is less persuasive than a badge would be, and this wording must be replaced with a verification receipt once decisions and evidence exist.
+- **Choice:** the profile page shows the status with the words "(self-declared)", and the edit form links to document review while saying the status itself is self-declared.
+- **Reason:** document review checks the licence/certificate and identity, not the status value; the product must not imply that an unverified value has been checked.
+- **Trade-off:** the page is less persuasive than a badge would be. The label sits beside a review badge, so the interface must keep the two claims visibly distinct (L47, L52).
 
 ### L24 — Post/Redirect/Get after a successful save
 - **Choice:** a successful save returns 303 (See Other) to `GET /profile`; validation errors re-render the form with 400 (Bad Request).
@@ -269,6 +269,41 @@ Implementation choices made after the D-series decisions. Each entry states the 
 - **Reason:** uv (a Python package and project manager) is not installed on the development machine, despite D8 naming it, and installing a new package manager merely to produce a lock would add an unverified tool to the session. The venv snapshot records exactly the versions that passed, including transitive dependencies, with no resolution step or network call.
 - **Trade-off:** the file captures development and runtime dependencies together and is tied to whatever happened to be installed; regenerating it requires the venv. When uv is adopted, `uv.lock` can be generated from the same `pyproject.toml` and this file retired.
 
+### L47 — The supported label is "document reviewed", not "source confirmed"
+- **Choice:** document review means a Nurse.ng reviewer inspected an uploaded NMCN (Nursing and Midwifery Council of Nigeria) licence or certificate and a government-issued photo ID and matched the names to the profile. Approval sets `nurse_profiles.document_reviewed_at`. The public page shows the label with a receipt stating what was checked, the review date, and explicitly that Nurse.ng does not check NMCN's register, does not prove authenticity, and does not assess competence.
+- **Reason:** the user chose this workflow while O1 (source-confirmed verification) remains open and web research is blocked. The label must describe only what a reviewer actually did. A truthful downgrade lets the pilot test demand without manufacturing the certainty the Phase 0 gate exists to test.
+- **Trade-off:** assurance is weaker than a register check. A convincing forgery can pass a visual review, and the platform cannot promise that a registration is currently valid. A future source-confirmed route needs its own label and must not silently upgrade historic cases.
+
+### L48 — Evidence is private local storage with opaque names and magic-byte checks
+- **Choice:** uploaded files are written under `settings.evidence_dir` (default `evidence/`, gitignored), outside the static tree, with a UUID version 4 hexadecimal name. Content is accepted only when its leading bytes are JPEG, PNG, or PDF; the declared MIME type and filename are ignored. Each file is capped at 5 MB (`NURSE_NG_EVIDENCE_MAX_BYTES`), hashed with SHA-256, and recorded with its original filename for the reviewer's context. Writes are atomic within the directory, the directory is created with mode `0700`, and each file is set to `0600`.
+- **Reason:** no object-storage dependency for the pilot; opaque names prevent guessing or path traversal; magic bytes stop a client from uploading one type while claiming another; the digest supports integrity checks; restrictive permissions keep the files private to the service account.
+- **Trade-off:** local disk is unencrypted, unreplicated, and unscanned. `mkdir` does not tighten an existing directory, and file modes do not protect against a privileged operator or backups. Database cascades remove evidence rows but do not delete the files on disk, so any future deletion path must reconcile both. There is no malware scan, encryption at rest, or retention job. Before production this store must move to private object storage with encryption, malware scanning, and scheduled deletion (O4), and this decision must record that migration.
+
+### L49 — The review area is staff-only, and every evidence open is audited
+- **Choice:** all `/review` routes require `is_staff`, set only through `python -m app.cli set-staff <phone>` (no web route grants it). Evidence is served only by `GET /review/{case_id}/evidence/{evidence_id}`, which checks that the evidence belongs to the case and writes an `evidence_accesses` row (reviewer, timestamp) before returning the file. Evidence responses carry `Cache-Control: no-store` and `X-Robots-Tag: noindex, nofollow`.
+- **Reason:** evidence is the most sensitive data the platform holds. A read audit supports NDPA (Nigeria Data Protection Act) accountability and lets the operator answer "who saw this document, and when". Scoping by both identifiers prevents cross-case evidence discovery.
+- **Trade-off:** the access table grows without bound until a retention job exists. Opening the case page or queue is not audited, only opening a file, so logins and browse activity still rely on server logs. Anyone with direct database access can bypass the application log.
+
+### L50 — Submission requires explicit consent; the registration number stays private
+- **Choice:** the submission form has a required consent checkbox ("I consent to Nurse.ng storing these documents privately and to a reviewer inspecting them"), validated on the server as well as in HTML. The NMCN registration number is required, validated, stored on the case, shown to reviewers, and never published on the profile.
+- **Reason:** document review processes sensitive personal data; storing it requires a legible consent step. The registration number is a professional identifier and adds nothing to the public page that the review label does not already convey.
+- **Trade-off:** consent is one broad checkbox, not granular per purpose, and it is not versioned. There is no self-service withdrawal or deletion flow; deletion depends on the retention decision (O4). Counsel should review the wording.
+
+### L51 — One pending case, no self-review, and decisions are final
+- **Choice:** a profile may have at most one pending case. A reviewer cannot decide their own case. Approval moves `document_reviewed_at` forward; rejection requires a note and leaves an earlier approval in place. Once decided, a case cannot be changed; a nurse submits a new case instead.
+- **Reason:** duplicate pending cases would split evidence across decisions. The label's meaning depends on a second person inspecting the documents. Rejection needs a reason the nurse can act on. Keeping the earlier approval avoids erasing a review that did happen.
+- **Trade-off:** there is no appeal or reopen route, and a later rejection does not revoke an earlier label. If the product later treats new adverse evidence as revoking, that needs an explicit decision and a new field rather than reusing this date. The one-pending rule is a check before insert, not a database constraint, so two simultaneous submissions could both pass; a partial unique index on `(profile_id)` where `status = 'pending'` is needed before the queue handles concurrent traffic. Two reviewers deciding the same case concurrently would be last-write-wins; the pilot assumes one reviewer at a time, and a conditional status update is needed before more than one reviewer works the queue.
+
+### L52 — The public label is accompanied by a receipt
+- **Choice:** the public page renders the "Document reviewed" badge with a short receipt and a footer that distinguishes a reviewed profile from an unreviewed one. The owner page shows the same status plus review history. The edit form points to the review page instead of claiming verification does not exist.
+- **Reason:** a bare badge overstates what happened. The receipt states the scope and limits in the same place a viewer sees the claim, and the footer prevents an old sentence ("not verified") from contradicting a reviewed profile.
+- **Trade-off:** the public page is longer, and the wording is a product/legal statement that must be reviewed by counsel and kept in step with L47 and the O1 outcome.
+
+### Deferred verification work
+- **Not built yet:** source confirmation against NMCN's register (O1), a distinct source-confirmed label, evidence encryption and malware scanning, object storage, retention and deletion schedules (O4), appeals or reopen, reviewer workload tooling, a consent version record, withdrawal of consent, and employer-facing display of review status.
+- **Reason:** the pilot tests document review first. Each item adds operational, legal, or verification-cost surface that the open decisions have not settled.
+- **Trade-off:** the current store is suitable for a controlled pilot only. It must not be described as production-grade evidence handling until the storage and retention items exist.
+
 ### Deferred authentication work
 - **Built on 21 October 2026:** login rate limiting (per-IP), account lockout, and dummy-hash timing equalisation.
 - **Not built yet:** email recovery, phone OTP (One-Time Password), MFA (Multi-Factor Authentication), breached-password checks, remember-me, per-device session management, trusted-proxy address handling (L41), distributed rate-limit state (L37), and startup enforcement of a high-entropy production secret key.
@@ -286,16 +321,157 @@ Implementation choices made after the D-series decisions. Each entry states the 
 
 | # | Decision | Status | Blocker |
 |---|---|---|---|
-| O1 | Launch verification: document-based or source-confirmed | Open | Deferred by the user on 18 October 2026; the research has not started and the memo is required before the Phase 0 gate can close |
+| O1 | Launch verification: document-based or source-confirmed | Open | Research protocol drafted on 21 October 2026 in `docs/O1_VERIFICATION_SOURCE_MEMO.md`; web tooling was blocked, so no source was retrieved and no finding exists. The memo must be completed before the Phase 0 gate can close |
 | O2 | Legal entity that operates the platform | Open | Needs counsel input; affects NDPA 2023 (Nigeria Data Protection Act 2023) controller registration and trust surface |
 | O3 | Numeric pilot gates and cost-per-verified-profile target | Open | Requires ten timed manual cases before a target can be set |
-| O4 | Evidence retention period and deletion schedule | Open | Needs counsel input for NDPA 2023 (Nigeria Data Protection Act 2023) |
-| O5 | Whether the concierge pilot stores identity documents at all | Open | Depends on O1 and counsel advice; minimum-data option is registration number plus certificate image |
+| O4 | Evidence retention period and deletion schedule | Open | Needs counsel input for NDPA 2023 (Nigeria Data Protection Act 2023). Interim behaviour is to keep every case and evidence file and audit each access (L49); no deletion job exists |
+| O5 | Whether the concierge pilot stores identity documents at all | Open | Depends on O1 and counsel advice; minimum-data option is registration number plus certificate image. The software workflow now stores both documents with consent (L50); this does not decide the manual pilot's practice |
 
 ---
 
 ## Notes on this session
 
+- Document review was implemented provisionally on 21 October 2026 at the user's direction (L47–L52). It supports the label "document reviewed" only, shows no source confirmation, and does not close O1.
 - Verification-source feasibility remains **unresearched**. The user deferred the research on 18 October 2026 in order to continue building; nothing here should be read as a finding about the NMCN (Nursing and Midwifery Council of Nigeria) or its services.
 - The roadmap's Phase 4–6 (jobs, community, international mobility) remain out of scope and are not affected by these decisions.
 - These decisions revise the build plan's assumptions; `BUILD_PLAN.md` itself has not been edited. A revision should be made once Phase 0 closes, not before.
+
+---
+
+## Agreed revision — 26 October 2026
+
+The builder proposed easier enrolment as an adoption strategy: open registration, optional professional verification, voluntary public profiles, and a community experience people can use before requesting verification. The choices below were discussed and selected by the user. They record product direction; the new community features still require implementation. Earlier entries remain as history, and this dated revision governs the choices it supersedes.
+
+### Working agreement reaffirmed
+
+- The assistant proposes options, explains a recommendation and the reasons and trade-offs, and asks the user to choose.
+- The user's selected option or combination is the agreed design choice. An ambiguous answer is clarified rather than treated as approval of an arbitrary option.
+- Approved choices are documented immediately. Further design and implementation work stays within the agreed scope.
+
+### Additional agreed decisions
+
+| # | Decision | Choice | Why | Revisit when |
+|---|---|---|---|---|
+| D11 | Enrolment and verification timing | Open enrolment replaces the invite-only launch policy in D4. Professional verification is optional for joining and participating and can be introduced gradually | Reduce enrolment friction and let people experience the platform's value before submitting documents | Participation, trust, or operating evidence calls for a different enrolment model |
+| D12 | Initial community scope | Topic discussions, a public feed, and finding and connecting with other nurses are all included in the agreed community direction | The user chose all three so members can interact and develop professional relationships | Usage and the solo builder's operating capacity justify changing scope |
+| D13 | Publication and audience | Profiles remain private until the owner chooses to publish. Anyone can read the public feed and topic discussions; registered members can post and reply | Combine a simple publication choice with an experience visitors can try before enrolling | User feedback or privacy and moderation requirements justify revising the audience rules |
+
+### L53 — Open enrolment with optional professional verification
+
+- **Choice:** people can register and participate without professional document review. Licence/certificate and identity evidence are requested when a member seeks review, rather than as a requirement for joining. Verification can be introduced gradually.
+- **Reason:** the user wants early adoption to come from experiencing the community, with a more flexible and accommodating enrolment process.
+- **Trade-off:** membership alone cannot support a professional verification claim. Self-declared information remains self-declared; the existing "Document reviewed" label still requires an actual approval and receipt under L47 and L52. Basic account authentication remains distinct from professional verification.
+
+### L54 — A simple public-profile choice
+
+- **Choice:** a profile stays private until its owner explicitly chooses "Make public" instead of "Keep private". The proposed enrolment flow shows a preview of the details that will become public. Contact details, registration numbers, and identity evidence retain their existing private boundaries.
+- **Reason:** the user explicitly chose a simple public choice, rather than automatic publication. A clear decision makes publication easy while preserving control over personal information.
+- **Trade-off:** the publication preview, its initial field selection, and the relationship between publication and member discovery still need detailed design. Search-engine indexing has not been selected by this choice. Public profile permission must not silently expose other private fields.
+
+### L55 — All three community experiences
+
+- **Choice:** include topic discussions, a public feed, and finding and connecting with other nurses. The user clarified that they wanted all three, rather than a single feature from the proposed options.
+- **Reason:** these experiences provide opportunities to ask questions, share experiences, discover peers, and establish relationships, which can give members a reason to return.
+- **Trade-off:** community introduces content and moderation work alongside profile and verification work. Early adoption and retention remain hypotheses to measure, rather than proof of employer demand or sustainable operating costs. Formal learning services, a jobs marketplace, and international mobility are separate later feature families.
+
+### L56 — Following and accepted connection requests
+
+- **Choice:** support both immediate following of another nurse's public updates and connection requests accepted by the other nurse. The user selected options 1 and 2 together. Neither relationship requires professional document review.
+- **Reason:** following supports interest in public updates, while accepted requests establish a mutual professional relationship and give both members control over that relationship.
+- **Trade-off:** the interface must explain the two relationships clearly. Notification behaviour, messaging, and any additional information available to connections have not been agreed; accepting a request must not silently settle those separate permissions.
+
+### L57 — Public reading with account-based contribution
+
+- **Choice:** anyone can read the public feed and topic discussions. Posting and replying require a registered member to sign in. The user selected option 1, rather than requiring registration to read or using different audiences for the feed and discussions.
+- **Reason:** visitors can experience the platform's value before enrolling, supporting the user's adoption strategy.
+- **Trade-off:** discussion content is visible beyond the registered community, so the posting experience must state its audience clearly. Moderation, reporting, and how a post author's visible identity relates to a private profile still require agreed rules.
+
+### L58 — One conversation shared between its topic and the feed
+
+- **Choice:** a member posts under a topic, and that post also appears in the public feed. Its replies belong to the same conversation in both places. The user selected the shared-post option.
+- **Reason:** one posting flow supports both experiences, lets discussions reach more people, and avoids splitting a conversation across two sets of replies.
+- **Trade-off:** topic posts enter the public feed as part of the agreed model. Topic categories, permitted content formats, feed ordering, and personalisation remain to be chosen.
+
+### Effect on earlier plans and open decisions
+
+- D11 supersedes the invite-only enrolment policy in D4. D13 preserves the private-by-default principle while changing the proposed publication experience.
+- D12 brings community interaction forward from the roadmap's later community phase. D1 (solo, part-time capacity), D2 (new graduates), D3 (public hospitals), and D9 (FastAPI) have not been replaced by these choices.
+- Open decisions O1–O5 remain open. The revised public release needs its launch criteria reviewed against its actual claims and evidence handling; these product choices do not close the original Phase 0 gate or establish a lawful authoritative verification source.
+- Content formats, starter topics, moderation and reporting rules, discovery and indexing details, notifications, messaging, connection permissions, and a delivery sequence have not yet been selected.
+- The existing build plan and Phase 0 plan remain historical planning documents. This revision records the new direction without presenting their older invite-only and deferred-community assumptions as the latest choices.
+
+### L59 — Text, images, and video in the initial community version
+
+- **Choice:** support text, images, and video from the first community version. The user selected all three proposed format sets, which includes the complete set of formats. These formats belong to the shared topic/feed experience under L58 and its public audience under L57.
+- **Reason:** the user chose the full range of expression for the more accommodating community experience, rather than beginning with text alone. Members can share written contributions and visual content as part of the adoption strategy.
+- **Trade-off:** media adds handling and moderation work, and storage and bandwidth costs depend on the publishing approach. Direct uploads, external video links, or a combination have not yet been selected. Permitted file types, sizes, video duration, processing and storage arrangements, and media attachments in replies still need detailed decisions.
+- **Effect on earlier notes:** this choice resolves the content-format question listed as pending in the initial 26 October revision. The other open design details and implementation status remain as recorded above.
+
+### L60 — Media uploads and external video links
+
+- **Choice:** members can upload images and videos from their devices and share existing videos through external links. The user selected the "Uploads plus video links" option for the initial community experience.
+- **Reason:** this supports sharing original media and existing video resources through the same community, matching the user's preference for flexible participation.
+- **Trade-off:** the application must support uploaded media and linked-video presentation. Uploaded video requires storage and processing arrangements; linked videos depend on their external hosts. Upload counts, file sizes, video duration, permitted types, storage and processing providers, and detailed presentation behaviour remain to be selected.
+- **Effect on earlier notes:** the media-sharing method listed as pending in L59 is now agreed. This choice does not select a hosting provider, commit to costs, decide media attachments in replies, or establish that media support has been implemented.
+
+### L61 — Initial community-post upload limits
+
+- **Choice:** a community post can include up to four uploaded images and one uploaded video of up to three minutes. The user selected the recommended initial limit set. These limits apply to uploads; longer videos can be shared through external links under L60.
+- **Reason:** this gives members room for photos and short explanations while bounding the media attached to an individual post and the associated hosting and moderation work.
+- **Trade-off:** larger albums and longer video files exceed this initial native-upload allowance. The external-video route remains available for longer resources. File-size limits, permitted types, processing and storage arrangements, any account-level upload limits, and media attachments in replies remain to be selected.
+- **Effect on earlier notes:** the image count, uploaded-video count, and uploaded-video duration listed as pending in L60 are now agreed for posts. This remains a planned limit set, rather than an implemented or performance-verified behaviour.
+
+### L62 — Publication after automatic checks with staff moderation
+
+- **Choice:** posts and replies become visible after automatic checks and any necessary media processing. Routine staff approval is not required before publication. Members can report content, and staff can review and remove it. The user selected option 1 from the proposed publishing approaches.
+- **Reason:** this supports responsive conversations and lets members participate without waiting for an initial or ongoing staff-approval queue.
+- **Trade-off:** reported issues may need to be handled after content is already public. Community rules, the exact automatic checks, reporting and review workflows, response targets, moderation permissions, and appeals still need detailed decisions. Automatic checks and content publication do not confer professional verification or a "Document reviewed" label.
+- **Effect on earlier notes:** the initial publication approach is now agreed. The staff-approval alternatives were not selected, and the new moderation workflow remains planned rather than implemented.
+
+---
+
+## Approved implementation decisions — 28 October 2026
+
+The choices below were made after reviewing the first community implementation. They define the trust and abuse-control hardening requested before that increment is treated as complete.
+
+### L63 — A document review keeps the name that was actually reviewed
+
+- **Choice:** an approval stores the profile display name that the reviewer saw. If the member later changes the current display name, the review remains in history and the public receipt names the reviewed identity explicitly; it must not imply that the new name was matched to the documents.
+- **Reason:** the user selected a reviewed-name snapshot instead of invalidating the approval or blocking later name corrections. The receipt can continue to state what truly happened without attaching that statement silently to a different name.
+- **Trade-off:** a public profile may show a current self-declared name alongside a different reviewed name. The interface must make the distinction prominent, and an old review does not establish that both names belong to the same person.
+
+### L64 — A discoverable profile must keep its display name public
+
+- **Choice:** sharing controls reject an attempt to make the display name private while the profile is published and discoverable. The member must make the whole profile private first.
+- **Reason:** nurse discovery needs a stable visible identity, and publication already requires the display name to be public. Enforcing the same rule after publication closes the path that could leave a nameless discoverable profile.
+- **Trade-off:** changing this one field takes an extra unpublish step. The service layer, not only the form, must enforce the rule.
+
+### L65 — Community names are unique, reserved where necessary, and locked after contribution
+
+- **Choice:** public community names have a normalised, case-insensitive unique key. Names representing Nurse.ng, NMCN (Nursing and Midwifery Council of Nigeria), staff, moderation, administration, or support are reserved. A member can choose or correct the name before contributing; the name locks when their first post or reply is published.
+- **Reason:** the user selected unique and locked names. This prevents two active members from presenting the same community identity, prevents ordinary accounts from presenting themselves as the platform or regulator, and stops a later rename from retroactively changing the apparent author of existing conversations.
+- **Trade-off:** uniqueness is not identity verification and cannot stop every real-person impersonation. A legitimate correction after the first contribution requires a future staff procedure; deleting content does not unlock the name.
+
+### L66 — Initial permissive community limits
+
+- **Choice:** each account may attempt up to 10 posts per hour, 60 replies per hour, and 20 reports per hour. Community uploads are limited to 500 MB in a 24-hour account window and 5 GB stored per account, in addition to the existing per-file and per-post limits.
+- **Reason:** the user selected the permissive limit set. It leaves room for active participation while bounding straightforward spam, report flooding, and unbounded local-disk consumption.
+- **Trade-off:** action counters remain process-local for the pilot, so multiple workers weaken them until distributed state is introduced. Database-backed byte accounting is stronger, but the limits are operational defaults rather than evidence that those volumes are affordable.
+
+### L67 — Stream uploads, reserve quota, and reconcile media storage
+
+- **Choice:** community uploads are copied to a private temporary file in bounded chunks rather than loaded into application memory. Account quota is reserved in the same database transaction as publication. Removing a reported post removes its media records, attempts to delete its files, and releases stored quota; an operator cleanup command reconciles orphan files and byte counters.
+- **Reason:** a permitted 100 MB video must not allocate one equally large Python bytes object, and database or filesystem failures must not silently consume quota forever.
+- **Trade-off:** local files and database rows still cannot form one atomic transaction. A crash between them can leave an orphan, so the reconciliation command remains necessary. Production object storage needs its own lifecycle and accounting controls.
+
+### L68 — Optional ClamAV scanning for community media
+
+- **Choice:** when the configured ClamAV (an antivirus scanner) command is available, every completed temporary community-media file is scanned before publication and a positive detection is rejected. If the scanner is absent, times out, or fails operationally, the optional pilot mode logs the condition and allows the upload.
+- **Reason:** the user selected optional scanning so development and the pilot are not blocked on a system daemon while still using the scanner when installed.
+- **Trade-off:** this is fail-open and is not sufficient for an unrestricted public launch. A production deployment must change to required, fail-closed scanning or use a storage processing pipeline that provides equivalent protection.
+
+### L69 — Database identities close connection and report races
+
+- **Choice:** every connection stores a canonical unordered pair key with a unique constraint, so reciprocal requests cannot coexist. Every open report stores a unique reporter/target key, cleared when the report is resolved or dismissed. Connection responses and moderation claims use conditional state updates so only the first concurrent action succeeds.
+- **Reason:** application-level pre-insert checks do not protect against two requests that race. Stable database keys let the database remain the authority on uniqueness while preserving requester/recipient direction and the ability to report again after a dismissal.
+- **Trade-off:** the extra projection keys must be backfilled and maintained by services. SQLite (an embedded Structured Query Language database) cannot reproduce every PostgreSQL locking behaviour, so PostgreSQL concurrency verification remains required before production.

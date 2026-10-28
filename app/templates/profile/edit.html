@@ -8,8 +8,8 @@
   <h1>Your professional profile</h1>
   <p class="lede">
     This profile is private. It is visible only to you until you activate it and
-    choose fields to share, and your professional status is self-declared until
-    verification exists.
+    choose fields to share. Your professional status is always self-declared;
+    document review covers your identity documents, not this claim.
   </p>
 
   {% if error %}
@@ -29,7 +29,10 @@
         <option value="{{ value }}"{% if values.professional_status == value %} selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-    <p class="field-hint">Self-declared. Verification is not available yet.</p>
+    <p class="field-hint">
+      Self-declared. <a href="/profile/verification">Document review</a> checks
+      your licence and identity separately.
+    </p>
 
     <label for="headline">Headline <span class="optional">(optional)</span></label>
     <input id="headline" name="headline" type="text" maxlength="160"

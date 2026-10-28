@@ -11,6 +11,24 @@
     <p class="lede">{{ fields.get('headline') }}</p>
   {% endif %}
 
+  {% if document_reviewed_on %}
+    <section class="verification-panel">
+      <p class="verification-badge">Document reviewed · {{ document_reviewed_on }}</p>
+      <h2>What “document reviewed” means</h2>
+      <p>
+        A Nurse.ng reviewer inspected an uploaded NMCN (Nursing and Midwifery
+        Council of Nigeria) licence or certificate and a government-issued
+        photo ID, and matched the name on them to this profile.
+      </p>
+      <p>
+        This is <strong>not source confirmation</strong>. Nurse.ng does not
+        check the registration against NMCN's records, does not prove the
+        documents are authentic, and does not assess clinical competence.
+      </p>
+      <p>Reviewed on {{ document_reviewed_on }} by a Nurse.ng reviewer.</p>
+    </section>
+  {% endif %}
+
   {% if fields.get('professional_status') or fields.get('location') %}
     <dl class="profile-meta">
       {% if fields.get('professional_status') %}
@@ -35,8 +53,43 @@
     <p class="lede">This profile is active but shares no details yet.</p>
   {% endif %}
 
+  {% if can_connect %}
+    <section class="profile-social-actions">
+      <h2>Connect</h2>
+      <div class="button-row">
+        {% if is_following %}
+          <form method="post" action="/nurses/{{ profile_public_id }}/unfollow">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="button-secondary">Unfollow</button>
+          </form>
+        {% else %}
+          <form method="post" action="/nurses/{{ profile_public_id }}/follow">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="button-primary">Follow</button>
+          </form>
+        {% endif %}
+
+        {% if not connection %}
+          <form method="post" action="/nurses/{{ profile_public_id }}/connect">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="button-secondary">Connect</button>
+          </form>
+        {% elif connection_status == 'pending' %}
+          <span class="field-hint">Connection request pending</span>
+        {% elif connection_status == 'accepted' %}
+          <span class="status-badge status-approved">Connected</span>
+        {% endif %}
+      </div>
+    </section>
+  {% endif %}
+
   <p class="form-alt">
-    Shared by its owner. Nurse.ng has not verified these details.
+    {% if document_reviewed_on %}
+      Shared by its owner. The identity documents behind the label were
+      reviewed by Nurse.ng; the registration was not confirmed with NMCN.
+    {% else %}
+      Shared by its owner. Nurse.ng has not reviewed or verified these details.
+    {% endif %}
   </p>
 </section>
 {% endblock %}

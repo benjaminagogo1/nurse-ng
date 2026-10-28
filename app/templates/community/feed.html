@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} — Nurse.ng{% endblock %}
+
+{% block content %}
+<section class="community-page">
+  <p class="eyebrow">Community</p>
+  <div class="page-heading-row">
+    <div>
+      <h1>{% if following_only %}Posts from nurses you follow{% else %}Public feed{% endif %}</h1>
+      <p class="lede">Public conversations from the Nurse.ng community.</p>
+    </div>
+    {% if user %}<a class="button-primary" href="/posts/new">Create post</a>{% endif %}
+  </div>
+
+  <nav class="section-tabs" aria-label="Feed views">
+    <a href="/feed" {% if not following_only %}aria-current="page"{% endif %}>All posts</a>
+    {% if user %}
+      <a href="/feed/following" {% if following_only %}aria-current="page"{% endif %}>Following</a>
+    {% endif %}
+    <a href="/topics">Topics</a>
+  </nav>
+
+  {% if not user %}
+    <p class="form-notice">
+      Anyone can read. <a href="/auth/register">Create an account</a> to post and reply.
+    </p>
+  {% endif %}
+
+  <div class="community-list">
+    {% for post in posts %}
+      {% include "community/_post_card.html" %}
+    {% else %}
+      <div class="empty-state">
+        <h2>No posts yet</h2>
+        <p>{% if following_only %}Follow public nurse profiles to build this feed.{% else %}The first discussion has not been published yet.{% endif %}</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

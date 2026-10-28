@@ -1,0 +1,47 @@
+<article class="community-card">
+  <header class="community-card-header">
+    <div>
+      <a class="topic-label" href="/topics/{{ post.topic.slug }}">{{ post.topic.name }}</a>
+      <p class="post-byline">
+        {% if profile_ids.get(post.author_id) %}
+          <a href="/p/{{ profile_ids.get(post.author_id) }}">{{ post.author.community_name }}</a>
+        {% else %}
+          {{ post.author.community_name or 'Nurse.ng member' }}
+        {% endif %}
+        · {{ post.published_at.strftime('%d %b %Y, %H:%M') }}
+      </p>
+    </div>
+  </header>
+
+  {% if post.body %}<div class="post-body">{{ post.body }}</div>{% endif %}
+
+  {% if post.media %}
+    <div class="post-media-grid">
+      {% for media in post.media %}
+        {% if media.kind == 'image' %}
+          <img src="/community/media/{{ media.id }}"
+               alt="Image shared by {{ post.author.community_name }}" loading="lazy">
+        {% elif media.kind == 'video' %}
+          <video controls preload="metadata">
+            <source src="/community/media/{{ media.id }}" type="{{ media.content_type }}">
+            Your browser cannot play this video.
+          </video>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if post.external_video_url %}
+    <p class="external-video-link">
+      <a href="{{ post.external_video_url }}" rel="noopener noreferrer nofollow"
+         target="_blank">Open external video</a>
+    </p>
+  {% endif %}
+
+  <footer class="community-card-footer">
+    <a href="/posts/{{ post.id }}">
+      View conversation
+      ({{ post.replies|selectattr('status', 'equalto', 'published')|list|length }} replies)
+    </a>
+  </footer>
+</article>

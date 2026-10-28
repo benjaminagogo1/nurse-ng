@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Document review — Nurse.ng{% endblock %}
+
+{% block content %}
+<section class="form-page">
+  <p class="eyebrow">Document review</p>
+  <h1>Review your licence and identity</h1>
+  <p class="lede">
+    A Nurse.ng reviewer inspects a copy of your NMCN (Nursing and Midwifery
+    Council of Nigeria) licence or certificate and a government-issued photo
+    ID, and matches the name on them to this profile.
+  </p>
+  <p class="field-hint">
+    Approval adds the label “Document reviewed” to your shared profile. It is
+    not source confirmation: Nurse.ng does not check NMCN's register and does
+    not prove the documents are authentic.
+  </p>
+
+  {% if error %}
+    <p class="form-error" role="alert">{{ error }}</p>
+  {% endif %}
+
+  <div class="verification-summary">
+    {% if document_reviewed_on %}
+      <p>
+        <span class="verification-badge">Document reviewed</span>
+        Reviewed on {{ document_reviewed_on }}.
+      </p>
+    {% else %}
+      <p><span class="verification-badge muted">Not reviewed</span></p>
+    {% endif %}
+  </div>
+
+  {% if pending %}
+    <p class="form-notice">
+      Your documents are with a reviewer. You cannot submit another case until
+      this one is decided.
+    </p>
+  {% else %}
+    <form method="post" action="/profile/verification" enctype="multipart/form-data"
+          class="stacked-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+      <label for="registration_number">NMCN registration number</label>
+      <input id="registration_number" name="registration_number" type="text"
+             maxlength="40" value="{{ registration_number }}" required>
+      <p class="field-hint">
+        Shown to the reviewer only. It is never published on your profile.
+      </p>
+
+      <label for="licence">Licence or certificate</label>
+      <input id="licence" name="licence" type="file" required
+             accept="image/jpeg,image/png,application/pdf">
+      <p class="field-hint">JPEG, PNG, or PDF, up to {{ max_megabytes }} MB.</p>
+
+      <label for="government_id">Government-issued photo ID</label>
+      <input id="government_id" name="government_id" type="file" required
+             accept="image/jpeg,image/png,application/pdf">
+      <p class="field-hint">
+        Passport, national identity card, or driver's licence. The name must
+        match the name on your licence or certificate.
+      </p>
+
+      <label class="inline-choice consent-choice">
+        <input type="checkbox" name="consent" value="on" required>
+        I consent to Nurse.ng storing these documents privately and to a
+        reviewer inspecting them for this review.
+      </label>
+
+      <button type="submit">Submit for review</button>
+    </form>
+  {% endif %}
+
+  {% if cases %}
+    <h2>Review history</h2>
+    <table class="review-table">
+      <thead>
+        <tr>
+          <th scope="col">Submitted</th>
+          <th scope="col">Status</th>
+          <th scope="col">Decided</th>
+          <th scope="col">Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% set status_labels = {
+          'pending': 'With a reviewer',
+          'approved': 'Approved',
+          'rejected': 'Not approved',
+        } %}
+        {% for case in cases %}
+          <tr>
+            <td>{{ case.created_at.strftime('%d %B %Y') }}</td>
+            <td>
+              <span class="status-badge status-{{ case.status }}">
+                {{ status_labels.get(case.status, case.status) }}
+              </span>
+            </td>
+            <td>
+              {% if case.decided_at %}{{ case.decided_at.strftime('%d %B %Y') }}{% else %}—{% endif %}
+            </td>
+            <td>{{ case.decision_note or '—' }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+
+  <p class="form-alt"><a href="/profile">Back to profile</a></p>
+</section>
+{% endblock %}

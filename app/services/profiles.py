@@ -281,24 +281,42 @@ def activate_profile(
     user: User,
     profile: NurseProfile,
 ) -> NurseProfile:
-    """Make a profile shareable. Activation never makes it discoverable."""
+    """Publish a profile after its owner has made the name public."""
     if profile.user_id != user.id:
         raise ProfileError("This profile does not belong to the signed-in user.")
     if not (profile.display_name or "").strip():
         raise ProfileError("Add a display name before activating your profile.")
+    if field_visibility(db, profile, "display_name") != Visibility.PUBLIC:
+        raise ProfileError(
+            "Make your display name public in sharing controls before publishing."
+        )
 
     profile.status = ProfileStatus.ACTIVE
-    # Invariant: the pilot has no directory, so activation must never opt a
-    # profile into discovery, even if the column was changed elsewhere.
-    profile.discoverable = False
+    profile.discoverable = True
     db.commit()
     db.refresh(profile)
     return profile
 
 
 def deactivate_profile(db: Session, profile: NurseProfile) -> NurseProfile:
-    """Return an active profile to draft, which turns its share link off."""
+    """Return a public profile to private draft state."""
     profile.status = ProfileStatus.DRAFT
+    profile.discoverable = False
     db.commit()
     db.refresh(profile)
     return profile
+
+
+def list_discoverable_profiles(db: Session, *, limit: int = 100) -> list[NurseProfile]:
+    """List only profiles whose owners explicitly published them."""
+    return list(
+        db.scalars(
+            select(NurseProfile)
+            .where(
+                NurseProfile.status == ProfileStatus.ACTIVE,
+                NurseProfile.discoverable.is_(True),
+            )
+            .order_by(NurseProfile.display_name, NurseProfile.created_at)
+            .limit(limit)
+        ).all()
+    )

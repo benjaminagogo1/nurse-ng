@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Start a discussion — Nurse.ng{% endblock %}
+
+{% block content %}
+<section class="form-page">
+  <p class="eyebrow">Community</p>
+  <h1>Start a discussion</h1>
+  <p class="lede">
+    Your post will be public after the checks described below. Replies belong to
+    the same conversation in its topic and in the feed.
+  </p>
+
+  {% if not user.community_name %}
+    <p class="form-notice">
+      First choose the <a href="/community/settings">public name</a> shown with your post.
+    </p>
+  {% endif %}
+  {% if not topics %}
+    <p class="form-notice">No active topic exists yet. A staff member must create one.</p>
+  {% endif %}
+  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+
+  <form method="post" action="/posts" enctype="multipart/form-data" class="stacked-form community-post-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+    <label for="topic-id">Topic</label>
+    <select id="topic-id" name="topic_id" required>
+      <option value="">Choose a topic</option>
+      {% for topic in topics %}
+        <option value="{{ topic.id }}" {% if values.topic_id == topic.id|string %}selected{% endif %}>{{ topic.name }}</option>
+      {% endfor %}
+    </select>
+
+    <label for="body">Text <span class="optional">(optional with media or a link)</span></label>
+    <textarea id="body" name="body" rows="8" maxlength="5000">{{ values.body }}</textarea>
+
+    <label for="images">Images <span class="optional">(optional)</span></label>
+    <input id="images" name="images" type="file" multiple
+           accept="image/jpeg,image/png,image/webp">
+    <p class="field-hint">Up to four JPEG, PNG, or WebP images; {{ image_max_mb }} MB each.</p>
+
+    <label for="video">Uploaded video <span class="optional">(optional)</span></label>
+    <input id="video" name="video" type="file" accept="video/mp4">
+    <p class="field-hint">
+      One MP4, no longer than {{ video_max_minutes }} minutes and no larger than {{ video_max_mb }} MB.
+      Duration is checked from the file.
+    </p>
+
+    <label for="external-video-url">External video URL <span class="optional">(optional)</span></label>
+    <input id="external-video-url" name="external_video_url" type="url"
+           maxlength="2048" placeholder="https://…" value="{{ values.external_video_url }}">
+
+    <p class="form-notice">
+      Automatic checks validate text limits, link format, media count, file type,
+      size, and video duration. They do not prove a post is accurate. Members can
+      report content and staff can remove it after publication.
+    </p>
+    <button type="submit" {% if not topics %}disabled{% endif %}>Publish post</button>
+  </form>
+</section>
+{% endblock %}

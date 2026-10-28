@@ -35,6 +35,12 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_staff: Mapped[bool] = mapped_column(Boolean, default=False)
 
+    # Public identity used on community contributions. It is deliberately
+    # separate from a nurse profile so posting never exposes a private profile.
+    community_name: Mapped[str] = mapped_column(
+        String(80), default="", server_default=""
+    )
+
     # Login lockout state (DECISIONS L38). Persisted so a restart cannot clear
     # an active lock and so every worker sees the same counter.
     failed_login_attempts: Mapped[int] = mapped_column(

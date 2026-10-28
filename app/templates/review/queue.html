@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Review queue — Nurse.ng{% endblock %}
+
+{% block content %}
+<section class="form-page">
+  <p class="eyebrow">Staff only</p>
+  <h1>Document review queue</h1>
+  <p class="lede">
+    Oldest submissions first. Opening a case shows the profile, the submitted
+    registration number, and both evidence files. Every evidence open is logged.
+  </p>
+
+  <h2>Waiting for review ({{ pending|length }})</h2>
+  {% if pending %}
+    <table class="review-table">
+      <thead>
+        <tr>
+          <th scope="col">Submitted</th>
+          <th scope="col">Nurse</th>
+          <th scope="col">Case</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for case in pending %}
+          <tr>
+            <td>{{ case.created_at.strftime('%d %B %Y') }}</td>
+            <td>{{ case.profile.display_name or 'Unnamed profile' }}</td>
+            <td><a href="/review/{{ case.id }}">Open case</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="field-hint">No cases are waiting.</p>
+  {% endif %}
+
+  <h2>Recent decisions</h2>
+  {% if recent %}
+    <table class="review-table">
+      <thead>
+        <tr>
+          <th scope="col">Decided</th>
+          <th scope="col">Nurse</th>
+          <th scope="col">Outcome</th>
+          <th scope="col">Reason</th>
+          <th scope="col">Case</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for case in recent %}
+          <tr>
+            <td>
+              {% if case.decided_at %}{{ case.decided_at.strftime('%d %B %Y') }}{% else %}—{% endif %}
+            </td>
+            <td>{{ case.profile.display_name or 'Unnamed profile' }}</td>
+            <td>
+              <span class="status-badge status-{{ case.status }}">
+                {{ 'Approved' if case.status == 'approved' else 'Not approved' }}
+              </span>
+            </td>
+            <td>{{ case.decision_note or '—' }}</td>
+            <td><a href="/review/{{ case.id }}">View</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="field-hint">No decisions yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

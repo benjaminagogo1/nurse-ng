@@ -7,13 +7,25 @@ false; nothing here makes a profile public.
 ``CredentialClaim.status`` is a projection of the verification domain. A claim
 must never reach ``document_reviewed``, ``source_confirmed``, or ``revoked``
 without a corresponding verification decision row (build plan, section 5).
-That invariant is enforced in services when the verification domain exists.
+The document-review workflow (DECISIONS L47-L52) records its outcome on
+``document_reviewed_at`` and does not write credential claims; a claim may only
+be raised by a future source-confirmed decision.
 """
 
 import uuid
+from datetime import datetime
 from enum import StrEnum
 
-from sqlalchemy import Boolean, ForeignKey, Index, String, Text, UniqueConstraint, Uuid
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Index,
+    String,
+    Text,
+    UniqueConstraint,
+    Uuid,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.uuid import uuid7
@@ -85,6 +97,13 @@ class NurseProfile(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     headline: Mapped[str] = mapped_column(String(160), default="")
     location: Mapped[str] = mapped_column(String(120), default="")
     bio: Mapped[str] = mapped_column(Text, default="")
+
+    # Set only when a reviewer approves a document-review case. Null means no
+    # approved review; the label is "document reviewed", never "verified"
+    # (DECISIONS L47). The case table remains the audit record.
+    document_reviewed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     user: Mapped[User] = relationship()
     claims: Mapped[list["CredentialClaim"]] = relationship(

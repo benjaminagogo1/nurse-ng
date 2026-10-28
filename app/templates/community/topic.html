@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}{{ topic.name }} — Nurse.ng{% endblock %}
+
+{% block content %}
+<section class="community-page">
+  <p class="eyebrow">Topic</p>
+  <div class="page-heading-row">
+    <div>
+      <h1>{{ topic.name }}</h1>
+      {% if topic.description %}<p class="lede">{{ topic.description }}</p>{% endif %}
+    </div>
+    {% if user %}<a class="button-primary" href="/posts/new">Create post</a>{% endif %}
+  </div>
+
+  <p class="form-alt"><a href="/topics">All topics</a> · <a href="/feed">Public feed</a></p>
+
+  <div class="community-list">
+    {% for post in posts %}
+      {% include "community/_post_card.html" %}
+    {% else %}
+      <div class="empty-state"><p>No discussions in this topic yet.</p></div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

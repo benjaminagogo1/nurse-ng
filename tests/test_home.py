@@ -3,7 +3,7 @@ def test_home_renders(client):
 
     assert response.status_code == 200
     assert "Nurse.ng" in response.text
-    assert "closed pilot" in response.text
+    assert "public nursing community" in response.text
 
 
 def test_home_carries_the_regulator_disclaimer(client):

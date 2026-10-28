@@ -10,9 +10,14 @@
     <header class="site-header">
       <a class="brand" href="/">Nurse.ng</a>
       <nav class="site-nav">
+        <a href="/feed">Feed</a>
+        <a href="/topics">Topics</a>
+        <a href="/nurses">Nurses</a>
         {% if user %}
           <a href="/profile">Profile</a>
-          <a href="/auth/dashboard">Account</a>
+          <a href="/network">Network</a>
+          {% if user.is_staff %}<a href="/review">Review</a>{% endif %}
+          {% if user.is_staff %}<a href="/moderation">Moderate</a>{% endif %}
           <form method="post" action="/auth/logout" class="inline-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <button type="submit" class="link-button">Sign out</button>

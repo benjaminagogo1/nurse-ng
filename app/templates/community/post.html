@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} — Nurse.ng{% endblock %}
+
+{% block content %}
+<section class="community-page">
+  <p class="eyebrow">Conversation</p>
+  {% include "community/_post_card.html" %}
+
+  {% if user and user.id != post.author_id %}
+    <details class="report-panel">
+      <summary>Report this post</summary>
+      <form method="post" action="/posts/{{ post.id }}/report" class="compact-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label>Reason
+          <select name="reason" required>
+            <option value="">Choose</option>
+            {% for value, label in report_reasons %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+          </select>
+        </label>
+        <label>Details <span class="optional">(required for Other)</span>
+          <textarea name="details" rows="3" maxlength="1000"></textarea>
+        </label>
+        <button type="submit" class="button-secondary">Submit report</button>
+      </form>
+    </details>
+  {% endif %}
+
+  <section class="reply-section">
+    <h2>Replies</h2>
+    <div class="reply-list">
+      {% for reply in post.replies if reply.status == 'published' %}
+        <article class="reply-card" id="reply-{{ reply.id }}">
+          <p class="post-byline">
+            {% if profile_ids.get(reply.author_id) %}
+              <a href="/p/{{ profile_ids.get(reply.author_id) }}">{{ reply.author.community_name }}</a>
+            {% else %}
+              {{ reply.author.community_name or 'Nurse.ng member' }}
+            {% endif %}
+            · {{ reply.created_at.strftime('%d %b %Y, %H:%M') }}
+          </p>
+          <div class="post-body">{{ reply.body }}</div>
+          {% if user and user.id != reply.author_id %}
+            <details class="report-panel compact">
+              <summary>Report reply</summary>
+              <form method="post" action="/replies/{{ reply.id }}/report" class="compact-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <select name="reason" required aria-label="Report reason">
+                  <option value="">Choose a reason</option>
+                  {% for value, label in report_reasons %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                </select>
+                <textarea name="details" rows="2" maxlength="1000" aria-label="Report details"></textarea>
+                <button type="submit" class="button-secondary">Report</button>
+              </form>
+            </details>
+          {% endif %}
+        </article>
+      {% else %}
+        <p class="field-hint">No replies yet.</p>
+      {% endfor %}
+    </div>
+
+    {% if user %}
+      {% if reply_error %}<p class="form-error" role="alert">{{ reply_error }}</p>{% endif %}
+      {% if not user.community_name %}
+        <p class="form-notice">Choose a <a href="/community/settings">public community name</a> before replying.</p>
+      {% endif %}
+      <form method="post" action="/posts/{{ post.id }}/replies" class="stacked-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label for="reply-body">Add a public reply</label>
+        <textarea id="reply-body" name="body" rows="4" maxlength="2000" required>{{ reply_body or '' }}</textarea>
+        <button type="submit">Reply</button>
+      </form>
+    {% else %}
+      <p class="form-notice"><a href="/auth/login">Sign in</a> to reply.</p>
+    {% endif %}
+  </section>
+</section>
+{% endblock %}
