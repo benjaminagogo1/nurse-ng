@@ -104,6 +104,11 @@ class NurseProfile(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     document_reviewed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    # Snapshot of the display name that was matched during the latest approved
+    # review. It can differ from the current self-declared display name (L63).
+    document_reviewed_name: Mapped[str | None] = mapped_column(
+        String(120), nullable=True
+    )
 
     user: Mapped[User] = relationship()
     claims: Mapped[list["CredentialClaim"]] = relationship(

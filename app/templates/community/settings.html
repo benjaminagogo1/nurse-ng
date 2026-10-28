@@ -10,6 +10,10 @@
     This name appears publicly beside every post and reply. It is separate from
     your nurse profile, so using the community does not publish a private profile.
   </p>
+  <p class="field-hint">
+    Names are unique and self-chosen, not professionally verified. Your name
+    locks after your first post or reply so old conversations keep a stable author.
+  </p>
 
   {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
 
@@ -17,7 +21,10 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <label for="name">Public community name</label>
     <input id="name" name="name" maxlength="80" required value="{{ name }}">
-    <p class="field-hint">Do not use a name you do not want public.</p>
+    <p class="field-hint">
+      Do not use a name you do not want public. Platform, regulator, staff, and
+      support identities are reserved.
+    </p>
     <button type="submit">Save community name</button>
   </form>
 </section>

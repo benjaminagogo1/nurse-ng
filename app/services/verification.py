@@ -236,7 +236,10 @@ def decide_case(
     if approve:
         # A prior approval stands if a later resubmission is rejected; this
         # column only moves forward on approval (DECISIONS L51).
+        reviewed_name = (case.profile.display_name or "").strip()
+        case.reviewed_display_name = reviewed_name
         case.profile.document_reviewed_at = now
+        case.profile.document_reviewed_name = reviewed_name
 
     db.commit()
     db.refresh(case)

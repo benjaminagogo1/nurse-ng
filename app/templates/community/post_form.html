@@ -56,6 +56,11 @@
       size, and video duration. They do not prove a post is accurate. Members can
       report content and staff can remove it after publication.
     </p>
+    <p class="field-hint">
+      Account media allowance: {{ daily_upload_mb }} MB per 24 hours and
+      {{ storage_quota_gb }} GB stored. Files are streamed and scanned with
+      ClamAV when the optional scanner is available.
+    </p>
     <button type="submit" {% if not topics %}disabled{% endif %}>Publish post</button>
   </form>
 </section>

@@ -48,6 +48,21 @@ class Settings(BaseSettings):
     community_image_max_bytes: int = 10 * 1024 * 1024
     community_video_max_bytes: int = 100 * 1024 * 1024
     community_video_max_seconds: int = 180
+    community_post_limit: int = 10
+    community_post_window_seconds: int = 3600
+    community_reply_limit: int = 60
+    community_reply_window_seconds: int = 3600
+    community_report_limit: int = 20
+    community_report_window_seconds: int = 3600
+    community_upload_window_bytes: int = 500 * 1024 * 1024
+    community_upload_window_seconds: int = 24 * 60 * 60
+    community_storage_quota_bytes: int = 5 * 1024 * 1024 * 1024
+    community_upload_chunk_bytes: int = 1024 * 1024
+    community_malware_scan_mode: Literal["disabled", "optional", "required"] = (
+        "optional"
+    )
+    community_malware_scan_command: str = "clamscan"
+    community_malware_scan_timeout_seconds: int = 60
 
 
 @lru_cache

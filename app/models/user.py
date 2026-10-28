@@ -8,7 +8,15 @@ arrive with the authorization layer.
 from datetime import datetime
 from enum import StrEnum
 
-from sqlalchemy import Boolean, DateTime, Integer, String
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    Integer,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from app.core.security import hash_password, verify_password
@@ -40,6 +48,21 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     community_name: Mapped[str] = mapped_column(
         String(80), default="", server_default=""
     )
+    community_name_key: Mapped[str | None] = mapped_column(
+        String(160), nullable=True
+    )
+    community_name_locked: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="0"
+    )
+    community_storage_bytes: Mapped[int] = mapped_column(
+        BigInteger, default=0, server_default="0"
+    )
+    community_upload_window_started_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    community_upload_window_bytes: Mapped[int] = mapped_column(
+        BigInteger, default=0, server_default="0"
+    )
 
     # Login lockout state (DECISIONS L38). Persisted so a restart cannot clear
     # an active lock and so every worker sees the same counter.
@@ -48,6 +71,17 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     locked_until: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
+    )
+
+    __table_args__ = (
+        UniqueConstraint(
+            "community_name_key",
+            name="uniq_users_community_name_key",
+        ),
+        CheckConstraint(
+            "community_storage_bytes >= 0 AND community_upload_window_bytes >= 0",
+            name="community_byte_counters_nonnegative",
+        ),
     )
 
     @validates("phone")

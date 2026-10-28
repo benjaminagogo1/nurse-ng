@@ -181,6 +181,9 @@ class ContentReport(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         DateTime(timezone=True), nullable=True
     )
     review_note: Mapped[str] = mapped_column(Text, default="")
+    # Present only while open. A unique key closes the race between two
+    # duplicate report submissions from the same member (DECISIONS L69).
+    open_key: Mapped[str | None] = mapped_column(String(80), nullable=True)
 
     post: Mapped[CommunityPost | None] = relationship(foreign_keys=[post_id])
     reply: Mapped[CommunityReply | None] = relationship(foreign_keys=[reply_id])
@@ -191,6 +194,7 @@ class ContentReport(UUIDPrimaryKeyMixin, TimestampMixin, Base):
             "(post_id IS NULL AND reply_id IS NOT NULL)",
             name="content_report_one_target",
         ),
+        UniqueConstraint("open_key", name="uniq_content_report_open_key"),
     )
 
 
@@ -232,6 +236,8 @@ class Connection(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     responded_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    # Canonical unordered user pair. Requester/recipient still record direction.
+    pair_key: Mapped[str] = mapped_column(String(65))
 
     __table_args__ = (
         UniqueConstraint(
@@ -239,6 +245,7 @@ class Connection(UUIDPrimaryKeyMixin, TimestampMixin, Base):
             "recipient_user_id",
             name="uniq_community_connection_direction",
         ),
+        UniqueConstraint("pair_key", name="uniq_community_connection_pair"),
         CheckConstraint(
             "requester_user_id != recipient_user_id",
             name="community_connection_not_self",

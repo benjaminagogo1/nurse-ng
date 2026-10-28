@@ -24,6 +24,10 @@
       <dt>Decided</dt>
       <dd>{{ case.decided_at.strftime('%d %B %Y') }}</dd>
     {% endif %}
+    {% if case.reviewed_display_name %}
+      <dt>Reviewed display name</dt>
+      <dd>{{ case.reviewed_display_name }}</dd>
+    {% endif %}
     {% if case.decision_note %}
       <dt>Reason</dt>
       <dd>{{ case.decision_note }}</dd>

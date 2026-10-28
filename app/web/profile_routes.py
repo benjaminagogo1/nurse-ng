@@ -108,7 +108,7 @@ def _show_context(
             1 for value in visibility.values() if value == Visibility.PUBLIC.value
         ),
         "display_name_shared": visibility.get("display_name") == Visibility.PUBLIC.value,
-        "document_reviewed_on": _document_reviewed_on(profile),
+        **_document_review_context(profile),
         "error": error,
     }
 
@@ -116,6 +116,18 @@ def _show_context(
 def _document_reviewed_on(profile: NurseProfile) -> str | None:
     value = profile.document_reviewed_at
     return value.strftime("%d %B %Y") if value else None
+
+
+def _document_review_context(profile: NurseProfile) -> dict[str, object]:
+    reviewed_name = profile.document_reviewed_name
+    current_name = (profile.display_name or "").strip()
+    return {
+        "document_reviewed_on": _document_reviewed_on(profile),
+        "document_reviewed_name": reviewed_name,
+        "document_review_name_changed": bool(
+            reviewed_name and current_name and reviewed_name != current_name
+        ),
+    }
 
 
 def _verification_context(
@@ -130,7 +142,7 @@ def _verification_context(
         "profile": profile,
         "cases": list_cases_for_profile(db, profile.id),
         "pending": has_pending_case(db, profile.id),
-        "document_reviewed_on": _document_reviewed_on(profile),
+        **_document_review_context(profile),
         "registration_number": registration_number,
         "max_megabytes": max(1, settings.evidence_max_bytes // (1024 * 1024)),
         "error": error,
@@ -455,7 +467,7 @@ def public_profile(
             "user": user,
             "fields": fields,
             "profile_public_id": profile.public_id,
-            "document_reviewed_on": _document_reviewed_on(profile),
+            **_document_review_context(profile),
             **profile_social_context(db, user, profile),
         },
     )

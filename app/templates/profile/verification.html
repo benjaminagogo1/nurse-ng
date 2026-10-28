@@ -25,8 +25,15 @@
     {% if document_reviewed_on %}
       <p>
         <span class="verification-badge">Document reviewed</span>
-        Reviewed on {{ document_reviewed_on }}.
+        {{ document_reviewed_name or profile.display_name }} was reviewed on
+        {{ document_reviewed_on }}.
       </p>
+      {% if document_review_name_changed %}
+        <p class="form-notice">
+          Your current profile name differs. The review remains attached only
+          to the name shown above; the current name is self-declared.
+        </p>
+      {% endif %}
     {% else %}
       <p><span class="verification-badge muted">Not reviewed</span></p>
     {% endif %}
@@ -79,6 +86,7 @@
         <tr>
           <th scope="col">Submitted</th>
           <th scope="col">Status</th>
+          <th scope="col">Reviewed name</th>
           <th scope="col">Decided</th>
           <th scope="col">Reason</th>
         </tr>
@@ -97,6 +105,7 @@
                 {{ status_labels.get(case.status, case.status) }}
               </span>
             </td>
+            <td>{{ case.reviewed_display_name or '—' }}</td>
             <td>
               {% if case.decided_at %}{{ case.decided_at.strftime('%d %B %Y') }}{% else %}—{% endif %}
             </td>

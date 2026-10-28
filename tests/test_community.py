@@ -1,10 +1,14 @@
 """Public community, media checks, relationships, reports, and moderation."""
 
 import uuid
+from io import BytesIO
+from types import SimpleNamespace
 
 import pytest
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
+from app.core import community_storage
 from app.core.config import settings
 from app.models.community import (
     CommunityMedia,
@@ -20,6 +24,12 @@ from app.models.community import (
 )
 from app.models.profile import NurseProfile
 from app.models.user import User
+from app.services.community import (
+    CommunityError,
+    connection_pair_key,
+    reconcile_community_media,
+    respond_to_connection,
+)
 from tests.helpers import csrf_from, register_and_sign_in
 from tests.test_profile_pages import save_profile
 from tests.test_profile_sharing import activate, save_sharing

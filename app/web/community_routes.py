@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session
 
 from app.core.community_storage import CommunityStorageError, community_media_path
 from app.core.config import settings
+from app.core.ratelimit import FixedWindowLimiter
 from app.db.session import get_db
 from app.models.community import CommunityReply, Connection, ConnectionStatus
 from app.models.profile import NurseProfile, ProfileStatus
@@ -60,6 +61,19 @@ from app.web.templating import render
 
 router = APIRouter(tags=["community"])
 
+_post_limiter = FixedWindowLimiter(
+    settings.community_post_limit,
+    settings.community_post_window_seconds,
+)
+_reply_limiter = FixedWindowLimiter(
+    settings.community_reply_limit,
+    settings.community_reply_window_seconds,
+)
+_report_limiter = FixedWindowLimiter(
+    settings.community_report_limit,
+    settings.community_report_window_seconds,
+)
+
 
 def _identifier(value: str) -> uuid.UUID:
     try:
@@ -94,13 +108,35 @@ def _new_post_context(
         "image_max_mb": max(1, settings.community_image_max_bytes // (1024 * 1024)),
         "video_max_mb": max(1, settings.community_video_max_bytes // (1024 * 1024)),
         "video_max_minutes": max(1, settings.community_video_max_seconds // 60),
+        "daily_upload_mb": max(
+            1, settings.community_upload_window_bytes // (1024 * 1024)
+        ),
+        "storage_quota_gb": max(
+            1, settings.community_storage_quota_bytes // (1024 * 1024 * 1024)
+        ),
     }
 
 
-def _read_upload(upload: UploadFile, maximum: int) -> CommunityUpload:
+def _stream_upload(upload: UploadFile) -> CommunityUpload:
     return CommunityUpload(
-        data=upload.file.read(maximum + 1),
+        file=upload.file,
         filename=upload.filename or "",
+    )
+
+
+def _retry_after(limiter: FixedWindowLimiter, user: User) -> int:
+    key = str(user.id)
+    if limiter.is_limited(key):
+        return limiter.retry_after(key)
+    limiter.record(key)
+    return 0
+
+
+def _raise_rate_limited(retry_after: int, message: str) -> None:
+    raise HTTPException(
+        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+        detail=message,
+        headers={"Retry-After": str(retry_after)},
     )
 
 
@@ -253,6 +289,22 @@ def publish_post(
         "body": body,
         "external_video_url": external_video_url,
     }
+    retry_after = _retry_after(_post_limiter, user)
+    if retry_after:
+        return render(
+            request,
+            "community/post_form.html",
+            {
+                "user": user,
+                **_new_post_context(
+                    db,
+                    values=values,
+                    error="Too many posts. Try again after the retry period.",
+                ),
+            },
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            headers={"Retry-After": str(retry_after)},
+        )
     try:
         parsed_topic_id = uuid.UUID(topic_id)
     except ValueError:
@@ -267,12 +319,9 @@ def publish_post(
                 topic_id=parsed_topic_id,
                 body=body,
                 external_video_url=external_video_url,
-                images=[
-                    _read_upload(item, settings.community_image_max_bytes)
-                    for item in uploaded_images
-                ],
+                images=[_stream_upload(item) for item in uploaded_images],
                 video=(
-                    _read_upload(uploaded_video, settings.community_video_max_bytes)
+                    _stream_upload(uploaded_video)
                     if uploaded_video is not None
                     else None
                 ),
@@ -330,6 +379,9 @@ def publish_reply(
     post = get_published_post(db, _identifier(post_id))
     if post is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    retry_after = _retry_after(_reply_limiter, user)
+    if retry_after:
+        _raise_rate_limited(retry_after, "Too many replies. Try again later.")
     try:
         add_reply(db, user, post, body)
     except CommunityError as exc:
@@ -367,6 +419,9 @@ def submit_post_report(
     post = get_published_post(db, _identifier(post_id))
     if post is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    retry_after = _retry_after(_report_limiter, user)
+    if retry_after:
+        _raise_rate_limited(retry_after, "Too many reports. Try again later.")
     try:
         report_post(db, user, post, reason=reason, details=details)
     except CommunityError as exc:
@@ -390,6 +445,9 @@ def submit_reply_report(
     reply = db.get(CommunityReply, _identifier(reply_id))
     if reply is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    retry_after = _retry_after(_report_limiter, user)
+    if retry_after:
+        _raise_rate_limited(retry_after, "Too many reports. Try again later.")
     try:
         report_reply(db, user, reply, reason=reason, details=details)
     except CommunityError as exc:

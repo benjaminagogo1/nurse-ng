@@ -219,6 +219,15 @@ def save_sharing_settings(
             raise ProfileError("Choose private or public for every field.")
         cleaned[name] = visibility
 
+    if (
+        profile.status == ProfileStatus.ACTIVE
+        and profile.discoverable
+        and cleaned.get("display_name") == Visibility.PRIVATE.value
+    ):
+        raise ProfileError(
+            "Make the profile private before making its display name private."
+        )
+
     rows = db.scalars(
         select(FieldVisibility).where(FieldVisibility.profile_id == profile.id)
     ).all()

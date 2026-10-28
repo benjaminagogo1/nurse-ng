@@ -51,6 +51,9 @@ class VerificationCase(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         DateTime(timezone=True), nullable=True
     )
     decision_note: Mapped[str] = mapped_column(Text, default="")
+    reviewed_display_name: Mapped[str | None] = mapped_column(
+        String(120), nullable=True
+    )
 
     profile: Mapped["NurseProfile"] = relationship()
     evidence: Mapped[list["EvidenceDocument"]] = relationship(

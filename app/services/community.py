@@ -4,19 +4,23 @@ import re
 import unicodedata
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
+from logging import getLogger
+from typing import BinaryIO
 from urllib.parse import urlsplit
 from uuid import UUID
 
-from sqlalchemy import and_, or_, select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.community_storage import (
     CommunityStorageError,
+    cleanup_orphan_community_media,
     delete_community_media,
     save_community_media,
 )
+from app.core.config import settings
 from app.models.community import (
     CommunityMedia,
     CommunityPost,
@@ -43,6 +47,22 @@ REPORT_DETAILS_MAX = 1000
 MODERATION_NOTE_MAX = 1000
 EXTERNAL_URL_MAX = 2048
 MAX_IMAGES_PER_POST = 4
+logger = getLogger(__name__)
+
+_RESERVED_COMMUNITY_NAME_KEYS = frozenset(
+    {
+        "admin",
+        "administrator",
+        "help",
+        "moderator",
+        "nmcn",
+        "nurseng",
+        "nursingandmidwiferycouncilofnigeria",
+        "official",
+        "staff",
+        "support",
+    }
+)
 
 REPORT_REASON_LABELS: dict[str, str] = {
     ReportReason.SPAM.value: "Spam",
@@ -59,7 +79,7 @@ class CommunityError(ValueError):
 
 @dataclass(frozen=True)
 class CommunityUpload:
-    data: bytes
+    file: BinaryIO
     filename: str
 
 
@@ -80,18 +100,51 @@ def _clean_text(
     return cleaned
 
 
-def set_community_name(db: Session, user: User, name: str) -> User:
-    """Set the name shown publicly beside posts and replies."""
-    cleaned = _clean_text(
-        name,
-        field="Community name",
-        maximum=COMMUNITY_NAME_MAX,
-        required=True,
-    )
+def _clean_community_name(name: str) -> tuple[str, str]:
+    normalised = unicodedata.normalize("NFKC", name or "")
+    cleaned = " ".join(normalised.split())
+    if not cleaned:
+        raise CommunityError("Community name is required.")
+    if len(cleaned) > COMMUNITY_NAME_MAX:
+        raise CommunityError(
+            f"Community name must be at most {COMMUNITY_NAME_MAX} characters."
+        )
     if len(cleaned) < 2:
         raise CommunityError("Community name must be at least 2 characters.")
-    user.community_name = cleaned
-    db.commit()
+    if any(unicodedata.category(character).startswith("C") for character in cleaned):
+        raise CommunityError("Community name contains unsupported characters.")
+    key = cleaned.casefold()
+    key = " ".join(key.split())
+    reserved_key = "".join(character for character in key if character.isalnum())
+    if reserved_key in _RESERVED_COMMUNITY_NAME_KEYS:
+        raise CommunityError("Choose a name that does not imply official or staff status.")
+    return cleaned, key
+
+
+def set_community_name(db: Session, user: User, name: str) -> User:
+    """Set a unique public name before the member's first contribution."""
+    cleaned, key = _clean_community_name(name)
+    if user.community_name_locked:
+        if user.community_name == cleaned:
+            return user
+        raise CommunityError(
+            "Your community name is locked because you have already contributed."
+        )
+    try:
+        result = db.execute(
+            update(User)
+            .where(User.id == user.id, User.community_name_locked.is_(False))
+            .values(community_name=cleaned, community_name_key=key)
+        )
+        if result.rowcount != 1:
+            db.rollback()
+            raise CommunityError(
+                "Your community name is locked because you have already contributed."
+            )
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise CommunityError("That community name is already in use.") from None
     db.refresh(user)
     return user
 
@@ -101,6 +154,59 @@ def _require_community_name(user: User) -> None:
         raise CommunityError(
             "Choose a public community name before posting or replying."
         )
+
+
+def _lock_community_name(db: Session, user: User) -> None:
+    _require_community_name(user)
+    if user.community_name_locked:
+        return
+    result = db.execute(
+        update(User)
+        .where(
+            User.id == user.id,
+            User.community_name_locked.is_(False),
+            User.community_name_key.is_not(None),
+        )
+        .values(community_name_locked=True)
+    )
+    if result.rowcount != 1:
+        raise CommunityError("Choose a public community name before contributing.")
+    user.community_name_locked = True
+
+
+def _as_utc(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)
+
+
+def _reserve_upload_quota(db: Session, user: User, size_bytes: int) -> None:
+    if size_bytes <= 0:
+        return
+    account = db.scalar(select(User).where(User.id == user.id).with_for_update())
+    if account is None:
+        raise CommunityError("The account could not be found.")
+    now = datetime.now(UTC)
+    window_started = account.community_upload_window_started_at
+    if (
+        window_started is None
+        or _as_utc(window_started)
+        + timedelta(seconds=settings.community_upload_window_seconds)
+        <= now
+    ):
+        account.community_upload_window_started_at = now
+        account.community_upload_window_bytes = 0
+
+    if (
+        account.community_upload_window_bytes + size_bytes
+        > settings.community_upload_window_bytes
+    ):
+        raise CommunityError("Your 24-hour community upload allowance is exhausted.")
+    if account.community_storage_bytes + size_bytes > settings.community_storage_quota_bytes:
+        raise CommunityError("Your community media storage allowance is exhausted.")
+
+    account.community_upload_window_bytes += size_bytes
+    account.community_storage_bytes += size_bytes
 
 
 def _topic_slug(name: str) -> str:
@@ -214,6 +320,7 @@ def create_post(
     )
     db.add(post)
     stored_names: list[str] = []
+    stored_size = 0
     uploads: list[tuple[str, CommunityUpload]] = [
         (MediaKind.IMAGE.value, upload) for upload in images
     ]
@@ -221,11 +328,13 @@ def create_post(
         uploads.append((MediaKind.VIDEO.value, video))
 
     try:
+        _lock_community_name(db, user)
         for position, (kind, upload) in enumerate(uploads):
             storage_name, content_type, size_bytes, duration = save_community_media(
-                upload.data, kind
+                upload.file, kind
             )
             stored_names.append(storage_name)
+            stored_size += size_bytes
             post.media.append(
                 CommunityMedia(
                     kind=kind,
@@ -237,12 +346,13 @@ def create_post(
                     position=position,
                 )
             )
+        _reserve_upload_quota(db, user, stored_size)
         db.commit()
-    except (CommunityStorageError, SQLAlchemyError) as exc:
+    except (CommunityStorageError, CommunityError, SQLAlchemyError) as exc:
         db.rollback()
         for storage_name in stored_names:
             delete_community_media(storage_name)
-        if isinstance(exc, CommunityStorageError):
+        if isinstance(exc, (CommunityStorageError, CommunityError)):
             raise CommunityError(str(exc)) from None
         raise CommunityError("The post could not be published.") from None
 
@@ -313,6 +423,7 @@ def add_reply(
         body=cleaned,
         status=ContentStatus.PUBLISHED,
     )
+    _lock_community_name(db, user)
     db.add(reply)
     db.commit()
     db.refresh(reply)
@@ -341,26 +452,25 @@ def report_post(
     reason: str,
     details: str,
 ) -> ContentReport:
+    if post.status != ContentStatus.PUBLISHED:
+        raise CommunityError("This post is no longer public.")
     if post.author_id == user.id:
         raise CommunityError("You cannot report your own post.")
     clean_reason, clean_details = _clean_report(reason, details)
-    existing = db.scalar(
-        select(ContentReport).where(
-            ContentReport.reporter_id == user.id,
-            ContentReport.post_id == post.id,
-            ContentReport.status == ReportStatus.OPEN,
-        )
-    )
-    if existing is not None:
-        raise CommunityError("You already reported this post.")
     report = ContentReport(
         reporter_id=user.id,
         post_id=post.id,
         reason=clean_reason,
         details=clean_details,
+        status=ReportStatus.OPEN,
+        open_key=f"post:{user.id.hex}:{post.id.hex}",
     )
     db.add(report)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise CommunityError("You already reported this post.") from None
     db.refresh(report)
     return report
 
@@ -375,26 +485,25 @@ def report_reply(
 ) -> ContentReport:
     if reply.status != ContentStatus.PUBLISHED:
         raise CommunityError("This reply is no longer public.")
+    if reply.post.status != ContentStatus.PUBLISHED:
+        raise CommunityError("This conversation is no longer public.")
     if reply.author_id == user.id:
         raise CommunityError("You cannot report your own reply.")
     clean_reason, clean_details = _clean_report(reason, details)
-    existing = db.scalar(
-        select(ContentReport).where(
-            ContentReport.reporter_id == user.id,
-            ContentReport.reply_id == reply.id,
-            ContentReport.status == ReportStatus.OPEN,
-        )
-    )
-    if existing is not None:
-        raise CommunityError("You already reported this reply.")
     report = ContentReport(
         reporter_id=user.id,
         reply_id=reply.id,
         reason=clean_reason,
         details=clean_details,
+        status=ReportStatus.OPEN,
+        open_key=f"reply:{user.id.hex}:{reply.id.hex}",
     )
     db.add(report)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise CommunityError("You already reported this reply.") from None
     db.refresh(report)
     return report
 
@@ -424,8 +533,6 @@ def moderate_report(
     """Dismiss a report or remove its target, retaining an audit row."""
     if not staff.is_staff:
         raise CommunityError("Staff access is required.")
-    if report.status != ReportStatus.OPEN:
-        raise CommunityError("This report has already been reviewed.")
     if action not in {"remove", "dismiss"}:
         raise CommunityError("Choose remove or dismiss.")
     clean_note = _clean_text(
@@ -435,19 +542,50 @@ def moderate_report(
         required=True,
     )
     now = datetime.now(UTC)
-    report.reviewed_by_user_id = staff.id
-    report.reviewed_at = now
-    report.review_note = clean_note
+    target = report.post or report.reply
+    if action == "remove" and target is None:
+        raise CommunityError("The reported content no longer exists.")
 
-    if action == "remove":
-        target = report.post or report.reply
-        if target is None:
-            raise CommunityError("The reported content no longer exists.")
-        target.status = ContentStatus.REMOVED
-        target.removed_by_user_id = staff.id
-        target.removed_at = now
-        target.removal_reason = clean_note
-        report.status = ReportStatus.RESOLVED
+    report_status = (
+        ReportStatus.RESOLVED if action == "remove" else ReportStatus.DISMISSED
+    )
+    claimed = db.execute(
+        update(ContentReport)
+        .where(
+            ContentReport.id == report.id,
+            ContentReport.status == ReportStatus.OPEN,
+        )
+        .values(
+            status=report_status,
+            reviewed_by_user_id=staff.id,
+            reviewed_at=now,
+            review_note=clean_note,
+            open_key=None,
+        )
+    )
+    if claimed.rowcount != 1:
+        db.rollback()
+        raise CommunityError("This report has already been reviewed.")
+
+    removed_post: CommunityPost | None = None
+    if action == "remove" and target is not None:
+        target_model = CommunityPost if report.post_id is not None else CommunityReply
+        removed = db.execute(
+            update(target_model)
+            .where(
+                target_model.id == target.id,
+                target_model.status == ContentStatus.PUBLISHED,
+            )
+            .values(
+                status=ContentStatus.REMOVED,
+                removed_by_user_id=staff.id,
+                removed_at=now,
+                removal_reason=clean_note,
+            )
+        )
+        if removed.rowcount != 1:
+            db.rollback()
+            raise CommunityError("The reported content is no longer public.")
         target_filter = (
             ContentReport.post_id == report.post_id
             if report.post_id is not None
@@ -465,13 +603,39 @@ def moderate_report(
                 reviewed_by_user_id=staff.id,
                 reviewed_at=now,
                 review_note="Closed because the content was removed.",
+                open_key=None,
             )
         )
-    else:
-        report.status = ReportStatus.DISMISSED
+        if isinstance(target, CommunityPost):
+            removed_post = target
     db.commit()
     db.refresh(report)
+    if removed_post is not None:
+        _remove_post_media(db, removed_post)
     return report
+
+
+def _remove_post_media(db: Session, post: CommunityPost) -> None:
+    media = list(post.media)
+    if not media:
+        return
+    storage_names = [item.storage_name for item in media]
+    released_bytes = sum(item.size_bytes for item in media)
+    account = db.scalar(select(User).where(User.id == post.author_id).with_for_update())
+    if account is not None:
+        account.community_storage_bytes = max(
+            0, account.community_storage_bytes - released_bytes
+        )
+    for item in media:
+        db.delete(item)
+    try:
+        db.commit()
+    except SQLAlchemyError:
+        db.rollback()
+        logger.exception("Could not release media records for removed post %s", post.id)
+        return
+    for storage_name in storage_names:
+        delete_community_media(storage_name)
 
 
 def get_public_media(db: Session, media_id: UUID) -> CommunityMedia | None:
@@ -542,7 +706,8 @@ def request_connection(
         raise CommunityError("You cannot connect with yourself.")
     if profile.status != ProfileStatus.ACTIVE or not profile.discoverable:
         raise CommunityError("This profile is not public.")
-    existing = connection_between(db, user.id, profile.user_id)
+    pair_key = connection_pair_key(user.id, profile.user_id)
+    existing = db.scalar(select(Connection).where(Connection.pair_key == pair_key))
     if existing is not None:
         if existing.status == ConnectionStatus.DECLINED:
             existing.requester_user_id = user.id
@@ -556,9 +721,17 @@ def request_connection(
         requester_user_id=user.id,
         recipient_user_id=profile.user_id,
         status=ConnectionStatus.PENDING,
+        pair_key=pair_key,
     )
     db.add(item)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        existing = db.scalar(select(Connection).where(Connection.pair_key == pair_key))
+        if existing is None:
+            raise CommunityError("The connection request could not be saved.") from None
+        return existing
     db.refresh(item)
     return item
 
@@ -570,18 +743,14 @@ def connection_between(
 ) -> Connection | None:
     return db.scalar(
         select(Connection).where(
-            or_(
-                and_(
-                    Connection.requester_user_id == first_user_id,
-                    Connection.recipient_user_id == second_user_id,
-                ),
-                and_(
-                    Connection.requester_user_id == second_user_id,
-                    Connection.recipient_user_id == first_user_id,
-                ),
-            )
+            Connection.pair_key == connection_pair_key(first_user_id, second_user_id)
         )
     )
+
+
+def connection_pair_key(first_user_id: UUID, second_user_id: UUID) -> str:
+    first, second = sorted((first_user_id.hex, second_user_id.hex))
+    return f"{first}:{second}"
 
 
 def respond_to_connection(
@@ -593,12 +762,21 @@ def respond_to_connection(
 ) -> Connection:
     if connection.recipient_user_id != user.id:
         raise CommunityError("Only the recipient can answer this request.")
-    if connection.status != ConnectionStatus.PENDING:
-        raise CommunityError("This connection request has already been answered.")
-    connection.status = (
+    new_status = (
         ConnectionStatus.ACCEPTED if accept else ConnectionStatus.DECLINED
     )
-    connection.responded_at = datetime.now(UTC)
+    result = db.execute(
+        update(Connection)
+        .where(
+            Connection.id == connection.id,
+            Connection.recipient_user_id == user.id,
+            Connection.status == ConnectionStatus.PENDING,
+        )
+        .values(status=new_status, responded_at=datetime.now(UTC))
+    )
+    if result.rowcount != 1:
+        db.rollback()
+        raise CommunityError("This connection request has already been answered.")
     db.commit()
     db.refresh(connection)
     return connection
@@ -686,3 +864,50 @@ def public_profile_ids(
         )
     ).all()
     return {profile.user_id: profile.public_id for profile in profiles}
+
+
+def reconcile_community_media(db: Session, *, dry_run: bool = False) -> dict[str, int]:
+    """Remove orphan files and reconcile retained-byte counters."""
+    stale_media = list(
+        db.scalars(
+            select(CommunityMedia)
+            .join(CommunityPost, CommunityMedia.post_id == CommunityPost.id)
+            .where(CommunityPost.status != ContentStatus.PUBLISHED)
+        ).all()
+    )
+    stale_names = {item.storage_name for item in stale_media}
+    referenced_names = set(db.scalars(select(CommunityMedia.storage_name)).all())
+    referenced_names -= stale_names
+    removed = cleanup_orphan_community_media(
+        referenced_names,
+        dry_run=dry_run,
+    )
+    if not dry_run:
+        for item in stale_media:
+            db.delete(item)
+    totals = dict(
+        db.execute(
+            select(
+                CommunityPost.author_id,
+                func.coalesce(func.sum(CommunityMedia.size_bytes), 0),
+            )
+            .join(CommunityMedia, CommunityMedia.post_id == CommunityPost.id)
+            .group_by(CommunityPost.author_id)
+        ).all()
+    )
+    corrected = 0
+    users = db.scalars(select(User)).all()
+    for user in users:
+        expected = int(totals.get(user.id, 0))
+        if user.community_storage_bytes != expected:
+            corrected += 1
+            if not dry_run:
+                user.community_storage_bytes = expected
+    if not dry_run:
+        db.commit()
+    return {
+        "referenced_files": len(referenced_names),
+        "removed_files": len(removed),
+        "removed_media_records": len(stale_media),
+        "corrected_accounts": corrected,
+    }

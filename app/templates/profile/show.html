@@ -34,9 +34,16 @@
     {% if document_reviewed_on %}
       <p>
         <span class="verification-badge">Document reviewed</span>
-        Reviewed on {{ document_reviewed_on }}.
+        {{ document_reviewed_name or profile.display_name }} was reviewed on
+        {{ document_reviewed_on }}.
         <a href="/profile/verification">View details</a>
       </p>
+      {% if document_review_name_changed %}
+        <p class="form-notice">
+          Your current name differs from the reviewed name. The public receipt
+          distinguishes the current self-declared name from the reviewed name.
+        </p>
+      {% endif %}
     {% else %}
       <p>
         <span class="verification-badge muted">Not reviewed</span>

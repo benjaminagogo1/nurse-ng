@@ -4,6 +4,7 @@ Usage::
 
     python -m app.cli set-staff +2348012345678
     python -m app.cli unset-staff +2348012345678
+    python -m app.cli cleanup-community-media --dry-run
 
 Staff accounts can open the document-review queue. There is deliberately no
 web route for granting the flag: it is an operator action, recorded in the
@@ -19,6 +20,7 @@ from sqlalchemy import select
 from app.core.validators import normalize_phone
 from app.db.session import SessionLocal
 from app.models.user import User
+from app.services.community import reconcile_community_media
 
 
 def _set_staff(phone: str, *, enabled: bool) -> int:
@@ -45,10 +47,26 @@ def main(argv: Sequence[str] | None = None) -> int:
         command = subparsers.add_parser(name)
         command.add_argument("phone", help="Phone number in international format.")
 
+    cleanup = subparsers.add_parser("cleanup-community-media")
+    cleanup.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Report orphan files and quota drift without changing them.",
+    )
+
     args = parser.parse_args(argv)
     if args.command == "set-staff":
         return _set_staff(args.phone, enabled=True)
-    return _set_staff(args.phone, enabled=False)
+    if args.command == "unset-staff":
+        return _set_staff(args.phone, enabled=False)
+    with SessionLocal() as db:
+        result = reconcile_community_media(db, dry_run=args.dry_run)
+    mode = "Would remove" if args.dry_run else "Removed"
+    print(
+        f"{mode} {result['removed_files']} file(s); "
+        f"{result['corrected_accounts']} account counter(s) needed correction."
+    )
+    return 0
 
 
 if __name__ == "__main__":
