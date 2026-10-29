@@ -7,35 +7,51 @@
     <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}">
   </head>
   <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
     <header class="site-header">
-      <a class="brand" href="/">Nurse.ng</a>
-      <nav class="site-nav">
-        <a href="/feed">Feed</a>
-        <a href="/topics">Topics</a>
-        <a href="/nurses">Nurses</a>
-        {% if user %}
-          <a href="/profile">Profile</a>
-          <a href="/network">Network</a>
-          {% if user.is_staff %}<a href="/review">Review</a>{% endif %}
-          {% if user.is_staff %}<a href="/moderation">Moderate</a>{% endif %}
-          <form method="post" action="/auth/logout" class="inline-form">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            <button type="submit" class="link-button">Sign out</button>
-          </form>
-        {% else %}
-          <a href="/auth/login">Sign in</a>
-          <a href="/auth/register">Create account</a>
-        {% endif %}
+      <a class="brand" href="/">
+        <svg aria-hidden="true" focusable="false" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <span>Nurse.ng</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <ul class="site-nav-list">
+          <li class="has-divider" aria-hidden="true"><span class="divider"></span></li>
+          <li><a href="/feed" {% if page == 'feed' %}aria-current="page"{% endif %}>Feed</a></li>
+          <li><a href="/topics" {% if page == 'topics' %}aria-current="page"{% endif %}>Topics</a></li>
+          <li><a href="/nurses" {% if page == 'nurses' %}aria-current="page"{% endif %}>Nurses</a></li>
+          {% if user %}
+            <li class="has-divider" aria-hidden="true"><span class="divider"></span></li>
+            <li><a href="/profile" {% if page == 'profile' %}aria-current="page"{% endif %}>Profile</a></li>
+            <li><a href="/network" {% if page == 'network' %}aria-current="page"{% endif %}>Network</a></li>
+            {% if user.is_staff %}
+              <li><a href="/review" {% if page == 'review' %}aria-current="page"{% endif %}>Review</a></li>
+              <li><a href="/moderation" {% if page == 'moderation' %}aria-current="page"{% endif %}>Moderate</a></li>
+            {% endif %}
+            <li class="log-out" role="button">
+              <form method="post" action="/auth/logout" class="inline-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <span>Sign out</span>
+                <button type="submit" class="link-button">Sign out</button>
+              </form>
+            </li>
+          {% else %}
+            <li class="auth-links">
+              <a href="/auth/login">Sign in</a>
+              <span class="auth-sep">or</span>
+              <a href="/auth/register">Create account</a>
+            </li>
+          {% endif %}
+        </ul>
       </nav>
     </header>
 
-    <main class="site-main">
+    <main id="main" class="site-main">
       {% block content %}{% endblock %}
     </main>
 
     <footer class="site-footer">
       <p>
-        Nurse.ng is not the Nursing and Midwifery Council of Nigeria, does not
+        Nurse.ng is not the Nursing and Midwifery Council of Nigeria; it does not
         issue licences, and does not replace the official register.
       </p>
     </footer>

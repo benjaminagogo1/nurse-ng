@@ -35,9 +35,7 @@
   </dl>
 
   <h2>Evidence</h2>
-  <p class="field-hint">
-    Private files. Opening one writes an access record against your account.
-  </p>
+  <p class="field-hint">Private files. Opening one writes an access record against your account.</p>
   <ul class="evidence-list">
     {% for document in case.evidence %}
       <li>
@@ -46,8 +44,7 @@
           {{ document.original_filename or 'Submitted file' }} ·
           {{ document.content_type }} · {{ (document.size_bytes / 1024)|round(1) }} KB
         </span>
-        <a href="/review/{{ case.id }}/evidence/{{ document.id }}" target="_blank"
-           rel="noopener">Download</a>
+        <a href="/review/{{ case.id }}/evidence/{{ document.id }}" target="_blank" rel="noopener">Download</a>
       </li>
     {% endfor %}
   </ul>
@@ -67,9 +64,7 @@
         <button type="submit" name="decision" value="approve" class="button-primary">
           Approve — document reviewed
         </button>
-        <button type="submit" name="decision" value="reject" class="button-secondary">
-          Reject
-        </button>
+        <button type="submit" name="decision" value="reject" class="button-secondary">Reject</button>
       </div>
     </form>
   {% else %}

@@ -49,31 +49,13 @@
                   <option value="">Choose a reason</option>
                   {% for value, label in report_reasons %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
                 </select>
-                <textarea name="details" rows="2" maxlength="1000" aria-label="Report details"></textarea>
-                <button type="submit" class="button-secondary">Report</button>
+                <button type="submit" class="button-secondary">Submit report</button>
               </form>
             </details>
           {% endif %}
         </article>
-      {% else %}
-        <p class="field-hint">No replies yet.</p>
       {% endfor %}
     </div>
-
-    {% if user %}
-      {% if reply_error %}<p class="form-error" role="alert">{{ reply_error }}</p>{% endif %}
-      {% if not user.community_name %}
-        <p class="form-notice">Choose a <a href="/community/settings">public community name</a> before replying.</p>
-      {% endif %}
-      <form method="post" action="/posts/{{ post.id }}/replies" class="stacked-form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <label for="reply-body">Add a public reply</label>
-        <textarea id="reply-body" name="body" rows="4" maxlength="2000" required>{{ reply_body or '' }}</textarea>
-        <button type="submit">Reply</button>
-      </form>
-    {% else %}
-      <p class="form-notice"><a href="/auth/login">Sign in</a> to reply.</p>
-    {% endif %}
   </section>
 </section>
 {% endblock %}

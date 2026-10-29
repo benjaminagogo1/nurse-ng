@@ -10,6 +10,10 @@
     You are signed in as <strong>{{ user.phone }}</strong>. Your profile is not
     visible to anyone yet; profiles are private until you choose otherwise.
   </p>
-  <p class="form-alt"><a href="/">Back to home</a></p>
+  <div class="profile-actions">
+    <a class="button-secondary" href="/profile">View profile</a>
+    <a class="button-secondary" href="/network">Network connections</a>
+  </div>
+  <p class="form-alt"><a href="/">Back to home</a>.</p>
 </section>
 {% endblock %}

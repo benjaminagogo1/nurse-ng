@@ -1,26 +1,41 @@
 {% extends "base.html" %}
 
-{% block title %}{{ topic.name }} — Nurse.ng{% endblock %}
+{% block title %}{{ title }} — Nurse.ng{% endblock %}
 
 {% block content %}
 <section class="community-page">
-  <p class="eyebrow">Topic</p>
+  <p class="eyebrow">Account</p>
   <div class="page-heading-row">
     <div>
       <h1>{{ topic.name }}</h1>
-      {% if topic.description %}<p class="lede">{{ topic.description }}</p>{% endif %}
+      <p class="lede">Conversation about {{ topic.name }}.</p>
     </div>
-    {% if user %}<a class="button-primary" href="/posts/new">Create post</a>{% endif %}
   </div>
 
-  <p class="form-alt"><a href="/topics">All topics</a> · <a href="/feed">Public feed</a></p>
+  {% if posts %}
+    {% set post = posts[0] %}
+  {% endif %}
+  {% if post %}
+    {% include "community/_post_card.html" %}
+  {% endif %}
 
-  <div class="community-list">
-    {% for post in posts %}
-      {% include "community/_post_card.html" %}
-    {% else %}
-      <div class="empty-state"><p>No discussions in this topic yet.</p></div>
-    {% endfor %}
-  </div>
+  {% if user and user and posts and user.id != posts[0].author_id %}
+    <details class="report-panel">
+      <summary>Report this post</summary>
+      <form method="post" action="/posts/{{ posts[0].id }}/report" class="compact-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label>Reason
+          <select name="reason" required>
+            <option value="">Choose</option>
+            {% for value, label in report_reasons %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+          </select>
+        </label>
+        <label>Details <span class="optional">(required for Other)</span>
+          <textarea name="details" rows="3" maxlength="1000"></textarea>
+        </label>
+        <button type="submit" class="button-secondary">Submit report</button>
+      </form>
+    </details>
+  {% endif %}
 </section>
 {% endblock %}

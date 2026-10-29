@@ -1,30 +1,43 @@
 {% extends "base.html" %}
 
-{% block title %}Topics — Nurse.ng{% endblock %}
+{% block title %}{{ title }} — Nurse.ng{% endblock %}
 
 {% block content %}
 <section class="community-page">
-  <p class="eyebrow">Community</p>
+  <p class="eyebrow">Topics</p>
   <div class="page-heading-row">
     <div>
       <h1>Discussion topics</h1>
-      <p class="lede">Posts belong to a topic and also appear in the public feed.</p>
+      <p class="lede">Start or follow conversations on topics that matter to nurses.</p>
     </div>
-    {% if user %}<a class="button-primary" href="/posts/new">Create post</a>{% endif %}
+    {% if user %}<a class="button-primary" href="/topics/new">New topic</a>{% endif %}
   </div>
 
-  <div class="topic-list">
+  <nav class="section-tabs" aria-label="Topic views">
+    <a href="/feed" {% if page == 'feed' %}aria-current="page"{% endif %}>Feed</a>
+    <a href="/topics" {% if page == 'topics' %}aria-current="page"{% endif %}>All topics</a>
+  </nav>
+
+  <div class="community-list">
     {% for topic in topics %}
       <article class="topic-card">
-        <h2><a href="/topics/{{ topic.slug }}">{{ topic.name }}</a></h2>
+        <h2>
+          <a href="/topics/{{ topic.slug }}">{{ topic.name }}</a>
+        </h2>
         {% if topic.description %}<p>{{ topic.description }}</p>{% endif %}
+        {% if topic.post_count %}
+          <p class="topic-label">{{ topic.post_count }} posts</p>
+        {% else %}
+          <p class="topic-label">No posts yet</p>
+        {% endif %}
       </article>
-    {% else %}
+    {% endfor %}
+    {% if not topics %}
       <div class="empty-state">
         <h2>No topics yet</h2>
-        <p>Staff must create the first topic before members can publish.</p>
+        <p>Create a new conversation with the button above.</p>
       </div>
-    {% endfor %}
+    {% endif %}
   </div>
 </section>
 {% endblock %}

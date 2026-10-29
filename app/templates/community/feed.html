@@ -28,14 +28,16 @@
   {% endif %}
 
   <div class="community-list">
-    {% for post in posts %}
-      {% include "community/_post_card.html" %}
+    {% if posts %}
+      {% for post in posts %}
+        {% include "community/_post_card.html" %}
+      {% endfor %}
     {% else %}
       <div class="empty-state">
         <h2>No posts yet</h2>
         <p>{% if following_only %}Follow public nurse profiles to build this feed.{% else %}The first discussion has not been published yet.{% endif %}</p>
       </div>
-    {% endfor %}
+    {% endif %}
   </div>
 </section>
 {% endblock %}

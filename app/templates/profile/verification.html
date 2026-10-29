@@ -8,8 +8,8 @@
   <h1>Review your licence and identity</h1>
   <p class="lede">
     A Nurse.ng reviewer inspects a copy of your NMCN (Nursing and Midwifery
-    Council of Nigeria) licence or certificate and a government-issued photo
-    ID, and matches the name on them to this profile.
+    Council of Nigeria) licence or certificate and a government-issued photo ID,
+    and matches the name on them to this profile.
   </p>
   <p class="field-hint">
     Approval adds the label “Document reviewed” to your shared profile. It is
@@ -30,8 +30,8 @@
       </p>
       {% if document_review_name_changed %}
         <p class="form-notice">
-          Your current profile name differs. The review remains attached only
-          to the name shown above; the current name is self-declared.
+          Your current profile name differs. The review remains attached only to
+          the name shown above; the current name is self-declared.
         </p>
       {% endif %}
     {% else %}
@@ -45,34 +45,24 @@
       this one is decided.
     </p>
   {% else %}
-    <form method="post" action="/profile/verification" enctype="multipart/form-data"
-          class="stacked-form">
+    <form method="post" action="/profile/verification" enctype="multipart/form-data" class="stacked-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
       <label for="registration_number">NMCN registration number</label>
-      <input id="registration_number" name="registration_number" type="text"
-             maxlength="40" value="{{ registration_number }}" required>
-      <p class="field-hint">
-        Shown to the reviewer only. It is never published on your profile.
-      </p>
+      <input id="registration_number" name="registration_number" type="text" maxlength="40" value="{{ registration_number }}" required>
+      <p class="field-hint">Shown to the reviewer only. It is never published on your profile.</p>
 
       <label for="licence">Licence or certificate</label>
-      <input id="licence" name="licence" type="file" required
-             accept="image/jpeg,image/png,application/pdf">
+      <input id="licence" name="licence" type="file" required accept="image/jpeg,image/png,application/pdf">
       <p class="field-hint">JPEG, PNG, or PDF, up to {{ max_megabytes }} MB.</p>
 
       <label for="government_id">Government-issued photo ID</label>
-      <input id="government_id" name="government_id" type="file" required
-             accept="image/jpeg,image/png,application/pdf">
-      <p class="field-hint">
-        Passport, national identity card, or driver's licence. The name must
-        match the name on your licence or certificate.
-      </p>
+      <input id="government_id" name="government_id" type="file" required accept="image/jpeg,image/png,application/pdf">
+      <p class="field-hint">Passport, national identity card, or driver's licence. The name must match the name on your licence or certificate.</p>
 
       <label class="inline-choice consent-choice">
         <input type="checkbox" name="consent" value="on" required>
-        I consent to Nurse.ng storing these documents privately and to a
-        reviewer inspecting them for this review.
+        I consent to Nurse.ng storing these documents privately and to a reviewer inspecting them for this review.
       </label>
 
       <button type="submit">Submit for review</button>
@@ -92,11 +82,7 @@
         </tr>
       </thead>
       <tbody>
-        {% set status_labels = {
-          'pending': 'With a reviewer',
-          'approved': 'Approved',
-          'rejected': 'Not approved',
-        } %}
+        {% set status_labels = {'pending': 'With a reviewer', 'approved': 'Approved', 'rejected': 'Not approved'} %}
         {% for case in cases %}
           <tr>
             <td>{{ case.created_at.strftime('%d %B %Y') }}</td>
