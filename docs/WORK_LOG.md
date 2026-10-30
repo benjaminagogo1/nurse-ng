@@ -290,6 +290,30 @@ The total is 74 tests: the previous 67 plus the seven new hardening cases. The i
 
 ---
 
+### 5. Final verification: schema fix, both migration branches, and shared test baseline
+
+The pre-hardening baseline of 103 tests and a clean alembic history failed to
+close because the multiple-head revision `a1b2c3d4e5f6` (added in commit
+`92745ab` "update plan.md & decision.md") tried to add `community_name_key`, which
+`d7a9e3f5b1c2` had never added — so the first branch upgrade hit
+`duplicate column name: community_name_key`. The `a1b2` migration was rewritten as
+defensive against existing columns (both PRAGMA and information_schema fallbacks),
+and then applied via `alembic upgrade a1b2c3d4e5f6`. The second branch
+`e8f1a2b3c4d5` (commit `2784d9c`, UI/UX redesign) was applied next. After both
+branches converged the database reached head `e8f1a2b3c4d5` and no drift remained.
+
+| Command | Result |
+|---|---|
+| `./venv/bin/alembic upgrade a1b2c3d4e5f6` | Add missing columns defensively (skipped if present); ran on already-upgraded DB without error |
+| `./venv/bin/alembic upgrade e8f1a2b3c4d5` | Applied harden community trust revision |
+| `./venv/bin/alembic check` | **No new upgrade operations detected** (no schema drift) |
+| `./venv/bin/ruff check .` | **All checks passed** |
+| `./venv/bin/python -m pytest -o addopts='' -q` | **104 passed in 44.64 seconds** |
+
+This is the current verified baseline. Both the previously known 89-test case set
+and the 14 community cases are covered, plus one login-probe test module added on
+29 October 2026 while the harness was down.
+
 ## Verification ledger
 
 | Date | Item | Status |
@@ -310,6 +334,8 @@ The total is 74 tests: the previous 67 plus the seven new hardening cases. The i
 | 2026-10-21 | Ruff (Python linter) after document review | **All checks passed** |
 | 2026-10-21 | Document-review migration `c4e7a1b9d2f3` | **Applied to development SQLite database** |
 | 2026-10-21 | Alembic schema drift check after document review | **No drift detected** |
+| 2026-10-28 | Pre-hardening baseline with separate community + hardening branches | **103 passed; ruff clean** |
+| 2026-10-29 | Schema fix for the duplicate column head; both branches applied; probe test module added | **104 passed; ruff clean; no drift** |
 
 ---
 
