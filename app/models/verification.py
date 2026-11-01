@@ -29,7 +29,8 @@ class CaseStatus(StrEnum):
 class EvidenceKind(StrEnum):
     LICENCE = "licence"
     GOVERNMENT_ID = "government_id"
-
+    NURSING_CERTIFICATE = "nursing_certificate"
+    ADDITIONAL_CERT = "additional_cert"
 
 class VerificationCase(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "verification_cases"

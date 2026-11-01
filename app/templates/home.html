@@ -1,19 +1,122 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon %}
 
-{% block title %}{{ title }} — Nurse.ng{% endblock %}
+{% block title %}Nurse.ng — A trusted home for Nigerian nurses{% endblock %}
 
 {% block content %}
 <section class="hero">
-  <p class="eyebrow">Nigeria</p>
-  <h1>A trustworthy professional profile for nurses.</h1>
-  <p class="lede">
-    Join the public nursing community, take part in discussions, and publish a
-    professional profile when you choose. Document review is optional and always
-    labelled separately from self-declared information.
-  </p>
-  <div class="hero-actions">
-    <a class="button-primary" href="/feed">Explore the community</a>
-    {% if not user %}<a class="button-secondary" href="/auth/register">Create account</a>{% endif %}
+  <div class="hero-inner">
+    <div>
+      <h1>
+        <span>Better careers.</span>
+        <span>Stronger nurses.</span>
+        <span class="hero-accent">Healthier communities.</span>
+      </h1>
+      <p class="lede">
+        Nurse.ng is a professional home for nurses in Nigeria. Join the public
+        community, build a profile you control, and get your documents reviewed
+        when you choose.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-light" href="/feed">Explore the community</a>
+        {% if user %}
+        <a class="btn btn-outline-light" href="/profile">Go to my profile</a>
+        {% else %}
+        <a class="btn btn-outline-light" href="/auth/register">Create account</a>
+        {% endif %}
+      </div>
+      <p class="hero-note">
+        Document review is optional and always labelled separately from
+        self-declared information.
+      </p>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+      <div class="mock-card">
+        <p class="mock-caption">Example profile</p>
+        <div class="mock-head">
+          <span class="mock-avatar">AO</span>
+          <div>
+            <strong>Ada Okafor</strong>
+            <span class="mock-sub">Registered Nurse · Lagos, Nigeria</span>
+          </div>
+        </div>
+        <span class="verification-badge">Document reviewed</span>
+      </div>
+      <div class="mock-card mock-card--share">
+        <p class="mock-caption">You choose what a shared link shows</p>
+        <ul class="mock-share">
+          <li>Display name <span class="mock-pill is-public">Public</span></li>
+          <li>Headline <span class="mock-pill is-public">Public</span></li>
+          <li>Bio <span class="mock-pill is-private">Private</span></li>
+        </ul>
+      </div>
+    </div>
   </div>
 </section>
+
+<section class="section" aria-labelledby="why-title">
+  <div class="section-head">
+    <h2 id="why-title">Why Nurse.ng?</h2>
+    <p>Everything you need to build a professional presence, with you in control of what is shared.</p>
+  </div>
+  <div class="feature-grid">
+    <article class="feature-card">
+      <div class="feature-icon">{{ icon('shield', 24) }}</div>
+      <h3>Document review</h3>
+      <p>Submit your NMCN licence and a photo ID. A reviewer matches the names and adds a clearly labelled badge to your
+        profile.</p>
+    </article>
+    <article class="feature-card">
+      <div class="feature-icon">{{ icon('lock', 24) }}</div>
+      <h3>You control sharing</h3>
+      <p>Your profile starts private. Choose, field by field, what appears on your share link.</p>
+    </article>
+    <article class="feature-card">
+      <div class="feature-icon">{{ icon('feed', 24) }}</div>
+      <h3>Real conversations</h3>
+      <p>Read public discussions by topic, post and reply, and report anything that doesn't belong.</p>
+    </article>
+    <article class="feature-card">
+      <div class="feature-icon">{{ icon('users', 24) }}</div>
+      <h3>A network of colleagues</h3>
+      <p>Follow nurses, send connection requests and keep your professional circle in one place.</p>
+    </article>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="how-title">
+  <div class="section-head">
+    <h2 id="how-title">Get started in three steps</h2>
+  </div>
+  <ol class="steps">
+    <li>
+      <h3>Create your account</h3>
+      <p>Sign up with a phone number you control. Your account is active straight away.</p>
+    </li>
+    <li>
+      <h3>Build your profile</h3>
+      <p>Add your name, status, headline and bio. It stays private until you make it public.</p>
+    </li>
+    <li>
+      <h3>Share and connect</h3>
+      <p>Join discussions, follow nurses, and request document review whenever you are ready.</p>
+    </li>
+  </ol>
+</section>
+
+{% if not user %}
+<section class="section" style="padding-top:0">
+  <div class="cta-band">
+    <div>
+      <h2>Ready to join the community?</h2>
+      <p>Create your account in a minute.</p>
+    </div>
+    <div class="button-row">
+      <a class="btn btn-light" href="/auth/register">Create account</a>
+      <a class="btn btn-outline-light" href="/auth/login">Sign in</a>
+    </div>
+  </div>
+</section>
+{% endif %}
 {% endblock %}

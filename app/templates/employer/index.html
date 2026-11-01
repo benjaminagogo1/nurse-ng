@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% set page = 'employers' %}
+
+{% block title %}For Employers — Nurse.ng{% endblock %}
+
+{% block content %}
+<section class="community-page">
+      <div class="banner banner--employer">
+            <h1>Find the right talent. Build stronger teams.</h1>
+            <p>Access a pool of verified and skilled nurses ready to make an impact in your organization.</p>
+            <div class="hero-actions">
+                  <a class="btn btn-primary" href="/jobs">Post a Job</a>
+                  <a class="btn btn-outline-light" href="/nurses">Browse Candidates</a>
+            </div>
+      </div>
+
+      <h2 style="margin-top:36px">Why Recruit with Nurse.ng?</h2>
+      <ul class="rec-grid">
+            <li><span class="lp-icon">{{ icon('shield', 24) }}</span><strong>Verified Profiles</strong><span
+                        class="rec-sub">Access authentic credentials and records.</span></li>
+            <li><span class="lp-icon">{{ icon('users', 24) }}</span><strong>Qualified Talent</strong><span
+                        class="rec-sub">Pre-screened and skilled professionals.</span></li>
+            <li><span class="lp-icon">{{ icon('calendar', 24) }}</span><strong>Faster Hiring</strong><span
+                        class="rec-sub">Save time and reduce recruitment costs.</span></li>
+            <li><span class="lp-icon">{{ icon('heart', 24) }}</span><strong>Dedicated Support</strong><span
+                        class="rec-sub">We're with you at every step.</span></li>
+      </ul>
+
+      <div class="db-card-head" style="margin-top:36px">
+            <h2 style="margin:0">Featured Candidates</h2>
+            <a href="/nurses">View all</a>
+      </div>
+      {# SAMPLE candidate: replace with real public profiles later #}
+      <div class="cand">
+            <span class="group-avatar" aria-hidden="true">A</span>
+            <div class="cand-main">
+                  <strong>Ada Okafor</strong>
+                  <small>Registered Nurse · 5 years experience</small>
+                  <div class="chips"><span class="chip">Critical Care</span><span class="chip">Patient Care</span><span
+                              class="chip">Leadership</span></div>
+            </div>
+            <a class="btn btn-secondary btn-sm" href="/nurses">View Profile</a>
+      </div>
+</section>
+{% endblock %}

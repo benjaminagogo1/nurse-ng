@@ -1,37 +1,89 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% set page = 'profile' %}
 
 {% block title %}{{ profile.display_name }} — Nurse.ng{% endblock %}
 
 {% block content %}
-<section class="form-page">
-  <p class="eyebrow">
-    {% if is_active %}Public profile{% else %}Private profile · Draft{% endif %}
-  </p>
-  <h1>{{ profile.display_name }}</h1>
-
+<section class="pf">
   {% if error %}
-    <p class="form-error" role="alert">{{ error }}</p>
+  <p class="form-error" role="alert">{{ error }}</p>
   {% endif %}
 
-  {% if profile.headline %}
-    <p class="lede">{{ profile.headline }}</p>
-  {% endif %}
+  <div class="pf-head">
+    <span class="pf-avatar" aria-hidden="true">{{ (profile.display_name or 'N')[:1]|upper }}</span>
+    <div>
+      <h1 class="pf-name">
+        {{ profile.display_name }}
+        {% if document_reviewed_on %}
+        <span class="pf-verified" title="Document reviewed">{{ icon('shield', 22) }}<span class="sr-only">Document
+            reviewed</span></span>
+        {% endif %}
+      </h1>
+      <p class="pf-sub">{{ status_label }}{% if profile.location %} · {{ profile.location }}{% endif %}</p>
+      <div class="pf-actions">
+        <a class="btn btn-primary btn-sm" href="/profile/edit">Edit Profile</a>
+        {% if is_active and share_url %}
+        <button type="button" class="btn btn-secondary btn-sm" data-copy="{{ share_url }}">{{ icon('share', 16)
+          }}<span>Share Profile</span></button>
+        {% else %}
+        <a class="btn btn-secondary btn-sm" href="/profile/sharing">{{ icon('share', 16) }}<span>Share
+            Profile</span></a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 
-  <dl class="profile-meta">
-    <dt>Professional status</dt>
-    <dd>{{ status_label }} <span class="optional">(self-declared)</span></dd>
-    {% if profile.location %}
-      <dt>Location</dt>
-      <dd>{{ profile.location }}</dd>
+  <div class="pf-stats">
+    {% if profile.years_experience is not none %}
+    <div class="pf-stat"><b>{{ profile.years_experience }}{% if profile.years_experience >= 5 %}+{% endif
+        %}</b><span>Years Experience</span></div>
     {% endif %}
-  </dl>
+    {% if profile.qualification %}
+    <div class="pf-stat"><b>{{ profile.qualification }}</b><span>Qualification</span></div>
+    {% endif %}
+    <div class="pf-stat">
+      <b>{{ icon('shield', 26) }}</b>
+      <span>{% if document_reviewed_on %}Document reviewed{% else %}Not yet reviewed{% endif %}</span>
+    </div>
+  </div>
 
-  {% if profile.bio %}
+  <nav class="section-tabs" aria-label="Profile sections">
+    <a href="#overview" aria-current="page">Overview</a>
+    <a href="#credentials">Education &amp; Credentials</a>
+    <a href="#skills">Skills</a>
+    <a href="#visibility">More</a>
+  </nav>
+
+  <div class="pf-section" id="overview">
+    <h2>About Me</h2>
+    {% if profile.headline %}<p class="lede">{{ profile.headline }}</p>{% endif %}
+    {% if profile.bio %}
     <div class="profile-bio">{{ profile.bio }}</div>
-  {% endif %}
+    {% else %}
+    <p class="field-hint">You have not written a bio yet. <a href="/profile/edit">Add one</a>.</p>
+    {% endif %}
+  </div>
 
-  <div class="verification-summary">
-    {% if document_reviewed_on %}
+  <div class="pf-section" id="skills">
+    <h2>Skills</h2>
+    {% if profile.skills %}
+    <div class="chips">
+      {% for skill in profile.skills.split(',') if skill.strip() %}
+      <span class="chip">{{ skill.strip() }}</span>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="field-hint">No skills added yet. <a href="/profile/edit">Add skills</a>.</p>
+    {% endif %}
+  </div>
+
+  <div class="pf-section" id="credentials">
+    <h2>Education &amp; Credentials</h2>
+    {% if profile.qualification %}<p><strong>{{ profile.qualification }}</strong> <span
+        class="optional">(self-declared)</span></p>{% endif %}
+    <div class="verification-summary">
+      {% if document_reviewed_on %}
       <p>
         <span class="verification-badge">Document reviewed</span>
         {{ document_reviewed_name or profile.display_name }} was reviewed on
@@ -39,56 +91,69 @@
         <a href="/profile/verification">View details</a>
       </p>
       {% if document_review_name_changed %}
-        <p class="form-notice">
-          Your current name differs from the reviewed name. The public receipt
-          distinguishes the current self-declared name from the reviewed name.
-        </p>
+      <p class="form-notice">
+        Your current name differs from the reviewed name. The public receipt
+        distinguishes the current self-declared name from the reviewed name.
+      </p>
       {% endif %}
-    {% else %}
+      {% else %}
       <p>
         <span class="verification-badge muted">Not reviewed</span>
         <a href="/profile/verification">Submit documents for review</a>.
       </p>
-    {% endif %}
+      {% endif %}
+    </div>
   </div>
 
-  <div class="profile-actions">
+  <div class="pf-section profile-actions" id="visibility">
+    <h2>Visibility</h2>
     {% if is_active %}
-      <p class="field-hint">
-        This profile appears in nurse discovery. Visitors see only the fields
-        you explicitly marked public ({{ public_field_count }} public).
-      </p>
-      {% if share_url %}
-        <label for="share-url">Share link</label>
-        <input id="share-url" type="text" value="{{ share_url }}" readonly onclick="this.select()">
-      {% endif %}
-      {% if not display_name_shared %}
-        <p class="field-hint">
-          Your display name is private, so the shared page will not show your name.
-        </p>
-      {% endif %}
-      <div class="button-row">
-        <a class="button-secondary" href="/profile/sharing">Sharing controls</a>
-        <form method="post" action="/profile/deactivate">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button type="submit" class="button-secondary">Make private</button>
-        </form>
-      </div>
-    {% else %}
-      <p class="field-hint">
-        Making your profile public adds it to nurse discovery. Your display name
-        must be public first. Publication is separate from document review.
-      </p>
-      <div class="button-row">
-        <form method="post" action="/profile/activate">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button type="submit" class="button-primary">Make public</button>
-        </form>
-        <a class="button-secondary" href="/profile/sharing">Sharing controls</a>
-      </div>
+    <p class="field-hint">
+      This profile appears in nurse discovery. Visitors see only the fields
+      you explicitly marked public ({{ public_field_count }} public).
+    </p>
+    {% if share_url %}
+    <label for="share-url">Share link</label>
+    <input id="share-url" type="text" value="{{ share_url }}" readonly onclick="this.select()">
     {% endif %}
-
-    <p class="form-alt"><a href="/profile/edit">Edit profile</a></p>
+    {% if not display_name_shared %}
+    <p class="field-hint">Your display name is private, so the shared page will not show your name.</p>
+    {% endif %}
+    <div class="button-row">
+      <a class="button-secondary" href="/profile/sharing">Sharing controls</a>
+      <form method="post" action="/profile/deactivate">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="button-secondary">Make private</button>
+      </form>
+    </div>
+    {% else %}
+    <p class="field-hint">
+      Making your profile public adds it to nurse discovery. Your display name
+      must be public first. Publication is separate from document review.
+    </p>
+    <div class="button-row">
+      <form method="post" action="/profile/activate">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="button-primary">Make public</button>
+      </form>
+      <a class="button-secondary" href="/profile/sharing">Sharing controls</a>
+    </div>
+    {% endif %}
   </div>
 </section>
+
+<script>
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var text = btn.getAttribute('data-copy');
+      var label = btn.querySelector('span');
+      var done = function () { label.textContent = 'Link copied'; };
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(done, function () { window.prompt('Copy this link', text); });
+      } else {
+        window.prompt('Copy this link', text);
+      }
+    });
+  });
+</script>
 {% endblock %}

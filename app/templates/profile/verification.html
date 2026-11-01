@@ -1,107 +1,139 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% set page = 'verification' %}
 
-{% block title %}Document review — Nurse.ng{% endblock %}
+{% block title %}Verification — Nurse.ng{% endblock %}
 
 {% block content %}
-<section class="form-page">
-  <p class="eyebrow">Document review</p>
-  <h1>Review your licence and identity</h1>
-  <p class="lede">
-    A Nurse.ng reviewer inspects a copy of your NMCN (Nursing and Midwifery
-    Council of Nigeria) licence or certificate and a government-issued photo ID,
-    and matches the name on them to this profile.
-  </p>
-  <p class="field-hint">
-    Approval adds the label “Document reviewed” to your shared profile. It is
-    not source confirmation: Nurse.ng does not check NMCN's register and does
-    not prove the documents are authentic.
-  </p>
+{% macro slot(name, title, hint, icon_name, required) %}
+<div class="slot">
+  <span class="slot-icon">{{ icon(icon_name, 22) }}</span>
+  <div class="slot-text"><strong>{{ title }}</strong><small data-hint="{{ hint }}">{{ hint }}</small></div>
+  <label class="slot-btn"><span>Upload</span>
+    <input type="file" name="{{ name }}" accept="image/jpeg,image/png,application/pdf" {% if required %} required{%
+      endif %}>
+  </label>
+</div>
+{% endmacro %}
+
+{% set step = 4 if document_reviewed_on else (2 if pending else 1) %}
+
+<section class="vf">
+  <h1>Verification</h1>
+  <p class="lede">Build trust with verified credentials.</p>
+
+  <ol class="stepper" aria-label="Verification progress">
+    {% for label in ['Documents', 'Review', 'Verification', 'Complete'] %}
+    <li
+      class="{% if document_reviewed_on or loop.index < step %}is-done{% elif loop.index == step %}is-current{% endif %}"
+      {% if loop.index==step %} aria-current="step" {% endif %}>{{ label }}</li>
+    {% endfor %}
+  </ol>
 
   {% if error %}
-    <p class="form-error" role="alert">{{ error }}</p>
+  <p class="form-error" role="alert">{{ error }}</p>
   {% endif %}
 
   <div class="verification-summary">
     {% if document_reviewed_on %}
-      <p>
-        <span class="verification-badge">Document reviewed</span>
-        {{ document_reviewed_name or profile.display_name }} was reviewed on
-        {{ document_reviewed_on }}.
-      </p>
-      {% if document_review_name_changed %}
-        <p class="form-notice">
-          Your current profile name differs. The review remains attached only to
-          the name shown above; the current name is self-declared.
-        </p>
-      {% endif %}
+    <p>
+      <span class="verification-badge">Document reviewed</span>
+      {{ document_reviewed_name or profile.display_name }} was reviewed on {{ document_reviewed_on }}.
+    </p>
+    {% if document_review_name_changed %}
+    <p class="form-notice">
+      Your current profile name differs. The review remains attached only to
+      the name shown above; the current name is self-declared.
+    </p>
+    {% endif %}
     {% else %}
-      <p><span class="verification-badge muted">Not reviewed</span></p>
+    <p><span class="verification-badge muted">Not reviewed</span></p>
     {% endif %}
   </div>
 
   {% if pending %}
-    <p class="form-notice">
-      Your documents are with a reviewer. You cannot submit another case until
-      this one is decided.
-    </p>
+  <p class="form-notice">
+    Your documents are with a reviewer. You cannot submit another case until
+    this one is decided.
+  </p>
   {% else %}
-    <form method="post" action="/profile/verification" enctype="multipart/form-data" class="stacked-form">
+  <div class="vf-card" style="margin-top:20px">
+    <h2>Upload Your Documents</h2>
+    <p class="field-hint">
+      Please upload clear and valid copies of your credentials. Accepted formats:
+      PDF, JPG, PNG (Max {{ max_megabytes }} MB each).
+    </p>
+
+    <form method="post" action="/profile/verification" enctype="multipart/form-data" class="vf-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
-      <label for="registration_number">NMCN registration number</label>
-      <input id="registration_number" name="registration_number" type="text" maxlength="40" value="{{ registration_number }}" required>
+      <label class="vf-label" for="registration_number">NMCN registration number</label>
+      <input id="registration_number" name="registration_number" type="text" maxlength="40"
+        value="{{ registration_number }}" required>
       <p class="field-hint">Shown to the reviewer only. It is never published on your profile.</p>
 
-      <label for="licence">Licence or certificate</label>
-      <input id="licence" name="licence" type="file" required accept="image/jpeg,image/png,application/pdf">
-      <p class="field-hint">JPEG, PNG, or PDF, up to {{ max_megabytes }} MB.</p>
+  
+      <div class="slot-list">
+        {% if allow_extra_evidence %}
+        {{ slot('nursing_certificate', 'Nursing Certificate', 'Your basic nursing qualification', 'file', false) }}
+        {% endif %}
+        {{ slot('licence', 'Registration Certificate', 'NMCN or relevant regulatory body', 'file', true) }}
+        {% if allow_extra_evidence %}
+        {{ slot('additional_certification', 'Additional Certifications', 'Optional', 'file', false) }}
+        {% endif %}
+        {{ slot('government_id', 'ID Card', 'Government issued ID', 'user', true) }}
+      </div>
 
-      <label for="government_id">Government-issued photo ID</label>
-      <input id="government_id" name="government_id" type="file" required accept="image/jpeg,image/png,application/pdf">
-      <p class="field-hint">Passport, national identity card, or driver's licence. The name must match the name on your licence or certificate.</p>
-
-      <label class="inline-choice consent-choice">
+      <label class="consent-choice">
         <input type="checkbox" name="consent" value="on" required>
         I consent to Nurse.ng storing these documents privately and to a reviewer inspecting them for this review.
       </label>
 
-      <button type="submit">Submit for review</button>
+      <p class="vf-secure">{{ icon('lock', 16) }}<span>Your information is secure and will only be used for verification
+          purposes.</span></p>
+
+      <button type="submit" class="button-primary btn-block" style="margin-top:16px">Continue</button>
     </form>
+  </div>
   {% endif %}
 
   {% if cases %}
-    <h2>Review history</h2>
-    <table class="review-table">
-      <thead>
-        <tr>
-          <th scope="col">Submitted</th>
-          <th scope="col">Status</th>
-          <th scope="col">Reviewed name</th>
-          <th scope="col">Decided</th>
-          <th scope="col">Reason</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% set status_labels = {'pending': 'With a reviewer', 'approved': 'Approved', 'rejected': 'Not approved'} %}
-        {% for case in cases %}
-          <tr>
-            <td>{{ case.created_at.strftime('%d %B %Y') }}</td>
-            <td>
-              <span class="status-badge status-{{ case.status }}">
-                {{ status_labels.get(case.status, case.status) }}
-              </span>
-            </td>
-            <td>{{ case.reviewed_display_name or '—' }}</td>
-            <td>
-              {% if case.decided_at %}{{ case.decided_at.strftime('%d %B %Y') }}{% else %}—{% endif %}
-            </td>
-            <td>{{ case.decision_note or '—' }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <h2 style="margin-top:32px">Review history</h2>
+  <table class="review-table">
+    <thead>
+      <tr>
+        <th scope="col">Submitted</th>
+        <th scope="col">Status</th>
+        <th scope="col">Reviewed name</th>
+        <th scope="col">Decided</th>
+        <th scope="col">Reason</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% set status_labels = {'pending': 'With a reviewer', 'approved': 'Approved', 'rejected': 'Not approved'} %}
+      {% for case in cases %}
+      <tr>
+        <td>{{ case.created_at.strftime('%d %B %Y') }}</td>
+        <td><span class="status-badge status-{{ case.status }}">{{ status_labels.get(case.status, case.status) }}</span>
+        </td>
+        <td>{{ case.reviewed_display_name or '—' }}</td>
+        <td>{% if case.decided_at %}{{ case.decided_at.strftime('%d %B %Y') }}{% else %}—{% endif %}</td>
+        <td>{{ case.decision_note or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
   {% endif %}
 
   <p class="form-alt"><a href="/profile">Back to profile</a></p>
 </section>
+
+<script>
+  document.querySelectorAll('.slot-btn input[type="file"]').forEach(function (input) {
+    input.addEventListener('change', function () {
+      var small = input.closest('.slot').querySelector('small');
+      small.textContent = input.files.length ? input.files[0].name : small.getAttribute('data-hint');
+    });
+  });
+</script>
 {% endblock %}

@@ -9,6 +9,7 @@ from app.models.community import (
     ContentReport,
     Follow,
 )
+from app.models.jobs import Job  # noqa: F401
 from app.models.profile import CredentialClaim, FieldVisibility, NurseProfile
 from app.models.user import User
 from app.models.verification import EvidenceAccess, EvidenceDocument, VerificationCase

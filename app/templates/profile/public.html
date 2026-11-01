@@ -53,6 +53,22 @@
     </dl>
   {% endif %}
 
+
+  {% if fields.get('qualification') or fields.get('years_experience') %}
+  <dl class="profile-meta">
+    {% if fields.get('qualification') %}<dt>Qualification</dt>
+    <dd>{{ fields.get('qualification') }} <span class="optional">(self-declared)</span></dd>{% endif %}
+    {% if fields.get('years_experience') %}<dt>Experience</dt>
+    <dd>{{ fields.get('years_experience') }} years</dd>{% endif %}
+  </dl>
+  {% endif %}
+  {% if fields.get('skills') %}
+  <div class="chips" style="margin-top:20px">
+    {% for skill in fields.get('skills').split(',') %}<span class="chip">{{ skill.strip() }}</span>{% endfor %}
+  </div>
+  {% endif %}
+  
+
   {% if fields.get('bio') %}
     <div class="profile-bio">{{ fields.get('bio') }}</div>
   {% endif %}

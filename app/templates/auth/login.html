@@ -1,29 +1,44 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon %}
 
 {% block title %}Sign in — Nurse.ng{% endblock %}
 
 {% block content %}
-<section class="form-page">
-  <p class="eyebrow">Sign in</p>
-  <h1>Sign in to Nurse.ng</h1>
+<section class="auth-split">
+  <aside class="auth-panel">
+    <h2>Welcome back to your professional community.</h2>
+    <p>Pick up your conversations, check your network and manage what your profile shares.</p>
+    <ul class="checklist">
+      <li>Your profile stays private until you choose to share it</li>
+      <li>Document review is always labelled separately</li>
+      <li>Reply to discussions and follow nurses</li>
+    </ul>
+  </aside>
 
-  {% if error %}
-    <p class="form-error" role="alert">{{ error }}</p>
-  {% endif %}
+  <div class="auth-form-wrap">
+    <div class="auth-card">
+      <h1>Sign in to Nurse.ng</h1>
+      <p class="lede">Enter the phone number and password you registered with.</p>
 
-  <form method="post" action="/auth/login" class="stacked-form" novalidate>
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      {% if error %}
+      <p class="form-error" role="alert">{{ error }}</p>
+      {% endif %}
 
-    <label for="phone">Phone number</label>
-    <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel"
-           value="{{ phone or '' }}" placeholder="+234 801 234 5678" required>
+      <form method="post" action="/auth/login" class="stacked-form" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
-    <label for="password">Password</label>
-    <input id="password" name="password" type="password" autocomplete="current-password" required>
+        <label for="phone">Phone number</label>
+        <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" value="{{ phone or '' }}"
+          placeholder="+234 801 234 5678" required>
 
-    <button type="submit">Sign in</button>
-  </form>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
 
-  <p class="form-alt">New here? <a href="/auth/register">Create an account</a>.</p>
+        <button type="submit">Sign in</button>
+      </form>
+
+      <p class="form-alt">New here? <a href="/auth/register">Create an account</a>.</p>
+    </div>
+  </div>
 </section>
 {% endblock %}

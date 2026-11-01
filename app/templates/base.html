@@ -1,59 +1,126 @@
+{%- from "_icons.html" import icon -%}
+{#- If your dashboard page lives at a different URL, change it here (one place). -#}
+{%- set DASHBOARD_URL = '/auth/dashboard' -%}
+
+{%- macro nav_link(href, key, label, name, current) -%}
+<li><a href="{{ href }}" {% if current==key %} aria-current="page" {% endif %}>{{ icon(name, 18) }}<span>{{ label
+      }}</span></a></li>
+{%- endmacro -%}
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Nurse.ng{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}">
-  </head>
-  <body>
-    <a class="skip-link" href="#main">Skip to main content</a>
-    <header class="site-header">
-      <a class="brand" href="/">
-        <svg aria-hidden="true" focusable="false" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-        <span>Nurse.ng</span>
-      </a>
-      <nav class="site-nav" aria-label="Primary">
-        <ul class="site-nav-list">
-          <li class="has-divider" aria-hidden="true"><span class="divider"></span></li>
-          <li><a href="/feed" {% if page == 'feed' %}aria-current="page"{% endif %}>Feed</a></li>
-          <li><a href="/topics" {% if page == 'topics' %}aria-current="page"{% endif %}>Topics</a></li>
-          <li><a href="/nurses" {% if page == 'nurses' %}aria-current="page"{% endif %}>Nurses</a></li>
-          {% if user %}
-            <li class="has-divider" aria-hidden="true"><span class="divider"></span></li>
-            <li><a href="/profile" {% if page == 'profile' %}aria-current="page"{% endif %}>Profile</a></li>
-            <li><a href="/network" {% if page == 'network' %}aria-current="page"{% endif %}>Network</a></li>
-            {% if user.is_staff %}
-              <li><a href="/review" {% if page == 'review' %}aria-current="page"{% endif %}>Review</a></li>
-              <li><a href="/moderation" {% if page == 'moderation' %}aria-current="page"{% endif %}>Moderate</a></li>
-            {% endif %}
-            <li class="log-out" role="button">
-              <form method="post" action="/auth/logout" class="inline-form">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                <span>Sign out</span>
-                <button type="submit" class="link-button">Sign out</button>
-              </form>
-            </li>
-          {% else %}
-            <li class="auth-links">
-              <a href="/auth/login">Sign in</a>
-              <span class="auth-sep">or</span>
-              <a href="/auth/register">Create account</a>
-            </li>
-          {% endif %}
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a3b30">
+  <title>{% block title %}Nurse.ng{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}">
+</head>
+
+<body class="{% if user %}is-app{% else %}is-public{% endif %}">
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a class="brand" href="/">{{ icon('logo', 26) }}<span>Nurse.ng</span></a>
+
+      {% if not user %}
+      <nav class="site-nav" id="site-nav" aria-label="Primary">
+        <ul>
+          <li><a href="/feed" {% if page=='feed' %}aria-current="page" {% endif %}>Feed</a></li>
+          <li><a href="/topics" {% if page=='topics' %}aria-current="page" {% endif %}>Topics</a></li>
+          <li><a href="/nurses" {% if page=='nurses' %}aria-current="page" {% endif %}>Find nurses</a></li>
+          <li class="only-mobile"><a href="/auth/login">Sign in</a></li>
         </ul>
       </nav>
-    </header>
+      {% endif %}
 
-    <main id="main" class="site-main">
+      <div class="header-actions">
+        {% if user %}
+        <form method="post" action="/auth/logout" class="inline-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button type="submit" class="btn btn-secondary btn-sm">{{ icon('logout', 16) }}<span>Sign out</span></button>
+        </form>
+        {% else %}
+        <a class="btn btn-ghost btn-sm hide-xs" href="/auth/login">Sign in</a>
+        <a class="btn btn-primary btn-sm" href="/auth/register">Get started</a>
+        {% endif %}
+        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"
+          aria-controls="{% if user %}app-nav{% else %}site-nav{% endif %}">
+          {{ icon('menu', 22) }}
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="{% if user %}app-shell{% endif %}">
+    {% if user %}
+    <aside class="sidebar" id="app-nav">
+      <nav aria-label="Primary">
+        <ul class="side-list">
+          {{ nav_link(DASHBOARD_URL, 'dashboard', 'Dashboard', 'dashboard', page) }}
+          {{ nav_link('/profile', 'profile', 'My profile', 'user', page) }}
+          {{ nav_link('/profile/verification', 'verification', 'Document review', 'shield', page) }}
+          {{ nav_link('/network', 'network', 'Network', 'users', page) }}
+        </ul>
+
+        <p class="side-heading">Community</p>
+        <ul class="side-list">
+          {{ nav_link('/feed', 'feed', 'Feed', 'feed', page) }}
+          {{ nav_link('/topics', 'topics', 'Topics', 'topics', page) }}
+          {{ nav_link('/nurses', 'nurses', 'Find nurses', 'search', page) }}
+        </ul>
+
+        {% if user.is_staff %}
+        <p class="side-heading">Staff</p>
+        <ul class="side-list">
+          {{ nav_link('/review', 'review', 'Document review queue', 'review', page) }}
+          {{ nav_link('/moderation', 'moderation', 'Moderation', 'flag', page) }}
+        </ul>
+        {% endif %}
+
+        <p class="side-heading">Coming soon</p>
+        <ul class="side-list">
+          <li><span class="side-soon">{{ icon('briefcase', 18) }}<span>Jobs</span><em>Soon</em></span></li>
+          <li><span class="side-soon">{{ icon('mail', 18) }}<span>Messages</span><em>Soon</em></span></li>
+          <li><span class="side-soon">{{ icon('book', 18) }}<span>Learning</span><em>Soon</em></span></li>
+        </ul>
+      </nav>
+    </aside>
+    {% endif %}
+
+    <main id="main" class="{% if user %}app-main{% else %}site-main{% endif %}">
       {% block content %}{% endblock %}
     </main>
+  </div>
 
-    <footer class="site-footer">
-      <p>
-        Nurse.ng is not the Nursing and Midwifery Council of Nigeria; it does not
-        issue licences, and does not replace the official register.
-      </p>
-    </footer>
-  </body>
+  <footer class="site-footer">
+    <p>
+      Nurse.ng is not the Nursing and Midwifery Council of Nigeria; it does not
+      issue licences, and does not replace the official register.
+    </p>
+  </footer>
+
+  <script>
+    (function () {
+      var toggle = document.querySelector('.nav-toggle');
+      if (!toggle) return;
+      toggle.addEventListener('click', function () {
+        var open = document.body.classList.toggle('nav-open');
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && document.body.classList.contains('nav-open')) {
+          document.body.classList.remove('nav-open');
+          toggle.setAttribute('aria-expanded', 'false');
+          toggle.focus();
+        }
+      });
+    })();
+  </script>
+</body>
+
 </html>

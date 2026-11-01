@@ -6,10 +6,13 @@ around account creation and sign-in, not the password primitive.
 
 from datetime import UTC, datetime, timedelta
 from math import ceil
+import re
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from app.models.user import AccountType, User, UserStatus
+
 
 from app.core.config import settings
 from app.core.security import hash_password, verify_password
@@ -18,6 +21,7 @@ from app.models.user import User, UserStatus
 
 MIN_PASSWORD_LENGTH = 8
 MAX_PASSWORD_LENGTH = 128
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 # A real Argon2 hash checked when no account matches, so an unknown number and
 # a wrong password cost roughly the same work (DECISIONS L39). Generated once

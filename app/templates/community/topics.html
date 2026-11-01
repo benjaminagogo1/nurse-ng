@@ -1,43 +1,54 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon %}
 
-{% block title %}{{ title }} — Nurse.ng{% endblock %}
+{% block title %}Community — Nurse.ng{% endblock %}
 
 {% block content %}
+{# ======= SAMPLE DATA: shown only while you have no real topics ======= #}
+{% set sample_groups = [
+{'name': 'General Nursing Discussion', 'slug': 'general', 'description': '12.4k members · Active 2m ago', 'post_count':
+none},
+{'name': 'ICU & Critical Care', 'slug': 'icu-critical-care', 'description': '8.7k members · Active 5m ago',
+'post_count': none},
+{'name': 'Midwives Network', 'slug': 'midwives', 'description': '6.3k members · Active 12m ago', 'post_count': none},
+{'name': 'International Opportunities', 'slug': 'international', 'description': '4.8k members · Active 30m ago',
+'post_count': none},
+{'name': 'Nursing Students', 'slug': 'students', 'description': '5.1k members · Active 1h ago', 'post_count': none}
+] %}
+{# ======= END SAMPLE DATA ======= #}
+{% set groups = topics if topics else sample_groups %}
+
 <section class="community-page">
-  <p class="eyebrow">Topics</p>
-  <div class="page-heading-row">
-    <div>
-      <h1>Discussion topics</h1>
-      <p class="lede">Start or follow conversations on topics that matter to nurses.</p>
+  <div class="banner">
+    <h1>Connect. Share. Grow.</h1>
+    <p>Join discussions, find mentors, and stay updated with the latest in the nursing community.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#groups">Join a Group</a>
+      {% if user %}<a class="btn btn-outline-light" href="/topics/new">New topic</a>{% endif %}
     </div>
-    {% if user %}<a class="button-primary" href="/topics/new">New topic</a>{% endif %}
   </div>
 
-  <nav class="section-tabs" aria-label="Topic views">
-    <a href="/feed" {% if page == 'feed' %}aria-current="page"{% endif %}>Feed</a>
-    <a href="/topics" {% if page == 'topics' %}aria-current="page"{% endif %}>All topics</a>
+  <nav class="section-tabs" aria-label="Community views">
+    <a href="/topics" aria-current="page">Featured Groups</a>
+    <a href="/feed">Discussions</a>
+    <a href="/nurses">Mentors</a>
   </nav>
 
-  <div class="community-list">
-    {% for topic in topics %}
-      <article class="topic-card">
-        <h2>
-          <a href="/topics/{{ topic.slug }}">{{ topic.name }}</a>
-        </h2>
-        {% if topic.description %}<p>{{ topic.description }}</p>{% endif %}
-        {% if topic.post_count %}
-          <p class="topic-label">{{ topic.post_count }} posts</p>
-        {% else %}
-          <p class="topic-label">No posts yet</p>
-        {% endif %}
-      </article>
-    {% endfor %}
-    {% if not topics %}
-      <div class="empty-state">
-        <h2>No topics yet</h2>
-        <p>Create a new conversation with the button above.</p>
+  <div class="group-list" id="groups">
+    {% for group in groups %}
+    <div class="group-row">
+      <span class="group-avatar" aria-hidden="true">{{ group.name[:1]|upper }}</span>
+      <div class="group-main">
+        <strong>{{ group.name }}</strong>
+        <small>
+          {% if group.post_count is not none %}{{ group.post_count or 0 }} posts{% if group.description %} · {{
+          group.description }}{% endif %}
+          {% else %}{{ group.description }}{% endif %}
+        </small>
       </div>
-    {% endif %}
+      <a class="chip-link" href="/topics/{{ group.slug }}">Join</a>
+    </div>
+    {% endfor %}
   </div>
 </section>
 {% endblock %}

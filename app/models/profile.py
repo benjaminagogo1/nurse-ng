@@ -21,6 +21,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Index,
+    Integer,
     String,
     Text,
     UniqueConstraint,
@@ -119,6 +120,10 @@ class NurseProfile(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         back_populates="profile",
         cascade="all, delete-orphan",
     )
+
+    qualification: Mapped[str] = mapped_column(String(120), default="", server_default="")
+    years_experience: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    skills: Mapped[str] = mapped_column(String(600), default="", server_default="")
 
     def __repr__(self) -> str:
         return f"<NurseProfile {self.public_id}>"

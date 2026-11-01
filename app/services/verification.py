@@ -67,12 +67,19 @@ def _clean_filename(value: str) -> str:
     return (value or "").replace("\\", "/").rsplit("/", 1)[-1][:255]
 
 
+_KIND_LABELS = {
+    EvidenceKind.LICENCE: "Licence or certificate",
+    EvidenceKind.GOVERNMENT_ID: "ID document",
+    EvidenceKind.NURSING_CERTIFICATE: "Nursing certificate",
+    EvidenceKind.ADDITIONAL_CERT: "Additional certification",
+}
+
+
 def _store_upload(kind: EvidenceKind, upload: EvidenceUpload) -> EvidenceDocument:
     try:
         storage_name, content_type, size, digest = save_evidence(upload.data)
     except EvidenceStorageError as exc:
-        label = "licence or certificate" if kind == EvidenceKind.LICENCE else "ID document"
-        raise VerificationError(f"{label.capitalize()}: {exc}") from None
+        raise VerificationError(f"{_KIND_LABELS[kind]}: {exc}") from None
     return EvidenceDocument(
         kind=kind.value,
         original_filename=_clean_filename(upload.filename),
@@ -91,8 +98,10 @@ def submit_case(
     registration_number: str,
     licence: EvidenceUpload,
     government_id: EvidenceUpload,
+    nursing_certificate: EvidenceUpload | None = None,
+    additional_certification: EvidenceUpload | None = None,
 ) -> VerificationCase:
-    """Create a pending case with both private evidence files."""
+    """Create a pending case with all private evidence files."""
     if profile.user_id != user.id:
         raise VerificationError("This profile does not belong to the signed-in user.")
 
@@ -106,10 +115,19 @@ def submit_case(
     if existing is not None:
         raise VerificationError("You already have a review in progress.")
 
+    uploads: list[tuple[EvidenceKind, EvidenceUpload]] = [
+        (EvidenceKind.LICENCE, licence),
+        (EvidenceKind.GOVERNMENT_ID, government_id),
+    ]
+    if nursing_certificate is not None and nursing_certificate.data:
+        uploads.append((EvidenceKind.NURSING_CERTIFICATE, nursing_certificate))
+    if additional_certification is not None and additional_certification.data:
+        uploads.append((EvidenceKind.ADDITIONAL_CERT, additional_certification))
+
     stored: list[EvidenceDocument] = []
     try:
-        stored.append(_store_upload(EvidenceKind.LICENCE, licence))
-        stored.append(_store_upload(EvidenceKind.GOVERNMENT_ID, government_id))
+        for kind, upload in uploads:
+            stored.append(_store_upload(kind, upload))
     except VerificationError:
         for document in stored:
             delete_evidence(document.storage_name)
@@ -132,7 +150,6 @@ def submit_case(
 
     db.refresh(case)
     return case
-
 
 def list_cases_for_profile(db: Session, profile_id: uuid.UUID) -> list[VerificationCase]:
     return list(

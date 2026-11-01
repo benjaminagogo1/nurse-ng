@@ -1,38 +1,57 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon %}
 
 {% block title %}Create your account — Nurse.ng{% endblock %}
 
 {% block content %}
-<section class="form-page">
-  <p class="eyebrow">Open registration</p>
-  <h1>Create your account</h1>
-  <p class="lede">
-    Use a phone number you control. Your account becomes active immediately;
-    professional document review is optional and is requested separately.
-  </p>
+<section class="auth-split">
+  <aside class="auth-panel">
+    <h2>Join a community that supports your journey.</h2>
+    <p>
+      Whether you are starting out or years into practice, Nurse.ng gives you
+      a place to connect, share and be recognised.
+    </p>
+    <ul class="checklist">
+      <li>Profiles you control, private until you say otherwise</li>
+      <li>Optional document review, labelled separately</li>
+      <li>Public discussions by topic</li>
+      <li>Follow nurses and build your network</li>
+    </ul>
+  </aside>
 
-  {% if error %}
-    <p class="form-error" role="alert">{{ error }}</p>
-  {% endif %}
+  <div class="auth-form-wrap">
+    <div class="auth-card">
+      <h1>Create your account</h1>
+      <p class="lede">
+        Use a phone number you control. Your account becomes active immediately;
+        professional document review is optional and is requested separately.
+      </p>
 
-  <form method="post" action="/auth/register" class="stacked-form">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      {% if error %}
+      <p class="form-error" role="alert">{{ error }}</p>
+      {% endif %}
 
-    <label for="phone">Phone number</label>
-    <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel"
-           value="{{ phone or '' }}" placeholder="+234 801 234 5678" required>
+      <form method="post" action="/auth/register" class="stacked-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
-    <label for="password">Password</label>
-    <input id="password" name="password" type="password" autocomplete="new-password"
-           minlength="8" maxlength="128" required>
+        <label for="phone">Phone number</label>
+        <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" value="{{ phone or '' }}"
+          placeholder="+234 801 234 5678" required>
 
-    <label for="confirm_password">Confirm password</label>
-    <input id="confirm_password" name="confirm_password" type="password"
-           autocomplete="new-password" minlength="8" maxlength="128" required>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128"
+          required>
+        <p class="field-hint">At least 8 characters.</p>
 
-    <button type="submit">Create account</button>
-  </form>
+        <label for="confirm_password">Confirm password</label>
+        <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" minlength="8"
+          maxlength="128" required>
 
-  <p class="form-alt">Already registered? <a href="/auth/login">Sign in</a>.</p>
+        <button type="submit">Create account</button>
+      </form>
+
+      <p class="form-alt">Already registered? <a href="/auth/login">Sign in</a>.</p>
+    </div>
+  </div>
 </section>
 {% endblock %}

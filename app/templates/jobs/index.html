@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% set page = 'jobs' %}
+
+{% block title %}Job Opportunities — Nurse.ng{% endblock %}
+
+{% block content %}
+{# ======= SAMPLE DATA: replace with real jobs from your database later ======= #}
+{% set jobs = [
+{'title': 'Registered Nurse', 'org': 'Lagos State University Teaching Hospital, Lagos', 'salary': '₦300,000 -
+₦450,000/month', 'type': 'Full-time', 'mode': 'On-site', 'posted': '2 days ago', 'icon': 'heart'},
+{'title': 'ICU Nurse', 'org': 'Riverside Hospital, Abuja', 'salary': '₦400,000 - ₦600,000/month', 'type': 'Full-time',
+'mode': 'On-site', 'posted': '3 days ago', 'icon': 'shield'},
+{'title': 'Midwife', 'org': 'Maternal Health Foundation, Port Harcourt', 'salary': '₦250,000 - ₦350,000/month', 'type':
+'Full-time', 'mode': 'On-site', 'posted': '4 days ago', 'icon': 'users'},
+{'title': 'Community Health Nurse', 'org': 'Global Health Initiative, Kaduna', 'salary': '₦180,000 - ₦250,000/month',
+'type': 'Contract', 'mode': 'Field', 'posted': '5 days ago', 'icon': 'building'},
+{'title': 'Theatre Nurse', 'org': 'National Hospital, Abuja', 'salary': '₦350,000 - ₦500,000/month', 'type':
+'Full-time', 'mode': 'On-site', 'posted': '6 days ago', 'icon': 'review'}
+] %}
+{# ======= END SAMPLE DATA ======= #}
+
+<section class="jb">
+      <h1>Job Opportunities</h1>
+      <p class="form-notice">Sample listings for the design preview. Real jobs appear here once employers post them.</p>
+      <p class="lede">Find the right job that fits your skills and goals.</p>
+
+      <div class="filter-bar" role="group" aria-label="Job type">
+            <button type="button" class="pill-tab" data-filter="all" aria-pressed="true">All Jobs</button>
+            <button type="button" class="pill-tab" data-filter="Full-time" aria-pressed="false">Full-time</button>
+            <button type="button" class="pill-tab" data-filter="Part-time" aria-pressed="false">Part-time</button>
+            <button type="button" class="pill-tab" data-filter="Contract" aria-pressed="false">Contract</button>
+            <button type="button" class="pill-tab" data-filter="Internship" aria-pressed="false">Internship</button>
+            <button type="button" class="btn btn-secondary btn-sm spacer">{{ icon('filter', 16)
+                  }}<span>Filter</span></button>
+      </div>
+
+      <div class="job-list">
+            {% for job in jobs %}
+            <article class="job-row" data-type="{{ job.type }}">
+                  <span class="job-logo">{{ icon(job.icon, 22) }}</span>
+                  <div class="job-main">
+                        <a class="job-title" href="#">{{ job.title }}</a>
+                        <p class="job-org">{{ job.org }}</p>
+                        <p class="job-salary">{{ job.salary }}</p>
+                        <span class="tag">{{ job.type }}</span><span class="tag">{{ job.mode }}</span>
+                  </div>
+                  <div class="job-side">
+                        {{ icon('chevron', 20) }}
+                        <span class="job-time">{{ job.posted }}</span>
+                  </div>
+            </article>
+            {% endfor %}
+            <div class="empty-state" id="jobs-empty" hidden>
+                  <h2>No jobs in this category yet</h2>
+                  <p>Check back soon, or view all jobs.</p>
+            </div>
+      </div>
+</section>
+
+<script>
+      (function () {
+            var tabs = document.querySelectorAll('[data-filter]');
+            var rows = document.querySelectorAll('[data-type]');
+            var empty = document.getElementById('jobs-empty');
+            tabs.forEach(function (tab) {
+                  tab.addEventListener('click', function () {
+                        tabs.forEach(function (t) { t.setAttribute('aria-pressed', 'false'); });
+                        tab.setAttribute('aria-pressed', 'true');
+                        var f = tab.getAttribute('data-filter'), shown = 0;
+                        rows.forEach(function (r) {
+                              var show = f === 'all' || r.getAttribute('data-type') === f;
+                              r.hidden = !show;
+                              if (show) shown++;
+                        });
+                        empty.hidden = shown > 0;
+                  });
+            });
+      })();
+</script>
+{% endblock %}

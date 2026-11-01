@@ -24,6 +24,10 @@ DISPLAY_NAME_MAX = 120
 HEADLINE_MAX = 160
 LOCATION_MAX = 120
 BIO_MAX = 5000
+QUALIFICATION_MAX = 120
+YEARS_EXPERIENCE_MAX = 60
+SKILLS_MAX_ITEMS = 12
+SKILL_MAX_LENGTH = 40
 
 PROFESSIONAL_STATUS_LABELS: dict[str, str] = {
     ProfessionalStatus.STUDENT.value: "Student",
@@ -40,6 +44,9 @@ SHAREABLE_FIELDS: tuple[tuple[str, str], ...] = (
     ("headline", "Headline"),
     ("location", "Location"),
     ("bio", "About you"),
+    ("qualification", "Highest qualification"),
+    ("years_experience", "Years of experience"),
+    ("skills", "Skills"),
 )
 SHAREABLE_FIELD_NAMES = frozenset(name for name, _ in SHAREABLE_FIELDS)
 
@@ -89,6 +96,41 @@ def professional_status_label(value: str) -> str:
     return PROFESSIONAL_STATUS_LABELS.get(value, value)
 
 
+def _clean_years(value: object) -> int | None:
+    cleaned = str(value if value is not None else "").strip()
+    if not cleaned:
+        return None
+    if not cleaned.isdigit():
+        raise ProfileError("Years of experience must be a whole number.")
+    years = int(cleaned)
+    if years > YEARS_EXPERIENCE_MAX:
+        raise ProfileError(
+            f"Years of experience must be at most {YEARS_EXPERIENCE_MAX}."
+        )
+    return years
+
+
+def _clean_skills(value: str) -> str:
+    items: list[str] = []
+    seen: set[str] = set()
+    for raw in (value or "").split(","):
+        skill = " ".join(raw.split())
+        if not skill:
+            continue
+        if len(skill) > SKILL_MAX_LENGTH:
+            raise ProfileError(
+                f"Each skill must be at most {SKILL_MAX_LENGTH} characters."
+            )
+        key = skill.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        items.append(skill)
+    if len(items) > SKILLS_MAX_ITEMS:
+        raise ProfileError(f"Add at most {SKILLS_MAX_ITEMS} skills.")
+    return ", ".join(items)
+
+
 def validate_profile_input(
     *,
     display_name: str,
@@ -96,12 +138,10 @@ def validate_profile_input(
     location: str,
     bio: str,
     professional_status: str,
-) -> dict[str, str]:
-    """Validate and normalise profile fields.
-
-    Lengths mirror the database columns so an over-long value is reported as a
-    form error instead of raising a database error.
-    """
+    qualification: str = "",
+    years_experience: str = "",
+    skills: str = "",
+) -> dict[str, object]:
     status = (professional_status or "").strip()
     if status not in PROFESSIONAL_STATUS_LABELS:
         raise ProfileError("Choose a valid professional status.")
@@ -117,23 +157,12 @@ def validate_profile_input(
         "location": _clean(location, field="Location", max_length=LOCATION_MAX),
         "bio": _clean(bio, field="Bio", max_length=BIO_MAX),
         "professional_status": status,
+        "qualification": _clean(
+            qualification, field="Qualification", max_length=QUALIFICATION_MAX
+        ),
+        "years_experience": _clean_years(years_experience),
+        "skills": _clean_skills(skills),
     }
-
-
-def _clean(
-    value: str,
-    *,
-    field: str,
-    max_length: int,
-    required: bool = False,
-) -> str:
-    cleaned = (value or "").strip()
-    if required and not cleaned:
-        raise ProfileError(f"{field} is required.")
-    if len(cleaned) > max_length:
-        raise ProfileError(f"{field} must be at most {max_length} characters.")
-    return cleaned
-
 
 def save_profile(
     db: Session,
@@ -144,19 +173,20 @@ def save_profile(
     location: str,
     bio: str,
     professional_status: str,
+    qualification: str = "",
+    years_experience: str = "",
+    skills: str = "",
 ) -> NurseProfile:
-    """Create or update the signed-in user's profile.
-
-    New profiles start as ``draft`` and non-discoverable. There is no path here
-    that makes a profile public; field visibility stays private until a later
-    increment adds explicit controls.
-    """
+    """Create or update the signed-in user's profile (always private by default)."""
     values = validate_profile_input(
         display_name=display_name,
         headline=headline,
         location=location,
         bio=bio,
         professional_status=professional_status,
+        qualification=qualification,
+        years_experience=years_experience,
+        skills=skills,
     )
 
     profile = get_profile_for_user(db, user.id)
@@ -174,7 +204,6 @@ def save_profile(
     try:
         db.commit()
     except IntegrityError:
-        # The unique constraint on user_id is the authority if two requests race.
         db.rollback()
         raise ProfileError("A profile already exists for this account.") from None
 
@@ -264,10 +293,10 @@ def public_profile_fields(db: Session, profile: NurseProfile) -> dict[str, str]:
         value = getattr(profile, name)
         if name == "professional_status":
             value = professional_status_label(value)
-        if value:
-            fields[name] = value
+        if value is None or value == "":
+            continue
+        fields[name] = str(value)
     return fields
-
 
 def get_active_profile_by_public_id(
     db: Session,

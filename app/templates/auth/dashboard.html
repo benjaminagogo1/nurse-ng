@@ -1,19 +1,55 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% set page = 'dashboard' %}
 
 {% block title %}Your account — Nurse.ng{% endblock %}
 
 {% block content %}
-<section class="form-page">
-  <p class="eyebrow">Signed in</p>
-  <h1>Your account</h1>
-  <p class="lede">
-    You are signed in as <strong>{{ user.phone }}</strong>. Your profile is not
-    visible to anyone yet; profiles are private until you choose otherwise.
-  </p>
-  <div class="profile-actions">
-    <a class="button-secondary" href="/profile">View profile</a>
-    <a class="button-secondary" href="/network">Network connections</a>
+<section class="dash">
+  <div class="dash-hero">
+    <h1>Welcome back</h1>
+    <p>
+      You are signed in as <strong>{{ user.phone }}</strong>. Your profile is not
+      visible to anyone yet; profiles are private until you choose otherwise.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-light" href="/profile">View profile</a>
+      <a class="btn btn-outline-light" href="/network">Network connections</a>
+    </div>
   </div>
-  <p class="form-alt"><a href="/">Back to home</a>.</p>
+
+  <h2 class="dash-title">What would you like to do?</h2>
+  <div class="dash-grid">
+    <a class="dash-tile" href="/profile/edit">
+      <div class="feature-icon">{{ icon('edit', 22) }}</div>
+      <strong>Update your profile</strong>
+      <span class="dash-sub">Add your status, headline and bio.</span>
+    </a>
+    <a class="dash-tile" href="/profile/verification">
+      <div class="feature-icon">{{ icon('shield', 22) }}</div>
+      <strong>Request document review</strong>
+      <span class="dash-sub">Submit your licence and photo ID.</span>
+    </a>
+    <a class="dash-tile" href="/feed">
+      <div class="feature-icon">{{ icon('feed', 22) }}</div>
+      <strong>Read the feed</strong>
+      <span class="dash-sub">See what nurses are discussing.</span>
+    </a>
+    <a class="dash-tile" href="/posts/new">
+      <div class="feature-icon">{{ icon('plus', 22) }}</div>
+      <strong>Start a discussion</strong>
+      <span class="dash-sub">Post to a topic.</span>
+    </a>
+    <a class="dash-tile" href="/nurses">
+      <div class="feature-icon">{{ icon('search', 22) }}</div>
+      <strong>Find nurses</strong>
+      <span class="dash-sub">Browse public profiles and follow colleagues.</span>
+    </a>
+    <a class="dash-tile" href="/community/settings">
+      <div class="feature-icon">{{ icon('user', 22) }}</div>
+      <strong>Choose your community name</strong>
+      <span class="dash-sub">The name shown beside your posts.</span>
+    </a>
+  </div>
 </section>
 {% endblock %}

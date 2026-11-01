@@ -45,6 +45,20 @@
     <label for="bio">About you <span class="optional">(optional)</span></label>
     <textarea id="bio" name="bio" rows="6" maxlength="5000">{{ values.bio }}</textarea>
 
+
+    <label for="qualification">Highest qualification <span class="optional">(optional)</span></label>
+    <input id="qualification" name="qualification" type="text" maxlength="120" value="{{ values.qualification }}"
+      placeholder="e.g. BSc Nursing">
+    
+    <label for="years_experience">Years of experience <span class="optional">(optional)</span></label>
+    <input id="years_experience" name="years_experience" type="number" min="0" max="60"
+      value="{{ values.years_experience if values.years_experience is not none else '' }}">
+    
+    <label for="skills">Skills <span class="optional">(optional)</span></label>
+    <input id="skills" name="skills" type="text" maxlength="600" value="{{ values.skills }}"
+      placeholder="Patient care, Critical thinking, Leadership">
+    <p class="field-hint">Separate skills with commas. Up to 12.</p>
+
     <button type="submit">Save profile</button>
   </form>
 </section>

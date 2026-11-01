@@ -30,6 +30,11 @@ class UserStatus(StrEnum):
     DEACTIVATED = "deactivated"
 
 
+class AccountType(StrEnum):
+    NURSE = "nurse"
+    EMPLOYER = "employer"
+    PARTNER = "partner"
+
 class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "users"
 
@@ -42,6 +47,9 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     mfa_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_staff: Mapped[bool] = mapped_column(Boolean, default=False)
+    account_type: Mapped[str] = mapped_column(
+        String(20), default=AccountType.NURSE, server_default="nurse", index=True
+    )
 
     # Public identity used on community contributions. It is deliberately
     # separate from a nurse profile so posting never exposes a private profile.
