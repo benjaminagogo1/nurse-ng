@@ -4,49 +4,38 @@
 {% block title %}Community — Nurse.ng{% endblock %}
 
 {% block content %}
-{# ======= SAMPLE DATA: shown only while you have no real topics ======= #}
-{% set sample_groups = [
-{'name': 'General Nursing Discussion', 'slug': 'general', 'description': '12.4k members · Active 2m ago', 'post_count':
-none},
-{'name': 'ICU & Critical Care', 'slug': 'icu-critical-care', 'description': '8.7k members · Active 5m ago',
-'post_count': none},
-{'name': 'Midwives Network', 'slug': 'midwives', 'description': '6.3k members · Active 12m ago', 'post_count': none},
-{'name': 'International Opportunities', 'slug': 'international', 'description': '4.8k members · Active 30m ago',
-'post_count': none},
-{'name': 'Nursing Students', 'slug': 'students', 'description': '5.1k members · Active 1h ago', 'post_count': none}
-] %}
-{# ======= END SAMPLE DATA ======= #}
-{% set groups = topics if topics else sample_groups %}
-
 <section class="community-page">
   <div class="banner">
+    <p class="eyebrow">Your people. Your community.</p>
     <h1>Connect. Share. Grow.</h1>
     <p>Join discussions, find mentors, and stay updated with the latest in the nursing community.</p>
     <div class="hero-actions">
-      <a class="btn btn-primary" href="#groups">Join a Group</a>
-      {% if user %}<a class="btn btn-outline-light" href="/topics/new">New topic</a>{% endif %}
+      <a class="btn btn-primary" href="#groups">Browse Groups</a>
+      {% if user and user.is_staff %}<a class="btn btn-outline-light" href="/moderation">Create a topic</a>{% endif %}
     </div>
   </div>
 
   <nav class="section-tabs" aria-label="Community views">
     <a href="/topics" aria-current="page">Featured Groups</a>
     <a href="/feed">Discussions</a>
-    <a href="/nurses">Mentors</a>
+    <a href="/nurses">Find nurses</a>
   </nav>
 
   <div class="group-list" id="groups">
-    {% for group in groups %}
+    {% for topic in topics %}
     <div class="group-row">
-      <span class="group-avatar" aria-hidden="true">{{ group.name[:1]|upper }}</span>
+      <span class="group-avatar" aria-hidden="true">{{ topic.name[:1]|upper }}</span>
       <div class="group-main">
-        <strong>{{ group.name }}</strong>
-        <small>
-          {% if group.post_count is not none %}{{ group.post_count or 0 }} posts{% if group.description %} · {{
-          group.description }}{% endif %}
-          {% else %}{{ group.description }}{% endif %}
-        </small>
+        <strong><a href="/topics/{{ topic.slug }}">{{ topic.name }}</a></strong>
+        {% if topic.description %}<small>{{ topic.description }}</small>{% endif %}
       </div>
-      <a class="chip-link" href="/topics/{{ group.slug }}">Join</a>
+      <a class="chip-link" href="/topics/{{ topic.slug }}">Explore</a>
+    </div>
+    {% else %}
+    <div class="empty-state" style="border:0">
+      <h2>No groups yet</h2>
+      <p>This space is getting started. Explore the public feed and help shape the conversation.</p>
+      <a class="btn btn-secondary btn-sm" href="/feed">Explore discussions {{ icon('arrow', 15) }}</a>
     </div>
     {% endfor %}
   </div>

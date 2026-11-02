@@ -20,7 +20,7 @@
             reviewed</span></span>
         {% endif %}
       </h1>
-      <p class="pf-sub">{{ status_label }}{% if profile.location %} · {{ profile.location }}{% endif %}</p>
+      <p class="pf-sub">{{ status_label }} <span class="optional">(self-declared)</span>{% if profile.location %} · {{ profile.location }}{% endif %}</p>
       <div class="pf-actions">
         <a class="btn btn-primary btn-sm" href="/profile/edit">Edit Profile</a>
         {% if is_active and share_url %}
@@ -51,6 +51,7 @@
   <nav class="section-tabs" aria-label="Profile sections">
     <a href="#overview" aria-current="page">Overview</a>
     <a href="#credentials">Education &amp; Credentials</a>
+    <a href="#experience">Experience</a>
     <a href="#skills">Skills</a>
     <a href="#visibility">More</a>
   </nav>
@@ -105,9 +106,19 @@
     </div>
   </div>
 
+  <div class="pf-section" id="experience">
+    <h2>Experience</h2>
+    {% if profile.years_experience is not none %}
+    <div class="exp"><span class="slot-icon">{{ icon('briefcase', 23) }}</span><div><strong>{{ profile.years_experience }} year{{ 's' if profile.years_experience != 1 }} of professional experience</strong><small>Self-declared · Add your career story in your bio.</small></div></div>
+    {% else %}
+    <p class="field-hint">Your experience is part of your story. <a href="/profile/edit">Add your experience</a>.</p>
+    {% endif %}
+  </div>
+
   <div class="pf-section profile-actions" id="visibility">
     <h2>Visibility</h2>
     {% if is_active %}
+    <p class="status-badge">Public profile</p>
     <p class="field-hint">
       This profile appears in nurse discovery. Visitors see only the fields
       you explicitly marked public ({{ public_field_count }} public).
@@ -127,6 +138,7 @@
       </form>
     </div>
     {% else %}
+    <p class="status-badge">Private profile · Draft</p>
     <p class="field-hint">
       Making your profile public adds it to nurse discovery. Your display name
       must be public first. Publication is separate from document review.

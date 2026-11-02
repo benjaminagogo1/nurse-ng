@@ -1,126 +1,129 @@
 {%- from "_icons.html" import icon -%}
-{#- If your dashboard page lives at a different URL, change it here (one place). -#}
-{%- set DASHBOARD_URL = '/auth/dashboard' -%}
-
+{%- from "_display.html" import display_button, display_dialog -%}
 {%- macro nav_link(href, key, label, name, current) -%}
-<li><a href="{{ href }}" {% if current==key %} aria-current="page" {% endif %}>{{ icon(name, 18) }}<span>{{ label
-      }}</span></a></li>
+<li><a href="{{ href }}"{% if current == key %} aria-current="page"{% endif %}>{{ icon(name, 19) }}<span>{{ label }}</span></a></li>
 {%- endmacro -%}
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0a3b30">
-  <title>{% block title %}Nurse.ng{% endblock %}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#073c40">
+  <meta name="description" content="A professional home for Nigerian nurses. Find opportunities, build your profile, and grow with your community.">
+  <title>{% block title %}{{ title or 'Nurse.ng' }} — Nurse.ng{% endblock %}</title>
+  <script src="{{ url_for('static', path='/js/display.js') }}"></script>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', path='/img/favicon.svg') }}">
   <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/design.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/appearance.css') }}">
+  <script src="{{ url_for('static', path='/js/app.js') }}" defer></script>
 </head>
-
-<body class="{% if user %}is-app{% else %}is-public{% endif %}">
+<body class="{% if user %}is-app{% else %}is-public{% endif %}{% if page == 'home' and not user %} is-landing{% endif %}{% if is_auth_page %} is-auth{% endif %}">
   <a class="skip-link" href="#main">Skip to main content</a>
-
+  {% block header %}
   <header class="site-header">
     <div class="site-header-inner">
-      <a class="brand" href="/">{{ icon('logo', 26) }}<span>Nurse.ng</span></a>
-
-      {% if not user %}
+      <a class="brand" href="/">{{ icon('logo', 31) }}<span>Nurse.ng</span></a>
+      {% if user %}
+      <form class="header-search" method="get" action="/jobs" role="search">
+        {{ icon('search', 17) }}<label class="sr-only" for="header-q">Search jobs</label>
+        <input id="header-q" type="search" name="q" placeholder="Search jobs, hospitals, or locations…" maxlength="120">
+      </form>
+      {% else %}
       <nav class="site-nav" id="site-nav" aria-label="Primary">
         <ul>
-          <li><a href="/feed" {% if page=='feed' %}aria-current="page" {% endif %}>Feed</a></li>
-          <li><a href="/topics" {% if page=='topics' %}aria-current="page" {% endif %}>Topics</a></li>
-          <li><a href="/nurses" {% if page=='nurses' %}aria-current="page" {% endif %}>Find nurses</a></li>
+          <li><a href="/"{% if page == 'home' %} aria-current="page"{% endif %}>Home</a></li>
+          <li><a href="/jobs"{% if page == 'jobs' %} aria-current="page"{% endif %}>Jobs</a></li>
+          <li><a href="/topics"{% if page in ['topics', 'feed', 'nurses'] %} aria-current="page"{% endif %}>Community</a></li>
+          <li><a href="/learning"{% if page == 'learning' %} aria-current="page"{% endif %}>Learning</a></li>
+          <li><a href="/resources"{% if page == 'resources' %} aria-current="page"{% endif %}>Resources</a></li>
+          <li class="only-mobile"><a href="/employers">For employers</a></li>
           <li class="only-mobile"><a href="/auth/login">Sign in</a></li>
+          <li class="only-mobile"><a href="/auth/register">Create an account</a></li>
         </ul>
       </nav>
       {% endif %}
-
       <div class="header-actions">
+        {{ display_button() }}
         {% if user %}
-        <form method="post" action="/auth/logout" class="inline-form">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button type="submit" class="btn btn-secondary btn-sm">{{ icon('logout', 16) }}<span>Sign out</span></button>
-        </form>
+        <details class="header-popover notifications">
+          <summary class="icon-button" aria-label="Notifications">{{ icon('bell', 20) }}</summary>
+          <div class="popover-content"><strong>Keep in touch</strong><p>Check your network for connection requests and your inbox for messages.</p><a href="/network">View network {{ icon('arrow', 15) }}</a><a href="/messages">View messages {{ icon('arrow', 15) }}</a></div>
+        </details>
+        <a class="icon-button header-messages" href="/messages" aria-label="Messages">{{ icon('chat', 20) }}</a>
+        <details class="header-popover account-menu">
+          <summary aria-label="Account menu">
+            <span class="avatar avatar-sm" aria-hidden="true">{{ (user.full_name or user.community_name or 'N')[:1]|upper }}</span>
+            <span class="account-label"><strong>{{ user.full_name or user.community_name or 'My account' }}</strong><small>{{ user.account_type|capitalize }}</small></span>
+            {{ icon('chevron-down', 14) }}
+          </summary>
+          <div class="popover-content">
+            <p class="account-phone">{{ user.phone }}</p>
+            <a href="/profile">{{ icon('user', 17) }} My profile</a>
+            <a href="/settings">{{ icon('settings', 17) }} Settings</a>
+            <form method="post" action="/auth/logout"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit" class="menu-signout">{{ icon('logout', 17) }} Sign out</button></form>
+          </div>
+        </details>
         {% else %}
+        <a class="employer-nav hide-xs" href="/employers">For employers</a>
         <a class="btn btn-ghost btn-sm hide-xs" href="/auth/login">Sign in</a>
-        <a class="btn btn-primary btn-sm" href="/auth/register">Get started</a>
+        <a class="btn btn-primary btn-sm" href="/auth/register">Get started {{ icon('arrow', 15) }}</a>
         {% endif %}
-        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"
-          aria-controls="{% if user %}app-nav{% else %}site-nav{% endif %}">
-          {{ icon('menu', 22) }}
-        </button>
+        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="{% if user %}app-nav{% else %}site-nav{% endif %}">{{ icon('menu', 22) }}</button>
       </div>
     </div>
   </header>
+  {% endblock %}
 
-  <div class="{% if user %}app-shell{% endif %}">
+  <div class="{% if user %}app-shell{% else %}public-shell{% endif %}">
     {% if user %}
     <aside class="sidebar" id="app-nav">
       <nav aria-label="Primary">
+        <p class="side-heading">Your workspace</p>
         <ul class="side-list">
-          {{ nav_link(DASHBOARD_URL, 'dashboard', 'Dashboard', 'dashboard', page) }}
+          {{ nav_link('/auth/dashboard', 'dashboard', 'Dashboard', 'dashboard', page) }}
           {{ nav_link('/profile', 'profile', 'My profile', 'user', page) }}
-          {{ nav_link('/profile/verification', 'verification', 'Document review', 'shield', page) }}
+          {{ nav_link('/jobs', 'jobs', 'Jobs', 'briefcase', page) }}
+          {{ nav_link('/applications', 'applications', 'Applications', 'file', page) }}
+          {{ nav_link('/profile/verification', 'verification', 'Verification', 'shield', page) }}
+          {{ nav_link('/messages', 'messages', 'Messages', 'chat', page) }}
           {{ nav_link('/network', 'network', 'Network', 'users', page) }}
         </ul>
-
-        <p class="side-heading">Community</p>
+        <p class="side-heading">Grow together</p>
         <ul class="side-list">
-          {{ nav_link('/feed', 'feed', 'Feed', 'feed', page) }}
-          {{ nav_link('/topics', 'topics', 'Topics', 'topics', page) }}
-          {{ nav_link('/nurses', 'nurses', 'Find nurses', 'search', page) }}
+          {{ nav_link('/topics', 'topics', 'Community', 'globe', page) }}
+          {{ nav_link('/feed', 'feed', 'Discussions', 'feed', page) }}
+          {{ nav_link('/learning', 'learning', 'Learning', 'book', page) }}
+          {{ nav_link('/resources', 'resources', 'Resources', 'folder', page) }}
+          {{ nav_link('/settings', 'settings', 'Settings', 'settings', page) }}
         </ul>
-
+        {% if user.account_type == 'employer' %}
+        <p class="side-heading">Recruitment</p>
+        <ul class="side-list">{{ nav_link('/employers', 'employers', 'For employers', 'building', page) }}{{ nav_link('/nurses', 'nurses', 'Find nurses', 'search', page) }}</ul>
+        {% endif %}
         {% if user.is_staff %}
         <p class="side-heading">Staff</p>
-        <ul class="side-list">
-          {{ nav_link('/review', 'review', 'Document review queue', 'review', page) }}
-          {{ nav_link('/moderation', 'moderation', 'Moderation', 'flag', page) }}
-        </ul>
+        <ul class="side-list">{{ nav_link('/review', 'review', 'Document reviews', 'review', page) }}{{ nav_link('/moderation', 'moderation', 'Moderation', 'flag', page) }}</ul>
         {% endif %}
-
-        <p class="side-heading">Coming soon</p>
-        <ul class="side-list">
-          <li><span class="side-soon">{{ icon('briefcase', 18) }}<span>Jobs</span><em>Soon</em></span></li>
-          <li><span class="side-soon">{{ icon('mail', 18) }}<span>Messages</span><em>Soon</em></span></li>
-          <li><span class="side-soon">{{ icon('book', 18) }}<span>Learning</span><em>Soon</em></span></li>
-        </ul>
       </nav>
+      <div class="sidebar-note">{{ icon('heart', 23) }}<strong>Your next chapter starts here.</strong><p>Keep learning. Keep connecting. Keep making a difference.</p><a href="/resources">Explore resources {{ icon('arrow', 15) }}</a></div>
     </aside>
     {% endif %}
-
-    <main id="main" class="{% if user %}app-main{% else %}site-main{% endif %}">
-      {% block content %}{% endblock %}
-    </main>
+    <main id="main" tabindex="-1" class="{% if user %}app-main{% else %}site-main{% endif %}">{% block content %}{% endblock %}</main>
   </div>
 
   <footer class="site-footer">
-    <p>
-      Nurse.ng is not the Nursing and Midwifery Council of Nigeria; it does not
-      issue licences, and does not replace the official register.
-    </p>
+    {% if not user and not is_auth_page %}
+    <div class="footer-top"><div><a class="brand" href="/">{{ icon('logo', 28) }}<span>Nurse.ng</span></a><p>A better future for nursing, together.</p></div><nav aria-label="Footer"><a href="/jobs">Find jobs</a><a href="/topics">Community</a><a href="/employers">For employers</a><a href="/resources">Resources</a></nav></div>
+    {% endif %}
+    <div class="footer-bottom"><span>© {{ now_year|default(2026) }} Nurse.ng</span><p>Nurse.ng is not the Nursing and Midwifery Council of Nigeria; it does not issue licences, and does not replace the official register.</p></div>
   </footer>
-
-  <script>
-    (function () {
-      var toggle = document.querySelector('.nav-toggle');
-      if (!toggle) return;
-      toggle.addEventListener('click', function () {
-        var open = document.body.classList.toggle('nav-open');
-        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      });
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && document.body.classList.contains('nav-open')) {
-          document.body.classList.remove('nav-open');
-          toggle.setAttribute('aria-expanded', 'false');
-          toggle.focus();
-        }
-      });
-    })();
-  </script>
+  <div class="toast" role="status" aria-live="polite" hidden></div>
+  {{ display_dialog() }}
+  <dialog id="mobile-navigation" class="mobile-navigation" aria-label="Main navigation">
+    <div class="mobile-navigation-heading"><strong>Menu</strong><button type="button" class="icon-button" data-navigation-close aria-label="Close navigation">{{ icon('close', 22) }}</button></div>
+    <div data-navigation-content></div>
+  </dialog>
+  {% block scripts %}{% endblock %}
 </body>
-
 </html>

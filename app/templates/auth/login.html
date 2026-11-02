@@ -1,44 +1,29 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
-
+{% from "_display.html" import display_button %}
 {% block title %}Sign in — Nurse.ng{% endblock %}
-
+{% block header %}
+<header class="site-header auth-header"><div class="site-header-inner"><a class="brand" href="/">{{ icon('logo', 31) }}<span>Nurse.ng</span></a><p class="header-hint">New to Nurse.ng? <a href="/auth/register">Get started {{ icon('arrow', 15) }}</a></p>{{ display_button() }}</div></header>
+{% endblock %}
 {% block content %}
-<section class="auth-split">
+<section class="auth-split auth-split-login">
   <aside class="auth-panel">
-    <h2>Welcome back to your professional community.</h2>
-    <p>Pick up your conversations, check your network and manage what your profile shares.</p>
-    <ul class="checklist">
-      <li>Your profile stays private until you choose to share it</li>
-      <li>Document review is always labelled separately</li>
-      <li>Reply to discussions and follow nurses</li>
-    </ul>
+    <div class="auth-panel-copy"><p class="hero-eyebrow"><span></span> Your community is here</p><h2>A little support.<br>A world of<br>possibilities.</h2><p>Pick up where you left off. Your next conversation, connection, and career opportunity are waiting.</p><ul class="checklist"><li>A professional profile that tells your story</li><li>Opportunities to do work that matters</li><li>A community that grows with you</li></ul></div>
+    <div class="auth-photo"><img src="{{ url_for('static', path='/img/healthcare-team.jpg') }}" alt="A team of nurses and healthcare colleagues" width="1200" height="800"><div><strong>It's good to have you back.</strong><span>Your people. Your possibilities.</span></div></div>
   </aside>
-
-  <div class="auth-form-wrap">
-    <div class="auth-card">
-      <h1>Sign in to Nurse.ng</h1>
-      <p class="lede">Enter the phone number and password you registered with.</p>
-
-      {% if error %}
-      <p class="form-error" role="alert">{{ error }}</p>
-      {% endif %}
-
-      <form method="post" action="/auth/login" class="stacked-form" novalidate>
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-
-        <label for="phone">Phone number</label>
-        <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" value="{{ phone or '' }}"
-          placeholder="+234 801 234 5678" required>
-
-        <label for="password">Password</label>
-        <input id="password" name="password" type="password" autocomplete="current-password" required>
-
-        <button type="submit">Sign in</button>
-      </form>
-
-      <p class="form-alt">New here? <a href="/auth/register">Create an account</a>.</p>
-    </div>
-  </div>
+  <div class="auth-form-wrap"><div class="auth-card">
+    <span class="welcome-icon">{{ icon('heart', 27) }}</span><p class="eyebrow">Your next chapter continues</p><h1>Welcome back.</h1><p class="lede">Sign in to your Nurse.ng account.</p>
+    {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+    <form method="post" action="/auth/login" class="stacked-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label for="phone">Phone number</label>
+      <div class="input-affix"><span class="affix-left"><span class="flag-ng" aria-hidden="true"></span></span><input class="has-left" id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" value="{{ phone or '' }}" placeholder="+234 801 234 5678" required></div>
+      <label for="password">Password</label>
+      <div class="input-affix"><input class="has-right" id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required><button class="affix-right" type="button" data-toggle-password="password" aria-label="Show password" aria-pressed="false">{{ icon('eye', 18) }}</button></div>
+      <button type="submit" class="btn btn-primary btn-block">Sign in {{ icon('arrow', 17) }}</button>
+    </form>
+    <p class="auth-privacy">{{ icon('lock', 14) }} A secure space for your professional journey.</p>
+    <p class="form-alt">New here? <a href="/auth/register">Create an account</a></p>
+  </div></div>
 </section>
 {% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Resources — Nurse.ng{% endblock %}
+{% block content %}
+<section class="community-page">
+  <div class="resource-intro"><p class="eyebrow">A little guidance, a long way</p><h1>Here for every step.</h1><p class="lede">Get comfortable, build your professional presence, and make the most of your Nurse.ng community.</p></div>
+  <div class="resource-grid" style="margin-bottom:30px">
+    <article class="resource-card"><span class="feature-icon">{{ icon('user', 25) }}</span><h2>A profile that tells your story</h2><p>Add your experience, qualifications, and skills. A thoughtful introduction helps people understand the difference you can make.</p><a class="text-link" href="/profile/edit">Build your profile {{ icon('arrow', 16) }}</a></article>
+    <article class="resource-card"><span class="feature-icon">{{ icon('users', 25) }}</span><h2>Find your professional circle</h2><p>Explore nursing discussions, share a perspective, and meet people who understand your everyday work.</p><a class="text-link" href="/topics">Meet the community {{ icon('arrow', 16) }}</a></article>
+  </div>
+  <h2 style="margin-bottom:20px">Good to know</h2>
+  <details class="guide" open><summary>Who can join Nurse.ng?</summary><div>Nurses at every stage, healthcare employers, and partners are welcome. Choose your account type when you register. Nurses can build profiles and apply for jobs; employers can publish opportunities and review applications.</div></details>
+  <details class="guide"><summary>Who can see my profile?</summary><div>Your profile starts private. Use <a href="/profile/sharing">sharing controls</a> to choose which fields can be public. Publishing your profile adds it to nurse discovery; making it private removes it again. Document uploads are never shown on your public profile.</div></details>
+  <details class="guide"><summary>What does “Document reviewed” mean?</summary><div>A reviewer has inspected the submitted licence or certificate and identity document and matched the names. It does not confirm the licence against the NMCN register, certify authenticity, or assess clinical competence. The official register remains the source for registration checks. <a href="/profile/verification">Learn about document review</a>.</div></details>
+  <details class="guide"><summary>How do job applications work?</summary><div>Open a role, introduce yourself, and agree to share the contact details shown on the application form with that employer. Track the application in your workspace. Your private profile fields are not included automatically.</div></details>
+  <details class="guide"><summary>How do I start a conversation?</summary><div>Choose a unique community name in <a href="/community/settings">community settings</a>, then join a public discussion. To send a private message, first make a connection that the other person accepts.</div></details>
+  <details class="guide"><summary>Where can I check official registration information?</summary><div>Visit the <a href="https://www.nmcn.gov.ng/" target="_blank" rel="noopener noreferrer">Nursing and Midwifery Council of Nigeria {{ icon('external', 14) }}<span class="sr-only">(opens in a new tab)</span></a> for official information about registration and professional practice.</div></details>
+</section>
+{% endblock %}

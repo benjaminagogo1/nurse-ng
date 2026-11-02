@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Messages — Nurse.ng{% endblock %}
+{% block content %}
+<section class="community-page">
+  <p class="eyebrow">A conversation can change everything</p><div class="page-heading-row"><div><h1>Messages</h1><p class="lede">Keep in touch with your professional connections.</p></div><a class="text-link hide-xs" href="/network">My network {{ icon('arrow', 16) }}</a></div>
+  <div class="inbox">
+    <aside class="inbox-contacts" aria-label="Conversations"><h2>Your connections</h2>{% for contact in contacts %}<a class="contact-row" href="/messages/{{ contact.id }}"{% if recipient and recipient.id == contact.id %} aria-current="page"{% endif %}><span class="avatar">{{ (contact.community_name or 'N')[:1]|upper }}</span><span><strong>{{ contact.community_name or 'Nurse' }}</strong><small>Connected on Nurse.ng</small></span>{{ icon('chevron', 15) }}</a>{% else %}<p class="field-hint">Your accepted connections appear here.</p><a class="text-link" href="/nurses">Find your people {{ icon('arrow', 15) }}</a>{% endfor %}</aside>
+    <div class="inbox-thread">
+      {% if recipient %}
+      <div class="thread-header"><span class="avatar">{{ (recipient.community_name or 'N')[:1]|upper }}</span><div><h2>{{ recipient.community_name or 'Nurse' }}</h2><small>Your professional connection</small></div></div>
+      <div class="thread-messages">
+        {% for message in messages %}<div class="message-bubble{% if message.sender_id == user.id %} is-mine{% endif %}"><p>{{ message.body }}</p><time datetime="{{ message.created_at.isoformat() }}">{{ message.created_at.strftime('%d %b · %H:%M') }} UTC</time></div>{% else %}<div class="empty-state compact-empty"><span class="empty-icon">{{ icon('chat', 28) }}</span><h3>Start with a hello.</h3><p>A thoughtful conversation is the beginning of a stronger connection.</p></div>{% endfor %}
+        <span id="latest"></span>
+      </div>
+      {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+      <form class="message-compose" method="post" action="/messages/{{ recipient.id }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label class="sr-only" for="message-body">Your message</label><textarea id="message-body" name="body" rows="2" maxlength="3000" placeholder="Write a message…" required>{{ body }}</textarea><button type="submit" class="btn btn-primary">Send {{ icon('arrow', 17) }}</button></form>
+      {% else %}
+      <div class="empty-state inbox-empty"><span class="empty-icon">{{ icon('chat', 30) }}</span><h2>Good connections start with a conversation</h2><p>{% if contacts %}Choose a connection to say hello, share an idea, or ask for advice.{% else %}Connect with fellow nurses to start a private conversation.{% endif %}</p>{% if not contacts %}<a class="btn btn-primary" href="/nurses">Explore the community {{ icon('arrow', 17) }}</a>{% endif %}</div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

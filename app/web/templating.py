@@ -33,7 +33,21 @@ def render(
     ``headers`` carries response metadata such as ``Retry-After`` when a
     rate-limited form is re-rendered.
     """
-    template_context: dict[str, Any] = {"csrf_token": csrf_token(request)}
+    path = request.url.path
+    section = path.strip("/").split("/")[0] or "home"
+    if path == "/auth/dashboard":
+        section = "dashboard"
+    elif path.startswith("/profile/verification"):
+        section = "verification"
+    elif section in {"posts", "feed"}:
+        section = "feed"
+    elif section == "community":
+        section = "settings"
+    template_context: dict[str, Any] = {
+        "csrf_token": csrf_token(request),
+        "page": section,
+        "is_auth_page": name in {"auth/login.html", "auth/register.html"},
+    }
     if context:
         template_context.update(context)
     return templates.TemplateResponse(

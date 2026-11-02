@@ -1,7 +1,10 @@
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import PlainTextResponse
+from sqlalchemy.orm import Session
 
+from app.db.session import get_db
 from app.models.user import User
+from app.web.auth_routes import dashboard
 from app.web.deps import get_current_user
 from app.web.templating import render
 
@@ -24,5 +27,8 @@ def robots_txt() -> str:
 def home(
     request: Request,
     user: User | None = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ) -> Response:
+    if user is not None:
+        return dashboard(request, user, db)
     return render(request, "home.html", {"title": "Nurse.ng", "user": user})

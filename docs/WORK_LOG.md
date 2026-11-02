@@ -493,3 +493,70 @@ The user explicitly approved execution of the full verification set. A first tes
 | `git diff --check` | **Passed** (no whitespace errors) |
 
 This is the pre-hardening result: the previously documented 89 cases plus 14 community cases. Migration drift and reversibility remain for the final isolated verification after the new hardening revision is written.
+
+---
+
+## Session 2026-11-02 — Resuming the interface refresh
+
+### 1. Reconstructed unfinished work
+
+- **User direction:** continue where the work stopped. Reviewed the existing uncommitted interface refresh, job applications, private messaging, account settings, profile additions, and document-upload wiring. These changes were already present when this session resumed.
+- **Finding:** the local database still has the two community migration heads and lacks account names/types, additional profile fields, jobs, applications, and messages. Creating tables from model metadata in tests would hide this deployment gap.
+- **Finding:** the pending compatibility-marker edit changed its historical parent, even though the development database still records both original heads. Preserve the original branch ancestry and add an explicit merge before the new schema revision (L70).
+- **Initial verification:** Ruff (Python linter) found four long lines in the new resources route; wrapped them. The sandboxed test suite and a separate health-check test stalled in the asynchronous test client's thread bridge. Requested the same test suite outside the sandbox; its result is pending.
+- **Next work:** finish migrations, verify fresh and existing database upgrades in temporary copies, exercise the new account/job/message flows, fix regressions, and record actual results. Existing source changes and historical records are preserved.
+
+### 2. Baseline results and migration repair
+
+- **Tests outside the sandbox:** 101 passed and 3 failed in 73.92 seconds. The failures were missing public/private profile labels and a review-submission label in redesigned templates. Restored explicit visibility labels and changed the review button to “Submit for review”.
+- **Fresh migration failure:** `d7a9e3f5b1c2` also declared the community-name key/lock columns owned by hardening. This caused an Alembic (database migration tool) circular column dependency. Removed those duplicate declarations; the hardening revision remains their sole owner. The compatibility marker preserves its original parent; `f9a2b3c4d5e6` merges both heads.
+- **Schema revision:** generated `b2c3d4e5f6a7` against an isolated database successfully migrated through the merge. It adds account names and roles, qualification/experience/skills, jobs, applications, and private messages, including foreign keys and the unique job/applicant constraint.
+- **Interface connections:** added a message link for accepted active network connections; replaced an unsupported “caught up” notification claim with links to actual requests/messages; removed duplicate file-input JavaScript already handled by the shared script.
+
+### 3. Regression coverage and local database upgrade
+
+- **New tests:** `tests/test_workspace_flows.py` covers account details and role/staff boundaries, duplicate email rollback, employer-only posting and job filters, application consent/contact snapshots/employer isolation/withdrawal, accepted active connection permissions, message escaping and read tracking, protected pages, and explicit sharing of qualification, experience (including zero), and skills.
+- **Migration test:** `tests/test_migrations.py` starts from the two historical heads, inserts an existing account, upgrades and checks metadata drift, verifies old data and new defaults, downgrades the new increment and re-upgrades, then exercises a full downgrade to base and a fresh upgrade. Added Alembic's explicit operating-system path separator to remove its configuration deprecation warning.
+- **Results:** the first 10 new tests passed in 20.18 seconds. After adding the extended-profile privacy case, the complete suite passed: **115 tests in 87.79 seconds**, with no warnings. Ruff reported “All checks passed!”; the dependency check reported “No broken requirements found”; `git diff --check` passed.
+- **Data preservation:** saved `/tmp/nurse-ng-before-refresh-20261102.db`, upgraded a separate copy, and compared every original column value across all 14 existing application tables. All values were preserved; Alembic detected no schema drift.
+- **Local application database:** applied the same merge and schema revisions successfully to `b2c3d4e5f6a7`; the subsequent schema-drift check passed. No account or content fixtures were added to the application database.
+
+### 4. Browser review
+
+- **Environment:** a temporary application server, a separate browser database, and headless Chrome. Temporary accounts exist only in the browser database. The browser runner is `/tmp/nurse-ng-browser-check.py`; screenshots and logs are under `/tmp/nurse-ng-browser-review/`.
+- **First attempts:** Chrome did not initialise within the first allowance; disabling its system keyring and allowing more startup time resolved that. The next runner stopped because it expected registration to redirect to `/auth/dashboard`; the application correctly redirects to `/`, which renders the member dashboard. Corrected the runner.
+- **Completed journeys:** real browser registration and profile editing, password visibility, public and signed-in mobile menus, and navigation through profile, verification, jobs, applications, messages, network, topics, feed, learning, resources, and settings. No application script exceptions, failed page/asset responses, or broken images were reported in that pass.
+- **Visual findings:** fixed the keyboard skip link peeking from the left edge, aligned public mobile navigation actions to the right, and corrected a full-width form plus margins overflowing the settings screen. Reduced the base input selector's specificity so the refreshed component styles can apply; reset the header-search input's minimum height to fit its container.
+- **Final visual verification:** passed after enabling keyboard focus emulation in the headless browser. The skip link is fully hidden when unfocused and visible on focus. Desktop landing/dashboard layouts and all checked mobile pages fit their viewport, including settings at 390 pixels. Public and member menus, Escape dismissal, password visibility, registration, and profile editing passed. No application script exceptions, failed page/asset responses, or broken images were detected. Temporary servers and browsers were stopped after each attempt.
+- **Completion documentation:** updated README status and the decision record with the inherited feature boundaries, migration repair, actual verification results, and remaining placeholder functionality. No Git history reconciliation, commits, or publication were performed.
+
+---
+
+## Session 2026-11-02 — Dark mode and accessibility
+
+### 1. Direction and implementation
+
+- **User direction:** implement dark mode and accessibility. The preceding discussion confirmed that the dashboard at `/` is expected for a valid existing session; no routing or authentication change was made during this increment.
+- **Decision:** recorded L72 before implementation: System/Light/Dark themes plus independent larger-text, higher-contrast, and reduced-motion options. Preferences belong to the browser. Device motion preferences remain authoritative even when the additional reduction option is off.
+- **Display controls:** added `_display.html`, `display.js`, and `appearance.css`. An early script applies the stored preference before styles load; guarded storage access falls back safely when storage is unavailable. Changes persist across navigation and reloads; system-theme changes and storage events update the current page. The dialog includes a reset action and explains when saving is unavailable.
+- **Entry points:** added the display button to public/member headers, login and registration headers, and account settings. Native dialog behavior supplies focus isolation, Escape dismissal, and restoration to the opener.
+- **Appearance:** added dark surface/text/status palettes, clearer input borders and focus rings, readable secondary labels, larger touch targets, text enlargement that uses relative sizing, high-contrast controls, forced-color handling, and reduced-motion styling. Photographs retain their original colors; higher contrast removes decorative photo backgrounds.
+- **Navigation/accessibility:** moved mobile navigation into a native dialog so links are inaccessible while it is closed and page controls cannot take focus while it is open. Desktop navigation is restored at the breakpoint. Removed the old backdrop element and the single-character search shortcut, which could interfere with speech input. Added a stable accessible account-menu name, specific file-upload names/hints, a focusable main landmark, and focus on returned form errors.
+
+### 2. Verification and corrections
+
+- **Regression suite:** **115 passed in 91.44 seconds**. Ruff (Python linter), JavaScript syntax checks, and `git diff --check` passed. There is no schema change or new dependency for this feature.
+- **Browser environment:** used an isolated local server/database and Chrome, with axe-core 4.10.3 as a temporary auditing tool. The audit runner and cases are `/tmp/nurse-ng-accessibility-check.py` and `/tmp/nurse-ng-accessibility-cases.py`. Results and screenshots are under `/tmp/nurse-ng-accessibility-review/`.
+- **Harness corrections:** native dialogs permit focus to reach browser controls; the test now distinguishes that from background page focus. Native Escape/Tab handling also required virtual key codes in browser automation. These were test-runner fixes, not replacements for native keyboard behavior.
+- **Findings fixed:** the first content audit found insufficient dark-mode contrast in dashboard labels, quick links, and a remaining white card footer. Corrected those colors and the statistic numbers/progress track. Enlarged text initially overflowed a 320-pixel header; simplified redundant header controls on very narrow screens while keeping their destinations in navigation.
+- **Automated accessibility result:** **38 page/theme states, zero reported violations** under the selected WCAG (Web Content Accessibility Guidelines) A/AA rules through version 2.2. Coverage includes public landing/login/registration, the preferences dialog, mobile navigation, dashboard, profile/edit/verification, jobs, applications, messages/conversation, network, topics/feed, learning/resources, settings, and a higher-contrast enlarged-text state. Some image/background contrast and ARIA (Accessible Rich Internet Applications) relationships remain marked for manual review by the auditing tool; this is not a certification claim.
+- **Behavior checks:** verified saved theme across navigation/reload, live system-theme changes, explicit overrides, device reduced motion, reset, blocked-storage fallback, keyboard navigation, Escape and focus restoration, and no focus on hidden navigation. Main mobile pages fit a 320-pixel viewport with enlarged text. No application script exceptions, failed page/asset responses, or broken images were reported.
+- **Final polish and verification:** increased quick-action/tag legibility and aligned tag colors with the chosen theme. The focused final check passed: dark dashboard contrast, enlarged-text reflow at 320 pixels, named buttons/radios/checkboxes in the browser accessibility tree, rejection of background focus while the dialog is open, and visible borders/focus styling in forced colors. Runner: `/tmp/nurse-ng-display-final-check.py`; screenshots: `/tmp/nurse-ng-display-final-review/`. Temporary browsers and servers were stopped. Final syntax, lint, and whitespace checks passed.
+
+---
+
+## Session 2026-11-02 — Product and engineering assessment recorded
+
+- **User direction:** transfer the entire assessment into `BUILD_PLAN.md`.
+- **Documentation:** appended the full assessment to [BUILD_PLAN.md](BUILD_PLAN.md#current-product-and-engineering-assessment--2-november-2026), including its opening qualifications, six-area comparison, all six priorities and their explanations, source references, and the next-cycle recommendation. Preserved the original plan and identified its historical stack and registration proposals separately from the current application.
+- **Scope:** recommendations remain proposed work. This documentation update changes no application behavior; the cited test and accessibility results are from the preceding implementation work.

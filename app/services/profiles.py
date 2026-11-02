@@ -61,6 +61,15 @@ class ProfileError(ValueError):
     """A profile input the user can correct."""
 
 
+def _clean(value: str, *, field: str, max_length: int, required: bool = False) -> str:
+    cleaned = (value or "").strip()
+    if required and not cleaned:
+        raise ProfileError(f"{field} is required.")
+    if len(cleaned) > max_length:
+        raise ProfileError(f"{field} must be at most {max_length} characters.")
+    return cleaned
+
+
 def field_visibility(db: Session, profile: NurseProfile, field: str) -> str:
     """Return the visibility for one profile field.
 
@@ -100,7 +109,7 @@ def _clean_years(value: object) -> int | None:
     cleaned = str(value if value is not None else "").strip()
     if not cleaned:
         return None
-    if not cleaned.isdigit():
+    if not cleaned.isascii() or not cleaned.isdigit() or len(cleaned) > 2:
         raise ProfileError("Years of experience must be a whole number.")
     years = int(cleaned)
     if years > YEARS_EXPERIENCE_MAX:

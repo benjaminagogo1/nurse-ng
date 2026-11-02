@@ -1,21 +1,28 @@
 """Registration, sign-in, sign-out, and the authenticated account page."""
 
+from datetime import UTC, datetime, timedelta
 from math import ceil
 
 from fastapi import APIRouter, Depends, Form, Request, Response, status
 from fastapi.responses import RedirectResponse
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.ratelimit import FixedWindowLimiter
 from app.db.session import get_db
-from app.models.user import User
+from app.models.jobs import Job, JobStatus
+from app.models.user import AccountType, User
 from app.services.auth import (
     AuthError,
     LoginLockedError,
     authenticate_user,
     register_user,
 )
+from app.services.community import list_connections, list_received_requests, list_topics
+from app.services.jobs import job_card, list_open_jobs
+from app.services.messages import unread_count
+from app.services.profiles import get_profile_for_user
 from app.web.deps import get_current_user, require_user, verify_csrf
 from app.web.templating import render
 
@@ -72,11 +79,19 @@ def _start_session(request: Request, user: User) -> None:
 @router.get("/register")
 def register_form(
     request: Request,
+    role: str = "nurse",
     user: User | None = Depends(get_current_user),
 ) -> Response:
     if user is not None:
         return RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
-    return render(request, "auth/register.html", {"title": "Create your account"})
+    return render(
+        request,
+        "auth/register.html",
+        {
+            "title": "Create your account",
+            "role": role if role in {item.value for item in AccountType} else "nurse",
+        },
+    )
 
 
 @router.post("/register")
@@ -84,17 +99,27 @@ def register(
     request: Request,
     phone: str = Form(""),
     password: str = Form(""),
-    confirm_password: str = Form(""),
+    confirm_password: str | None = Form(None),
+    full_name: str = Form(""),
+    email: str = Form(""),
+    role: str = Form("nurse"),
     _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
 ) -> Response:
+    values = {
+        "title": "Create your account",
+        "phone": phone,
+        "full_name": full_name,
+        "email": email,
+        "role": role if role in {item.value for item in AccountType} else "nurse",
+    }
     ip = _client_ip(request)
     if _register_ip_limiter.is_limited(ip):
         retry_after = _register_ip_limiter.retry_after(ip)
         return _render_rate_limited(
             request,
             "auth/register.html",
-            {"title": "Create your account", "phone": phone},
+            values,
             message=(
                 "Too many accounts were created from this connection. "
                 f"Try again in {_minutes(retry_after)} minute(s)."
@@ -103,25 +128,27 @@ def register(
         )
     _register_ip_limiter.record(ip)
 
-    if password != confirm_password:
+    if confirm_password is not None and password != confirm_password:
         return render(
             request,
             "auth/register.html",
             {
-                "title": "Create your account",
-                "phone": phone,
+                **values,
                 "error": "The two passwords do not match.",
             },
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 
     try:
-        user = register_user(db, phone=phone, password=password)
+        user = register_user(
+            db, phone=phone, password=password, full_name=full_name,
+            email=email, account_type=role,
+        )
     except AuthError as exc:
         return render(
             request,
             "auth/register.html",
-            {"title": "Create your account", "phone": phone, "error": str(exc)},
+            {**values, "error": str(exc)},
             status_code=status.HTTP_409_CONFLICT
             if "already exists" in str(exc)
             else status.HTTP_400_BAD_REQUEST,
@@ -207,5 +234,39 @@ def logout(
 def dashboard(
     request: Request,
     user: User = Depends(require_user),
+    db: Session = Depends(get_db),
 ) -> Response:
-    return render(request, "auth/dashboard.html", {"title": "Your account", "user": user})
+    profile = get_profile_for_user(db, user.id)
+    completion_fields = (
+        "display_name", "headline", "location", "bio", "qualification", "skills",
+    )
+    completed = sum(bool(getattr(profile, field, "")) for field in completion_fields)
+    if profile and profile.years_experience is not None:
+        completed += 1
+    if profile and profile.document_reviewed_at:
+        completed += 1
+    name = (profile.display_name if profile else "") or user.full_name or user.community_name
+    new_job_count = db.scalar(
+        select(func.count(Job.id)).where(
+            Job.status == JobStatus.OPEN,
+            Job.posted_at >= datetime.now(UTC) - timedelta(days=7),
+        )
+    ) or 0
+    return render(
+        request,
+        "auth/dashboard.html",
+        {
+            "title": "Dashboard",
+            "page": "dashboard",
+            "user": user,
+            "profile": profile,
+            "greeting_name": name.split()[0] if name else "",
+            "profile_completion": round(completed / 8 * 100),
+            "new_job_count": new_job_count,
+            "connection_count": len(list_connections(db, user.id)),
+            "unread_count": unread_count(db, user),
+            "pending_requests": len(list_received_requests(db, user.id)),
+            "jobs": [job_card(job) for job in list_open_jobs(db, limit=3)],
+            "topics": list_topics(db)[:3],
+        },
+    )

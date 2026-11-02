@@ -7,7 +7,10 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.core.config import settings
 from app.web.auth_routes import router as auth_router
 from app.web.community_routes import router as community_router
+from app.web.jobs_routes import router as jobs_router
+from app.web.messages_routes import router as messages_router
 from app.web.moderation_routes import router as moderation_router
+from app.web.pages_routes import router as pages_router
 from app.web.profile_routes import public_router
 from app.web.profile_routes import router as profile_router
 from app.web.review_routes import router as review_router
@@ -33,6 +36,9 @@ def create_app() -> FastAPI:
     app.include_router(review_router)
     app.include_router(community_router)
     app.include_router(moderation_router)
+    app.include_router(jobs_router)
+    app.include_router(messages_router)
+    app.include_router(pages_router)
     app.include_router(public_router)
     return app
 

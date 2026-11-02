@@ -4,20 +4,18 @@ Password hashing lives in ``app.core.security``. This module owns the rules
 around account creation and sign-in, not the password primitive.
 """
 
+import re
 from datetime import UTC, datetime, timedelta
 from math import ceil
-import re
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-from app.models.user import AccountType, User, UserStatus
-
 
 from app.core.config import settings
 from app.core.security import hash_password, verify_password
 from app.core.validators import E164_RE, normalize_phone
-from app.models.user import User, UserStatus
+from app.models.user import AccountType, User, UserStatus
 
 MIN_PASSWORD_LENGTH = 8
 MAX_PASSWORD_LENGTH = 128
@@ -92,9 +90,25 @@ def validate_password(password: str) -> str:
     return password
 
 
-def register_user(db: Session, *, phone: str, password: str) -> User:
+def register_user(
+    db: Session,
+    *,
+    phone: str,
+    password: str,
+    full_name: str = "",
+    email: str = "",
+    account_type: str = AccountType.NURSE.value,
+) -> User:
     """Create an active user. Raises ``AuthError`` for invalid input."""
     validate_password(password)
+    full_name = full_name.strip()
+    email = email.strip()
+    if len(full_name) > 120:
+        raise AuthError("Your name must be at most 120 characters.")
+    if email and (len(email) > 254 or not _EMAIL_RE.fullmatch(email)):
+        raise AuthError("Enter a valid email address.")
+    if account_type not in {role.value for role in AccountType}:
+        raise AuthError("Choose a nurse, employer, or partner account.")
 
     normalised = normalize_phone(phone)
     if not E164_RE.match(normalised):
@@ -104,7 +118,15 @@ def register_user(db: Session, *, phone: str, password: str) -> User:
     if existing is not None:
         raise AuthError("An account with that phone number already exists.")
 
-    user = User(phone=normalised, hashed_password="")
+    user = User(
+        phone=normalised,
+        full_name=full_name,
+        email=email or None,
+        account_type=account_type,
+        hashed_password="",
+    )
+    if user.email and db.scalar(select(User.id).where(User.email == user.email)) is not None:
+        raise AuthError("An account with that email address already exists.")
     user.set_password(password)
     db.add(user)
     try:
@@ -112,7 +134,7 @@ def register_user(db: Session, *, phone: str, password: str) -> User:
     except IntegrityError:
         # The unique constraint is the authority if two requests race.
         db.rollback()
-        raise AuthError("An account with that phone number already exists.") from None
+        raise AuthError("An account with that phone number or email already exists.") from None
 
     db.refresh(user)
     return user
@@ -153,3 +175,18 @@ def authenticate_user(db: Session, *, phone: str, password: str) -> User | None:
 
     _clear_lock_state(db, user)
     return user
+
+
+def save_account_details(db: Session, user: User, *, full_name: str, email: str) -> None:
+    full_name, email = full_name.strip(), email.strip()
+    if not full_name or len(full_name) > 120:
+        raise AuthError("Enter your full name (up to 120 characters).")
+    if email and (len(email) > 254 or not _EMAIL_RE.fullmatch(email)):
+        raise AuthError("Enter a valid email address.")
+    user.full_name = full_name
+    user.email = email or None
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise AuthError("An account with that email address already exists.") from None

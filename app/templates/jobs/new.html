@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Post a job — Nurse.ng{% endblock %}
+
+{% block content %}
+<section class="form-page">
+      <p class="eyebrow">Employers</p>
+      <h1>Post a job</h1>
+      <p class="lede">Your listing appears on the public jobs page straight away.</p>
+
+      {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+
+      <form method="post" action="/jobs" class="stacked-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+            <label for="title">Job title</label>
+            <input id="title" name="title" maxlength="120" value="{{ values.title }}" required>
+
+            <label for="organization">Organization</label>
+            <input id="organization" name="organization" maxlength="160" value="{{ values.organization }}" required>
+
+            <label for="location">Location <span class="optional">(optional)</span></label>
+            <input id="location" name="location" maxlength="120" value="{{ values.location }}" placeholder="e.g. Lagos">
+
+            <label for="job_type">Job type</label>
+            <select id="job_type" name="job_type">
+                  {% for value, label in job_types %}
+                  <option value="{{ value }}" {% if values.job_type==value %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+            </select>
+
+            <label for="work_mode">Work mode</label>
+            <select id="work_mode" name="work_mode">
+                  {% for value, label in work_modes %}
+                  <option value="{{ value }}" {% if values.work_mode==value %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+            </select>
+
+            <label for="salary_min">Minimum salary per month (₦) <span class="optional">(optional)</span></label>
+            <input id="salary_min" name="salary_min" inputmode="numeric" value="{{ values.salary_min }}">
+
+            <label for="salary_max">Maximum salary per month (₦) <span class="optional">(optional)</span></label>
+            <input id="salary_max" name="salary_max" inputmode="numeric" value="{{ values.salary_max }}">
+
+            <label for="description">Description <span class="optional">(optional)</span></label>
+            <textarea id="description" name="description" rows="8" maxlength="5000">{{ values.description }}</textarea>
+
+            <button type="submit">Publish job</button>
+      </form>
+</section>
+{% endblock %}

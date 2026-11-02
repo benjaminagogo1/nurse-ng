@@ -1,81 +1,24 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
-{% set page = 'jobs' %}
-
-{% block title %}Job Opportunities — Nurse.ng{% endblock %}
-
+{% block title %}Job opportunities — Nurse.ng{% endblock %}
 {% block content %}
-{# ======= SAMPLE DATA: replace with real jobs from your database later ======= #}
-{% set jobs = [
-{'title': 'Registered Nurse', 'org': 'Lagos State University Teaching Hospital, Lagos', 'salary': '₦300,000 -
-₦450,000/month', 'type': 'Full-time', 'mode': 'On-site', 'posted': '2 days ago', 'icon': 'heart'},
-{'title': 'ICU Nurse', 'org': 'Riverside Hospital, Abuja', 'salary': '₦400,000 - ₦600,000/month', 'type': 'Full-time',
-'mode': 'On-site', 'posted': '3 days ago', 'icon': 'shield'},
-{'title': 'Midwife', 'org': 'Maternal Health Foundation, Port Harcourt', 'salary': '₦250,000 - ₦350,000/month', 'type':
-'Full-time', 'mode': 'On-site', 'posted': '4 days ago', 'icon': 'users'},
-{'title': 'Community Health Nurse', 'org': 'Global Health Initiative, Kaduna', 'salary': '₦180,000 - ₦250,000/month',
-'type': 'Contract', 'mode': 'Field', 'posted': '5 days ago', 'icon': 'building'},
-{'title': 'Theatre Nurse', 'org': 'National Hospital, Abuja', 'salary': '₦350,000 - ₦500,000/month', 'type':
-'Full-time', 'mode': 'On-site', 'posted': '6 days ago', 'icon': 'review'}
-] %}
-{# ======= END SAMPLE DATA ======= #}
-
 <section class="jb">
-      <h1>Job Opportunities</h1>
-      <p class="form-notice">Sample listings for the design preview. Real jobs appear here once employers post them.</p>
-      <p class="lede">Find the right job that fits your skills and goals.</p>
-
-      <div class="filter-bar" role="group" aria-label="Job type">
-            <button type="button" class="pill-tab" data-filter="all" aria-pressed="true">All Jobs</button>
-            <button type="button" class="pill-tab" data-filter="Full-time" aria-pressed="false">Full-time</button>
-            <button type="button" class="pill-tab" data-filter="Part-time" aria-pressed="false">Part-time</button>
-            <button type="button" class="pill-tab" data-filter="Contract" aria-pressed="false">Contract</button>
-            <button type="button" class="pill-tab" data-filter="Internship" aria-pressed="false">Internship</button>
-            <button type="button" class="btn btn-secondary btn-sm spacer">{{ icon('filter', 16)
-                  }}<span>Filter</span></button>
-      </div>
-
-      <div class="job-list">
-            {% for job in jobs %}
-            <article class="job-row" data-type="{{ job.type }}">
-                  <span class="job-logo">{{ icon(job.icon, 22) }}</span>
-                  <div class="job-main">
-                        <a class="job-title" href="#">{{ job.title }}</a>
-                        <p class="job-org">{{ job.org }}</p>
-                        <p class="job-salary">{{ job.salary }}</p>
-                        <span class="tag">{{ job.type }}</span><span class="tag">{{ job.mode }}</span>
-                  </div>
-                  <div class="job-side">
-                        {{ icon('chevron', 20) }}
-                        <span class="job-time">{{ job.posted }}</span>
-                  </div>
-            </article>
-            {% endfor %}
-            <div class="empty-state" id="jobs-empty" hidden>
-                  <h2>No jobs in this category yet</h2>
-                  <p>Check back soon, or view all jobs.</p>
-            </div>
-      </div>
+  <p class="eyebrow">Do work that matters</p>
+  <div class="page-heading-row"><div><h1>Job opportunities</h1><p class="lede">Find the right role for your skills and your ambitions.</p></div>{% if is_employer %}<a class="btn btn-primary" href="/jobs/new">{{ icon('plus', 17) }} Post a job</a>{% else %}<a class="text-link hide-xs" href="/employers">Looking to hire? {{ icon('arrow', 16) }}</a>{% endif %}</div>
+  <form class="jobs-toolbar" action="/jobs" method="get" role="search">
+    <div class="jobs-search">{{ icon('search', 19) }}<label class="sr-only" for="jobs-q">Search jobs, hospitals, or locations</label><input id="jobs-q" name="q" type="search" value="{{ q }}" maxlength="120" placeholder="Search job titles, hospitals, or locations…"></div>
+    {% if job_type %}<input type="hidden" name="type" value="{{ job_type }}">{% endif %}
+    <button class="btn btn-primary btn-sm" type="submit">Search jobs</button>
+  </form>
+  <nav class="filter-bar" aria-label="Job type">
+    <a class="pill-tab" href="/jobs{% if q %}?q={{ q|urlencode }}{% endif %}"{% if not job_type %} aria-current="page"{% endif %}>All jobs</a>
+    {% for value, label in job_types %}<a class="pill-tab" href="/jobs?type={{ value }}{% if q %}&amp;q={{ q|urlencode }}{% endif %}"{% if job_type == value %} aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
+  </nav>
+  <p class="results-count">{{ jobs|length }} opportunit{{ 'y' if jobs|length == 1 else 'ies' }}{% if q %} for <strong>“{{ q }}”</strong>{% endif %}{% if q or job_type %} · <a href="/jobs">Clear filters</a>{% endif %}</p>
+  <div class="job-list">
+    {% for job in jobs %}{% include "jobs/_card.html" %}{% else %}
+    <div class="empty-state"><span class="empty-icon">{{ icon('search', 28) }}</span><h2>{% if q or job_type %}Let's try another search{% else %}Your next opportunity is on its way{% endif %}</h2><p>{% if q or job_type %}Try a different job title, location, or category to find your next role.{% else %}New opportunities appear here as healthcare employers publish them.{% endif %}</p>{% if q or job_type %}<a class="btn btn-secondary btn-sm" href="/jobs">Clear filters</a>{% else %}<a class="btn btn-secondary btn-sm" href="{% if is_employer %}/jobs/new{% else %}/employers{% endif %}">Hiring nurses? Post a job {{ icon('arrow', 15) }}</a>{% endif %}</div>
+    {% endfor %}
+  </div>
 </section>
-
-<script>
-      (function () {
-            var tabs = document.querySelectorAll('[data-filter]');
-            var rows = document.querySelectorAll('[data-type]');
-            var empty = document.getElementById('jobs-empty');
-            tabs.forEach(function (tab) {
-                  tab.addEventListener('click', function () {
-                        tabs.forEach(function (t) { t.setAttribute('aria-pressed', 'false'); });
-                        tab.setAttribute('aria-pressed', 'true');
-                        var f = tab.getAttribute('data-filter'), shown = 0;
-                        rows.forEach(function (r) {
-                              var show = f === 'all' || r.getAttribute('data-type') === f;
-                              r.hidden = !show;
-                              if (show) shown++;
-                        });
-                        empty.hidden = shown > 0;
-                  });
-            });
-      })();
-</script>
 {% endblock %}

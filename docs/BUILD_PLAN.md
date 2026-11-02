@@ -397,3 +397,80 @@ Use a custom user model (`identity.User`) from the first migration. Changing it 
 ---
 
 *Legal and regulatory points are for qualified Nigerian counsel to confirm. Timeline, staffing, and cost figures are planning estimates, not commitments.*
+
+---
+
+## Current product and engineering assessment — 2 November 2026
+
+This section records the complete assessment at the user's request. The earlier plan is preserved as originally written; its proposed Django stack and invite-only approach are historical proposals, while the current application uses FastAPI and open registration. Recommendations below are proposed work, not completed implementation or newly approved technical decisions. Test and accessibility results refer to the prior verification recorded in [WORK_LOG.md](WORK_LOG.md#session-2026-11-02--dark-mode-and-accessibility); they were not rerun for this documentation update.
+
+**I would assess Nurse.ng as a functional early-stage product with a sound foundation. It needs stronger trust controls, operational reliability, and evidence from real users before an unrestricted public launch.**
+
+The progress is substantial: profiles, applications, messaging, community, document review, and accessibility controls work together. We have 115 passing tests and encouraging accessibility results. Those establish useful evidence about tested behavior; they do not yet establish production security, performance under load, or market demand.
+
+Here is my assessment:
+
+| Area | Current position | What would raise the standard |
+|---|---|---|
+| User experience | Coherent design, responsive pages, useful accessibility controls | Usability testing with nurses on real phones and unreliable connections |
+| Architecture | FastAPI, clear domain models, services, routes, and migrations | More consistent business-rule enforcement and concurrency testing |
+| Privacy | Private profiles, explicit sharing, application consent, restricted evidence access | Complete retention, deletion, recovery, and audit procedures |
+| Trust | Document-review labels distinguish review from source confirmation | Employer checks, job legitimacy controls, appeals, and transparent review standards |
+| Reliability | Automated tests and migration checks | Monitored deployments, tested restores, rollback procedures, and load testing |
+| Product value | Several useful workflows exist | Evidence that nurses return and employers produce meaningful outcomes |
+
+What would make it world-class, in my judgment, is the following work—in this order.
+
+1. **Make trust the strongest part of the product.**
+
+   An employer account currently gains posting access through its selected account type. That does not establish that the organization or vacancy is legitimate.
+
+   I would introduce organization checks, accountable employer representatives, job reporting, listing expiry, and a clear response process for suspected scams. Nurses should understand who is requesting their information and why.
+
+   Professional claims also need precise boundaries. “Document reviewed” must continue to mean exactly that. Any future claim of source confirmation needs a lawful, reliable source and a dated record of the check.
+
+2. **Complete account security and recovery before collecting more sensitive information.**
+
+   The source configuration still permits development defaults, including a development signing key and cookies without the secure-only setting. These are appropriate for local development, but production should refuse to start with unsafe settings. See [config.py](../app/core/config.py#L14).
+
+   There is also an important distinction from our earlier session discussion: remaining signed in is normal, but **revoking access is a separate requirement**. The current [logout implementation](../app/web/auth_routes.py#L224) clears the browser session; it does not individually revoke an already-copied valid session cookie.
+
+   I would prioritize revocable sessions, password recovery, verified recovery channels, and multi-factor authentication for staff. Someone reviewing identity documents should have stronger protection than an ordinary browsing session.
+
+3. **Make failures recoverable and visible.**
+
+   A dependable product needs answers to practical questions: If a deployment fails, can we roll back? If files disappear, can we restore them? If applications stop submitting, will we know before users complain?
+
+   I would add automated deployment checks, a staging environment, error monitoring, actionable alerts, and backups with demonstrated restoration.
+
+   Private evidence currently uses local storage, and community malware scanning can allow uploads when scanning is unavailable. Both are documented pilot choices. Before public operation, I would implement protected storage, explicit retention rules, and a scanning process that prevents unchecked files from being published.
+
+4. **Finish the journeys that produce value.**
+
+   My recommended first journey is:
+
+   **Create a useful profile → find a legitimate opportunity → apply confidently → receive an employer response.**
+
+   Measure where people abandon that journey. Improve those steps before expanding the feature catalogue.
+
+   Community should have an equally concrete purpose: getting a useful answer, finding a mentor, or making a professional connection. A populated feed alone does not demonstrate that value.
+
+   I would also address pagination, message-history access, useful notifications with preference controls, and concurrent updates. For example, two reviewers deciding a case simultaneously must not silently overwrite each other’s decisions.
+
+5. **Design around the conditions your users actually face.**
+
+   For Nigerian nurses, I would test inexpensive Android phones, limited data, interrupted uploads, shared devices, and slow connections.
+
+   Priorities would include compressed media, preserved form drafts, recoverable submissions, clear error messages, and fast access to essential information. Accessibility work should continue with actual keyboard and screen-reader users, including better descriptions and captions for community media.
+
+   The existing FastAPI application can support this direction. I would retain the architecture and improve it incrementally; I see no demonstrated need for a framework rewrite or microservices.
+
+6. **Build a disciplined learning and operating process.**
+
+   Start with a manageable cohort of nurses and a small number of accountable employers. Observe them completing tasks and provide responsive support.
+
+   Track meaningful outcomes: completed profiles, useful conversations, employer response times, interviews arranged, returning users, and time to resolve reports. Understand the cost of document reviews, moderation, storage, and support alongside those outcomes.
+
+   Those findings should guide both product development and the business model.
+
+**My recommendation for the next development cycle is production readiness and one complete, measurable user journey.** I would begin with account recovery and session control, employer legitimacy, and deployment/backup safeguards, then run an observed pilot. That would give us much stronger evidence for deciding what Nurse.ng should become next.

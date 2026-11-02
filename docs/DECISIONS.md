@@ -475,3 +475,29 @@ The choices below were made after reviewing the first community implementation. 
 - **Choice:** every connection stores a canonical unordered pair key with a unique constraint, so reciprocal requests cannot coexist. Every open report stores a unique reporter/target key, cleared when the report is resolved or dismissed. Connection responses and moderation claims use conditional state updates so only the first concurrent action succeeds.
 - **Reason:** application-level pre-insert checks do not protect against two requests that race. Stable database keys let the database remain the authority on uniqueness while preserving requester/recipient direction and the ability to report again after a dismissal.
 - **Trade-off:** the extra projection keys must be backfilled and maintained by services. SQLite (an embedded Structured Query Language database) cannot reproduce every PostgreSQL locking behaviour, so PostgreSQL concurrency verification remains required before production.
+
+---
+
+## Implementation continuation — 2 November 2026
+
+### L70 — Merge existing migration heads before adding the interface schema
+
+- **Choice:** keep the community compatibility revision at its historical parent, make it a no-op because the hardening revision owns the overlapping columns, and explicitly merge the two heads. Add the account, professional-profile, job, application, and direct-message schema in a following revision.
+- **Reason:** the existing database records both community heads. Reparenting an applied revision obscures that history and can strand upgrades. Both fresh databases and databases at the two recorded heads need an executable path to the current models.
+- **Trade-off:** this repairs a historical duplicate-column branch with a compatibility marker. Downgrading that marker alone does not remove hardening-owned columns. Full migration and data-preservation checks use temporary databases before any local application upgrade.
+- **Scope:** continuation of existing unfinished implementation, not a new product choice. Existing application consent, connection permissions, and private profile defaults remain the basis for regression checks.
+
+### L71 — Preserve the boundaries of the inherited workspace features
+
+- **Implementation observed and completed:** account names/contact details are separate from public community identities; nurse/employer/partner account selection does not grant staff access. Job applications require explicit contact-sharing consent and store a snapshot for the posting employer. Message reads and writes require an accepted connection and an active recipient. New professional fields remain subject to the existing private-by-default sharing controls.
+- **Reason:** the unfinished interface already exposed these flows. Its completion needs functional routes, schema support, and tests that preserve who can see or change data.
+- **Trade-offs:** messaging shows the latest 100 messages and requires a page reload for new replies; its sending throttle remains process-local. Job applications are a basic submission/status workflow. Learning uses external resource links, while events and social sign-in remain placeholders. These implementation records do not establish authoritative professional verification or production launch readiness.
+- **Interface fixes:** restore explicit profile visibility and review-submission labels, link accepted connections to their conversations, and use neutral notification copy rather than an unimplemented unread-status claim. Mobile forms account for their margins; the keyboard skip link remains hidden until focused.
+
+### L72 — Browser display preferences and accessible navigation
+
+- **User direction:** implement dark mode and accessibility. Keep the existing signed-in routing behavior accepted in the preceding discussion.
+- **Choice:** offer System (default), Light, and Dark appearance; larger text, higher contrast, and reduced motion are independent options. Respect operating-system motion preferences even when the additional reduction is off. Save only these presentation preferences in browser storage and apply them before rendering the page.
+- **Reason:** visitors and members should be able to read and navigate the same pages comfortably, including login and registration. An early theme script avoids flashing a light page on a dark preference.
+- **Trade-off:** preferences belong to this browser, not the account, and may be unavailable when browser storage is blocked. System preferences remain the fallback. These improvements are not a claim of full accessibility certification; uploaded community media still needs author-provided descriptions/captions in a future content workflow.
+- **Implementation scope:** a native display-preferences dialog, stronger focus and contrast, accessible names for icon/upload controls, larger touch targets, keyboard-safe mobile navigation, reduced-motion/forced-color support, and browser checks for theme persistence and keyboard behavior.

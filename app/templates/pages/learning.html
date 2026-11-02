@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Learning — Nurse.ng{% endblock %}
+{% block content %}
+<section class="community-page">
+  <div class="resource-intro"><p class="eyebrow">Make room for growth</p><h1>Keep learning. Keep growing.</h1><p class="lede">Build on what you know, explore a new perspective, and take your next step with confidence.</p></div>
+  <div class="resource-grid">{% for resource in resources %}<article class="resource-card"><span class="feature-icon">{{ icon(resource.icon, 25) }}</span><p class="eyebrow">{{ resource.category }}</p><h2>{{ resource.title }}</h2><p>{{ resource.description }}</p><a class="text-link" href="{{ resource.url }}"{% if resource.url.startswith('https://') %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ resource.label }} {{ icon('external' if resource.url.startswith('https://') else 'arrow', 16) }}{% if resource.url.startswith('https://') %}<span class="sr-only">(opens in a new tab)</span>{% endif %}</a></article>{% endfor %}</div>
+</section>
+{% endblock %}

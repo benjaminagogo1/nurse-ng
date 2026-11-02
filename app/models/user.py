@@ -1,8 +1,8 @@
 """Identity domain: the custom user model.
 
 Phone is the primary contact and the login identifier. Email is optional and
-unique when present. Roles are not a column; group membership and permissions
-arrive with the authorization layer.
+unique when present. Account type distinguishes nurses, employers, and partners;
+staff permissions are granted separately.
 """
 
 from datetime import datetime
@@ -35,11 +35,13 @@ class AccountType(StrEnum):
     EMPLOYER = "employer"
     PARTNER = "partner"
 
+
 class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "users"
 
     phone: Mapped[str] = mapped_column(String(16), unique=True, index=True)
     email: Mapped[str | None] = mapped_column(String(254), unique=True, nullable=True)
+    full_name: Mapped[str] = mapped_column(String(120), default="", server_default="")
     hashed_password: Mapped[str] = mapped_column(String(255))
 
     status: Mapped[str] = mapped_column(String(20), default=UserStatus.ACTIVE)

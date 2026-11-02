@@ -60,6 +60,13 @@ def _form_values(profile: NurseProfile | None, **overrides: str) -> dict[str, st
             if profile
             else ProfessionalStatus.STUDENT.value
         ),
+        "qualification": profile.qualification if profile else "",
+        "years_experience": (
+            str(profile.years_experience)
+            if profile and profile.years_experience is not None
+            else ""
+        ),
+        "skills": profile.skills if profile else "",
     }
     values.update(overrides)
     return values
@@ -79,7 +86,7 @@ def _sharing_items(
                 "name": name,
                 "label": label,
                 "visibility": visibility.get(name, Visibility.PRIVATE.value),
-                "preview": value,
+                "preview": "" if value is None else str(value),
             }
         )
     return items
@@ -146,6 +153,7 @@ def _verification_context(
         "registration_number": registration_number,
         "max_megabytes": max(1, settings.evidence_max_bytes // (1024 * 1024)),
         "error": error,
+        "allow_extra_evidence": True,
     }
 
 
@@ -173,6 +181,7 @@ def edit_profile_form(
     db: Session = Depends(get_db),
 ) -> Response:
     profile = get_profile_for_user(db, user.id)
+    prefill = {"display_name": user.full_name} if profile is None and user.full_name else {}
     return render(
         request,
         "profile/edit.html",
@@ -180,7 +189,7 @@ def edit_profile_form(
             "title": "Edit your profile",
             "user": user,
             "profile": profile,
-            "values": _form_values(profile),
+            "values": _form_values(profile, **prefill),
             "status_options": list(PROFESSIONAL_STATUS_LABELS.items()),
         },
     )
@@ -194,6 +203,9 @@ def save_profile_form(
     location: str = Form(""),
     bio: str = Form(""),
     professional_status: str = Form(""),
+    qualification: str = Form(""),
+    years_experience: str = Form(""),
+    skills: str = Form(""),
     user: User = Depends(require_user),
     _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
@@ -207,6 +219,9 @@ def save_profile_form(
             location=location,
             bio=bio,
             professional_status=professional_status,
+            qualification=qualification,
+            years_experience=years_experience,
+            skills=skills,
         )
     except ProfileError as exc:
         profile = get_profile_for_user(db, user.id)
@@ -224,6 +239,9 @@ def save_profile_form(
                     location=location,
                     bio=bio,
                     professional_status=professional_status,
+                    qualification=qualification,
+                    years_experience=years_experience,
+                    skills=skills,
                 ),
                 "status_options": list(PROFESSIONAL_STATUS_LABELS.items()),
                 "error": str(exc),
@@ -266,6 +284,9 @@ def save_sharing_form(
     visibility_headline: str = Form(Visibility.PRIVATE.value),
     visibility_location: str = Form(Visibility.PRIVATE.value),
     visibility_bio: str = Form(Visibility.PRIVATE.value),
+    visibility_qualification: str = Form(Visibility.PRIVATE.value),
+    visibility_years_experience: str = Form(Visibility.PRIVATE.value),
+    visibility_skills: str = Form(Visibility.PRIVATE.value),
     user: User = Depends(require_user),
     _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
@@ -280,6 +301,9 @@ def save_sharing_form(
         "headline": visibility_headline,
         "location": visibility_location,
         "bio": visibility_bio,
+        "qualification": visibility_qualification,
+        "years_experience": visibility_years_experience,
+        "skills": visibility_skills,
     }
 
     try:
@@ -333,6 +357,8 @@ def submit_verification(
     registration_number: str = Form(""),
     licence: UploadFile | None = File(None),
     government_id: UploadFile | None = File(None),
+    nursing_certificate: UploadFile | None = File(None),
+    additional_certification: UploadFile | None = File(None),
     consent: str = Form(""),
     user: User = Depends(require_user),
     _: None = Depends(verify_csrf),
@@ -359,17 +385,11 @@ def submit_verification(
         )
 
     limit = settings.evidence_max_bytes + 1
-    uploads: list[EvidenceUpload] = []
-    for upload in (licence, government_id):
-        if upload is None:
-            uploads.append(EvidenceUpload(data=b"", filename=""))
-            continue
-        uploads.append(
-            EvidenceUpload(
-                data=upload.file.read(limit),
-                filename=upload.filename or "",
-            )
-        )
+
+    def _read(upload: UploadFile | None) -> EvidenceUpload:
+        if upload is None or not upload.filename:
+            return EvidenceUpload(data=b"", filename="")
+        return EvidenceUpload(data=upload.file.read(limit), filename=upload.filename)
 
     try:
         submit_case(
@@ -377,8 +397,10 @@ def submit_verification(
             user=user,
             profile=profile,
             registration_number=registration_number,
-            licence=uploads[0],
-            government_id=uploads[1],
+            licence=_read(licence),
+            government_id=_read(government_id),
+            nursing_certificate=_read(nursing_certificate),
+            additional_certification=_read(additional_certification),
         )
     except VerificationError as exc:
         return render(

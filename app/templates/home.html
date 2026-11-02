@@ -1,122 +1,46 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
-
-{% block title %}Nurse.ng — A trusted home for Nigerian nurses{% endblock %}
-
+{% block title %}Nurse.ng — Better careers. Stronger nurses.{% endblock %}
 {% block content %}
 <section class="hero">
   <div class="hero-inner">
-    <div>
-      <h1>
-        <span>Better careers.</span>
-        <span>Stronger nurses.</span>
-        <span class="hero-accent">Healthier communities.</span>
-      </h1>
-      <p class="lede">
-        Nurse.ng is a professional home for nurses in Nigeria. Join the public
-        community, build a profile you control, and get your documents reviewed
-        when you choose.
-      </p>
-      <div class="hero-actions">
-        <a class="btn btn-light" href="/feed">Explore the community</a>
-        {% if user %}
-        <a class="btn btn-outline-light" href="/profile">Go to my profile</a>
-        {% else %}
-        <a class="btn btn-outline-light" href="/auth/register">Create account</a>
-        {% endif %}
-      </div>
-      <p class="hero-note">
-        Document review is optional and always labelled separately from
-        self-declared information.
-      </p>
+    <div class="hero-copy">
+      <p class="hero-eyebrow"><span></span> A community that cares for you</p>
+      <h1><span>Better Careers.</span><span>Stronger Nurses.</span><span class="hero-accent">Healthier Communities.</span></h1>
+      <p class="lede">Your calling deserves a world of possibilities. Find opportunities, build your professional profile, and grow with Nigeria's nursing community.</p>
+      <form class="hero-search" action="/jobs" method="get" role="search">
+        {{ icon('search', 21) }}
+        <label class="sr-only" for="hero-q">Search jobs, hospitals, or opportunities</label>
+        <input id="hero-q" name="q" type="search" maxlength="120" placeholder="Search jobs, hospitals, or opportunities…">
+        <button type="submit" class="btn btn-primary">Search {{ icon('arrow', 17) }}</button>
+      </form>
+      <p class="hero-popular">Popular: <a href="/jobs?q=Registered+nurse">Registered nurse</a><span>·</span><a href="/jobs?q=Lagos">Jobs in Lagos</a><span>·</span><a href="/jobs?type=internship">Internships</a></p>
     </div>
-
-    <div class="hero-visual" aria-hidden="true">
-      <div class="mock-card">
-        <p class="mock-caption">Example profile</p>
-        <div class="mock-head">
-          <span class="mock-avatar">AO</span>
-          <div>
-            <strong>Ada Okafor</strong>
-            <span class="mock-sub">Registered Nurse · Lagos, Nigeria</span>
-          </div>
-        </div>
-        <span class="verification-badge">Document reviewed</span>
-      </div>
-      <div class="mock-card mock-card--share">
-        <p class="mock-caption">You choose what a shared link shows</p>
-        <ul class="mock-share">
-          <li>Display name <span class="mock-pill is-public">Public</span></li>
-          <li>Headline <span class="mock-pill is-public">Public</span></li>
-          <li>Bio <span class="mock-pill is-private">Private</span></li>
-        </ul>
-      </div>
-    </div>
+    <div class="hero-caption"><span class="caption-icon">{{ icon('heart', 18) }}</span><span>A profession with purpose.<br><strong>A community for life.</strong></span></div>
+  </div>
+  <div class="hero-benefits">
+    <a href="/profile/verification"><span class="benefit-icon">{{ icon('shield', 24) }}</span><span><strong>Build your credibility</strong><small>Get your professional documents reviewed.</small></span></a>
+    <a href="/jobs"><span class="benefit-icon">{{ icon('briefcase', 24) }}</span><span><strong>Find your next role</strong><small>Explore opportunities at home and abroad.</small></span></a>
+    <a href="/topics"><span class="benefit-icon">{{ icon('users', 24) }}</span><span><strong>Build your network</strong><small>Connect with nurses, mentors, and employers.</small></span></a>
+    <a href="/learning"><span class="benefit-icon">{{ icon('book', 24) }}</span><span><strong>Grow your skills</strong><small>Make room for your next chapter.</small></span></a>
   </div>
 </section>
 
-<section class="section" aria-labelledby="why-title">
-  <div class="section-head">
-    <h2 id="why-title">Why Nurse.ng?</h2>
-    <p>Everything you need to build a professional presence, with you in control of what is shared.</p>
+<section class="section why-section" aria-labelledby="why-title">
+  <div class="section-heading">
+    <div><p class="eyebrow">Your career, cared for</p><h2 id="why-title">Why Nurse.ng?</h2><p>Everything you need to build a fulfilling nursing career.</p></div>
+    <a class="text-link" href="/resources">Get to know us {{ icon('arrow', 17) }}</a>
   </div>
-  <div class="feature-grid">
-    <article class="feature-card">
-      <div class="feature-icon">{{ icon('shield', 24) }}</div>
-      <h3>Document review</h3>
-      <p>Submit your NMCN licence and a photo ID. A reviewer matches the names and adds a clearly labelled badge to your
-        profile.</p>
-    </article>
-    <article class="feature-card">
-      <div class="feature-icon">{{ icon('lock', 24) }}</div>
-      <h3>You control sharing</h3>
-      <p>Your profile starts private. Choose, field by field, what appears on your share link.</p>
-    </article>
-    <article class="feature-card">
-      <div class="feature-icon">{{ icon('feed', 24) }}</div>
-      <h3>Real conversations</h3>
-      <p>Read public discussions by topic, post and reply, and report anything that doesn't belong.</p>
-    </article>
-    <article class="feature-card">
-      <div class="feature-icon">{{ icon('users', 24) }}</div>
-      <h3>A network of colleagues</h3>
-      <p>Follow nurses, send connection requests and keep your professional circle in one place.</p>
-    </article>
+  <div class="why-grid">
+    <article><span class="feature-icon">{{ icon('shield', 25) }}</span><div><h3>Trust that grows with you</h3><p>Professional profiles with clearly labelled document reviews.</p></div></article>
+    <article><span class="feature-icon">{{ icon('building', 25) }}</span><div><h3>Meaningful opportunities</h3><p>Find your place with hospitals and healthcare organizations.</p></div></article>
+    <article><span class="feature-icon">{{ icon('sparkle', 25) }}</span><div><h3>Room to grow</h3><p>Learning resources for wherever your career takes you.</p></div></article>
+    <article><span class="feature-icon">{{ icon('users', 25) }}</span><div><h3>A supportive community</h3><p>Learn, collaborate, and belong in a public nursing community.</p></div></article>
   </div>
 </section>
 
-<section class="section" aria-labelledby="how-title">
-  <div class="section-head">
-    <h2 id="how-title">Get started in three steps</h2>
-  </div>
-  <ol class="steps">
-    <li>
-      <h3>Create your account</h3>
-      <p>Sign up with a phone number you control. Your account is active straight away.</p>
-    </li>
-    <li>
-      <h3>Build your profile</h3>
-      <p>Add your name, status, headline and bio. It stays private until you make it public.</p>
-    </li>
-    <li>
-      <h3>Share and connect</h3>
-      <p>Join discussions, follow nurses, and request document review whenever you are ready.</p>
-    </li>
-  </ol>
+<section class="section home-next">
+  <div class="next-card"><p class="eyebrow">For nurses</p><h2>Your next chapter<br>starts with you.</h2><p>A profile that tells your story. A network that helps you thrive.</p><a class="btn btn-primary" href="/auth/register">Join the community {{ icon('arrow', 17) }}</a><span class="next-decoration" aria-hidden="true">{{ icon('heart', 112) }}</span></div>
+  <div class="next-card employer-card"><p class="eyebrow">For healthcare employers</p><h2>Great care starts<br>with great people.</h2><p>Connect with nursing professionals and build your next great team.</p><a class="btn btn-secondary" href="/employers">Meet your next hire {{ icon('arrow', 17) }}</a><span class="next-decoration" aria-hidden="true">{{ icon('users', 112) }}</span></div>
 </section>
-
-{% if not user %}
-<section class="section" style="padding-top:0">
-  <div class="cta-band">
-    <div>
-      <h2>Ready to join the community?</h2>
-      <p>Create your account in a minute.</p>
-    </div>
-    <div class="button-row">
-      <a class="btn btn-light" href="/auth/register">Create account</a>
-      <a class="btn btn-outline-light" href="/auth/login">Sign in</a>
-    </div>
-  </div>
-</section>
-{% endif %}
 {% endblock %}

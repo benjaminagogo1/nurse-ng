@@ -8,9 +8,9 @@
 {% macro slot(name, title, hint, icon_name, required) %}
 <div class="slot">
   <span class="slot-icon">{{ icon(icon_name, 22) }}</span>
-  <div class="slot-text"><strong>{{ title }}</strong><small data-hint="{{ hint }}">{{ hint }}</small></div>
+  <div class="slot-text"><strong>{{ title }}</strong><small id="{{ name }}-hint" data-hint="{{ hint }}" aria-live="polite">{{ hint }}</small></div>
   <label class="slot-btn"><span>Upload</span>
-    <input type="file" name="{{ name }}" accept="image/jpeg,image/png,application/pdf" {% if required %} required{%
+    <input type="file" name="{{ name }}" aria-label="Upload {{ title }}" aria-describedby="{{ name }}-hint" accept="image/jpeg,image/png,application/pdf" {% if required %} required{%
       endif %}>
   </label>
 </div>
@@ -20,7 +20,7 @@
 
 <section class="vf">
   <h1>Verification</h1>
-  <p class="lede">Build trust with verified credentials.</p>
+  <p class="lede">Build trust in your professional story.</p>
 
   <ol class="stepper" aria-label="Verification progress">
     {% for label in ['Documents', 'Review', 'Verification', 'Complete'] %}
@@ -89,10 +89,9 @@
         I consent to Nurse.ng storing these documents privately and to a reviewer inspecting them for this review.
       </label>
 
-      <p class="vf-secure">{{ icon('lock', 16) }}<span>Your information is secure and will only be used for verification
-          purposes.</span></p>
+      <p class="vf-secure">{{ icon('lock', 16) }}<span>Your documents are private and available only to authorized reviewers. A document review checks the names on your documents; it does not confirm registration against the NMCN register.</span></p>
 
-      <button type="submit" class="button-primary btn-block" style="margin-top:16px">Continue</button>
+      <button type="submit" class="button-primary btn-block" style="margin-top:16px">Submit for review</button>
     </form>
   </div>
   {% endif %}
@@ -128,12 +127,4 @@
   <p class="form-alt"><a href="/profile">Back to profile</a></p>
 </section>
 
-<script>
-  document.querySelectorAll('.slot-btn input[type="file"]').forEach(function (input) {
-    input.addEventListener('change', function () {
-      var small = input.closest('.slot').querySelector('small');
-      small.textContent = input.files.length ? input.files[0].name : small.getAttribute('data-hint');
-    });
-  });
-</script>
 {% endblock %}

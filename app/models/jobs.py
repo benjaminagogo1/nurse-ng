@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from enum import StrEnum
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
@@ -50,3 +50,28 @@ class Job(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     employer: Mapped[User] = relationship(foreign_keys=[employer_user_id])
+
+
+class JobApplication(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Only the contact details explicitly shared on the application form."""
+
+    __tablename__ = "job_applications"
+
+    job_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("jobs.id", ondelete="CASCADE"), index=True
+    )
+    applicant_user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    candidate_name: Mapped[str] = mapped_column(String(120))
+    candidate_phone: Mapped[str] = mapped_column(String(16))
+    candidate_email: Mapped[str] = mapped_column(String(254), default="")
+    cover_note: Mapped[str] = mapped_column(Text, default="")
+    status: Mapped[str] = mapped_column(String(20), default="submitted", index=True)
+
+    job: Mapped[Job] = relationship()
+    applicant: Mapped[User] = relationship()
+
+    __table_args__ = (
+        UniqueConstraint("job_id", "applicant_user_id", name="uniq_job_applicant"),
+    )

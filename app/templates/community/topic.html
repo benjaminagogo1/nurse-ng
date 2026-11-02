@@ -1,41 +1,10 @@
 {% extends "base.html" %}
-
-{% block title %}{{ title }} — Nurse.ng{% endblock %}
-
+{% from "_icons.html" import icon %}
+{% block title %}{{ topic.name }} — Nurse.ng{% endblock %}
 {% block content %}
 <section class="community-page">
-  <p class="eyebrow">Account</p>
-  <div class="page-heading-row">
-    <div>
-      <h1>{{ topic.name }}</h1>
-      <p class="lede">Conversation about {{ topic.name }}.</p>
-    </div>
-  </div>
-
-  {% if posts %}
-    {% set post = posts[0] %}
-  {% endif %}
-  {% if post %}
-    {% include "community/_post_card.html" %}
-  {% endif %}
-
-  {% if user and user and posts and user.id != posts[0].author_id %}
-    <details class="report-panel">
-      <summary>Report this post</summary>
-      <form method="post" action="/posts/{{ posts[0].id }}/report" class="compact-form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <label>Reason
-          <select name="reason" required>
-            <option value="">Choose</option>
-            {% for value, label in report_reasons %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-          </select>
-        </label>
-        <label>Details <span class="optional">(required for Other)</span>
-          <textarea name="details" rows="3" maxlength="1000"></textarea>
-        </label>
-        <button type="submit" class="button-secondary">Submit report</button>
-      </form>
-    </details>
-  {% endif %}
+  <a class="text-link" href="/topics">← Back to the community</a>
+  <div class="page-heading-row" style="margin-top:24px"><div><p class="eyebrow">Find your people</p><h1>{{ topic.name }}</h1><p class="lede">{{ topic.description or 'A space to learn, connect, and share your experience.' }}</p></div>{% if user %}<a class="btn btn-primary" href="/posts/new">{{ icon('plus', 17) }} Start a discussion</a>{% endif %}</div>
+  <div class="community-list">{% for post in posts %}{% include "community/_post_card.html" %}{% else %}<div class="empty-state"><span class="empty-icon">{{ icon('feed', 28) }}</span><h2>Every conversation starts somewhere</h2><p>Share a question, an experience, or a little encouragement with your community.</p><a class="btn btn-primary" href="{% if user %}/posts/new{% else %}/auth/register{% endif %}">Start the conversation {{ icon('arrow', 17) }}</a></div>{% endfor %}</div>
 </section>
 {% endblock %}

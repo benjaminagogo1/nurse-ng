@@ -40,10 +40,15 @@
           {{ other.community_name if other and other.community_name else 'Nurse.ng member' }}
           {% if profile_ids.get(other_id) %}</a>{% endif %}
         </span>
+        <div class="button-row">
+        {% if other and other.is_active and other.status == 'active' %}
+        <a class="button-primary" href="/messages/{{ other_id }}">Message</a>
+        {% endif %}
         <form method="post" action="/connections/{{ item.id }}/remove">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <button class="button-secondary">Remove</button>
         </form>
+        </div>
       </article>
     {% else %}
       <p class="field-hint">No accepted connections yet.</p>

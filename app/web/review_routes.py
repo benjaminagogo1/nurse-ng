@@ -31,8 +31,9 @@ router = APIRouter(prefix="/review", tags=["review"])
 KIND_LABELS = {
     "licence": "Licence or certificate",
     "government_id": "Government-issued ID",
+    "nursing_certificate": "Nursing certificate",
+    "additional_cert": "Additional certification",
 }
-
 
 def _case_context(case, reviewer: User, *, error: str | None = None) -> dict[str, object]:
     return {

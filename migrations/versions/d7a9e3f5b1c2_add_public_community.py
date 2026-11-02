@@ -27,8 +27,6 @@ def _timestamps() -> list[sa.Column]:
 def upgrade() -> None:
     with op.batch_alter_table("users") as batch_op:
         batch_op.add_column(sa.Column("community_name", sa.String(length=80), server_default="", nullable=False))
-        batch_op.add_column(sa.Column("community_name_key", sa.String(length=160), nullable=True))
-        batch_op.add_column(sa.Column("community_name_locked", sa.Boolean(), nullable=False, default=False, server_default="0"))
 
     op.create_table(
         "community_topics",
