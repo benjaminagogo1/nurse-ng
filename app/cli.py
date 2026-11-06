@@ -5,6 +5,7 @@ Usage::
     python -m app.cli set-staff +2348012345678
     python -m app.cli unset-staff +2348012345678
     python -m app.cli cleanup-community-media --dry-run
+    python -m app.cli check-config
 
 Staff accounts can open the document-review queue. There is deliberately no
 web route for granting the flag: it is an operator action, recorded in the
@@ -17,6 +18,7 @@ from collections.abc import Sequence
 
 from sqlalchemy import select
 
+from app.core.config import settings
 from app.core.validators import normalize_phone
 from app.db.session import SessionLocal
 from app.models.user import User
@@ -42,6 +44,9 @@ def _set_staff(phone: str, *, enabled: bool) -> int:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m app.cli")
     subparsers = parser.add_subparsers(dest="command", required=True)
+    subparsers.add_parser(
+        "check-config", help="Validate startup settings without displaying secrets."
+    )
 
     for name in ("set-staff", "unset-staff"):
         command = subparsers.add_parser(name)
@@ -55,6 +60,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
 
     args = parser.parse_args(argv)
+    if args.command == "check-config":
+        # Settings validation already ran on import. Do not print the model,
+        # database URL, or signing key, and do not open a database connection.
+        print(f"Configuration valid: environment={settings.environment}")
+        print(f"Allowed hosts: {settings.allowed_hosts}")
+        print(f"Secure cookies: {settings.session_https_only}; debug: {settings.debug}")
+        return 0
     if args.command == "set-staff":
         return _set_staff(args.phone, enabled=True)
     if args.command == "unset-staff":

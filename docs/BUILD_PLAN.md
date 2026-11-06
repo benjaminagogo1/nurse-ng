@@ -447,6 +447,7 @@ What would make it world-class, in my judgment, is the following work—in this 
 
 4. **Finish the journeys that produce value.**
 
+
    My recommended first journey is:
 
    **Create a useful profile → find a legitimate opportunity → apply confidently → receive an employer response.**
@@ -474,3 +475,85 @@ What would make it world-class, in my judgment, is the following work—in this 
    Those findings should guide both product development and the business model.
 
 **My recommendation for the next development cycle is production readiness and one complete, measurable user journey.** I would begin with account recovery and session control, employer legitimacy, and deployment/backup safeguards, then run an observed pilot. That would give us much stronger evidence for deciding what Nurse.ng should become next.
+
+---
+
+## Assessment baseline and completion tracker — 6 November 2026
+
+**Purpose:** preserve the assessment requested on 6 November 2026 and measure later work against it. This section supplements the earlier assessments; it does not rewrite their history. Saving these recommendations does not mark them implemented or authorize their implementation.
+
+**Assessment scope:** local source code, automated checks, and isolated probes using an in-memory database. No live deployment was assessed, and no fresh browser visual or accessibility audit was performed. The observations below are the fixed baseline; update the tracker and evidence log as work progresses.
+
+### Recorded assessment
+
+**Nurse.ng is a substantial, functional MVP, but its security and trust gaps should be addressed before a public launch.** The architecture is suitable for continued development.
+
+Checks performed during the assessment:
+
+| Check | Result on 6 November 2026 |
+|---|---|
+| `venv/bin/python -m pytest` | **115 passed in 183.99 seconds** |
+| `venv/bin/ruff check .` | Passed |
+| `venv/bin/python -m pip check` | No broken requirements found |
+| `node --check app/static/js/app.js` and `node --check app/static/js/display.js` | Passed |
+| `venv/bin/alembic heads` | One head: `b2c3d4e5f6a7` |
+| `venv/bin/alembic check` | No schema drift detected in the local SQLite database |
+| Isolated assessment probes | Confirmed the unsafe-default session, unenforced host restriction, stale review decision, and suspended-profile findings below |
+
+Passing the existing suite did not establish the absence of these defects. The probe runner was temporary (`/tmp/nurse-ng-assessment-probes.py`), not a committed regression test; the reproduction descriptions below are retained so future verification does not depend on that file. The sandbox blocked the probe test client's thread communication; the successful run used the approved execution outside the sandbox and only fixture data in memory.
+
+The highest priorities are:
+
+1. **Critical if deployed with defaults: forgeable login sessions.** The application accepts a publicly known signing key. Using that key and a fixture account ID, the assessment successfully accessed the staff review queue without signing in (HTTP 200). Secure cookies also default to off, and an unlisted Host header was accepted despite the `allowed_hosts` setting. Production startup should reject unsafe configuration. Sources: [configuration](../app/core/config.py), [application middleware](../app/main.py).
+
+2. **High: simultaneous reviews can corrupt the decision record.** Two independent database sessions loaded the same pending case. One reviewer approved it, then the other session overwrote that approval with a rejection. The profile retained its approval badge. Decisions need an atomic state transition and preserved history. Source: [document-review service](../app/services/verification.py).
+
+3. **High: employer legitimacy is unchecked.** Anyone can register as an employer and immediately publish jobs using an arbitrary organization name. Application consent protects against unexpected disclosure, but applicants can still share contact details with an impersonator. Organization approval should precede publishing jobs or receiving applications. Sources: [registration](../app/services/auth.py), [job service](../app/services/jobs.py).
+
+4. **Medium: suspension leaves profiles publicly discoverable.** Suspending a fixture account did not remove its profile from the discovery query or prevent its public profile from resolving. Public queries check profile status without checking account status. Source: [profile service](../app/services/profiles.py).
+
+There are meaningful strengths: private-by-default profiles, field-level sharing controls, explicit application consent, staff-only evidence access with access logging, Argon2 password hashing, and messaging restricted to accepted connections. The interface code also includes useful accessibility and display preferences. The earlier browser accessibility results remain historical evidence, not a fresh audit for this assessment.
+
+The remaining readiness work goes beyond those bugs. Account recovery, password changes, session revocation, phone verification, and staff multi-factor authentication (MFA) are missing. Sensitive evidence uses local storage without an implemented retention or malware-scanning workflow. No checked-in continuous integration (CI) or deployment automation was found; PostgreSQL behavior and backup restoration still need demonstrated verification. Sources: [account routes](../app/web/pages_routes.py), [session authentication](../app/web/deps.py), [evidence storage](../app/core/storage.py), [test setup](../tests/conftest.py).
+
+**The biggest product uncertainty is whether the trust service delivers measurable value.** The [verification-source memo](O1_VERIFICATION_SOURCE_MEMO.md) remains unresolved. The application correctly says “document reviewed,” but authoritative verification, review costs, and employer demand remain unproven. Research remains deferred as recorded in the existing project direction; this assessment does not restart it.
+
+The recommended next development cycle addresses the issues above and one complete journey: **create a profile → find a legitimate job → apply → receive an employer response.** Measure completion, employer response times, interviews, and support effort before expanding features.
+
+### Completion tracker
+
+The criteria below make the recommendations reviewable; they describe proposed outcomes, not completed work or newly selected providers. Preserve IDs when linking fixes, pull requests, tests, or operational evidence.
+
+- Status values: **Open**, **In progress**, **Deferred**, **Verified complete**.
+- Mark an item **Verified complete** only when all its closure criteria are met and the evidence log contains a date, implementation reference, and actual verification result. A code change or passing unrelated tests alone does not close an item.
+- Record a deferral or change of scope explicitly with its reason and decision reference. Deferred items remain unresolved and do not count as completed.
+- Track the first four findings separately from the wider readiness work. A count is progress against this assessment, not a percentage of the whole product or proof of launch readiness.
+
+**Baseline on 6 November 2026:** 0 of 4 priority findings verified complete; 0 of 13 total tracker items verified complete. Twelve items were open; A12 was deferred.
+
+**Current progress:** 0 of 4 priority findings and 0 of 13 total items verified complete. Eleven items are open, A01 is in progress, and A12 is deferred. A01's implementation is locally verified; the actual deployment configuration and HTTPS/proxy checks remain outstanding. **Last tracker update: 6 November 2026.** Update current counts together with the rows; preserve the baseline.
+
+| ID | Area / priority | Status | Evidence required to close |
+|---|---|---|---|
+| A01 | Unsafe production configuration — critical if defaults are deployed | In progress | Production startup rejects missing or known development signing keys and unsafe cookie settings. Host restrictions are enforced. Automated checks reject a cookie signed with the old development key, reject unlisted hosts, and verify Secure cookies in production configuration. Record the deployed configuration check without recording secrets. |
+| A02 | Review decision consistency — high | Open | Independent concurrent reviewers cannot overwrite a decided case. Exactly one transition succeeds; the losing attempt receives a clear conflict. Decision history is preserved and the public badge agrees with the recorded decision. Commit regression coverage using separate database sessions and verify on the intended production database. |
+| A03 | Employer legitimacy — high | Open | A self-selected employer role cannot publish a job or receive applicant details before organization approval. Record the approval/revocation procedure and accountable representative. Test unapproved, approved, revoked, and unrelated employers, while retaining application consent and employer isolation. |
+| A04 | Suspended profiles — medium | Open | Suspended and deactivated accounts are excluded from public discovery and public profile access. Regression checks cover direct profile URLs and listings, while active accounts retain their intended visibility. |
+| A05 | Recovery, password changes, and verified phone ownership — readiness | Open | Users can verify phone ownership, change passwords with appropriate authentication, and recover access through a verified channel. Test successful flows, wrong/expired/reused recovery credentials, abuse limits, and prevention of cross-account changes. Record a support procedure for failed recovery. |
+| A06 | Session revocation — readiness | Open | Users can invalidate an individual session and all sessions. Previously copied cookies cease granting access after revocation; password recovery and account suspension follow a documented invalidation policy. Regression checks demonstrate server-side rejection of revoked cookies. |
+| A07 | Staff MFA — readiness | Open | Staff must complete a second factor before accessing review or moderation functions. Enrollment, recovery, and removal have documented controls. Tests demonstrate that a password-only session cannot bypass the requirement. |
+| A08 | Sensitive evidence storage and lifecycle — readiness | Open | Document and verify production storage access protection, encryption, scanning/quarantine, retention periods, and deletion behavior. Unchecked or rejected evidence cannot be opened by reviewers. Exercise scanner failure, unauthorized reads, and scheduled deletion with fixture files; preserve the intended access audit. |
+| A09 | CI and deployment automation — readiness | Open | Commit a reproducible pipeline that runs required checks and controls migrations and deployment. Record a successful staging deployment, a failed-check gate, and a demonstrated recovery or rollback procedure. |
+| A10 | PostgreSQL verification — readiness | Open | Run migrations and relevant authentication, privacy, application, messaging, and review-concurrency checks against the intended PostgreSQL version. Record fresh-install and existing-data upgrade results and confirm no schema drift. SQLite results alone do not close this item. |
+| A11 | Backup restoration — readiness | Open | Restore both database and private evidence from backups into an isolated environment. Verify account access, application records, evidence links, and permissions after restoration. Record backup age, restore duration, retention, and the repeatable restore procedure against agreed recovery targets. |
+| A12 | Verification source and review economics — product decision | Deferred | Resolve O1 with sourced evidence and an explicit decision: source-confirmed, defensible document-only operation, or stop. Record permitted claims, applicable legal input, and observed review costs. Match public labels to the chosen model. Research remains deferred until resumed by the user; a document-reviewed implementation alone does not close O1. |
+| A13 | Nurse-to-employer value — product validation | Open | Observe the full profile → legitimate job → application → employer response journey with real participants. Set pilot targets and a measurement window before evaluating results. Record completion/drop-off, response times, interviews, support effort, and whether those targets were met; document the resulting product decision. |
+
+### Completion evidence log
+
+Append a row for each status change or verification. Keep earlier results, including failures and deferrals. Link durable repository or operational records; do not rely solely on files under `/tmp`.
+
+| Date | Item | Status change / result | Implementation or decision reference | Verification evidence / remaining work |
+|---|---|---|---|---|
+| 2026-11-06 | A01–A13 | Baseline recorded; no items closed | This assessment; [work log](WORK_LOG.md#session-2026-11-06--assessment-and-completion-baseline) | 115 existing tests passed; isolated probes confirmed A01, A02, and A04. A03 was established by registration/posting code and existing workflow coverage. A12 remains deferred under the recorded project direction. No fixes were made during the assessment. |
+| 2026-11-06 | A01 | Open → In progress; implementation locally verified | [L73](DECISIONS.md#l73--enforce-safe-configuration-before-application-startup-a01), [configuration](../app/core/config.py), [middleware](../app/main.py), [operator check](../app/cli.py), [regression tests](../tests/test_configuration.py) | 37 focused checks passed, including fresh-process production startup, rejection of both old signing keys, host restrictions, IPv6 development access, HTTPS login/logout cookies, and a configuration check that neither displays secrets nor connects to the database. Full-suite results are recorded in the work log. Closure still requires running `python -m app.cli check-config` and verifying HTTPS cookies/host rejection in the actual deployment environment; no deployment was performed. |

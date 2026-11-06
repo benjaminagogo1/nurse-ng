@@ -1,3 +1,18 @@
+# ruff: noqa: E402
+"""Configure an isolated local test environment before importing the application."""
+
+import os
+import secrets
+
+os.environ.update({
+    "NURSE_NG_ENVIRONMENT": "development",
+    "NURSE_NG_DEBUG": "false",
+    "NURSE_NG_SECRET_KEY": secrets.token_urlsafe(32),
+    "NURSE_NG_ALLOWED_HOSTS": "localhost,127.0.0.1,::1",
+    "NURSE_NG_SESSION_HTTPS_ONLY": "false",
+    "NURSE_NG_SESSION_SAME_SITE": "lax",
+})
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -50,6 +65,8 @@ def client(db_session):
         yield db_session
 
     app.dependency_overrides[get_db] = override_get_db
-    with TestClient(app) as test_client:
-        yield test_client
-    app.dependency_overrides.clear()
+    try:
+        with TestClient(app, base_url="http://localhost") as test_client:
+            yield test_client
+    finally:
+        app.dependency_overrides.clear()

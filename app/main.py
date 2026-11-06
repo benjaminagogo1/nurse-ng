@@ -3,6 +3,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from app.core.config import settings
 from app.web.auth_routes import router as auth_router
@@ -28,6 +29,12 @@ def create_app() -> FastAPI:
         max_age=settings.session_max_age,
         same_site=settings.session_same_site,
         https_only=settings.session_https_only,
+    )
+    # Added last so invalid hosts are rejected before session handling or routes.
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=settings.trusted_hosts,
+        www_redirect=False,
     )
     app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
     app.include_router(router)

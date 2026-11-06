@@ -501,3 +501,15 @@ The choices below were made after reviewing the first community implementation. 
 - **Reason:** visitors and members should be able to read and navigate the same pages comfortably, including login and registration. An early theme script avoids flashing a light page on a dark preference.
 - **Trade-off:** preferences belong to this browser, not the account, and may be unavailable when browser storage is blocked. System preferences remain the fallback. These improvements are not a claim of full accessibility certification; uploaded community media still needs author-provided descriptions/captions in a future content workflow.
 - **Implementation scope:** a native display-preferences dialog, stronger focus and contrast, accessible names for icon/upload controls, larger touch targets, keyboard-safe mobile navigation, reduced-motion/forced-color support, and browser checks for theme persistence and keyboard behavior.
+
+---
+
+## Implementation — 6 November 2026
+
+### L73 — Enforce safe configuration before application startup (A01)
+
+- **User direction:** start the recommended A01 implementation: safe production configuration, session-cookie protection, and host enforcement with regression checks.
+- **Choice:** introduce an explicit `NURSE_NG_ENVIRONMENT` (`production` by default; `development` for local work). Production requires an operator-supplied signing key of at least 32 characters, explicit allowed hosts, disabled debug mode, and Secure cookies. Reject the known development keys. Development without a key uses a fresh cryptographically random key per process. Host restrictions apply in both modes; wildcard hosts are not accepted. SameSite=None requires Secure cookies in either mode.
+- **Reason:** a missing setting must not silently enable a publicly known session-signing key. Configuration validation and the host middleware make the security boundary executable instead of relying on deployment comments.
+- **Trade-offs:** existing local environments must explicitly select development and remove old placeholder keys. A generated development key invalidates sessions after restart and is unsuitable for multiple workers. Production workers must share a securely provisioned random key; length checks cannot establish its randomness. The repository cannot verify the configuration of an unprovided live deployment.
+- **Scope:** this implements configuration safeguards. Session revocation (A06), trusted-proxy address configuration, staff MFA, and the remaining assessment items retain their separate scope. Implementation and verification progress are recorded in the work log and A01 tracker entry.

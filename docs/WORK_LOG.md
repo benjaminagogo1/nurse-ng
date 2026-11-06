@@ -560,3 +560,24 @@ This is the pre-hardening result: the previously documented 89 cases plus 14 com
 - **User direction:** transfer the entire assessment into `BUILD_PLAN.md`.
 - **Documentation:** appended the full assessment to [BUILD_PLAN.md](BUILD_PLAN.md#current-product-and-engineering-assessment--2-november-2026), including its opening qualifications, six-area comparison, all six priorities and their explanations, source references, and the next-cycle recommendation. Preserved the original plan and identified its historical stack and registration proposals separately from the current application.
 - **Scope:** recommendations remain proposed work. This documentation update changes no application behavior; the cited test and accessibility results are from the preceding implementation work.
+
+---
+
+## Session 2026-11-06 — Assessment and completion baseline
+
+- **User direction:** assess the project, then save the assessment in the project documents so future completeness can be measured against it.
+- **Assessment results:** 115 tests passed in 183.99 seconds. Ruff, dependency consistency, and both JavaScript syntax checks passed. Alembic reported one head (`b2c3d4e5f6a7`) and no local SQLite schema drift. No live deployment or fresh browser accessibility audit was performed.
+- **Additional findings:** isolated fixture checks confirmed that the development signing key permits a forged staff session, unlisted hosts are accepted, stale reviewer sessions can overwrite a decision while leaving the approval badge, and suspended profiles remain publicly discoverable. The probe runner stalled in the sandbox's asynchronous thread bridge; its approved run outside the sandbox completed successfully using an in-memory database. Temporary stalled runners were stopped. Employer self-registration and immediate posting privileges were also reviewed.
+- **Documentation:** preserved the assessment and added a 13-item completion tracker, stable IDs, closure criteria, baseline counts, and an evidence log in [BUILD_PLAN.md](BUILD_PLAN.md#assessment-baseline-and-completion-tracker--6-november-2026). Linked it from the README. Kept the earlier assessments and the existing user edit intact.
+- **Scope:** this records findings and proposed closure criteria, not implemented fixes or authorization to begin implementation. Verification-source research remains deferred. The checks above belong to the assessment; this follow-up changes documentation only.
+
+---
+
+## Session 2026-11-06 — A01 production configuration and session safeguards
+
+- **User direction:** start the recommended first implementation item, A01. Recorded the implementation choice as L73 before editing application code.
+- **Implementation:** production is the default environment and requires an explicit signing key and host list. Unsafe debug/cookie settings, short or known development keys, wildcard hosts, and malformed host entries fail configuration validation. Development must be selected explicitly and generates a random per-process signing key when none is supplied. TrustedHostMiddleware rejects unlisted hosts before session handling and routes. Validation messages and settings representations do not display the signing key.
+- **Operator support:** added `python -m app.cli check-config`, which reports the validated mode, hosts, and cookie/debug flags without showing secrets or connecting to the database. Updated `.env.example` and README instructions, including migration from old local placeholder keys and the production verification procedure.
+- **Focused checks:** the first run found 35 passing cases and one IPv6 localhost failure. Starlette preserves brackets around IPv6 Host literals; adjusted the configured middleware hosts accordingly. After that correction and the operator-command check, **37 tests passed in 5.81 seconds**. Ruff and whitespace checks passed. Tests run outside the sandbox because the test client's thread communication was previously blocked there.
+- **Full regression check:** **152 tests passed in 65.04 seconds**, including all 115 existing cases and the 37 new configuration cases. The suite covers migration history as well as authentication, profiles, community, review, recruitment, and messaging. Final Ruff and whitespace checks passed; no dependency or schema changes were introduced.
+- **Tracker:** A01 is in progress with its local implementation verified. Its original closure criteria also require checking the actual deployment configuration and public HTTPS/proxy behavior, which remain unverified. No deployment, data migration, or other assessment-item implementation was performed. The pre-existing documentation changes were preserved.
