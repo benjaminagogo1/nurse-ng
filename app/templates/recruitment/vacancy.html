@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Review vacancy — Nurse.ng{% endblock %}
+{% block content %}
+<section class="form-page recruitment-page">
+  <a href="/recruitment/vacancies">← Vacancy records</a>
+  <p class="eyebrow">Staff only · {{ record.state }}</p>
+  <h1>{{ record.normalized.get('title') or 'Incomplete vacancy record' }}</h1>
+  <p>Source: <a href="/recruitment/sources/{{ record.source_id }}">{{ record.source.organization.name }}</a></p>
+  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+  {% if record.issues %}<ul>{% for issue in record.issues %}<li>{{ issue }}</li>{% endfor %}</ul>{% endif %}
+  <p class="field-hint">Last observed {{ record.last_seen_at.strftime('%Y-%m-%d %H:%M') }} UTC. A published processing state does not guarantee current availability: source approval, health, freshness and deadlines also govern public visibility.</p>
+  {% if record.job_id %}<p><a href="/jobs/{{ record.job_id }}">View public vacancy</a> (may be unavailable when its source is no longer approved).</p>{% endif %}
+  <p><a href="/recruitment/vacancies/{{ record.id }}/original">Download original source snapshot as text</a></p>
+  <details class="source-card"><summary>Original extracted record</summary><pre class="source-evidence">{{ record.raw_record|tojson(indent=2) }}</pre></details>
+  <details class="source-card"><summary>Normalized record and staff clarifications</summary><pre class="source-evidence">{{ record.normalized|tojson(indent=2) }}</pre></details>
+  <h2>Review this record</h2>
+  <p>Only change fields supported by the cited evidence. The original record stays unchanged. Publishing requires a current, healthy approved source and a recent successful observation. To resolve cross-source conflicts, reject the incorrect record before publishing the supported record.</p>
+  <form class="source-form" method="post" action="/recruitment/vacancies/{{ record.id }}/review">
+    <input name="csrf_token" type="hidden" value="{{ csrf_token }}"><input name="revision" type="hidden" value="{{ values.get('revision', record.revision) }}">
+    {% for key, label in fields.items() %}<label>{{ label }}<input name="{{ key }}" value="{{ values.get(key, record.normalized.get(key, '')) }}" maxlength="{{ 2048 if key == 'announcement_url' else 250 }}"></label>{% endfor %}
+    <p class="field-hint">Use ISO dates (YYYY-MM-DD) or timestamps with an explicit UTC offset. Date-only deadlines include that day in {{ record.source.deadline_timezone or 'the configured source timezone' }}. Employment start dates must not be entered as application opening dates.</p>
+    <label>Description<textarea name="description" maxlength="30000" rows="10">{{ values.get('description', record.normalized.get('description', '')) }}</textarea></label>
+    <label class="consent-choice"><input type="checkbox" name="employer_confirmed" value="true" {% if values.get('employer_confirmed') == 'true' %}checked{% endif %}><span>I have confirmed the stated employer using the cited evidence.</span></label>
+    <label class="consent-choice"><input type="checkbox" name="nursing_confirmed" value="true" {% if values.get('nursing_confirmed') == 'true' %}checked{% endif %}><span>I have confirmed this role is relevant to nursing or midwifery.</span></label>
+    <label>Supporting evidence URL<input type="url" name="reference" value="{{ values.get('reference', '') }}" required maxlength="2048"></label>
+    <label>Decision and reasons<textarea name="note" required maxlength="3000">{{ values.get('note', '') }}</textarea></label>
+    <div class="button-row"><button class="button-primary" name="action" value="publish" type="submit">Publish with recorded evidence</button><button class="button-secondary" name="action" value="reject" type="submit">Reject record</button></div>
+  </form>
+  <h2 id="history">Change and decision history</h2>
+  {% for entry in history %}<article class="source-card"><h3>{{ entry.action|capitalize }}</h3><p class="field-hint">{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }} UTC · {{ 'Staff review' if entry.actor_id else 'Automatic collection' }}</p><p><a href="/recruitment/vacancies/snapshots/{{ entry.snapshot_id }}/original">Original page for this change</a></p><pre class="source-evidence">{{ entry.details|tojson(indent=2) }}</pre></article>{% endfor %}
+  <nav class="source-actions" aria-label="History pages">{% if history_page > 1 %}<a href="?history_page={{ history_page - 1 }}#history">Newer</a>{% endif %}{% if has_more %}<a href="?history_page={{ history_page + 1 }}#history">Older</a>{% endif %}</nav>
+</section>
+{% endblock %}

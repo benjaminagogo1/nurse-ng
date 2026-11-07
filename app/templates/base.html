@@ -17,8 +17,11 @@
   <link rel="stylesheet" href="{{ url_for('static', path='/css/design.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', path='/css/appearance.css') }}">
   <script src="{{ url_for('static', path='/js/app.js') }}" defer></script>
+  <script src="{{ url_for('static', path='/js/community-drafts.js') }}" defer></script>
+  <script src="{{ url_for('static', path='/js/community-replies.js') }}" defer></script>
 </head>
-<body class="{% if user %}is-app{% else %}is-public{% endif %}{% if page == 'home' and not user %} is-landing{% endif %}{% if is_auth_page %} is-auth{% endif %}">
+<body data-draft-scope="{{ draft_scope }}" class="{% if user %}is-app{% else %}is-public{% endif %}{% if page == 'home' and not user %} is-landing{% endif %}{% if is_auth_page %} is-auth{% endif %}">
+  {% if published_draft %}<script type="application/json" id="published-draft">{{ published_draft|tojson }}</script>{% endif %}
   <a class="skip-link" href="#main">Skip to main content</a>
   {% block header %}
   <header class="site-header">
@@ -34,7 +37,7 @@
         <ul>
           <li><a href="/"{% if page == 'home' %} aria-current="page"{% endif %}>Home</a></li>
           <li><a href="/jobs"{% if page == 'jobs' %} aria-current="page"{% endif %}>Jobs</a></li>
-          <li><a href="/topics"{% if page in ['topics', 'feed', 'nurses'] %} aria-current="page"{% endif %}>Community</a></li>
+          <li><a href="/feed"{% if page in ['topics', 'feed', 'nurses', 'discussion-follows'] %} aria-current="page"{% endif %}>Community</a></li>
           <li><a href="/learning"{% if page == 'learning' %} aria-current="page"{% endif %}>Learning</a></li>
           <li><a href="/resources"{% if page == 'resources' %} aria-current="page"{% endif %}>Resources</a></li>
           <li class="only-mobile"><a href="/employers">For employers</a></li>
@@ -48,7 +51,7 @@
         {% if user %}
         <details class="header-popover notifications">
           <summary class="icon-button" aria-label="Notifications">{{ icon('bell', 20) }}</summary>
-          <div class="popover-content"><strong>Keep in touch</strong><p>Check your network for connection requests and your inbox for messages.</p><a href="/network">View network {{ icon('arrow', 15) }}</a><a href="/messages">View messages {{ icon('arrow', 15) }}</a></div>
+          <div class="popover-content"><strong>Keep in touch</strong><p>Return to your discussions, connection requests, and messages.</p><a href="/feed/discussions">Discussion replies {{ icon('arrow', 15) }}</a><a href="/network">View network {{ icon('arrow', 15) }}</a><a href="/messages">View messages {{ icon('arrow', 15) }}</a></div>
         </details>
         <a class="icon-button header-messages" href="/messages" aria-label="Messages">{{ icon('chat', 20) }}</a>
         <details class="header-popover account-menu">
@@ -91,8 +94,9 @@
         </ul>
         <p class="side-heading">Grow together</p>
         <ul class="side-list">
-          {{ nav_link('/topics', 'topics', 'Community', 'globe', page) }}
-          {{ nav_link('/feed', 'feed', 'Discussions', 'feed', page) }}
+          {{ nav_link('/feed', 'feed', 'Community', 'globe', page) }}
+          {{ nav_link('/feed/discussions', 'discussion-follows', 'Followed discussions', 'feed', page) }}
+          {{ nav_link('/topics', 'topics', 'Browse topics', 'users', page) }}
           {{ nav_link('/learning', 'learning', 'Learning', 'book', page) }}
           {{ nav_link('/resources', 'resources', 'Resources', 'folder', page) }}
           {{ nav_link('/settings', 'settings', 'Settings', 'settings', page) }}
@@ -103,7 +107,7 @@
         {% endif %}
         {% if user.is_staff %}
         <p class="side-heading">Staff</p>
-        <ul class="side-list">{{ nav_link('/review', 'review', 'Document reviews', 'review', page) }}{{ nav_link('/moderation', 'moderation', 'Moderation', 'flag', page) }}</ul>
+        <ul class="side-list">{{ nav_link('/review', 'review', 'Document reviews', 'review', page) }}{{ nav_link('/moderation', 'moderation', 'Moderation', 'flag', page) }}{{ nav_link('/recruitment', 'recruitment', 'Recruitment sources', 'building', page) }}</ul>
         {% endif %}
       </nav>
       <div class="sidebar-note">{{ icon('heart', 23) }}<strong>Your next chapter starts here.</strong><p>Keep learning. Keep connecting. Keep making a difference.</p><a href="/resources">Explore resources {{ icon('arrow', 15) }}</a></div>

@@ -14,8 +14,10 @@ from app.web.moderation_routes import router as moderation_router
 from app.web.pages_routes import router as pages_router
 from app.web.profile_routes import public_router
 from app.web.profile_routes import router as profile_router
+from app.web.recruitment_routes import router as recruitment_router
 from app.web.review_routes import router as review_router
 from app.web.routes import router
+from app.web.vacancy_routes import router as vacancy_router
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -41,6 +43,8 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(profile_router)
     app.include_router(review_router)
+    app.include_router(recruitment_router)
+    app.include_router(vacancy_router)
     app.include_router(community_router)
     app.include_router(moderation_router)
     app.include_router(jobs_router)

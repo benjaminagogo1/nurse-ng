@@ -1,13 +1,18 @@
 """Job listings: posting by employer accounts and public reads."""
 
-from datetime import UTC, datetime
+import re
+from datetime import UTC, datetime, timedelta
+from decimal import Decimal
 
-from sqlalchemy import or_, select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.jobs import Job, JobApplication, JobStatus, JobType, WorkMode
+from app.models.recruitment import RecruitmentSource
 from app.models.user import AccountType, User
+from app.services.recruitment import REUSE_BASES, utc
+from app.services.vacancies import FRESHNESS, collector_authorized
 
 TITLE_MAX = 120
 ORGANIZATION_MAX = 160
@@ -71,6 +76,7 @@ def create_job(
     salary_min: str,
     salary_max: str,
     description: str,
+    country_code: str = "",
 ) -> Job:
     if user.account_type != AccountType.EMPLOYER.value:
         raise JobError("Only employer accounts can post jobs.")
@@ -78,6 +84,9 @@ def create_job(
         raise JobError("Choose a valid job type.")
     if work_mode not in WORK_MODE_LABELS:
         raise JobError("Choose a valid work mode.")
+    code = country_code.strip().upper()
+    if code and not re.fullmatch(r"[A-Z]{2}", code):
+        raise JobError("Use a two-letter country code or leave it blank.")
 
     low = _naira(salary_min, "Minimum salary")
     high = _naira(salary_max, "Maximum salary")
@@ -96,6 +105,7 @@ def create_job(
         salary_min=low,
         salary_max=high,
         description=_clean(description, field="Description", maximum=DESCRIPTION_MAX),
+        country_code=code,
         status=JobStatus.OPEN,
     )
     db.add(job)
@@ -105,9 +115,16 @@ def create_job(
 
 
 def list_open_jobs(
-    db: Session, *, job_type: str | None = None, query: str = "", limit: int = 50
+    db: Session,
+    *,
+    job_type: str | None = None,
+    query: str = "",
+    limit: int = 50,
+    country_code: str = "",
 ) -> list[Job]:
-    statement = select(Job).where(Job.status == JobStatus.OPEN)
+    statement = select(Job).where(open_job_condition())
+    if country_code:
+        statement = statement.where(Job.country_code == country_code.upper())
     if job_type:
         statement = statement.where(Job.job_type == job_type)
     if query.strip():
@@ -119,13 +136,79 @@ def list_open_jobs(
             )
         )
     return list(
-        db.scalars(
-            statement.order_by(Job.posted_at.desc(), Job.id.desc()).limit(limit)
-        ).all()
+        db.scalars(statement.order_by(Job.posted_at.desc(), Job.id.desc()).limit(limit)).all()
     )
 
 
+def open_job_condition():
+    timestamp = datetime.now(UTC)
+    return and_(
+        Job.status == JobStatus.OPEN,
+        or_(
+            Job.source_id.is_(None),
+            and_(
+                Job.confirmed_at >= timestamp - FRESHNESS,
+                Job.closes_at > timestamp,
+                Job.source.has(
+                    and_(
+                        RecruitmentSource.verification_status == "approved",
+                        RecruitmentSource.approval_expires_at > timestamp,
+                        RecruitmentSource.permission_status == "permitted",
+                        RecruitmentSource.reuse_basis.in_(list(REUSE_BASES)),
+                        RecruitmentSource.reuse_url_prefix != "",
+                        RecruitmentSource.allow_collection.is_(True),
+                        RecruitmentSource.allow_snapshot_retention.is_(True),
+                        RecruitmentSource.allow_republication.is_(True),
+                        RecruitmentSource.automation_status == "monitoring",
+                        RecruitmentSource.collection_method == "html",
+                        RecruitmentSource.collection_adapter == "jsonld",
+                        RecruitmentSource.health_status == "healthy",
+                    )
+                ),
+            ),
+        ),
+    )
+
+
+def effective_job_status(job: Job) -> str:
+    if not job.source_id:
+        return job.status
+    timestamp = datetime.now(UTC)
+    if job.closes_at and utc(job.closes_at) <= timestamp:
+        return "closed"
+    if (
+        job.status != "open"
+        or not collector_authorized(job.source)
+        or job.source.health_status != "healthy"
+        or not job.confirmed_at
+        or utc(job.confirmed_at) < timestamp - FRESHNESS
+    ):
+        return "unconfirmed"
+    if job.opens_at and utc(job.opens_at) > timestamp:
+        return "upcoming"
+    if job.closes_at and utc(job.closes_at) <= timestamp + timedelta(days=7):
+        return "closing_soon"
+    return "open"
+
+
 def salary_label(job: Job) -> str:
+    if job.source_id:
+        data = job.normalized_data.get("salary", {})
+        if not data:
+            return "Salary not stated"
+
+        def number(key):
+            return f"{Decimal(data[key]):,}"
+
+        if "value" in data:
+            amount = number("value")
+        elif "minValue" in data and "maxValue" in data:
+            amount = f"{number('minValue')} – {number('maxValue')}"
+        elif "minValue" in data:
+            amount = "from " + number("minValue")
+        else:
+            amount = "up to " + number("maxValue")
+        return f"{data['currency']} {amount}/{data['unit'].lower()}"
     low, high = job.salary_min, job.salary_max
     if low is None and high is None:
         return "Salary not stated"
@@ -153,10 +236,34 @@ def job_card(job: Job) -> dict[str, object]:
         "organization": job.organization,
         "location": job.location,
         "salary": salary_label(job),
-        "type": JOB_TYPE_LABELS.get(job.job_type, job.job_type),
-        "mode": WORK_MODE_LABELS.get(job.work_mode, job.work_mode),
+        "type": JOB_TYPE_LABELS.get(job.job_type, job.job_type or "Employment type not stated"),
+        "mode": WORK_MODE_LABELS.get(job.work_mode, job.work_mode or "Work mode not stated"),
         "posted": posted_label(job),
         "description": job.description,
+        "external": bool(job.source_id),
+        "country": job.country_code,
+        "status": effective_job_status(job),
+        "source_name": job.source.organization.name if job.source_id else "",
+        "source_url": job.source.original_url if job.source_id else "",
+        "announcement_url": job.normalized_data.get("announcement_url", "")
+        if job.source_id
+        else "",
+        "closing_date": job.normalized_data.get("closing_date", "") if job.source_id else "",
+        "deadline_timezone": job.source.deadline_timezone if job.source_id else "",
+        "confirmed_at": job.confirmed_at,
+        "clarified": bool(job.normalized_data.get("_review")) if job.source_id else False,
+        "requirements": {
+            label: job.normalized_data[key]
+            for key, label in {
+                "responsibilities": "Responsibilities",
+                "qualifications": "Qualifications",
+                "experience": "Experience",
+                "registration_requirements": "Registration requirements",
+                "skills": "Skills",
+                "benefits": "Benefits",
+            }.items()
+            if job.source_id and job.normalized_data.get(key)
+        },
     }
 
 
@@ -169,6 +276,8 @@ def application_for_job(db: Session, user: User, job: Job) -> JobApplication | N
 
 
 def apply_for_job(db: Session, user: User, job: Job, *, cover_note: str) -> JobApplication:
+    if job.source_id:
+        raise JobError("Follow the original announcement for this vacancy's application process.")
     if user.account_type != AccountType.NURSE.value:
         raise JobError("Applications are available to nurse accounts.")
     if job.status != JobStatus.OPEN:

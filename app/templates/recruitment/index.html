@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Recruitment sources — Nurse.ng{% endblock %}
+{% block content %}
+<section class="form-page recruitment-page">
+  <p class="eyebrow">Staff only</p>
+  <h1>Recruitment sources</h1>
+  <p class="lede">Discover institutions, check their recruitment channels, and record the evidence needed for approval.</p>
+  <p class="field-hint">New discoveries stay pending. Source approval does not verify individual vacancies. Configured collectors publish valid vacancies automatically; exceptions go to vacancy review.</p>
+  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+  <form method="get" class="source-filters">
+    <label>Find a source<input name="q" value="{{ query }}" maxlength="200" placeholder="Organisation or URL"></label>
+    <label>Status<select name="status"><option value="">All statuses</option>{% for option in ['pending', 'approved', 'rejected', 'revoked'] %}<option value="{{ option }}" {% if status == option %}selected{% endif %}>{{ option|capitalize }}</option>{% endfor %}</select></label>
+    <label>Country code<input name="country" value="{{ country }}" maxlength="2" placeholder="NG"></label>
+    <button class="button-primary" type="submit">Filter</button>
+  </form>
+  <p><a href="/recruitment/vacancies">Review vacancy exceptions</a></p>
+  <h2>{{ total }} source{{ '' if total == 1 else 's' }}</h2>
+  <div class="source-list">
+  {% for source in sources %}
+    <article class="source-card">
+      <h3><a href="/recruitment/sources/{{ source.id }}">{{ source.organization.name }}</a></h3>
+      <p class="source-url">{{ source.original_url }}</p>
+      <p>{{ source.organization.country_code or 'Country unconfirmed' }} · {{ source.verification_status|capitalize }} · {{ source.automation_status|capitalize }}</p>
+      <p class="field-hint">{{ source.source_type|replace('_', ' ')|capitalize }} · Found through {{ source.discovered_via|replace('_', ' ') }} · Last check: {{ source.health_status|replace('_', ' ') }}</p>
+    </article>
+  {% else %}<p>No matching sources. Initialise discovery with the operator command or add a schedule below.</p>{% endfor %}
+  </div>
+  <nav class="source-actions" aria-label="Source pages">{% if previous_url %}<a href="{{ previous_url }}">Previous</a>{% endif %}<span>Page {{ page_number }}</span>{% if next_url %}<a href="{{ next_url }}">Next</a>{% endif %}</nav>
+
+  <details class="source-card" {% if error and values %}open{% endif %}>
+    <summary>Add a source you already know</summary>
+    <form method="post" action="/recruitment/sources" class="source-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Organisation name<input name="name" value="{{ values.get('name', '') }}" required maxlength="250"></label>
+      <label>Organisation category<select name="category">{% for key, label in categories.items() %}<option value="{{ key }}" {% if values.get('category', 'unconfirmed') == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+      <label>Country code<input name="country_code" value="{{ values.get('country_code', '') }}" maxlength="2" placeholder="NG"></label>
+      <label>State, region or city<input name="location" value="{{ values.get('location', '') }}" maxlength="250"></label>
+      <label>Organisation website<input type="url" name="website_url" value="{{ values.get('website_url', '') }}" required maxlength="2048"></label>
+      <label>Recruitment page URL<input type="url" name="source_url" value="{{ values.get('source_url', '') }}" required maxlength="2048"></label>
+      <button type="submit" class="button-primary">Register pending source</button>
+    </form>
+  </details>
+
+  <h2 id="schedules">Automatic discovery</h2>
+  <p>ROR directory discovery finds healthcare institutions in Nigeria and worldwide without a list of hospital URLs. Its coverage is incomplete; directory inclusion is not proof of licensing or recruitment authority.</p>
+  {% for schedule in schedules %}
+  <article class="source-card">
+    <h3>{{ schedule.name }}</h3>
+    <p>{{ schedule.provider|upper }} · {{ schedule.country_code or 'Worldwide' }} · Every {{ schedule.interval_hours }} hours · {{ 'Enabled' if schedule.enabled else 'Paused' }}</p>
+    <p class="field-hint">Next run: {{ schedule.next_run_at.strftime('%Y-%m-%d %H:%M') }} UTC · Page {{ schedule.next_page }}</p>
+    {% if schedule.query %}<p>{{ schedule.query }}</p>{% endif %}
+    <form method="post" action="/recruitment/schedules/{{ schedule.id }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="enabled" value="{{ 'false' if schedule.enabled else 'true' }}">
+      <button class="button-primary" type="submit">{{ 'Pause' if schedule.enabled else 'Enable' }} schedule</button>
+    </form>
+  </article>
+  {% else %}<p>No schedules yet.</p>{% endfor %}
+  <details class="source-card">
+    <summary>Add a discovery schedule</summary>
+    <form method="post" action="/recruitment/schedules" class="source-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Schedule name<input name="name" required maxlength="120"></label>
+      <label>Discovery provider<select name="provider"><option value="ror">ROR healthcare directory</option>{% if search_enabled %}<option value="brave">Brave search</option>{% endif %}</select></label>
+      {% if not search_enabled %}<p class="field-hint">Search is unavailable until the operator configures its API key and permission to store search results.</p>{% endif %}
+      <label>Country code<input name="country_code" maxlength="2" placeholder="Blank for worldwide"></label>
+      <label>Query<input name="query" maxlength="300"></label>
+      <p class="field-hint">Optional for ROR. Search queries can use {country}, {region}, and {category}; Nigerian schedules rotate across states and institution categories.</p>
+      <label>Interval in hours<input type="number" name="interval_hours" value="24" min="1" max="720" required></label>
+      <button class="button-primary" type="submit">Add schedule</button>
+    </form>
+  </details>
+
+  <h2>Worker activity</h2>
+  <p>{{ counts.get('queued', 0) }} queued · {{ counts.get('running', 0) }} running · {{ counts.get('failed', 0) }} failed</p>
+  <p class="field-hint">The separate discovery worker must be running for schedules and page checks to execute. Times are UTC.</p>
+  {% for task in tasks %}
+  <article class="source-card">
+    <p><strong>{{ task.kind|capitalize }}</strong> · {{ task.status|capitalize }} · {{ task.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+    <p>{{ task.message or 'Waiting for a worker.' }}</p>
+    <p class="field-hint">{{ task.result_count }} new sources · Attempt {{ task.attempts }}{% if task.source_id %} · <a href="/recruitment/sources/{{ task.source_id }}">View source</a>{% endif %}</p>
+  </article>
+  {% else %}<p>No tasks have run yet.</p>{% endfor %}
+</section>
+{% endblock %}

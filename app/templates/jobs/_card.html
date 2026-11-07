@@ -1,6 +1,6 @@
 {% from "_icons.html" import icon %}
 <article class="job-row">
   <span class="job-logo tone-{{ loop.index0 % 4 if loop is defined else 0 }}">{{ icon('building', 24) }}</span>
-  <div class="job-main"><a class="job-title" href="/jobs/{{ job.id }}">{{ job.title }}</a><p class="job-org">{{ job.organization }}{% if job.location %}<span>·</span>{{ job.location }}{% endif %}</p><p class="job-salary">{{ job.salary }}</p><div class="job-tags"><span class="tag">{{ job.type }}</span><span class="tag tag-neutral">{{ job.mode }}</span></div></div>
+  <div class="job-main"><a class="job-title" href="/jobs/{{ job.id }}">{{ job.title }}</a><p class="job-org">{{ job.organization }}{% if job.location %}<span>·</span>{{ job.location }}{% endif %}</p><p class="job-salary">{{ job.salary }}</p><div class="job-tags"><span class="tag">{{ job.type }}</span><span class="tag tag-neutral">{{ job.mode }}</span></div><p class="job-provenance">{{ 'Approved recruitment source' if job.external else 'Employer submission' }}{% if job.external %} · {{ job.status|replace('_', ' ')|capitalize }}{% endif %}</p></div>
   <div class="job-side"><a class="job-arrow" href="/jobs/{{ job.id }}" aria-label="View {{ job.title }}">{{ icon('chevron', 17) }}</a><span class="job-time">{{ job.posted }}</span></div>
 </article>

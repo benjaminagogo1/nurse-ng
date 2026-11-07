@@ -7,10 +7,25 @@
     <a class="text-link" href="/jobs">← Back to job opportunities</a>
     <div class="job-detail-top"><span class="job-logo">{{ icon('building', 31) }}</span><div><p class="eyebrow">{{ job.organization }}</p><h1>{{ job.title }}</h1><p class="job-org">{{ job.location or 'Location not specified' }} · Posted {{ job.posted|lower }}</p></div></div>
     <div class="job-detail-meta"><span>{{ icon('briefcase', 17) }} {{ job.type }}</span><span>{{ icon('pin', 17) }} {{ job.mode }}</span><span>{{ icon('calendar', 17) }} {{ job.salary }}</span></div>
+    {% if job.external %}
+    <p><strong>{{ job.status|replace('_', ' ')|capitalize }}</strong> · {{ job.country }}</p>
+    <p>Source: <a href="{{ job.source_url }}" target="_blank" rel="noopener noreferrer">{{ job.source_name }}</a> · Approved recruitment source</p>
+    <p class="field-hint">Source approval does not verify every vacancy or establish your eligibility to practise. Confirm the requirements in the original announcement.</p>
+    <p>Closing date: {{ job.closing_date }}{% if job.closing_date|length == 10 %} ({{ job.deadline_timezone }}){% endif %}</p>
+    <p class="field-hint">Last confirmed: {{ job.confirmed_at.strftime('%Y-%m-%d %H:%M') if job.confirmed_at else 'Not confirmed' }} UTC{% if job.clarified %}. Some fields were clarified by Nurse.ng following staff review.{% endif %}</p>
+    {% endif %}
     <h2>About this opportunity</h2><div class="job-description">{{ job.description or 'The employer has not added a detailed description for this role. You can introduce yourself with a note when applying.' }}</div>
+    {% for label, value in job.requirements.items() %}<h2>{{ label }}</h2><div class="job-description">{{ value }}</div>{% endfor %}
     <div class="job-apply">
       {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
-      {% if is_owner %}
+      {% if job.external %}
+      <h2>External application</h2>
+      {% if job.status in ['open', 'closing_soon', 'upcoming'] %}
+      <p>Read the original vacancy for the institution's application instructions. Nurse.ng does not submit an application or share your contact details when you open this link.</p>
+      <a class="btn btn-primary" href="{{ job.announcement_url }}" target="_blank" rel="noopener noreferrer">Open original vacancy {{ icon('arrow', 17) }}</a>
+      {% elif job.status == 'closed' %}<p>The recorded deadline has passed.</p>
+      {% else %}<p>We cannot currently confirm that this vacancy is open. It has been removed from current opportunities.</p>{% endif %}
+      {% elif is_owner %}
       <h2>Find your next team member</h2><p class="lede">Applications for your roles are available in your workspace.</p><a class="btn btn-primary" href="/applications">View applications {{ icon('arrow', 17) }}</a>
       {% elif application %}
       <p class="form-notice" role="status">You've applied for this role. Status: <strong>{{ application.status|replace('_', ' ')|capitalize }}</strong>.</p><a class="btn btn-secondary" href="/applications">Track my applications {{ icon('arrow', 17) }}</a>

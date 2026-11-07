@@ -5,18 +5,18 @@
 
 {% block content %}
 <section class="community-page">
-  <div class="banner">
+  <div class="banner conversation-banner">
     <p class="eyebrow">Your people. Your community.</p>
-    <h1>Connect. Share. Grow.</h1>
-    <p>Join discussions, find mentors, and stay updated with the latest in the nursing community.</p>
+    <h1>Find your conversation.</h1>
+    <p>Ask questions, exchange useful information, and talk about everyday life in nursing.</p>
     <div class="hero-actions">
-      <a class="btn btn-primary" href="#groups">Browse Groups</a>
+      <a class="btn btn-primary" href="{% if user %}/posts/new{% else %}/auth/register{% endif %}">Ask or share</a>
       {% if user and user.is_staff %}<a class="btn btn-outline-light" href="/moderation">Create a topic</a>{% endif %}
     </div>
   </div>
 
   <nav class="section-tabs" aria-label="Community views">
-    <a href="/topics" aria-current="page">Featured Groups</a>
+    <a href="/topics" aria-current="page">Topics</a>
     <a href="/feed">Discussions</a>
     <a href="/nurses">Find nurses</a>
   </nav>
@@ -33,7 +33,7 @@
     </div>
     {% else %}
     <div class="empty-state" style="border:0">
-      <h2>No groups yet</h2>
+      <h2>No topics available</h2>
       <p>This space is getting started. Explore the public feed and help shape the conversation.</p>
       <a class="btn btn-secondary btn-sm" href="/feed">Explore discussions {{ icon('arrow', 15) }}</a>
     </div>

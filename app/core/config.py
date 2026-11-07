@@ -87,6 +87,13 @@ class Settings(BaseSettings):
     community_malware_scan_command: str = "clamscan"
     community_malware_scan_timeout_seconds: int = 60
 
+    # Optional search discovery. ROR directory discovery needs neither setting.
+    # The agreement must permit retaining candidate URLs/results for this registry.
+    recruitment_search_key: str = Field(default="", repr=False)
+    recruitment_search_permission_reference: str = ""
+    recruitment_daily_task_limit: int = Field(default=100, ge=1, le=1000)
+    recruitment_pending_task_limit: int = Field(default=500, ge=20, le=5000)
+
     @model_validator(mode="after")
     def validate_security_settings(self) -> Self:
         production = self.environment == "production"

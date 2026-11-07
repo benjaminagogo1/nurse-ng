@@ -1,0 +1,7 @@
+{% if previous_page or next_page %}
+<nav class="conversation-pagination" aria-label="Conversation pages">
+  {% if previous_page %}<a class="btn btn-secondary" href="{{ previous_page }}">← Previous</a>{% endif %}
+  <span>Page {{ page_number }}</span>
+  {% if next_page %}<a class="btn btn-secondary" href="{{ next_page }}">Next →</a>{% endif %}
+</nav>
+{% endif %}

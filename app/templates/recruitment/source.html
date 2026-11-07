@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}{{ source.organization.name }} — Recruitment sources{% endblock %}
+{% block content %}
+<section class="form-page recruitment-page">
+  <a href="/recruitment">← Recruitment sources</a>
+  <p class="eyebrow">Staff only · Source review</p>
+  <h1>{{ source.organization.name }}</h1>
+  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+  <p><strong>{{ source.verification_status|capitalize }}{% if source.verification_status == 'approved' and not current_approval %} — approval expired{% endif %}</strong> · {{ source.automation_status|capitalize }} · {{ source.health_status|replace('_', ' ') }}</p>
+  <dl class="source-facts">
+    <dt>Original source URL</dt><dd><a href="{{ source.original_url }}" target="_blank" rel="noopener noreferrer">{{ source.original_url }}</a></dd>
+    <dt>Observed address</dt><dd>{{ source.observed_url or 'Not checked yet' }}</dd>
+    <dt>Canonical hint from page</dt><dd>{{ source.canonical_hint or 'None recorded' }}</dd>
+    <dt>Organisation website</dt><dd>{{ source.organization.website_url }}</dd>
+    <dt>Location</dt><dd>{{ source.organization.location or 'Unconfirmed' }} · {{ source.organization.country_code or 'Country unconfirmed' }}</dd>
+    <dt>Organisation category</dt><dd>{{ categories.get(source.organization.category, source.organization.category) }}</dd>
+    <dt>Discovered through</dt><dd>{{ source.discovered_via|replace('_', ' ') }} · {{ source.source_type|replace('_', ' ') }}</dd>
+    <dt>Collection method</dt><dd>{{ methods.get(source.collection_method, source.collection_method) }}</dd>
+    <dt>Permission status</dt><dd>{{ source.permission_status }}{% if source.access_notes %} — {{ source.access_notes }}{% endif %}</dd>
+    <dt>Last successful check (UTC)</dt><dd>{{ source.last_success_at or 'None' }}</dd>
+    <dt>Last attempt (UTC)</dt><dd>{{ source.last_attempt_at or 'None' }} · {{ source.failure_count }} consecutive failures</dd>
+    <dt>Last observed page change (UTC)</dt><dd>{{ source.last_changed_at or 'None' }}</dd>
+    <dt>Next page check (UTC)</dt><dd>{{ source.next_check_at }}</dd>
+    <dt>Approval expiry (UTC)</dt><dd>{{ source.approval_expires_at or 'No approval' }}</dd>
+    <dt>Last vacancy discovery</dt><dd>{{ source.last_vacancy_discovery_at or 'No vacancies collected' }}</dd>
+  </dl>
+  <p class="field-hint">The original URL is retained exactly. Observed addresses and canonical hints do not establish website ownership. Access errors do not prove that an organisation is invalid.</p>
+  <section class="source-card" aria-labelledby="activation-title">
+    <h2 id="activation-title">Live vacancy collection</h2>
+    {% if activation_blockers %}
+      <p><strong>Not enabled</strong></p>
+      <ul>{% for blocker in activation_blockers %}<li>{{ blocker }}</li>{% endfor %}</ul>
+    {% else %}
+      <p><strong>Enabled for the background worker</strong></p>
+      <p>Valid vacancies publish after a successful collection. Keep the recruitment worker running. Enabling collection does not confirm that this page contains an open vacancy.</p>
+    {% endif %}
+    {% if source.health_status != 'healthy' %}<p>Last access result: {{ source.health_status|replace('_', ' ') }}. A successful check is still needed; access failures do not establish that the institution is invalid.</p>{% endif %}
+    <p>Recorded reuse basis: {{ reuse_bases.get(source.reuse_basis, 'Not recorded') }}. Permitted URL scope: {{ source.reuse_url_prefix or 'Not recorded' }}.</p>
+    <p>A separate licence is not mandatory where another documented legal basis applies. Government ownership and public access do not by themselves establish unrestricted reuse.</p>
+  </section>
+  {% if source.automation_status == 'monitoring' %}
+  <form method="post" action="/recruitment/sources/{{ source.id }}/check">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit" class="button-primary">Request page check</button>
+  </form>
+  {% endif %}
+
+  <p><a href="/recruitment/vacancies?source_id={{ source.id }}&amp;state=">View collected vacancy records</a></p>
+  {% if snapshots %}<details class="source-card"><summary>Recent original page snapshots</summary><ul>{% for snapshot in snapshots %}<li><a href="/recruitment/vacancies/snapshots/{{ snapshot.id }}/original">{{ snapshot.collected_at.strftime('%Y-%m-%d %H:%M') }} UTC — download as text</a></li>{% endfor %}</ul></details>{% endif %}
+  <details class="source-card">
+    <summary>Configure vacancy collection</summary>
+    <p>Current collector: {{ source.collection_adapter or 'Disabled' }}. The first adapter reads schema.org JobPosting data embedded in this source page. General guidance does not become a vacancy.</p>
+    <p>Approve website collection first. Record the permitted vacancy URL scope and the timezone used for date-only deadlines. External recruitment portals require their own approved source.</p>
+    <form method="post" action="/recruitment/sources/{{ source.id }}/collector" class="source-form">
+      <input name="csrf_token" type="hidden" value="{{ csrf_token }}"><input name="revision" type="hidden" value="{{ source.revision }}">
+      <label>Collection<select name="enabled"><option value="false">Disabled</option><option value="true" {% if source.collection_adapter %}selected{% endif %}>Structured JobPosting data</option></select></label>
+      <label>Permitted vacancy URL prefix<input name="url_prefix" type="url" value="{{ source.vacancy_url_prefix or source.original_url }}" maxlength="2048"></label>
+      <label>Deadline timezone<input name="timezone" value="{{ source.deadline_timezone }}" placeholder="Africa/Lagos" maxlength="80"></label>
+      <label>Permission evidence URL<input name="reference" type="url" required maxlength="2048"></label>
+      <label>Permission scope and configuration reason<textarea name="note" required maxlength="3000"></textarea></label>
+      <button class="button-primary" type="submit">Save collector configuration</button>
+    </form>
+  </details>
+
+  <details class="source-card">
+    <summary>Correct organisation details</summary>
+    <p>Search and directory details need verification. Saving corrections returns approved sources for this organisation to pending review.</p>
+    <form method="post" action="/recruitment/sources/{{ source.id }}/organisation" class="source-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="revision" value="{{ source.revision }}">
+      <label>Organisation name<input name="name" value="{{ source.organization.name }}" maxlength="250" required></label>
+      <label>Category<select name="category">{% for key, label in categories.items() %}<option value="{{ key }}" {% if source.organization.category == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+      <label>Country code<input name="country_code" value="{{ source.organization.country_code }}" maxlength="2"></label>
+      <label>State, region or city<input name="location" value="{{ source.organization.location }}" maxlength="250"></label>
+      <button class="button-primary" type="submit">Save corrections</button>
+    </form>
+  </details>
+
+  <details class="source-card" {% if values.get('action') == 'approve' %}open{% endif %}>
+    <summary>Review evidence and approve source</summary>
+    <p>Record authoritative references and the checks performed. Apply licensing rules for the organisation's jurisdiction. Robots access is not permission to republish vacancies.</p>
+    <p class="field-hint">Approval records trust in this source and the permitted collection method. Individual vacancies must still pass validation before publication.</p>
+    <form method="post" action="/recruitment/sources/{{ source.id }}/review" class="source-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="revision" value="{{ values.get('revision', source.revision) }}"><input type="hidden" name="action" value="approve">
+      {% for key, label in checks.items() %}
+      <fieldset><legend>{{ label }}</legend>
+        <label>Evidence and finding<textarea name="{{ key }}_note" maxlength="2000" required>{{ values.get(key ~ '_note', '') }}</textarea></label>
+        <label>Authoritative reference URL<input name="{{ key }}_url" type="url" value="{{ values.get(key ~ '_url', '') }}" maxlength="2048" required></label>
+      </fieldset>
+      {% endfor %}
+      <fieldset><legend>Reuse basis and scope</legend>
+        <p>Use the permission evidence above to identify the applicable rule, terms or authorization and explain its scope and conditions. These are staff findings; the software does not determine legal rights. All three uses below must be covered by that evidence for this collector.</p>
+        <label>Basis for reuse<select name="reuse_basis" required><option value="">Select the documented basis</option>{% for key, label in reuse_bases.items() %}<option value="{{ key }}" {% if values.get('reuse_basis') == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+        <label>Permitted URL prefix<input name="reuse_url_prefix" type="url" value="{{ values.get('reuse_url_prefix', source.original_url) }}" maxlength="2048" required></label>
+        {% for key, label in reuse_rights.items() %}<label><input name="{{ key }}" type="checkbox" value="true" {% if values.get(key) == 'true' %}checked{% endif %} required> {{ label }}</label>{% endfor %}
+        <p class="field-hint">Reapproval disables any earlier collector configuration. Configure it again within this scope after review. Do not paste private agreements or personal information; use an access-controlled reference and a concise finding.</p>
+      </fieldset>
+      <label>Organisation registration/licensing applicability<select name="licensing_applicability"><option value="required">Required; checked in this jurisdiction</option><option value="not_applicable" {% if values.get('licensing_applicability') == 'not_applicable' %}selected{% endif %}>Not applicable; reason recorded in evidence</option></select></label>
+      <p class="field-hint">This concerns the institution or agency's registration requirements, separately from the reuse basis above.</p>
+      <label>Permitted collection method<select name="method">{% for key, label in methods.items() %}<option value="{{ key }}" {% if values.get('method', source.collection_method) == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+      <label>Review expiry date (UTC)<input name="expires_at" type="date" value="{{ values.get('expires_at', default_expiry) }}" required></label>
+      <label>Decision note<textarea name="note" maxlength="3000" required>{{ values.get('note', '') }}</textarea></label>
+      <button type="submit" class="button-primary">Approve source with recorded evidence</button>
+    </form>
+  </details>
+
+  <details class="source-card" {% if values.get('action') and values.get('action') != 'approve' %}open{% endif %}>
+    <summary>Manage review and monitoring</summary>
+    <form method="post" action="/recruitment/sources/{{ source.id }}/review" class="source-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="revision" value="{{ values.get('revision', source.revision) }}">
+      <label>Action<select name="action">{% for key, label in [('pause', 'Pause page checks'), ('resume', 'Resume page checks'), ('reject', 'Reject source'), ('revoke', 'Revoke approval'), ('reopen', 'Reopen as pending')] %}<option value="{{ key }}" {% if values.get('action') == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+      <label>Reason<textarea name="note" maxlength="3000" required>{{ values.get('note', '') if values.get('action') != 'approve' else '' }}</textarea></label>
+      <button class="button-primary" type="submit">Record action</button>
+    </form>
+  </details>
+
+  <h2 id="history">Evidence and history</h2>
+  {% for entry in history %}
+    <article class="source-card">
+      <h3>{{ entry.kind|replace('_', ' ')|capitalize }}</h3>
+      <p class="field-hint">{{ entry.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC · {{ 'Staff action' if entry.actor_id else 'Discovery system' }}{% if entry.actor_id %} · {{ entry.actor_id }}{% endif %}</p>
+      {% if entry.reference_url %}<p class="source-url">{{ entry.reference_url }}</p>{% endif %}
+      <pre class="source-evidence">{{ entry.details|tojson(indent=2) }}</pre>
+    </article>
+  {% endfor %}
+  <nav class="source-actions" aria-label="Evidence pages">{% if history_page > 1 %}<a href="?history_page={{ history_page - 1 }}#history">Newer entries</a>{% endif %}{% if has_more %}<a href="?history_page={{ history_page + 1 }}#history">Older entries</a>{% endif %}</nav>
+</section>
+{% endblock %}

@@ -8,12 +8,13 @@ from fastapi import (
     File,
     Form,
     HTTPException,
+    Query,
     Request,
     Response,
     UploadFile,
     status,
 )
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -21,7 +22,7 @@ from app.core.community_storage import CommunityStorageError, community_media_pa
 from app.core.config import settings
 from app.core.ratelimit import FixedWindowLimiter
 from app.db.session import get_db
-from app.models.community import CommunityReply, Connection, ConnectionStatus
+from app.models.community import CommunityReply, Connection, ConnectionStatus, ContentStatus
 from app.models.profile import NurseProfile, ProfileStatus
 from app.models.user import User
 from app.services.community import (
@@ -31,6 +32,10 @@ from app.services.community import (
     add_reply,
     connection_between,
     create_post,
+    discussion_reply_page,
+    discussion_summaries,
+    first_unread_reply,
+    follow_discussion,
     follow_exists,
     follow_profile,
     followed_user_ids,
@@ -41,13 +46,17 @@ from app.services.community import (
     list_published_posts,
     list_received_requests,
     list_topics,
+    mark_discussion_read,
     public_profile_ids,
     remove_connection,
+    reply_page_number,
+    reply_references,
     report_post,
     report_reply,
     request_connection,
     respond_to_connection,
     set_community_name,
+    unfollow_discussion,
     unfollow_profile,
     users_by_id,
 )
@@ -57,7 +66,7 @@ from app.services.profiles import (
     public_profile_fields,
 )
 from app.web.deps import get_current_user, require_user, verify_csrf
-from app.web.templating import render
+from app.web.templating import confirm_published_draft, render
 
 router = APIRouter(tags=["community"])
 
@@ -85,11 +94,63 @@ def _identifier(value: str) -> uuid.UUID:
 def _post_context(
     db: Session,
     posts: list,
+    user: User | None = None,
 ) -> dict[str, object]:
     author_ids = {post.author_id for post in posts}
     return {
         "posts": posts,
         "profile_ids": public_profile_ids(db, author_ids),
+        "summaries": discussion_summaries(db, posts, user),
+    }
+
+
+def _listing_context(request: Request, db: Session, user: User | None,
+                     query: str, page_number: int, **filters) -> dict[str, object]:
+    page_size = 20
+    query = query.strip()
+    posts = list_published_posts(
+        db, query=query, offset=(page_number - 1) * page_size, limit=page_size + 1, **filters,
+    )
+    return {
+        **_post_context(db, posts[:page_size], user),
+        "search_query": query,
+        "listing_path": request.url.path,
+        "page_number": page_number,
+        "next_page": str(request.url.include_query_params(page=page_number + 1))
+        if len(posts) > page_size else None,
+        "previous_page": str(request.url.include_query_params(page=page_number - 1))
+        if page_number > 1 else None,
+    }
+
+
+def _conversation_context(
+    db: Session, post, user: User | None, *, page_number: int = 1,
+    reply_to: str = "", reply_target_explicit: bool = False, **extra,
+) -> dict[str, object]:
+    reply_page = discussion_reply_page(db, post, user, page=page_number)
+    target_ids = {reply.in_reply_to_id for reply in reply_page.replies if reply.in_reply_to_id}
+    selected = None
+    if reply_to:
+        try:
+            selected = uuid.UUID(reply_to)
+            target_ids.add(selected)
+        except ValueError:
+            pass
+    references = reply_references(db, post.id, target_ids)
+    return {
+        "title": f"Conversation in {post.topic.name}", "user": user, "post": post,
+        "conversation_detail": True,
+        "reply_page": reply_page,
+        "reply_references": references,
+        "reply_target": references.get(selected),
+        "reply_target_id": str(selected) if selected else reply_to,
+        "reply_target_explicit": reply_target_explicit,
+        "summaries": discussion_summaries(db, [post], user),
+        "profile_ids": public_profile_ids(
+            db, {post.author_id, *(reply.author_id for reply in reply_page.replies)},
+        ),
+        "report_reasons": REPORT_REASON_LABELS.items(),
+        **extra,
     }
 
 
@@ -99,11 +160,16 @@ def _new_post_context(
     values: dict[str, str] | None = None,
     error: str | None = None,
 ) -> dict[str, object]:
+    topics = list_topics(db)
+    default_topic = next((topic for topic in topics if topic.slug == "general-nursing"), None)
+    if len(topics) == 1:
+        default_topic = topics[0]
     return {
-        "title": "Start a discussion",
-        "topics": list_topics(db),
+        "title": "Ask or share",
+        "topics": topics,
         "values": values
-        or {"topic_id": "", "body": "", "external_video_url": ""},
+        or {"topic_id": str(default_topic.id) if default_topic else "", "body": "",
+            "external_video_url": "", "community_name": ""},
         "error": error,
         "image_max_mb": max(1, settings.community_image_max_bytes // (1024 * 1024)),
         "video_max_mb": max(1, settings.community_video_max_bytes // (1024 * 1024)),
@@ -150,39 +216,58 @@ def _public_profile(db: Session, public_id: str) -> NurseProfile:
 @router.get("/feed")
 def feed(
     request: Request,
+    q: str = Query("", max_length=120),
+    page: int = Query(1, ge=1, le=10000),
     user: User | None = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> Response:
-    posts = list_published_posts(db)
     return render(
         request,
         "community/feed.html",
         {
-            "title": "Community feed",
+            "title": "Community conversations",
             "user": user,
-            "following_only": False,
-            **_post_context(db, posts),
+            "feed_view": "all",
+            **_listing_context(request, db, user, q, page),
         },
+        headers={"Cache-Control": "no-store"},
     )
 
 
 @router.get("/feed/following")
 def following_feed(
     request: Request,
+    q: str = Query("", max_length=120),
+    page: int = Query(1, ge=1, le=10000),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ) -> Response:
-    posts = list_published_posts(db, author_ids=followed_user_ids(db, user.id))
     return render(
         request,
         "community/feed.html",
         {
             "title": "Following feed",
             "user": user,
-            "following_only": True,
-            **_post_context(db, posts),
+            "feed_view": "people",
+            **_listing_context(request, db, user, q, page,
+                               author_ids=followed_user_ids(db, user.id)),
         },
+        headers={"Cache-Control": "no-store"},
     )
+
+
+@router.get("/feed/discussions")
+def followed_discussions(
+    request: Request,
+    q: str = Query("", max_length=120),
+    page: int = Query(1, ge=1, le=10000),
+    user: User = Depends(require_user), db: Session = Depends(get_db),
+) -> Response:
+    return render(request, "community/feed.html", {
+        "title": "Discussions you follow", "user": user,
+        "feed_view": "discussions", "page": "discussion-follows",
+        **_listing_context(request, db, user, q, page, discussion_follower_id=user.id),
+    }, headers={"Cache-Control": "no-store"})
 
 
 @router.get("/topics")
@@ -203,13 +288,14 @@ def topics_page(
 def topic_page(
     slug: str,
     request: Request,
+    q: str = Query("", max_length=120),
+    page: int = Query(1, ge=1, le=10000),
     user: User | None = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> Response:
     topic = get_topic_by_slug(db, slug)
     if topic is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    posts = list_published_posts(db, topic_id=topic.id)
     return render(
         request,
         "community/topic.html",
@@ -217,8 +303,9 @@ def topic_page(
             "title": topic.name,
             "user": user,
             "topic": topic,
-            **_post_context(db, posts),
+            **_listing_context(request, db, user, q, page, topic_id=topic.id),
         },
+        headers={"Cache-Control": "no-store"},
     )
 
 
@@ -262,13 +349,17 @@ def save_community_settings(
 @router.get("/posts/new")
 def new_post_form(
     request: Request,
+    topic: str = Query(""),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ) -> Response:
+    context = _new_post_context(db)
+    if any(str(item.id) == topic for item in context["topics"]):
+        context["values"]["topic_id"] = topic
     return render(
         request,
         "community/post_form.html",
-        {"user": user, **_new_post_context(db)},
+        {"user": user, **context},
     )
 
 
@@ -277,7 +368,9 @@ def publish_post(
     request: Request,
     topic_id: str = Form(""),
     body: str = Form(""),
+    community_name: str = Form(""),
     external_video_url: str = Form(""),
+    draft_version: str = Form(""),
     images: list[UploadFile] | None = File(None),
     video: UploadFile | None = File(None),
     user: User = Depends(require_user),
@@ -288,6 +381,7 @@ def publish_post(
         "topic_id": topic_id,
         "body": body,
         "external_video_url": external_video_url,
+        "community_name": community_name,
     }
     retry_after = _retry_after(_post_limiter, user)
     if retry_after:
@@ -313,6 +407,8 @@ def publish_post(
         uploaded_images = [item for item in images or [] if item.filename]
         uploaded_video = video if video is not None and video.filename else None
         try:
+            if not user.community_name and community_name.strip():
+                set_community_name(db, user, community_name)
             post = create_post(
                 db,
                 user,
@@ -329,6 +425,7 @@ def publish_post(
         except CommunityError as exc:
             error = str(exc)
         else:
+            confirm_published_draft(request, "post", draft_version)
             return RedirectResponse(
                 f"/posts/{post.id}", status_code=status.HTTP_303_SEE_OTHER
             )
@@ -345,26 +442,96 @@ def publish_post(
 def post_page(
     post_id: str,
     request: Request,
+    page: int = Query(1, ge=1, le=10000),
+    reply_to: str | None = Query(None, max_length=36),
     user: User | None = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> Response:
     post = get_published_post(db, _identifier(post_id))
     if post is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    return render(
+    context = _conversation_context(
+        db, post, user, page_number=page, reply_to=reply_to or "",
+        reply_target_explicit=reply_to is not None,
+    )
+    response = render(
         request,
         "community/post.html",
-        {
-            "title": f"Discussion in {post.topic.name}",
-            "user": user,
-            "post": post,
-            "profile_ids": public_profile_ids(
-                db,
-                {post.author_id, *(reply.author_id for reply in post.replies)},
-            ),
-            "report_reasons": REPORT_REASON_LABELS.items(),
-        },
+        context,
+        headers={"Cache-Control": "no-store"},
     )
+    if user is not None:
+        mark_discussion_read(db, user, post, context["reply_page"].replies)
+    return response
+
+
+@router.get("/posts/{post_id}/unread")
+def first_unread_page(
+    post_id: str, user: User = Depends(require_user), db: Session = Depends(get_db),
+) -> Response:
+    post = get_published_post(db, _identifier(post_id))
+    if post is None:
+        raise HTTPException(status_code=404)
+    reply = first_unread_reply(db, user, post.id)
+    destination = f"/posts/{post.id}#replies"
+    if reply is not None:
+        destination = f"/posts/{post.id}?page={reply_page_number(db, reply)}#reply-{reply.id}"
+    return RedirectResponse(destination, status_code=303, headers={"Cache-Control": "no-store"})
+
+
+@router.get("/posts/{post_id}/replies/{reply_id}")
+def reply_permalink(
+    post_id: str, reply_id: str, db: Session = Depends(get_db),
+) -> Response:
+    post = get_published_post(db, _identifier(post_id))
+    if post is None:
+        raise HTTPException(status_code=404)
+    reply = db.scalar(select(CommunityReply).where(
+        CommunityReply.id == _identifier(reply_id), CommunityReply.post_id == post.id,
+        CommunityReply.status == ContentStatus.PUBLISHED,
+    ))
+    if reply is None:
+        raise HTTPException(status_code=404)
+    return RedirectResponse(
+        f"/posts/{post.id}?page={reply_page_number(db, reply)}#reply-{reply.id}",
+        status_code=303, headers={"Cache-Control": "no-store"},
+    )
+
+
+@router.get("/posts/{post_id}/reply-context/{reply_id}")
+def reply_context(post_id: str, reply_id: str, db: Session = Depends(get_db)) -> Response:
+    post = get_published_post(db, _identifier(post_id))
+    if post is None:
+        raise HTTPException(status_code=404)
+    target_id = _identifier(reply_id)
+    reference = reply_references(db, post.id, {target_id}).get(target_id)
+    if reference is None:
+        raise HTTPException(status_code=404)
+    return JSONResponse(reference, headers={"Cache-Control": "no-store"})
+
+
+@router.post("/posts/{post_id}/follow")
+def subscribe_to_discussion(
+    post_id: str, user: User = Depends(require_user),
+    _: None = Depends(verify_csrf), db: Session = Depends(get_db),
+) -> Response:
+    post = get_published_post(db, _identifier(post_id))
+    if post is None:
+        raise HTTPException(status_code=404)
+    follow_discussion(db, user, post)
+    return RedirectResponse(f"/posts/{post.id}", status_code=303)
+
+
+@router.post("/posts/{post_id}/unfollow")
+def unsubscribe_from_discussion(
+    post_id: str, user: User = Depends(require_user),
+    _: None = Depends(verify_csrf), db: Session = Depends(get_db),
+) -> Response:
+    post = get_published_post(db, _identifier(post_id))
+    if post is None:
+        raise HTTPException(status_code=404)
+    unfollow_discussion(db, user, post)
+    return RedirectResponse(f"/posts/{post.id}", status_code=303)
 
 
 @router.post("/posts/{post_id}/replies")
@@ -372,6 +539,10 @@ def publish_reply(
     post_id: str,
     request: Request,
     body: str = Form(""),
+    community_name: str = Form(""),
+    draft_version: str = Form(""),
+    in_reply_to_id: str = Form(""),
+    page: int = Form(1, ge=1, le=10000),
     user: User = Depends(require_user),
     _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
@@ -381,29 +552,37 @@ def publish_reply(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     retry_after = _retry_after(_reply_limiter, user)
     if retry_after:
-        _raise_rate_limited(retry_after, "Too many replies. Try again later.")
+        return render(request, "community/post.html", _conversation_context(
+            db, post, user, page_number=page, reply_body=body, reply_name=community_name,
+            reply_to=in_reply_to_id, reply_target_explicit=True,
+            reply_error="You have sent several replies. Please try again in a little while.",
+        ), status_code=429, headers={"Retry-After": str(retry_after), "Cache-Control": "no-store"})
     try:
-        add_reply(db, user, post, body)
+        target_id = None
+        if in_reply_to_id:
+            try:
+                target_id = uuid.UUID(in_reply_to_id)
+            except ValueError:
+                raise CommunityError(
+                    "Choose an available response or reply to the conversation instead."
+                ) from None
+        if not user.community_name and community_name.strip():
+            set_community_name(db, user, community_name)
+        reply = add_reply(db, user, post, body, in_reply_to_id=target_id)
     except CommunityError as exc:
         return render(
             request,
             "community/post.html",
-            {
-                "title": f"Discussion in {post.topic.name}",
-                "user": user,
-                "post": post,
-                "profile_ids": public_profile_ids(
-                    db,
-                    {post.author_id, *(reply.author_id for reply in post.replies)},
-                ),
-                "report_reasons": REPORT_REASON_LABELS.items(),
-                "reply_error": str(exc),
-                "reply_body": body,
-            },
+            _conversation_context(db, post, user, page_number=page, reply_error=str(exc),
+                                  reply_body=body, reply_name=community_name,
+                                  reply_to=in_reply_to_id, reply_target_explicit=True),
             status_code=status.HTTP_400_BAD_REQUEST,
+            headers={"Cache-Control": "no-store"},
         )
+    confirm_published_draft(request, f"reply:{post.id}", draft_version)
     return RedirectResponse(
-        f"/posts/{post.id}", status_code=status.HTTP_303_SEE_OTHER
+        f"/posts/{post.id}?page={reply_page_number(db, reply)}#reply-{reply.id}",
+        status_code=status.HTTP_303_SEE_OTHER,
     )
 
 

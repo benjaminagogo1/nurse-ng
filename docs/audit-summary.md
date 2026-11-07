@@ -1,5 +1,7 @@
 # Reconceptualizing Nurse.ng as a professional-networking platform
 
+> Historical audit note, preserved for context. The state and next steps below predate the later interface and community work. Nurse.ng is a broader professional platform for nurses and healthcare employers; community is one function. See [current status](../README.md#status), the [assessment tracker](BUILD_PLAN.md#assessment-baseline-and-completion-tracker--6-november-2026), and [community delivery progress](BUILD_PLAN.md#community-delivery-progress--6-november-2026) for current evidence and priorities.
+
 A nurse professional community with documented review, follow/connect features,
 and staff moderation — designed for trusted, offline-friendly use.
 

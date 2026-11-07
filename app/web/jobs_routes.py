@@ -22,6 +22,7 @@ from app.services.jobs import (
     list_open_jobs,
 )
 from app.services.profiles import list_discoverable_profiles, public_profile_fields
+from app.services.vacancies import collector_authorized
 from app.web.deps import get_current_user, require_user, verify_csrf
 from app.web.templating import render
 
@@ -52,6 +53,7 @@ _EMPTY_FORM = {
     "salary_min": "",
     "salary_max": "",
     "description": "",
+    "country_code": "",
 }
 
 
@@ -60,11 +62,12 @@ def jobs_page(
     request: Request,
     job_type: str = Query("", alias="type"),
     q: str = Query("", max_length=120),
+    country: str = Query("", max_length=2),
     user: User | None = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> Response:
     job_type = job_type if job_type in JOB_TYPE_LABELS else ""
-    jobs = list_open_jobs(db, job_type=job_type or None, query=q)
+    jobs = list_open_jobs(db, job_type=job_type or None, query=q, country_code=country)
     return render(
         request,
         "jobs/index.html",
@@ -75,6 +78,7 @@ def jobs_page(
             "job_types": list(JOB_TYPE_LABELS.items()),
             "job_type": job_type if job_type in JOB_TYPE_LABELS else "",
             "q": q,
+            "country": country.upper(),
             "is_employer": _is_employer(user),
         },
     )
@@ -104,6 +108,7 @@ def publish_job(
     salary_min: str = Form(""),
     salary_max: str = Form(""),
     description: str = Form(""),
+    country_code: str = Form(""),
     user: User = Depends(require_user),
     _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
@@ -119,6 +124,7 @@ def publish_job(
         "salary_min": salary_min,
         "salary_max": salary_max,
         "description": description,
+        "country_code": country_code,
     }
     try:
         create_job(
@@ -132,6 +138,7 @@ def publish_job(
             salary_min=salary_min,
             salary_max=salary_max,
             description=description,
+            country_code=country_code,
         )
     except JobError as exc:
         return render(
@@ -167,23 +174,38 @@ def employers_page(
 
 def _job(db: Session, identifier: UUID, user: User | None) -> Job:
     job = db.get(Job, identifier)
-    if job is None or (job.status != JobStatus.OPEN and (
-        user is None or user.id != job.employer_user_id
-    )):
+    if job and job.source_id:
+        if collector_authorized(job.source) and job.status in {"open", "unconfirmed", "closed"}:
+            return job
+        raise HTTPException(status_code=404, detail="This opportunity is no longer available.")
+    if job is None or (
+        job.status != JobStatus.OPEN and (user is None or user.id != job.employer_user_id)
+    ):
         raise HTTPException(status_code=404, detail="This job is no longer available.")
     return job
 
 
-def _detail(request: Request, db: Session, user: User | None, job: Job,
-            *, error: str | None = None, cover_note: str = "") -> Response:
+def _detail(
+    request: Request,
+    db: Session,
+    user: User | None,
+    job: Job,
+    *,
+    error: str | None = None,
+    cover_note: str = "",
+) -> Response:
     return render(
-        request, "jobs/show.html",
+        request,
+        "jobs/show.html",
         {
-            "title": job.title, "user": user, "job": job_card(job),
+            "title": job.title,
+            "user": user,
+            "job": job_card(job),
             "is_employer": _is_employer(user),
             "is_owner": bool(user and user.id == job.employer_user_id),
             "application": application_for_job(db, user, job) if user else None,
-            "error": error, "cover_note": cover_note,
+            "error": error,
+            "cover_note": cover_note,
         },
         status_code=400 if error else 200,
     )
@@ -191,16 +213,22 @@ def _detail(request: Request, db: Session, user: User | None, job: Job,
 
 @router.get("/jobs/{job_id}")
 def job_detail(
-    job_id: UUID, request: Request,
-    user: User | None = Depends(get_current_user), db: Session = Depends(get_db),
+    job_id: UUID,
+    request: Request,
+    user: User | None = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ) -> Response:
     return _detail(request, db, user, _job(db, job_id, user))
 
 
 @router.post("/jobs/{job_id}/apply")
 def apply(
-    job_id: UUID, request: Request, cover_note: str = Form(""), consent: str = Form(""),
-    user: User = Depends(require_user), _: None = Depends(verify_csrf),
+    job_id: UUID,
+    request: Request,
+    cover_note: str = Form(""),
+    consent: str = Form(""),
+    user: User = Depends(require_user),
+    _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
 ) -> Response:
     job = _job(db, job_id, user)
@@ -217,18 +245,29 @@ def apply(
 
 @router.get("/applications")
 def applications(
-    request: Request, user: User = Depends(require_user), db: Session = Depends(get_db),
+    request: Request,
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
 ) -> Response:
-    return render(request, "jobs/applications.html", {
-        "title": "Applications", "user": user, "is_employer": _is_employer(user),
-        "applications": list_applications(db, user), "status_labels": APPLICATION_STATUS_LABELS,
-    })
+    return render(
+        request,
+        "jobs/applications.html",
+        {
+            "title": "Applications",
+            "user": user,
+            "is_employer": _is_employer(user),
+            "applications": list_applications(db, user),
+            "status_labels": APPLICATION_STATUS_LABELS,
+        },
+    )
 
 
 @router.post("/applications/{application_id}/status")
 def application_status(
-    application_id: UUID, new_status: str = Form(""),
-    user: User = Depends(require_user), _: None = Depends(verify_csrf),
+    application_id: UUID,
+    new_status: str = Form(""),
+    user: User = Depends(require_user),
+    _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
 ) -> Response:
     application = db.get(JobApplication, application_id)

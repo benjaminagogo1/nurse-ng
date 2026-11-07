@@ -137,6 +137,10 @@ class CommunityReply(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     author_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
+    in_reply_to_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("community_replies.id", ondelete="SET NULL", name="fk_community_reply_parent"),
+        nullable=True, index=True,
+    )
     body: Mapped[str] = mapped_column(Text)
     status: Mapped[str] = mapped_column(
         String(20), default=ContentStatus.PUBLISHED, index=True
@@ -151,6 +155,43 @@ class CommunityReply(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     post: Mapped[CommunityPost] = relationship(back_populates="replies")
     author: Mapped[User] = relationship(foreign_keys=[author_id])
+
+    __table_args__ = (
+        Index("community_reply_activity_idx", "post_id", "status", "created_at"),
+        CheckConstraint("in_reply_to_id IS NULL OR in_reply_to_id != id",
+                        name="community_reply_not_self"),
+    )
+
+
+class DiscussionFollow(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """A private subscription to a public conversation, independent of people follows."""
+
+    __tablename__ = "discussion_follows"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    post_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("community_posts.id", ondelete="CASCADE"), index=True
+    )
+    last_read_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "post_id", name="uniq_discussion_follow"),
+    )
+
+
+class DiscussionReplyRead(Base):
+    """Private record of a reply rendered for one discussion follower."""
+
+    __tablename__ = "discussion_reply_reads"
+
+    follow_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("discussion_follows.id", ondelete="CASCADE"), primary_key=True
+    )
+    reply_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("community_replies.id", ondelete="CASCADE"), primary_key=True, index=True
+    )
 
 
 class ContentReport(UUIDPrimaryKeyMixin, TimestampMixin, Base):

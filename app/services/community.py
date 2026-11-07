@@ -10,7 +10,9 @@ from typing import BinaryIO
 from urllib.parse import urlsplit
 from uuid import UUID
 
-from sqlalchemy import func, or_, select, update
+from sqlalchemy import delete, func, or_, select, update
+from sqlalchemy.dialects.postgresql import insert as postgresql_insert
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session, selectinload
 
@@ -30,6 +32,8 @@ from app.models.community import (
     ConnectionStatus,
     ContentReport,
     ContentStatus,
+    DiscussionFollow,
+    DiscussionReplyRead,
     Follow,
     MediaKind,
     ReportReason,
@@ -41,6 +45,7 @@ from app.models.user import User
 COMMUNITY_NAME_MAX = 80
 POST_BODY_MAX = 5000
 REPLY_BODY_MAX = 2000
+REPLIES_PER_PAGE = 20
 TOPIC_NAME_MAX = 80
 TOPIC_DESCRIPTION_MAX = 500
 REPORT_DETAILS_MAX = 1000
@@ -360,13 +365,15 @@ def create_post(
     return post
 
 
-def _post_load_options():
-    return (
+def _post_load_options(*, replies: bool = True):
+    options = (
         selectinload(CommunityPost.author),
         selectinload(CommunityPost.topic),
         selectinload(CommunityPost.media),
-        selectinload(CommunityPost.replies).selectinload(CommunityReply.author),
     )
+    if replies:
+        options += (selectinload(CommunityPost.replies).selectinload(CommunityReply.author),)
+    return options
 
 
 def list_published_posts(
@@ -375,6 +382,9 @@ def list_published_posts(
     topic_id: UUID | None = None,
     author_ids: set[UUID] | None = None,
     limit: int = 50,
+    offset: int = 0,
+    query: str = "",
+    discussion_follower_id: UUID | None = None,
 ) -> list[CommunityPost]:
     statement = select(CommunityPost).where(
         CommunityPost.status == ContentStatus.PUBLISHED
@@ -385,10 +395,203 @@ def list_published_posts(
         if not author_ids:
             return []
         statement = statement.where(CommunityPost.author_id.in_(author_ids))
-    statement = statement.options(*_post_load_options()).order_by(
-        CommunityPost.published_at.desc(), CommunityPost.id.desc()
+    for word in query.strip().split():
+        matching_reply = select(CommunityReply.id).where(
+            CommunityReply.post_id == CommunityPost.id,
+            CommunityReply.status == ContentStatus.PUBLISHED,
+            CommunityReply.body.icontains(word, autoescape=True),
+        ).exists()
+        statement = statement.where(or_(
+            CommunityPost.body.icontains(word, autoescape=True),
+            CommunityPost.topic.has(CommunityTopic.name.icontains(word, autoescape=True)),
+            matching_reply,
+        ))
+    order = CommunityPost.published_at
+    if discussion_follower_id is not None:
+        statement = statement.join(DiscussionFollow).where(
+            DiscussionFollow.user_id == discussion_follower_id
+        )
+        latest_reply = select(func.max(CommunityReply.created_at)).where(
+            CommunityReply.post_id == CommunityPost.id,
+            CommunityReply.status == ContentStatus.PUBLISHED,
+        ).correlate(CommunityPost).scalar_subquery()
+        order = func.coalesce(latest_reply, CommunityPost.published_at)
+    statement = statement.options(*_post_load_options(replies=False)).order_by(
+        order.desc(), CommunityPost.id.desc()
     )
-    return list(db.scalars(statement.limit(limit)).all())
+    return list(db.scalars(statement.offset(offset).limit(limit)).all())
+
+
+def discussion_summaries(
+    db: Session, posts: Sequence[CommunityPost], user: User | None = None,
+) -> dict[UUID, dict[str, object]]:
+    """Batch visible reply counts and this member's private update indicators."""
+    result = {
+        post.id: {"replies": 0, "last_reply_at": None, "following": False, "new_replies": 0}
+        for post in posts
+    }
+    if not result:
+        return result
+    for post_id, count, latest in db.execute(
+        select(CommunityReply.post_id, func.count(), func.max(CommunityReply.created_at))
+        .where(CommunityReply.post_id.in_(result), CommunityReply.status == ContentStatus.PUBLISHED)
+        .group_by(CommunityReply.post_id)
+    ):
+        result[post_id].update(replies=count, last_reply_at=latest)
+    if user is not None:
+        for post_id in db.scalars(select(DiscussionFollow.post_id).where(
+            DiscussionFollow.user_id == user.id, DiscussionFollow.post_id.in_(result),
+        )):
+            result[post_id]["following"] = True
+        for post_id, count in db.execute(
+            select(CommunityReply.post_id, func.count())
+            .join(DiscussionFollow, DiscussionFollow.post_id == CommunityReply.post_id)
+            .where(
+                DiscussionFollow.user_id == user.id, CommunityReply.post_id.in_(result),
+                CommunityReply.status == ContentStatus.PUBLISHED,
+                CommunityReply.author_id != user.id,
+                CommunityReply.created_at > DiscussionFollow.last_read_at,
+                ~_reply_read_exists(),
+            ).group_by(CommunityReply.post_id)
+        ):
+            result[post_id]["new_replies"] = count
+    return result
+
+
+def follow_discussion(db: Session, user: User, post: CommunityPost) -> None:
+    if post.status != ContentStatus.PUBLISHED:
+        raise CommunityError("This conversation is no longer available.")
+    existing = db.scalar(select(DiscussionFollow.id).where(
+        DiscussionFollow.user_id == user.id, DiscussionFollow.post_id == post.id,
+    ))
+    if existing is not None:
+        return
+    db.add(DiscussionFollow(user_id=user.id, post_id=post.id, last_read_at=datetime.now(UTC)))
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        if db.scalar(select(DiscussionFollow.id).where(
+            DiscussionFollow.user_id == user.id, DiscussionFollow.post_id == post.id,
+        )) is None:
+            raise
+
+
+def unfollow_discussion(db: Session, user: User, post: CommunityPost) -> None:
+    db.execute(delete(DiscussionFollow).where(
+        DiscussionFollow.user_id == user.id, DiscussionFollow.post_id == post.id,
+    ))
+    db.commit()
+
+
+def _reply_read_exists():
+    return select(DiscussionReplyRead.reply_id).where(
+        DiscussionReplyRead.follow_id == DiscussionFollow.id,
+        DiscussionReplyRead.reply_id == CommunityReply.id,
+    ).correlate(DiscussionFollow, CommunityReply).exists()
+
+
+def _unread_replies(user: User, post_id: UUID):
+    return select(CommunityReply).join(
+        DiscussionFollow, DiscussionFollow.post_id == CommunityReply.post_id,
+    ).where(
+        DiscussionFollow.user_id == user.id,
+        CommunityReply.post_id == post_id,
+        CommunityReply.status == ContentStatus.PUBLISHED,
+        CommunityReply.author_id != user.id,
+        CommunityReply.created_at > DiscussionFollow.last_read_at,
+        ~_reply_read_exists(),
+    )
+
+
+def first_unread_reply(db: Session, user: User, post_id: UUID) -> CommunityReply | None:
+    return db.scalar(_unread_replies(user, post_id).order_by(
+        CommunityReply.created_at, CommunityReply.id,
+    ).limit(1))
+
+
+@dataclass(frozen=True)
+class ReplyPage:
+    replies: Sequence[CommunityReply]
+    number: int
+    total_pages: int
+    total_replies: int
+    unread_ids: frozenset[UUID]
+    first_unread_id: UUID | None
+
+
+def discussion_reply_page(
+    db: Session, post: CommunityPost, user: User | None = None, *, page: int = 1,
+) -> ReplyPage:
+    visible = select(CommunityReply).where(
+        CommunityReply.post_id == post.id, CommunityReply.status == ContentStatus.PUBLISHED,
+    )
+    total = db.scalar(visible.with_only_columns(func.count()).select_from(CommunityReply)) or 0
+    total_pages = max(1, (total + REPLIES_PER_PAGE - 1) // REPLIES_PER_PAGE)
+    page = min(max(1, page), total_pages)
+    replies = list(db.scalars(visible.order_by(
+        CommunityReply.created_at, CommunityReply.id,
+    ).offset((page - 1) * REPLIES_PER_PAGE).limit(REPLIES_PER_PAGE).options(
+        selectinload(CommunityReply.author),
+    )))
+    unread_ids = frozenset()
+    first_unread = None
+    if user is not None:
+        first_unread = first_unread_reply(db, user, post.id)
+        if first_unread is not None and replies:
+            unread_ids = frozenset(db.scalars(_unread_replies(user, post.id).where(
+                CommunityReply.id.in_([reply.id for reply in replies]),
+            ).with_only_columns(CommunityReply.id)))
+    return ReplyPage(replies, page, total_pages, total, unread_ids,
+                     first_unread.id if first_unread else None)
+
+
+def reply_page_number(db: Session, reply: CommunityReply) -> int:
+    earlier = db.scalar(select(func.count()).select_from(CommunityReply).where(
+        CommunityReply.post_id == reply.post_id,
+        CommunityReply.status == ContentStatus.PUBLISHED,
+        or_(CommunityReply.created_at < reply.created_at,
+            (CommunityReply.created_at == reply.created_at) & (CommunityReply.id < reply.id)),
+    )) or 0
+    return earlier // REPLIES_PER_PAGE + 1
+
+
+def reply_references(db: Session, post_id: UUID, reply_ids: set[UUID]) -> dict[UUID, dict]:
+    """Resolve only immediate public references, never copy removed text or load a tree."""
+    if not reply_ids:
+        return {}
+    rows = db.execute(select(CommunityReply.id, User.community_name, CommunityReply.body).join(
+        User, User.id == CommunityReply.author_id,
+    ).where(
+        CommunityReply.post_id == post_id, CommunityReply.id.in_(reply_ids),
+        CommunityReply.status == ContentStatus.PUBLISHED,
+    ).limit(len(reply_ids)))
+    result = {}
+    for reply_id, name, body in rows:
+        excerpt = " ".join(body.split())
+        result[reply_id] = {
+            "id": str(reply_id), "author": name or "Nurse.ng member",
+            "excerpt": excerpt[:180] + ("…" if len(excerpt) > 180 else ""),
+            "url": f"/posts/{post_id}/replies/{reply_id}",
+        }
+    return result
+
+
+def mark_discussion_read(
+    db: Session, user: User, post: CommunityPost, replies: Sequence[CommunityReply],
+) -> None:
+    # Record only rendered replies, leaving gaps and concurrently arriving replies new.
+    if not replies:
+        return
+    rows = _unread_replies(user, post.id).where(
+        CommunityReply.id.in_([reply.id for reply in replies]),
+    ).with_only_columns(DiscussionFollow.id, CommunityReply.id)
+    # Both supported databases offer an atomic insert that tolerates overlapping reads.
+    insert = sqlite_insert if db.get_bind().dialect.name == "sqlite" else postgresql_insert
+    db.execute(insert(DiscussionReplyRead).from_select(
+        ["follow_id", "reply_id"], rows,
+    ).on_conflict_do_nothing(index_elements=["follow_id", "reply_id"]))
+    db.commit()
 
 
 def get_published_post(db: Session, post_id: UUID) -> CommunityPost | None:
@@ -398,7 +601,8 @@ def get_published_post(db: Session, post_id: UUID) -> CommunityPost | None:
             CommunityPost.id == post_id,
             CommunityPost.status == ContentStatus.PUBLISHED,
         )
-        .options(*_post_load_options())
+        .options(*_post_load_options(replies=False))
+        .execution_options(populate_existing=True)
     )
 
 
@@ -407,6 +611,8 @@ def add_reply(
     user: User,
     post: CommunityPost,
     body: str,
+    *,
+    in_reply_to_id: UUID | None = None,
 ) -> CommunityReply:
     _require_community_name(user)
     if post.status != ContentStatus.PUBLISHED:
@@ -417,11 +623,21 @@ def add_reply(
         maximum=REPLY_BODY_MAX,
         required=True,
     )
+    if in_reply_to_id is not None and db.scalar(select(CommunityReply.id).where(
+        CommunityReply.id == in_reply_to_id, CommunityReply.post_id == post.id,
+        CommunityReply.status == ContentStatus.PUBLISHED,
+    )) is None:
+        raise CommunityError(
+            "The response you selected is no longer available. "
+            "Choose another response or reply to the conversation instead."
+        )
     reply = CommunityReply(
         post_id=post.id,
         author_id=user.id,
         body=cleaned,
+        in_reply_to_id=in_reply_to_id,
         status=ContentStatus.PUBLISHED,
+        created_at=datetime.now(UTC),
     )
     _lock_community_name(db, user)
     db.add(reply)

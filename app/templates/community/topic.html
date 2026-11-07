@@ -2,9 +2,14 @@
 {% from "_icons.html" import icon %}
 {% block title %}{{ topic.name }} — Nurse.ng{% endblock %}
 {% block content %}
-<section class="community-page">
-  <a class="text-link" href="/topics">← Back to the community</a>
-  <div class="page-heading-row" style="margin-top:24px"><div><p class="eyebrow">Find your people</p><h1>{{ topic.name }}</h1><p class="lede">{{ topic.description or 'A space to learn, connect, and share your experience.' }}</p></div>{% if user %}<a class="btn btn-primary" href="/posts/new">{{ icon('plus', 17) }} Start a discussion</a>{% endif %}</div>
-  <div class="community-list">{% for post in posts %}{% include "community/_post_card.html" %}{% else %}<div class="empty-state"><span class="empty-icon">{{ icon('feed', 28) }}</span><h2>Every conversation starts somewhere</h2><p>Share a question, an experience, or a little encouragement with your community.</p><a class="btn btn-primary" href="{% if user %}/posts/new{% else %}/auth/register{% endif %}">Start the conversation {{ icon('arrow', 17) }}</a></div>{% endfor %}</div>
+<section class="community-page conversation-space">
+  <a class="text-link" href="/topics">← Browse topics</a>
+  <div class="page-heading-row conversation-heading"><div><p class="eyebrow">Community topic</p><h1>{{ topic.name }}</h1><p class="lede">{{ topic.description or 'Questions, shared information, and everyday experiences.' }}</p></div><a class="btn btn-primary" href="{% if user %}/posts/new?topic={{ topic.id }}{% else %}/auth/register{% endif %}">{{ icon('plus', 17) }} Ask or share</a></div>
+  {% include "community/_search.html" %}
+  <div class="community-list">
+    {% for post in posts %}{% include "community/_post_card.html" %}
+    {% else %}<div class="empty-state"><h2>{% if search_query %}No conversations found{% elif page_number > 1 %}No more conversations here{% else %}Start a conversation{% endif %}</h2><p>{% if search_query %}Try fewer words or <a href="/feed?q={{ search_query|urlencode }}">search all conversations</a>.{% else %}Ask a question, share some information, or talk about your experience.{% endif %}</p></div>{% endfor %}
+  </div>
+  {% include "community/_pagination.html" %}
 </section>
 {% endblock %}

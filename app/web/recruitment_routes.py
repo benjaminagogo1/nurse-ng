@@ -1,0 +1,349 @@
+"""Private source discovery and approval screens. Requests never fetch websites."""
+
+from datetime import UTC, datetime, timedelta
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
+from fastapi.responses import RedirectResponse
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.core.config import settings
+from app.db.session import get_db
+from app.models.recruitment import DiscoverySchedule, DiscoveryTask, RecruitmentSource, SourceEvent
+from app.models.user import User
+from app.models.vacancies import VacancySnapshot
+from app.services import recruitment as registry
+from app.services.vacancies import activation_blockers, configure_collector
+from app.web.deps import require_staff, verify_csrf
+from app.web.templating import render
+
+router = APIRouter(prefix="/recruitment", tags=["recruitment sources"])
+
+
+def _load(db, model, identifier):
+    try:
+        record = db.get(model, UUID(identifier))
+    except ValueError:
+        record = None
+    if record is None:
+        raise HTTPException(404)
+    return record
+
+
+def _dashboard(
+    request, db, user, *, error=None, values=None, query="", status="", country="", page=1
+):
+    sources, total = registry.list_sources(
+        db,
+        query=query,
+        status=status,
+        country_code=country,
+        page=page,
+    )
+    return render(
+        request,
+        "recruitment/index.html",
+        {
+            "user": user,
+            "sources": sources,
+            "total": total,
+            "categories": registry.CATEGORIES,
+            "schedules": list(
+                db.scalars(select(DiscoverySchedule).order_by(DiscoverySchedule.name))
+            ),
+            "tasks": list(
+                db.scalars(
+                    select(DiscoveryTask)
+                    .order_by(DiscoveryTask.created_at.desc(), DiscoveryTask.id.desc())
+                    .limit(20)
+                )
+            ),
+            "counts": registry.task_counts(db),
+            "error": error,
+            "values": values or {},
+            "query": query,
+            "status": status,
+            "country": country,
+            "page_number": page,
+            "previous_url": str(request.url.include_query_params(page=page - 1))
+            if page > 1
+            else "",
+            "next_url": str(request.url.include_query_params(page=page + 1))
+            if page * 25 < total
+            else "",
+            "search_enabled": bool(
+                settings.recruitment_search_key and settings.recruitment_search_permission_reference
+            ),
+        },
+        status_code=400 if error else 200,
+    )
+
+
+def _detail(request, db, user, source, *, error=None, values=None, history_page=1):
+    history = list(
+        db.scalars(
+            select(SourceEvent)
+            .where(SourceEvent.source_id == source.id)
+            .order_by(SourceEvent.created_at.desc(), SourceEvent.id.desc())
+            .offset((history_page - 1) * 25)
+            .limit(26)
+        )
+    )
+    return render(
+        request,
+        "recruitment/source.html",
+        {
+            "user": user,
+            "source": source,
+            "categories": registry.CATEGORIES,
+            "checks": registry.CHECKS,
+            "methods": registry.METHODS,
+            "reuse_bases": registry.REUSE_BASES,
+            "reuse_rights": registry.REUSE_RIGHTS,
+            "activation_blockers": activation_blockers(source),
+            "history": history[:25],
+            "snapshots": list(
+                db.scalars(
+                    select(VacancySnapshot)
+                    .where(VacancySnapshot.source_id == source.id)
+                    .order_by(VacancySnapshot.collected_at.desc())
+                    .limit(5)
+                )
+            ),
+            "history_page": history_page,
+            "has_more": len(history) > 25,
+            "current_approval": registry.approval_current(source),
+            "default_expiry": (registry.now() + timedelta(days=90)).date().isoformat(),
+            "error": error,
+            "values": values or {},
+        },
+        status_code=400 if error else 200,
+    )
+
+
+@router.get("")
+def index(
+    request: Request,
+    q: str = Query("", max_length=200),
+    status: str = Query("", max_length=20),
+    country: str = Query("", max_length=2),
+    page: int = Query(1, ge=1, le=100000),
+    user: User = Depends(require_staff),
+    db: Session = Depends(get_db),
+):
+    return _dashboard(request, db, user, query=q, status=status, country=country, page=page)
+
+
+@router.post("/sources")
+def register(
+    request: Request,
+    name: str = Form(""),
+    category: str = Form("unconfirmed"),
+    country_code: str = Form(""),
+    location: str = Form(""),
+    website_url: str = Form(""),
+    source_url: str = Form(""),
+    user: User = Depends(require_staff),
+    _: None = Depends(verify_csrf),
+    db: Session = Depends(get_db),
+):
+    values = dict(
+        name=name,
+        category=category,
+        country_code=country_code,
+        location=location,
+        website_url=website_url,
+        source_url=source_url,
+    )
+    try:
+        source = registry.register_manual_source(db, user, **values)
+    except registry.RecruitmentError as exc:
+        db.rollback()
+        return _dashboard(request, db, user, error=str(exc), values=values)
+    return RedirectResponse(f"/recruitment/sources/{source.id}", status_code=303)
+
+
+@router.post("/schedules")
+def schedule(
+    request: Request,
+    name: str = Form(""),
+    provider: str = Form("ror"),
+    country_code: str = Form(""),
+    query: str = Form(""),
+    interval_hours: int = Form(24),
+    user: User = Depends(require_staff),
+    _: None = Depends(verify_csrf),
+    db: Session = Depends(get_db),
+):
+    try:
+        registry.add_schedule(
+            db,
+            user,
+            name=name,
+            provider=provider,
+            country_code=country_code,
+            query=query,
+            interval_hours=interval_hours,
+        )
+    except registry.RecruitmentError as exc:
+        db.rollback()
+        return _dashboard(request, db, user, error=str(exc))
+    return RedirectResponse("/recruitment#schedules", status_code=303)
+
+
+@router.post("/schedules/{schedule_id}")
+def toggle_schedule(
+    schedule_id: str,
+    enabled: bool = Form(False),
+    user: User = Depends(require_staff),
+    _: None = Depends(verify_csrf),
+    db: Session = Depends(get_db),
+):
+    item = _load(db, DiscoverySchedule, schedule_id)
+    registry.set_schedule_enabled(db, user, item, enabled=enabled)
+    return RedirectResponse("/recruitment#schedules", status_code=303)
+
+
+@router.get("/sources/{source_id}")
+def detail(
+    source_id: str,
+    request: Request,
+    history_page: int = Query(1, ge=1, le=100000),
+    user: User = Depends(require_staff),
+    db: Session = Depends(get_db),
+):
+    return _detail(
+        request, db, user, _load(db, RecruitmentSource, source_id), history_page=history_page
+    )
+
+
+@router.post("/sources/{source_id}/review")
+async def review(
+    source_id: str,
+    request: Request,
+    revision: int = Form(...),
+    action: str = Form(""),
+    note: str = Form(""),
+    method: str = Form("unconfirmed"),
+    expires_at: str = Form(""),
+    licensing_applicability: str = Form("required"),
+    user: User = Depends(require_staff),
+    _: None = Depends(verify_csrf),
+    db: Session = Depends(get_db),
+):
+    source = _load(db, RecruitmentSource, source_id)
+    form = await request.form()
+    values = {key: value for key, value in form.items() if isinstance(value, str)}
+    try:
+        expiry = None
+        if action == "approve":
+            try:
+                expiry = datetime.strptime(expires_at, "%Y-%m-%d").replace(tzinfo=UTC)
+            except ValueError:
+                raise registry.RecruitmentError("Choose a valid review expiry date.") from None
+        registry.review_source(
+            db,
+            user,
+            source,
+            revision=revision,
+            action=action,
+            note=note,
+            method=method,
+            expires_at=expiry,
+            licensing_applicability=licensing_applicability,
+            checks={
+                key: {"note": values.get(f"{key}_note", ""), "url": values.get(f"{key}_url", "")}
+                for key in registry.CHECKS
+            },
+            reuse={
+                "basis": values.get("reuse_basis", ""),
+                "url_prefix": values.get("reuse_url_prefix", ""),
+                **{right: values.get(right) == "true" for right in registry.REUSE_RIGHTS},
+            },
+        )
+    except registry.RecruitmentError as exc:
+        db.rollback()
+        return _detail(request, db, user, source, error=str(exc), values=values)
+    return RedirectResponse(f"/recruitment/sources/{source.id}", status_code=303)
+
+
+@router.post("/sources/{source_id}/organisation")
+def organisation(
+    source_id: str,
+    request: Request,
+    revision: int = Form(...),
+    name: str = Form(""),
+    category: str = Form("unconfirmed"),
+    country_code: str = Form(""),
+    location: str = Form(""),
+    user: User = Depends(require_staff),
+    _: None = Depends(verify_csrf),
+    db: Session = Depends(get_db),
+):
+    source = _load(db, RecruitmentSource, source_id)
+    try:
+        registry.update_organization(
+            db,
+            user,
+            source,
+            revision=revision,
+            name=name,
+            category=category,
+            country_code=country_code,
+            location=location,
+        )
+    except registry.RecruitmentError as exc:
+        db.rollback()
+        return _detail(request, db, user, source, error=str(exc))
+    return RedirectResponse(f"/recruitment/sources/{source.id}", status_code=303)
+
+
+@router.post("/sources/{source_id}/check")
+def check(
+    source_id: str,
+    request: Request,
+    user: User = Depends(require_staff),
+    _: None = Depends(verify_csrf),
+    db: Session = Depends(get_db),
+):
+    source = _load(db, RecruitmentSource, source_id)
+    try:
+        registry.request_inspection(db, user, source)
+    except registry.RecruitmentError as exc:
+        db.rollback()
+        return _detail(request, db, user, source, error=str(exc))
+    return RedirectResponse(f"/recruitment/sources/{source.id}", status_code=303)
+
+
+@router.post("/sources/{source_id}/collector")
+def collector(
+    source_id: str,
+    request: Request,
+    revision: int = Form(...),
+    enabled: bool = Form(False),
+    url_prefix: str = Form(""),
+    timezone: str = Form(""),
+    note: str = Form(""),
+    reference: str = Form(""),
+    user: User = Depends(require_staff),
+    _: None = Depends(verify_csrf),
+    db: Session = Depends(get_db),
+):
+    source = _load(db, RecruitmentSource, source_id)
+    try:
+        configure_collector(
+            db,
+            user,
+            source,
+            revision=revision,
+            enabled=enabled,
+            url_prefix=url_prefix,
+            timezone=timezone,
+            note=note,
+            reference=reference,
+        )
+    except registry.RecruitmentError as exc:
+        db.rollback()
+        return _detail(request, db, user, source, error=str(exc))
+    return RedirectResponse(f"/recruitment/sources/{source.id}", status_code=303)

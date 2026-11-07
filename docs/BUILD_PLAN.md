@@ -531,14 +531,14 @@ The criteria below make the recommendations reviewable; they describe proposed o
 
 **Baseline on 6 November 2026:** 0 of 4 priority findings verified complete; 0 of 13 total tracker items verified complete. Twelve items were open; A12 was deferred.
 
-**Current progress:** 0 of 4 priority findings and 0 of 13 total items verified complete. Eleven items are open, A01 is in progress, and A12 is deferred. A01's implementation is locally verified; the actual deployment configuration and HTTPS/proxy checks remain outstanding. **Last tracker update: 6 November 2026.** Update current counts together with the rows; preserve the baseline.
+**Current progress:** 0 of 4 priority findings and 0 of 13 total items verified complete. Nine items are open, A01 is in progress, and A02, A04, and A12 are deferred. A01's implementation is locally verified; the actual deployment configuration and HTTPS/proxy checks remain outstanding. The user has prioritized community delivery and deferred A02/A04 under [L74](DECISIONS.md#l74--community-is-the-immediate-delivery-priority-within-the-wider-platform). **Last tracker update: 6 November 2026.** Update current counts together with the rows; preserve the baseline.
 
 | ID | Area / priority | Status | Evidence required to close |
 |---|---|---|---|
 | A01 | Unsafe production configuration — critical if defaults are deployed | In progress | Production startup rejects missing or known development signing keys and unsafe cookie settings. Host restrictions are enforced. Automated checks reject a cookie signed with the old development key, reject unlisted hosts, and verify Secure cookies in production configuration. Record the deployed configuration check without recording secrets. |
-| A02 | Review decision consistency — high | Open | Independent concurrent reviewers cannot overwrite a decided case. Exactly one transition succeeds; the losing attempt receives a clear conflict. Decision history is preserved and the public badge agrees with the recorded decision. Commit regression coverage using separate database sessions and verify on the intended production database. |
+| A02 | Review decision consistency — high | Deferred | Independent concurrent reviewers cannot overwrite a decided case. Exactly one transition succeeds; the losing attempt receives a clear conflict. Decision history is preserved and the public badge agrees with the recorded decision. Commit regression coverage using separate database sessions and verify on the intended production database. |
 | A03 | Employer legitimacy — high | Open | A self-selected employer role cannot publish a job or receive applicant details before organization approval. Record the approval/revocation procedure and accountable representative. Test unapproved, approved, revoked, and unrelated employers, while retaining application consent and employer isolation. |
-| A04 | Suspended profiles — medium | Open | Suspended and deactivated accounts are excluded from public discovery and public profile access. Regression checks cover direct profile URLs and listings, while active accounts retain their intended visibility. |
+| A04 | Suspended profiles — medium | Deferred | Suspended and deactivated accounts are excluded from public discovery and public profile access. Regression checks cover direct profile URLs and listings, while active accounts retain their intended visibility. |
 | A05 | Recovery, password changes, and verified phone ownership — readiness | Open | Users can verify phone ownership, change passwords with appropriate authentication, and recover access through a verified channel. Test successful flows, wrong/expired/reused recovery credentials, abuse limits, and prevention of cross-account changes. Record a support procedure for failed recovery. |
 | A06 | Session revocation — readiness | Open | Users can invalidate an individual session and all sessions. Previously copied cookies cease granting access after revocation; password recovery and account suspension follow a documented invalidation policy. Regression checks demonstrate server-side rejection of revoked cookies. |
 | A07 | Staff MFA — readiness | Open | Staff must complete a second factor before accessing review or moderation functions. Enrollment, recovery, and removal have documented controls. Tests demonstrate that a password-only session cannot bypass the requirement. |
@@ -557,3 +557,114 @@ Append a row for each status change or verification. Keep earlier results, inclu
 |---|---|---|---|---|
 | 2026-11-06 | A01–A13 | Baseline recorded; no items closed | This assessment; [work log](WORK_LOG.md#session-2026-11-06--assessment-and-completion-baseline) | 115 existing tests passed; isolated probes confirmed A01, A02, and A04. A03 was established by registration/posting code and existing workflow coverage. A12 remains deferred under the recorded project direction. No fixes were made during the assessment. |
 | 2026-11-06 | A01 | Open → In progress; implementation locally verified | [L73](DECISIONS.md#l73--enforce-safe-configuration-before-application-startup-a01), [configuration](../app/core/config.py), [middleware](../app/main.py), [operator check](../app/cli.py), [regression tests](../tests/test_configuration.py) | 37 focused checks passed, including fresh-process production startup, rejection of both old signing keys, host restrictions, IPv6 development access, HTTPS login/logout cookies, and a configuration check that neither displays secrets nor connects to the database. Full-suite results are recorded in the work log. Closure still requires running `python -m app.cli check-config` and verifying HTTPS cookies/host rejection in the actual deployment environment; no deployment was performed. |
+| 2026-11-06 | A02, A04 | Open → Deferred | [L74](DECISIONS.md#l74--community-is-the-immediate-delivery-priority-within-the-wider-platform) | The user explicitly postponed these fixes and prioritized the described community experience. Their closure criteria remain unchanged; neither item is implemented or counted as complete by this increment. |
+
+### Community delivery progress — 6 November 2026
+
+The immediate journey is **ask or share → receive replies → follow the discussion → return to new replies or find earlier information**. This implements [L74/L75](DECISIONS.md#l74--community-is-the-immediate-delivery-priority-within-the-wider-platform) within the broader professional platform. The delivery checks below are separate from the fixed assessment baseline above; they measure this increment's behavior, not the completeness of Nurse.ng or outcomes with real nurses.
+
+| ID | Delivered behavior | Verification |
+|---|---|---|
+| C01 | Text-first asking/sharing, optional media, and choosing a first community name in the composer without publishing a private professional profile | Automated identity/privacy cases and actual browser submission passed. |
+| C02 | A working reply composer, preserved text on validation/throttling errors, reply counts, and a link to the submitted reply | Automated permission, escaping, validation, and throttle checks; browser reply submission passed. |
+| C03 | Search public conversations, topics, and published reply text; page through results while retaining the query and topic | Automated search, hidden-content exclusion, wildcard, and pagination cases; browser reply-only search and pagination passed. |
+| C04 | Explicitly follow/unfollow discussions and return through `/feed/discussions`; new replies from others are marked until read | Automated CSRF, privacy, uniqueness, unread/read, removal, and read-marker checks; browser follow → new reply → read flow passed. Indicators refresh on page load. |
+| C05 | Upgrade safely with a follow table and activity index; initialize one empty General nursing category only when no topics exist | Migration upgrade/downgrade and existing-inactive-topic checks passed. Local upgrade preserved existing records across 17 tables; one schema head, `c3d4e5f6a7b8`, with no drift. |
+| C06 | Usable conversation screens on mobile and desktop, using existing display preferences | Targeted Chrome checks at 320, 390, and 1440 pixels passed with no application script exceptions or failed HTTP responses. This was not a fresh full accessibility audit. |
+
+**Evidence:** [discussion regression tests](../tests/test_discussions.py), [migration tests](../tests/test_migrations.py), and the [community work log](WORK_LOG.md#session-2026-11-06--community-conversations). Full regression suite: **165 passed in 77.57 seconds**. The local database was backed up and upgraded; other environments require `alembic upgrade head` before running this code.
+
+**Still to validate:** whether real nurses can get useful answers and return to relevant conversations, especially on inexpensive phones and unreliable connections. Live updates, email/push notifications, and nested replies are not part of this increment. No artificial member activity was added.
+
+### Reply pagination and unread navigation — 6 November 2026
+
+Implemented under [L76](DECISIONS.md#l76--page-through-replies-without-clearing-unopened-information), following the user's instruction to start this increment. C01–C06 above retain the evidence from the initial delivery; this follow-up refines reading and returning to conversations.
+
+| ID | Delivered behavior | Verification |
+|---|---|---|
+| C07 | At most 20 published replies per page, stable timestamp/ID ordering, earlier/later controls, and a composer that retains the current page on validation or throttle errors | Database-query bounds, tied timestamps, removed replies, invalid/stale/empty pages, and successful/error submissions covered in regression tests. Mobile/desktop browser reflow passed. |
+| C08 | New-reply indicators open the first unread reply; the target is highlighted. Reading pages out of order clears only the replies on those pages | Tests and browser checks opened the final page first, returned to the earliest unread reply, and confirmed intermediate replies stayed new. Repeated reads, private member isolation, replies arriving after page load, failed rendering, and deletion of read records on unfollow are covered. |
+| C09 | Permanent reply links resolve their current page, including after earlier replies are removed. Existing follow history survives the schema upgrade | Regression cases cover changed page positions, wrong-discussion/removed targets, existing follow cutoffs, fresh installation, and downgrade/upgrade. A trial and actual local upgrade preserved all existing records across 18 tables. |
+
+**Latest evidence:** **177 tests passed in 109.05 seconds**, Ruff and whitespace checks passed, and targeted Chrome journeys passed at 320/390/1440 pixels. Sources: [discussion tests](../tests/test_discussions.py), [migration tests](../tests/test_migrations.py), [read-record migration](../migrations/versions/d4e5f6a7b8c9_add_discussion_reply_reads.py), and [work log](WORK_LOG.md#session-2026-11-06--reply-pagination-and-unread-navigation). Local schema head: `d4e5f6a7b8c9`; no drift.
+
+Read state is private and means included in a rendered page, not proof of attention. PostgreSQL runtime/concurrency verification and the existing assessment items retain their separate status. Draft recovery was left for the following increment, recorded below.
+
+### Community draft recovery — 7 November 2026
+
+Implemented under [L77](DECISIONS.md#l77--recover-community-drafts-within-the-signed-in-browser-tab) after the user's instruction to start draft recovery. The earlier delivery records and assessment baseline remain intact.
+
+| ID | Delivered behavior | Verification |
+|---|---|---|
+| C10 | Save question/reply text, selected topic, optional video link, and first community name; restore in the same tab and composer. Separate reply drafts by discussion; provide explicit discard and a 24-hour lifetime | Chrome checks passed for return/refresh, separate tabs and discussions, topic/link/name restoration, discard, expired/malformed storage, and file reselection. Draft content stays in session storage rather than the database or signed session cookie. |
+| C11 | Clear only the version acknowledged after successful publication; retain text on failure or unknown network outcome; prevent Back from restoring published/discarded text | Server regression cases cover successful/failed post and reply publication, malformed version IDs, CSRF rejection, and one-time confirmation. Browser checks cover validation, offline submission, successful post/reply publication, a different draft in another tab, and history restoration. |
+| C12 | Separate drafts by sign-in session, clear on logout/account change, and stop stale tabs re-saving signed-out drafts. Keep ordinary forms usable when storage is blocked | Automated session-boundary cases and real-browser logout across two tabs passed. Browser checks confirm old text is cleared, stale-tab input cannot save, another account starts empty, display preferences remain, and blocked storage still permits normal posting. |
+
+**Evidence:** **182 automated tests passed in 128.92 seconds**; Ruff, JavaScript syntax, and whitespace checks passed. The checked-in [browser runner](../tests/browser/community_drafts.py) passed at 320/390/1440 pixels, including simulated network failure. See [server regression tests](../tests/test_draft_recovery.py) and the [work log](WORK_LOG.md#session-2026-11-07--community-draft-recovery). No new schema or runtime dependency was introduced.
+
+**Scope:** drafts belong to the current browser tab and sign-in session, expire after 24 hours without an edit, and may disappear when the tab is closed. Cleanup of expired records runs on the next page visit. This is local recovery, not encrypted storage or cross-device synchronization. Browser/JavaScript restrictions can disable recovery; the composer reports that condition. Unknown submission outcomes are retained with a reminder to check the conversation before retrying; there is no automatic resubmission or duplicate-submission guarantee.
+
+### Replying to a specific response — 7 November 2026
+
+Implemented under [L78](DECISIONS.md#l78--link-a-response-to-the-reply-it-answers) after the user authorized the next community increment.
+
+| ID | Delivered behavior | Verification |
+|---|---|---|
+| C13 | Reply to an individual response, show a short author/excerpt reference with a link back, and retain the chronological/paginated layout | Server cases cover selection links, native navigation without JavaScript, publication across pages, reference lookup, and ensuring an off-page excerpt does not mark the original reply read. |
+| C14 | Preserve the selected response alongside draft text; explicit new selections take precedence; changing/removing the target keeps typed text | The browser runner covers selecting a response, changing pages, restoring the draft, choosing another response, clearing context, discarding, publishing, and following the reference back. |
+| C15 | Reject unavailable or cross-discussion targets; removal hides quoted text; upgrade without losing replies, reports, or read records | Tests cover malformed/missing/removed/foreign targets, service validation, authentication/CSRF, escaping, restricted public metadata, soft removal, and hard deletion. Migration cases preserve historical replies/reports/read records through upgrade and downgrade/upgrade. A backup, trial, and actual local upgrade preserved original values across 19 tables and passed foreign-key checks. |
+
+**Evidence:** **192 automated tests passed in 138.46 seconds**. Ruff, both community-script syntax checks, and whitespace checks passed. Sources: [reply-context cases](../tests/test_reply_context.py), [migration tests](../tests/test_migrations.py), [browser runner](../tests/browser/community_drafts.py), and [migration](../migrations/versions/e5f6a7b8c9d0_add_reply_context.py). Current local schema: `e5f6a7b8c9d0`; no drift.
+
+The final browser pass verified response selection, changes/removal, draft restoration, cross-page publication and reference navigation, plus the existing draft/offline/logout journey. Focused mobile composer/reference screenshots were visually reviewed. See the [work log](WORK_LOG.md#session-2026-11-07--replying-to-individual-responses) for the actual results and browser-runner corrections; this is not a full accessibility audit.
+
+Only immediate public references are loaded. Drafts store a response ID, not a copy of its author or excerpt. When the selected response disappears, the user must choose another or explicitly reply to the conversation instead; the text is retained. This increment adds no nested layout, private messaging permission, notification delivery, or runtime dependency. Earlier assessment deferrals remain unchanged.
+
+### Recruitment-source discovery and review — 7 November 2026
+
+Implemented under [L79](DECISIONS.md#l79--independent-recruitment-source-discovery-with-evidence-based-staff-approval) after the user authorised starting the saved recruitment design.
+
+| ID | Delivered capability | Evidence and limits |
+| --- | --- | --- |
+| R01 | Central organisation/source registry and manual registration, exact original URL, separate observed/canonical fields | Migration `a3310f4d2d7b`; idempotency, exact LSHSC URL and redirect tests |
+| R02 | Independent directory discovery for Nigeria and worldwide; recruitment-page links and bounded sitemap inspection; pending candidates | Live implemented ROR adapter: 18 usable Nigerian institution candidates from 20 records. Unseen NG/NZ fixture institutions proceed to recruitment-page candidates without a supplied hospital list. ROR coverage is incomplete. |
+| R03 | Optional search adapter with configurable queries and Nigerian state/category rotation | Credential and storage-rights gates tested. Provider account/rights activation and live paid search validation remain open. |
+| R04 | Staff evidence review, approval expiry, pause/revoke/reopen, health and event history | Service and HTTP tests cover separate evidence requirements, staff/CSRF, stale decisions, redirects and interrupted work. Browser forms verified. |
+| R05 | Scheduled persistent queue, single network lease, hard deadline, retries, bounded requests and daily/queue budgets | Duplicate queue, lease fencing/recovery, cancellation, malformed results, rate-limit cooldown and SSRF/robots/redirect/size tests. Production PostgreSQL/deployment validation remains open. |
+
+The full suite passed at **246 tests** before two additional special-address cases; the final recruitment suites passed **56 tests**, covering all changed recruitment logic. Current collection totals **248 tests**. Ruff and whitespace checks passed. Browser checks exercised staff login, source listing/detail on mobile and desktop, evidence submission and exact URL retention in an isolated database. A live read-only ROR request verified the adapter contract; no sources were automatically approved.
+
+The local database was backed up, trial-migrated, and upgraded to `a3310f4d2d7b`, preserving original data across 19 tables, with 24 tables afterwards, valid foreign keys and no schema drift. Other environments must run `./venv/bin/alembic upgrade head`.
+
+**Remaining:** AI assistance, the first permitted vacancy adapter, original/normalized vacancy storage, validation/deduplication, automatic publication, exceptions and lifecycle, unified search and notifications. Existing A03 employer legitimacy and A10 PostgreSQL readiness are not marked complete by this increment. See [the design's capability tracker](AUTOMATED_RECRUITMENT_SOURCE_DISCOVERY.md#implementation-progress--7-november-2026) and [worker/admin instructions](RECRUITMENT_SOURCE_OPERATIONS.md).
+
+### Structured vacancy ingestion and publication — 7 November 2026
+
+Implemented under [L80](DECISIONS.md#l80--shared-vacancies-with-original-source-evidence-and-guarded-publication).
+
+| ID | Delivered increment | Evidence and limits |
+| --- | --- | --- |
+| R06 | Approved-source JobPosting collection, original page snapshots and extracted/normalized records | Malformed structured pages retained without publication. One HTML page, up to 50 records; other formats require adapters. |
+| R07 | Automatic ordinary publication, URL deduplication, staff exceptions and history | Missing dates/locations, unsafe URLs, employer mismatches, conflicts, stale forms, correction expiry and rejected-record persistence tested. No live source approval granted. |
+| R08 | Shared `/jobs`, country/type filters, disclosed currencies/pay periods and external applications | Existing employer flows retained; imported jobs never collect contacts through the platform apply endpoint. Browser checks use isolated NG/NZ examples. |
+| R09 | Deadline/freshness gates, approval expiry/revocation, missing-record and failure handling | Read gates work without a worker, using a 48-hour confirmation window. Explicit withdrawal signals and independent application-link monitoring remain open. |
+
+**Verification:** **280 tests passed in 175.04 seconds**; Ruff and whitespace checks passed. Migration checks preserve historical employer jobs/applications through upgrade and an empty-vacancy downgrade/upgrade. The browser journey passed collector setup, automatic publication, international salary display, external application presentation, exception approval and mobile/desktop reflow. Visual review improved mobile search and job-card attribution placement, followed by another successful browser pass.
+
+The local database was backed up, trial-upgraded and upgraded to `3838cd201521`, preserving every original value across 24 tables. There are now 27 tables, valid foreign keys and no drift. Populated vacancy history prevents a lossy downgrade. These checks do not close A10 PostgreSQL readiness.
+
+The inspected saved exact LSHSC page contains zero JobPosting records. Actual source activation still requires source verification, reuse rights and a compatible adapter. AI, more adapters, A03 direct-employer safeguards, saved opportunities and notification delivery remain open. See the [capability tracker](AUTOMATED_RECRUITMENT_SOURCE_DISCOVERY.md) and [operating instructions](RECRUITMENT_SOURCE_OPERATIONS.md).
+
+### Source activation scope — 7 November 2026
+
+Implemented under L81. A separate licence is not mandatory: staff can record the applicable legal basis for reuse, published terms or written authorization.
+
+| ID | Delivered increment | Evidence and limits |
+| --- | --- | --- |
+| R10 | Explicit reuse basis, collection/retention/republication findings and URL scope | Staff evidence remains required; government ownership is not automatically converted into unrestricted rights. Existing records are preserved without inferred grants. |
+| R11 | Scope enforcement in collector configuration and redirects; reapproval clears old configuration | Checked alongside stale-result cancellation, expiry, public-read restrictions and migration preservation. Live TLS checks remain separate. |
+| R12 | Staff activation status and exact LSHSC review | Browser checks passed. [LSHSC remains pending](LSHSC_ACTIVATION_REVIEW.md); no structured vacancy was found and worker certificate validation fails. |
+
+The local database is upgraded to `49b37f820e16`, with all original values across 27 tables preserved and no schema drift. Backup: `/tmp/nurse-vacancy-migration-6vpftetr/before.db`. This does not close production/PostgreSQL readiness or establish any source's legal rights.
+
+Verification for R10–R12: **298 tests passed in 362.47 seconds**, with Ruff and whitespace checks passing. Isolated Chrome checks passed the legal-basis review form, approval without a separate licence, remaining collector blockers, exact URL preservation and mobile/desktop reflow; the vacancy publication/application/exception journey also passed.

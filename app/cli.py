@@ -14,6 +14,7 @@ access audit when the reviewer opens evidence (DECISIONS L49).
 
 import argparse
 import sys
+import time
 from collections.abc import Sequence
 
 from sqlalchemy import select
@@ -59,6 +60,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Report orphan files and quota drift without changing them.",
     )
 
+    subparsers.add_parser(
+        "recruitment-init", help="Create directory schedules and pending LSHSC source."
+    )
+    worker = subparsers.add_parser("recruitment-worker", help="Run the source-discovery queue.")
+    worker.add_argument("--once", action="store_true", help="Process ready tasks, then exit.")
+    worker.add_argument("--max-tasks", type=int, default=10, help="Task limit for --once (1–100).")
+
     args = parser.parse_args(argv)
     if args.command == "check-config":
         # Settings validation already ran on import. Do not print the model,
@@ -71,6 +79,38 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _set_staff(args.phone, enabled=True)
     if args.command == "unset-staff":
         return _set_staff(args.phone, enabled=False)
+    if args.command == "recruitment-init":
+        from app.services.recruitment import initialize_discovery
+
+        with SessionLocal() as db:
+            result = initialize_discovery(db)
+        print(f"Created {result['schedules']} schedules and {result['sources']} pending sources.")
+        return 0
+    if args.command == "recruitment-worker":
+        from app.services.recruitment_worker import enqueue_due, run_next
+
+        if not 1 <= args.max_tasks <= 100:
+            parser.error("--max-tasks must be between 1 and 100")
+        completed = 0
+        try:
+            while True:
+                with SessionLocal() as db:
+                    enqueue_due(db)
+                    task = run_next(db)
+                    if task is not None:
+                        print(
+                            f"{task.kind}: {task.status}; {task.result_count} new sources; "
+                            f"{task.outcome}",
+                            flush=True,
+                        )
+                        completed += 1
+                if args.once and (task is None or completed >= args.max_tasks):
+                    break
+                if task is None:
+                    time.sleep(5)
+        except KeyboardInterrupt:
+            print("Discovery worker stopped; unfinished leases can be recovered.")
+        return 0
     with SessionLocal() as db:
         result = reconcile_community_media(db, dry_run=args.dry_run)
     mode = "Would remove" if args.dry_run else "Removed"

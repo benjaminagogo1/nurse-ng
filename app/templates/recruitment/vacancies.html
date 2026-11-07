@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Vacancy review — Nurse.ng{% endblock %}
+{% block content %}
+<section class="form-page recruitment-page">
+  <a href="/recruitment">← Recruitment sources</a>
+  <p class="eyebrow">Staff only</p><h1>Vacancy records</h1>
+  <p>Ordinary valid vacancies from configured, approved sources publish automatically. Review incomplete records, conflicting information and missing announcements here.</p>
+  <form method="get" class="source-filters">
+    {% if source_id %}<input name="source_id" type="hidden" value="{{ source_id }}">{% endif %}
+    <label>State<select name="state"><option value="">All records</option>{% for key in ['pending', 'published', 'unconfirmed', 'rejected'] %}<option value="{{ key }}" {% if state == key %}selected{% endif %}>{{ key|capitalize }}</option>{% endfor %}</select></label>
+    <button class="button-primary" type="submit">Filter</button>
+  </form>
+  <p>{{ total }} record{{ '' if total == 1 else 's' }}</p>
+  {% for record in records %}<article class="source-card">
+    <h2><a href="/recruitment/vacancies/{{ record.id }}">{{ record.normalized.get('title') or 'Incomplete vacancy record' }}</a></h2>
+    <p>{{ record.source.organization.name }} · {{ record.state|capitalize }}</p>
+    <p class="field-hint">Last seen {{ record.last_seen_at.strftime('%Y-%m-%d %H:%M') }} UTC</p>
+    {% if record.issues %}<ul>{% for issue in record.issues %}<li>{{ issue }}</li>{% endfor %}</ul>{% endif %}
+  </article>{% else %}<p>No matching records. Collection begins after a source is approved and its structured vacancy collector is configured.</p>{% endfor %}
+  <nav class="source-actions" aria-label="Vacancy record pages">{% if previous_url %}<a href="{{ previous_url }}">Previous</a>{% endif %}{% if next_url %}<a href="{{ next_url }}">Next</a>{% endif %}</nav>
+</section>
+{% endblock %}

@@ -8,12 +8,12 @@
         {% else %}
           {{ post.author.community_name or 'Nurse.ng member' }}
         {% endif %}
-        · {{ post.published_at.strftime('%d %b %Y, %H:%M') }}
+        · <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%d %b %Y, %H:%M') }} UTC</time>
       </p>
     </div>
   </header>
 
-  {% if post.body %}<div class="post-body">{{ post.body }}</div>{% endif %}
+  {% if post.body %}<div class="post-body">{% if conversation_detail %}{{ post.body }}{% else %}{{ post.body|truncate(500) }}{% endif %}</div>{% endif %}
 
   {% if post.media %}
     <div class="post-media-grid">
@@ -39,9 +39,10 @@
   {% endif %}
 
   <footer class="community-card-footer">
-    <a href="/posts/{{ post.id }}">
-      View conversation
-      ({{ post.replies|selectattr('status', 'equalto', 'published')|list|length }} replies)
-    </a>
+    {% set summary = summaries[post.id] %}
+    {% if conversation_detail %}<a href="#reply-form">Join the conversation</a>
+    {% else %}<a href="/posts/{{ post.id }}">Read &amp; reply <span>({{ summary.replies }} {{ 'reply' if summary.replies == 1 else 'replies' }})</span></a>{% endif %}
+    {% if summary.new_replies and not conversation_detail %}<a class="conversation-update" href="/posts/{{ post.id }}/unread">{{ summary.new_replies }} new {{ 'reply' if summary.new_replies == 1 else 'replies' }} →</a>
+    {% elif summary.last_reply_at %}<span class="field-hint">Latest reply {{ summary.last_reply_at.strftime('%d %b %Y') }}</span>{% endif %}
   </footer>
 </article>

@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.ratelimit import FixedWindowLimiter
 from app.db.session import get_db
-from app.models.jobs import Job, JobStatus
+from app.models.jobs import Job
 from app.models.user import AccountType, User
 from app.services.auth import (
     AuthError,
@@ -20,7 +20,7 @@ from app.services.auth import (
     register_user,
 )
 from app.services.community import list_connections, list_received_requests, list_topics
-from app.services.jobs import job_card, list_open_jobs
+from app.services.jobs import job_card, list_open_jobs, open_job_condition
 from app.services.messages import unread_count
 from app.services.profiles import get_profile_for_user
 from app.web.deps import get_current_user, require_user, verify_csrf
@@ -248,7 +248,7 @@ def dashboard(
     name = (profile.display_name if profile else "") or user.full_name or user.community_name
     new_job_count = db.scalar(
         select(func.count(Job.id)).where(
-            Job.status == JobStatus.OPEN,
+            open_job_condition(),
             Job.posted_at >= datetime.now(UTC) - timedelta(days=7),
         )
     ) or 0

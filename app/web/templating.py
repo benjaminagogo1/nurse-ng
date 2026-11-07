@@ -1,8 +1,10 @@
 """Template rendering and CSRF tokens."""
 
 import secrets
+from hashlib import sha256
 from pathlib import Path
 from typing import Any
+from uuid import UUID
 
 from fastapi import Request
 from fastapi.responses import HTMLResponse
@@ -19,6 +21,15 @@ def csrf_token(request: Request) -> str:
         token = secrets.token_urlsafe(32)
         request.session["csrf_token"] = token
     return token
+
+
+def confirm_published_draft(request: Request, key: str, version: str) -> None:
+    """Acknowledge only a valid opaque version, never store draft content in the session."""
+    try:
+        version = str(UUID(version))
+    except ValueError:
+        return
+    request.session["published_draft"] = {"key": key, "version": version}
 
 
 def render(
@@ -50,10 +61,19 @@ def render(
     }
     if context:
         template_context.update(context)
-    return templates.TemplateResponse(
+    user = template_context.get("user")
+    template_context["draft_scope"] = (
+        sha256(f"{user.id}:{template_context['csrf_token']}".encode()).hexdigest()
+        if user is not None else ""
+    )
+    template_context["published_draft"] = request.session.get("published_draft") if user else None
+    response = templates.TemplateResponse(
         request=request,
         name=name,
         context=template_context,
         status_code=status_code,
-        headers=headers,
+        headers={"Cache-Control": "no-store", **(headers or {})},
     )
+    # A rendering failure leaves the acknowledgement available for a later page.
+    request.session.pop("published_draft", None)
+    return response

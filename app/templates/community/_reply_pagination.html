@@ -1,0 +1,7 @@
+{% if reply_page.total_pages > 1 %}
+<nav class="conversation-pagination reply-pagination" aria-label="Reply pages">
+  {% if reply_page.number > 1 %}<a class="btn btn-secondary" href="/posts/{{ post.id }}?page={{ reply_page.number - 1 }}{% if reply_target_explicit %}&amp;reply_to={{ reply_target_id }}{% endif %}#replies" rel="prev">← Earlier replies</a>{% endif %}
+  <span>Page {{ reply_page.number }} of {{ reply_page.total_pages }}</span>
+  {% if reply_page.number < reply_page.total_pages %}<a class="btn btn-secondary" href="/posts/{{ post.id }}?page={{ reply_page.number + 1 }}{% if reply_target_explicit %}&amp;reply_to={{ reply_target_id }}{% endif %}#replies" rel="next">Later replies →</a>{% endif %}
+</nav>
+{% endif %}

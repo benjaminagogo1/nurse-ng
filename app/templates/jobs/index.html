@@ -7,17 +7,18 @@
   <div class="page-heading-row"><div><h1>Job opportunities</h1><p class="lede">Find the right role for your skills and your ambitions.</p></div>{% if is_employer %}<a class="btn btn-primary" href="/jobs/new">{{ icon('plus', 17) }} Post a job</a>{% else %}<a class="text-link hide-xs" href="/employers">Looking to hire? {{ icon('arrow', 16) }}</a>{% endif %}</div>
   <form class="jobs-toolbar" action="/jobs" method="get" role="search">
     <div class="jobs-search">{{ icon('search', 19) }}<label class="sr-only" for="jobs-q">Search jobs, hospitals, or locations</label><input id="jobs-q" name="q" type="search" value="{{ q }}" maxlength="120" placeholder="Search job titles, hospitals, or locations…"></div>
+    <label for="jobs-country">Country code</label><input id="jobs-country" name="country" value="{{ country }}" maxlength="2" placeholder="NG" class="jobs-country-code">
     {% if job_type %}<input type="hidden" name="type" value="{{ job_type }}">{% endif %}
     <button class="btn btn-primary btn-sm" type="submit">Search jobs</button>
   </form>
   <nav class="filter-bar" aria-label="Job type">
-    <a class="pill-tab" href="/jobs{% if q %}?q={{ q|urlencode }}{% endif %}"{% if not job_type %} aria-current="page"{% endif %}>All jobs</a>
-    {% for value, label in job_types %}<a class="pill-tab" href="/jobs?type={{ value }}{% if q %}&amp;q={{ q|urlencode }}{% endif %}"{% if job_type == value %} aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
+    <a class="pill-tab" href="/jobs?country={{ country|urlencode }}{% if q %}&amp;q={{ q|urlencode }}{% endif %}"{% if not job_type %} aria-current="page"{% endif %}>All jobs</a>
+    {% for value, label in job_types %}<a class="pill-tab" href="/jobs?country={{ country|urlencode }}&amp;type={{ value }}{% if q %}&amp;q={{ q|urlencode }}{% endif %}"{% if job_type == value %} aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
   </nav>
-  <p class="results-count">{{ jobs|length }} opportunit{{ 'y' if jobs|length == 1 else 'ies' }}{% if q %} for <strong>“{{ q }}”</strong>{% endif %}{% if q or job_type %} · <a href="/jobs">Clear filters</a>{% endif %}</p>
+  <p class="results-count">{{ jobs|length }} opportunit{{ 'y' if jobs|length == 1 else 'ies' }}{% if q %} for <strong>“{{ q }}”</strong>{% endif %}{% if q or job_type or country %} · <a href="/jobs">Clear filters</a>{% endif %}</p>
   <div class="job-list">
     {% for job in jobs %}{% include "jobs/_card.html" %}{% else %}
-    <div class="empty-state"><span class="empty-icon">{{ icon('search', 28) }}</span><h2>{% if q or job_type %}Let's try another search{% else %}Your next opportunity is on its way{% endif %}</h2><p>{% if q or job_type %}Try a different job title, location, or category to find your next role.{% else %}New opportunities appear here as healthcare employers publish them.{% endif %}</p>{% if q or job_type %}<a class="btn btn-secondary btn-sm" href="/jobs">Clear filters</a>{% else %}<a class="btn btn-secondary btn-sm" href="{% if is_employer %}/jobs/new{% else %}/employers{% endif %}">Hiring nurses? Post a job {{ icon('arrow', 15) }}</a>{% endif %}</div>
+    <div class="empty-state"><span class="empty-icon">{{ icon('search', 28) }}</span><h2>{% if q or job_type or country %}Let's try another search{% else %}Your next opportunity is on its way{% endif %}</h2><p>{% if q or job_type or country %}Try a different job title, location, or category to find your next role.{% else %}Opportunities appear here from employer submissions and approved recruitment sources.{% endif %}</p>{% if q or job_type or country %}<a class="btn btn-secondary btn-sm" href="/jobs">Clear filters</a>{% else %}<a class="btn btn-secondary btn-sm" href="{% if is_employer %}/jobs/new{% else %}/employers{% endif %}">Hiring nurses? Post a job {{ icon('arrow', 15) }}</a>{% endif %}</div>
     {% endfor %}
   </div>
 </section>
