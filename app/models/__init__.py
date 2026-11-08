@@ -1,5 +1,6 @@
 """Model registry. Import every model here so Alembic sees the full metadata."""
 
+from app.models.account import AccountToken, FileDeletion
 from app.models.community import (
     CommunityMedia,
     CommunityPost,
@@ -21,11 +22,14 @@ from app.models.recruitment import (
     RecruitmentSource,
     SourceEvent,
 )
+from app.models.reels import Reel, ReelSave
 from app.models.user import User
 from app.models.vacancies import VacancyEvent, VacancyRecord, VacancySnapshot
 from app.models.verification import EvidenceAccess, EvidenceDocument, VerificationCase
 
 __all__ = [
+    "AccountToken",
+    "FileDeletion",
     "CommunityMedia",
     "CommunityPost",
     "CommunityReply",
@@ -47,6 +51,8 @@ __all__ = [
     "NurseProfile",
     "RecruitmentOrganization",
     "RecruitmentSource",
+    "Reel",
+    "ReelSave",
     "SourceEvent",
     "User",
     "VacancyEvent",

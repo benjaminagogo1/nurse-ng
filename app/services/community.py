@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from logging import getLogger
-from typing import BinaryIO
+from typing import TYPE_CHECKING, BinaryIO
 from urllib.parse import urlsplit
 from uuid import UUID
 
@@ -41,6 +41,9 @@ from app.models.community import (
 )
 from app.models.profile import NurseProfile, ProfileStatus
 from app.models.user import User
+
+if TYPE_CHECKING:
+    from app.models.reels import Reel
 
 COMMUNITY_NAME_MAX = 80
 POST_BODY_MAX = 5000
@@ -300,9 +303,12 @@ def create_post(
     external_video_url: str,
     images: Sequence[CommunityUpload] = (),
     video: CommunityUpload | None = None,
+    reel: "Reel | None" = None,
 ) -> CommunityPost:
     """Run synchronous checks, store media, and publish one topic post."""
     _require_community_name(user)
+    if reel is not None and (video is None or images or external_video_url):
+        raise CommunityError("A reel needs one uploaded video.")
     topic = db.get(CommunityTopic, topic_id)
     if topic is None or not topic.is_active:
         raise CommunityError("Choose an active topic.")
@@ -321,7 +327,7 @@ def create_post(
         topic_id=topic.id,
         body=clean_body,
         external_video_url=clean_url,
-        status=ContentStatus.PUBLISHED,
+        status=ContentStatus.PROCESSING if reel is not None else ContentStatus.PUBLISHED,
     )
     db.add(post)
     stored_names: list[str] = []
@@ -339,10 +345,17 @@ def create_post(
                 upload.file, kind
             )
             stored_names.append(storage_name)
+            if reel is not None:
+                from app.services.reels import clean_captions
+
+                if reel.cover_seconds >= duration:
+                    raise CommunityError("Choose a cover frame within your video.")
+                if reel.captions:
+                    clean_captions(reel.captions.encode(), duration)
             stored_size += size_bytes
             post.media.append(
                 CommunityMedia(
-                    kind=kind,
+                    kind=MediaKind.REEL_SOURCE if reel is not None else kind,
                     original_filename=(upload.filename or "")[:255],
                     storage_name=storage_name,
                     content_type=content_type,
@@ -352,6 +365,9 @@ def create_post(
                 )
             )
         _reserve_upload_quota(db, user, stored_size)
+        if reel is not None:
+            reel.post = post
+            db.add(reel)
         db.commit()
     except (CommunityStorageError, CommunityError, SQLAlchemyError) as exc:
         db.rollback()
@@ -860,6 +876,7 @@ def get_public_media(db: Session, media_id: UUID) -> CommunityMedia | None:
         .join(CommunityPost, CommunityMedia.post_id == CommunityPost.id)
         .where(
             CommunityMedia.id == media_id,
+            CommunityMedia.kind != MediaKind.REEL_SOURCE,
             CommunityPost.status == ContentStatus.PUBLISHED,
         )
     )
@@ -1088,7 +1105,7 @@ def reconcile_community_media(db: Session, *, dry_run: bool = False) -> dict[str
         db.scalars(
             select(CommunityMedia)
             .join(CommunityPost, CommunityMedia.post_id == CommunityPost.id)
-            .where(CommunityPost.status != ContentStatus.PUBLISHED)
+            .where(CommunityPost.status == ContentStatus.REMOVED)
         ).all()
     )
     stale_names = {item.storage_name for item in stale_media}

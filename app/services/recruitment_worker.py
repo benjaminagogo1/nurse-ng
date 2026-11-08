@@ -2,15 +2,22 @@
 
 import multiprocessing
 import secrets
+from collections import deque
 from datetime import timedelta
 
-from sqlalchemy import func, select, update
+from sqlalchemy import case, func, literal, or_, select, union_all, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.models.recruitment import DiscoverySchedule, DiscoveryTask, RecruitmentSource
+from app.models.recruitment import (
+    DiscoverySchedule,
+    DiscoveryTask,
+    RecruitmentOrganization,
+    RecruitmentSource,
+)
 from app.services.recruitment import checked_url, event, now, register_candidate, utc
+from app.services.recruitment_activation import POLICY_VERSION, apply_assessment, context, eligible
 from app.services.recruitment_discovery import execute_discovery
 from app.services.recruitment_fetch import in_scope, origin
 from app.services.vacancies import collector_authorized, ingest_page, mark_source_unconfirmed
@@ -35,10 +42,49 @@ def enqueue_due(db: Session) -> int:
     )
     room = max(0, settings.recruitment_pending_task_limit - outstanding)
     added = 0
+    # Consider schedules and sources together so worldwide schedules cannot fill
+    # the queue ahead of due Nigerian source checks. Ignore already queued items.
+    due = union_all(
+        select(
+            DiscoverySchedule.id.label("id"), literal("schedule").label("kind"),
+            DiscoverySchedule.country_code.label("country"),
+            DiscoverySchedule.next_run_at.label("due_at"),
+        ).where(
+            DiscoverySchedule.enabled.is_(True), DiscoverySchedule.next_run_at <= timestamp,
+            ~select(DiscoveryTask.id).where(
+                DiscoveryTask.schedule_id == DiscoverySchedule.id,
+                DiscoveryTask.active_key.is_not(None),
+            ).exists(),
+        ),
+        select(
+            RecruitmentSource.id, literal("source"), RecruitmentOrganization.country_code,
+            RecruitmentSource.next_check_at,
+        ).join(RecruitmentOrganization).where(
+            RecruitmentSource.next_check_at <= timestamp,
+            RecruitmentSource.automation_status == "monitoring",
+            RecruitmentSource.verification_status.not_in(["rejected", "revoked"]),
+            ~select(DiscoveryTask.id).where(
+                DiscoveryTask.source_id == RecruitmentSource.id,
+                DiscoveryTask.active_key.is_not(None),
+            ).exists(),
+        ),
+    ).subquery()
+    groups = [deque(db.execute(select(due).where(condition).order_by(
+        due.c.due_at, due.c.id,
+    ).limit(room))) for condition in (due.c.country == "NG", due.c.country != "NG")]
+    admitted = db.scalar(select(func.count()).select_from(DiscoveryTask)) or 0
+    candidates = []
+    for slot in range(room):
+        preferred = 1 if (admitted + slot) % 5 == 4 else 0
+        group = groups[preferred] or groups[1 - preferred]
+        if not group:
+            break
+        candidates.append(group.popleft())
     schedules = list(
         db.scalars(
             select(DiscoverySchedule)
             .where(
+                DiscoverySchedule.id.in_([row.id for row in candidates if row.kind == "schedule"]),
                 DiscoverySchedule.enabled.is_(True),
                 DiscoverySchedule.next_run_at <= timestamp,
             )
@@ -85,6 +131,7 @@ def enqueue_due(db: Session) -> int:
         db.scalars(
             select(RecruitmentSource)
             .where(
+                RecruitmentSource.id.in_([row.id for row in candidates if row.kind == "source"]),
                 RecruitmentSource.next_check_at <= timestamp,
                 RecruitmentSource.automation_status == "monitoring",
                 RecruitmentSource.verification_status.not_in(["rejected", "revoked"]),
@@ -176,13 +223,26 @@ def claim_next(db: Session) -> DiscoveryTask | None:
         return None
     if db.scalar(select(DiscoveryTask.id).where(DiscoveryTask.running_key == "network")):
         return None
+    local_task = or_(
+        select(DiscoverySchedule.id).where(
+            DiscoverySchedule.id == DiscoveryTask.schedule_id,
+            DiscoverySchedule.country_code == "NG",
+        ).exists(),
+        select(RecruitmentSource.id).join(RecruitmentOrganization).where(
+            RecruitmentSource.id == DiscoveryTask.source_id,
+            RecruitmentOrganization.country_code == "NG",
+        ).exists(),
+    )
+    # Four of every five attempt slots prefer Nigeria. The fifth prefers other
+    # countries; either group can use a slot when the preferred queue is empty.
+    preferred = ~local_task if used % 5 == 4 else local_task
     task = db.scalar(
         select(DiscoveryTask)
         .where(
             DiscoveryTask.status == "queued",
             DiscoveryTask.available_at <= timestamp,
         )
-        .order_by(DiscoveryTask.available_at, DiscoveryTask.id)
+        .order_by(case((preferred, 0), else_=1), DiscoveryTask.available_at, DiscoveryTask.id)
         .limit(1)
     )
     if task is None:
@@ -405,7 +465,14 @@ def apply_result(db: Session, task_id, token: str, payload: dict, result: dict) 
                     details={"observed": source.observed_url, "scope": source.reuse_url_prefix},
                 )
             source.revision += 1
-            if payload.get("collect_vacancies") and collector_authorized(source):
+            automatically_activated = apply_assessment(db, source, result, timestamp, task.id)
+            if result.get("activation_review") and not automatically_activated:
+                task.message = "Automatic activation needs review: " + "; ".join(
+                    result["activation_review"]["reasons"]
+                )[:440]
+            if (
+                payload.get("collect_vacancies") or automatically_activated
+            ) and collector_authorized(source):
                 counts = ingest_page(db, source, result, timestamp)
                 task.message = (
                     f"Collected {counts['records']} vacancies; "
@@ -460,8 +527,13 @@ def apply_result(db: Session, task_id, token: str, payload: dict, result: dict) 
                     task.result_count += int(created)
     else:
         if source:
-            if payload.get("collect_vacancies"):
+            if payload.get("collect_vacancies") or source.approval_mode == "automatic":
                 mark_source_unconfirmed(db, source.id)
+            if payload.get("automatic_activation"):
+                apply_assessment(db, source, {"activation_review": {
+                    "status": "needs_review", "policy_version": POLICY_VERSION, "evidence": {},
+                    "reasons": ["Automatic checks could not complete: " + task.outcome],
+                }}, timestamp, task.id)
             source.last_attempt_at = timestamp
             source.health_status = task.outcome[:30]
             source.failure_count += 1
@@ -501,6 +573,10 @@ def run_next(db: Session, *, executor=None) -> DiscoveryTask | None:
                 "collect_vacancies": collector_authorized(source),
                 "reuse_url_prefix": source.reuse_url_prefix,
             }
+            if eligible(source):
+                payload["automatic_activation"] = context(source)
+                # Recheck independent identity and current reuse evidence on every collection.
+                payload["collect_vacancies"] = False
         else:
             apply_result(db, identifier, token, payload, {"ok": False, "outcome": "cancelled"})
             return task

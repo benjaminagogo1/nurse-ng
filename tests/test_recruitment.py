@@ -16,7 +16,7 @@ from app.models.recruitment import (
 from app.models.user import User
 from app.services import recruitment as registry
 from app.services import recruitment_worker as worker
-from app.services.recruitment_discovery import execute_discovery, search_query
+from app.services.recruitment_discovery import DISCOVERY_CATEGORIES, execute_discovery, search_query
 from app.services.recruitment_fetch import FetchedPage
 from tests.helpers import csrf_from, register_and_sign_in
 
@@ -154,10 +154,12 @@ def test_directory_to_new_institution_to_recruitment_page_stays_pending(db_sessi
 
 
 def test_initialization_is_idempotent_and_keeps_exact_user_url(db_session):
-    assert registry.initialize_discovery(db_session) == {"schedules": 2, "sources": 1}
+    assert registry.initialize_discovery(db_session) == {"schedules": 2, "sources": 5}
     assert registry.initialize_discovery(db_session) == {"schedules": 0, "sources": 0}
     assert (
-        db_session.scalar(select(RecruitmentSource)).original_url == "https://lshsc.ng/recruitment"
+        db_session.scalar(select(RecruitmentSource).where(
+            RecruitmentSource.original_url == "https://lshsc.ng/recruitment"
+        )) is not None
     )
 
 
@@ -384,7 +386,8 @@ def test_search_needs_credentials_and_result_storage_permission(db_session, staf
     assert result["outcome"] == "configuration_needed" and not fixture.requests
     assert "test-private-key" not in str(result)
     assert "Abia" in search_query(
-        {"query": "{region} {category} {country}", "country_code": "NG", "page": 1}
+        {"query": "{region} {category} {country}", "country_code": "NG",
+         "page": len(DISCOVERY_CATEGORIES) + 1}
     )
     assert "health service commission" in search_query(
         {"query": "{category}", "country_code": "NZ", "page": 2}

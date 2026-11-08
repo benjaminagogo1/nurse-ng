@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_avatar.html" import avatar with context %}
 
 {% block title %}{{ title }} — Nurse.ng{% endblock %}
 
@@ -19,7 +20,7 @@
   {% include "community/_post_card.html" %}
 
   {% if user and user.id != post.author_id %}
-    <details class="report-panel">
+    <details class="report-panel" id="report">
       <summary>Report this post</summary>
       <form method="post" action="/posts/{{ post.id }}/report" class="compact-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -46,6 +47,7 @@
     <div class="reply-list">
       {% for reply in reply_page.replies %}
         <article class="reply-card" id="reply-{{ reply.id }}">
+          {{ avatar(reply.author, reply.author.community_name) }}
           <p class="post-byline">
             {% if profile_ids.get(reply.author_id) %}
               <a href="/p/{{ profile_ids.get(reply.author_id) }}">{{ reply.author.community_name }}</a>

@@ -14,5 +14,6 @@ staticfiles/
 media/
 # Private document-review evidence; never commit (DECISIONS L48).
 evidence/
+private-mail/
 *.log
 .DS_Store

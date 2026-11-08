@@ -57,6 +57,19 @@ class Settings(BaseSettings):
     login_lockout_threshold: int = 5
     login_lockout_seconds: int = 900
 
+    avatar_dir: str = "media/avatars"
+    avatar_max_bytes: int = Field(default=5 * 1024 * 1024, ge=1024, le=10 * 1024 * 1024)
+    # Email links use a configured origin, never the request's Host header.
+    public_base_url: str = "http://127.0.0.1:8000"
+    account_mail_backend: Literal["disabled", "file", "smtp"] = "disabled"
+    account_mail_dir: str = "private-mail"
+    smtp_host: str = ""
+    smtp_port: int = Field(default=587, ge=1, le=65535)
+    smtp_security: Literal["starttls", "ssl"] = "starttls"
+    smtp_username: str = Field(default="", repr=False)
+    smtp_password: str = Field(default="", repr=False)
+    smtp_from: str = ""
+
     # Document-review evidence (DECISIONS L47-L48). Files are private: they are
     # written outside the static tree and served only through an authenticated
     # reviewer route. A relative path resolves against the process working
@@ -86,6 +99,11 @@ class Settings(BaseSettings):
     )
     community_malware_scan_command: str = "clamscan"
     community_malware_scan_timeout_seconds: int = 60
+
+    # Reels processing runs in a separate CLI worker, outside web requests.
+    # Empty selects the pinned imageio-ffmpeg binary; operators may use a system binary.
+    reels_ffmpeg: str = ""
+    reels_process_timeout_seconds: int = Field(default=300, ge=30, le=1200)
 
     # Optional search discovery. ROR directory discovery needs neither setting.
     # The agreement must permit retaining candidate URLs/results for this registry.
@@ -123,6 +141,24 @@ class Settings(BaseSettings):
         for host in hosts:
             _validate_host(host)
         self.allowed_hosts = ",".join(dict.fromkeys(hosts))
+        from urllib.parse import urlsplit
+
+        base = urlsplit(self.public_base_url)
+        if (
+            base.scheme not in {"http", "https"} or not base.hostname
+            or base.username or base.password or base.query or base.fragment
+            or base.path not in {"", "/"}
+        ):
+            raise ValueError("NURSE_NG_PUBLIC_BASE_URL must be an HTTP(S) origin.")
+        if production and self.account_mail_backend != "disabled" and base.scheme != "https":
+            raise ValueError("Account email requires an HTTPS PUBLIC_BASE_URL in production.")
+        if production and self.account_mail_backend == "file":
+            raise ValueError("The file email backend is only available in development.")
+        if self.account_mail_backend == "smtp" and (
+            not self.smtp_host or not self.smtp_from or "@" not in self.smtp_from
+            or any(c in self.smtp_from for c in "\r\n")
+        ):
+            raise ValueError("SMTP requires NURSE_NG_SMTP_HOST and a valid NURSE_NG_SMTP_FROM.")
         return self
 
     @property

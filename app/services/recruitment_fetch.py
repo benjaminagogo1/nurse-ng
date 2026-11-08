@@ -17,6 +17,8 @@ from email.utils import parsedate_to_datetime
 from urllib.parse import parse_qsl, quote, unquote, urljoin, urlsplit, urlunsplit
 from urllib.robotparser import RobotFileParser
 
+from app.services.recruitment_tls import source_ssl_context
+
 USER_AGENT = "NurseNgSourceDiscovery/1.0"
 MAX_BYTES = 2 * 1024 * 1024
 
@@ -176,7 +178,7 @@ class PublicFetcher:
             # Connect to the validated numeric address, never resolve the hostname a second time.
             connection.sock = socket.create_connection((address, port), timeout=self._remaining())
             if parsed.scheme == "https":
-                connection.sock = ssl.create_default_context().wrap_socket(
+                connection.sock = source_ssl_context(host).wrap_socket(
                     connection.sock,
                     server_hostname=host,
                 )

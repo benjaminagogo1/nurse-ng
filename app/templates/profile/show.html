@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
+{% from "_avatar.html" import avatar with context %}
 {% set page = 'profile' %}
 
 {% block title %}{{ profile.display_name }} — Nurse.ng{% endblock %}
@@ -11,7 +12,7 @@
   {% endif %}
 
   <div class="pf-head">
-    <span class="pf-avatar" aria-hidden="true">{{ (profile.display_name or 'N')[:1]|upper }}</span>
+    {{ avatar(user, profile.display_name, 'pf-avatar') }}
     <div>
       <h1 class="pf-name">
         {{ profile.display_name }}
@@ -22,6 +23,7 @@
       </h1>
       <p class="pf-sub">{{ status_label }} <span class="optional">(self-declared)</span>{% if profile.location %} · {{ profile.location }}{% endif %}</p>
       <div class="pf-actions">
+        <a class="btn btn-secondary btn-sm" href="/settings#photo-heading">Change photo</a>
         <a class="btn btn-primary btn-sm" href="/profile/edit">Edit Profile</a>
         {% if is_active and share_url %}
         <button type="button" class="btn btn-secondary btn-sm" data-copy="{{ share_url }}">{{ icon('share', 16)

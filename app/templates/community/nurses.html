@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_avatar.html" import avatar with context %}
 
 {% block title %}Find nurses — Nurse.ng{% endblock %}
 
@@ -11,6 +12,7 @@
   <div class="profile-card-grid">
     {% for card in cards %}
       <article class="profile-card">
+        {{ avatar(card.profile.user, card.fields.get('display_name')) }}
         <h2><a href="/p/{{ card.profile.public_id }}">{{ card.fields.get('display_name', 'Nurse profile') }}</a></h2>
         {% if card.fields.get('headline') %}<p>{{ card.fields.get('headline') }}</p>{% endif %}
         {% if card.fields.get('location') %}<p class="field-hint">{{ card.fields.get('location') }}</p>{% endif %}

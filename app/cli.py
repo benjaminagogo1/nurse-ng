@@ -48,6 +48,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     subparsers.add_parser(
         "check-config", help="Validate startup settings without displaying secrets."
     )
+    subparsers.add_parser("cleanup-account-files", help="Retry queued account file removals.")
 
     for name in ("set-staff", "unset-staff"):
         command = subparsers.add_parser(name)
@@ -61,13 +62,45 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
 
     subparsers.add_parser(
-        "recruitment-init", help="Create directory schedules and pending LSHSC source."
+        "recruitment-init", help="Set up Nigerian-first schedules and pending starter sources."
     )
     worker = subparsers.add_parser("recruitment-worker", help="Run the source-discovery queue.")
     worker.add_argument("--once", action="store_true", help="Process ready tasks, then exit.")
     worker.add_argument("--max-tasks", type=int, default=10, help="Task limit for --once (1–100).")
 
+    reels = subparsers.add_parser("reels-worker", help="Process queued Reels videos.")
+    reels.add_argument("--once", action="store_true", help="Drain ready work, then exit.")
+    reels.add_argument("--max-tasks", type=int, default=10)
+
     args = parser.parse_args(argv)
+    if args.command == "reels-worker":
+        from app.services.reel_worker import ffmpeg_binary, run_next
+
+        if not 1 <= args.max_tasks <= 100:
+            parser.error("--max-tasks must be between 1 and 100")
+        ffmpeg_binary()
+        completed = 0
+        try:
+            while True:
+                with SessionLocal() as db:
+                    result = run_next(db)
+                if result:
+                    print(f"reel={result[0]} state={result[1]}", flush=True)
+                    completed += 1
+                if args.once and (result is None or completed >= args.max_tasks):
+                    break
+                if result is None:
+                    time.sleep(3)
+        except KeyboardInterrupt:
+            print("Reels worker stopped; unfinished leases will be recovered.")
+        return 0
+    if args.command == "cleanup-account-files":
+        from app.services.accounts import cleanup_account_files
+
+        with SessionLocal() as db:
+            result = cleanup_account_files(db)
+        print(f"Removed {result['removed']} queued account file(s).")
+        return 0
     if args.command == "check-config":
         # Settings validation already ran on import. Do not print the model,
         # database URL, or signing key, and do not open a database connection.

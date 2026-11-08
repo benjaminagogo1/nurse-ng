@@ -42,6 +42,8 @@ class RecruitmentSource(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     source_type: Mapped[str] = mapped_column(String(30), default="recruitment_page")
     discovered_via: Mapped[str] = mapped_column(String(30))
     verification_status: Mapped[str] = mapped_column(String(20), default="pending", index=True)
+    approval_mode: Mapped[str] = mapped_column(String(20), default="", server_default="")
+    activation_review: Mapped[dict] = mapped_column(JSON, default=dict, server_default="{}")
     permission_status: Mapped[str] = mapped_column(String(20), default="unknown")
     reuse_basis: Mapped[str] = mapped_column(String(30), default="", server_default="")
     reuse_url_prefix: Mapped[str] = mapped_column(String(2048), default="", server_default="")

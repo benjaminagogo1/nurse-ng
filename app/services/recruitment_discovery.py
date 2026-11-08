@@ -20,7 +20,8 @@ from app.services.recruitment_fetch import (
 )
 
 CAREER_WORDS = re.compile(
-    r"\b(careers?|recruitment|vacanc(?:y|ies)|jobs?|internships?|emploi|recrutement|"
+    r"\b(careers?|recruitment|vacanc(?:y|ies)|jobs?|internships?|fellows?(?:hip)?s?|"
+    r"traineeships?|graduate[ -]+programmes?|digital[ -]+health|emploi|recrutement|"
     r"carri[eè]res?|vacantes|empleos?|vagas|carreiras?|recrutamento)\b",
     re.I,
 )
@@ -74,6 +75,13 @@ DISCOVERY_CATEGORIES = (
     "healthcare organisation",
     "licensed healthcare recruitment agency",
     "government recruitment",
+    "youth fellowship programme",
+    "digital health programme",
+    "public health internship",
+    "healthcare graduate trainee programme",
+    "federal health recruitment",
+    "state primary healthcare recruitment",
+    "graduate internship programme",
 )
 
 
@@ -219,14 +227,15 @@ def ror_discovery(payload: dict, fetcher) -> dict:
 
 def search_query(payload: dict) -> str:
     index = max(0, payload.get("page", 1) - 1)
+    # Visit every category before moving to the next region, with a national
+    # round as well. Fellowships must not wait months behind hospital searches.
+    regions = ("", *NIGERIAN_REGIONS)
     region = (
-        NIGERIAN_REGIONS[index % len(NIGERIAN_REGIONS)]
+        regions[(index // len(DISCOVERY_CATEGORIES)) % len(regions)]
         if payload.get("country_code") == "NG"
         else ""
     )
-    category_index = (
-        index // len(NIGERIAN_REGIONS) if payload.get("country_code") == "NG" else index
-    )
+    category_index = index
     category = DISCOVERY_CATEGORIES[category_index % len(DISCOVERY_CATEGORIES)]
     text = payload["query"]
     for token, value in {
@@ -285,14 +294,16 @@ def brave_discovery(payload: dict, fetcher, *, key: str, permission: str) -> dic
         "ok": True,
         "outcome": "search_checked",
         "candidates": candidates,
-        "next_page": payload.get("page", 1) % (len(NIGERIAN_REGIONS) * len(DISCOVERY_CATEGORIES))
+        "next_page": payload.get("page", 1)
+        % ((len(NIGERIAN_REGIONS) + 1) * len(DISCOVERY_CATEGORIES))
         + 1,
         "message": f"Found {len(candidates)} candidate pages for review.",
     }
 
 
 def inspect_source(payload: dict, fetcher) -> dict:
-    page = fetcher.get(payload["url"])
+    limits = {"allowed_origin": origin(payload["url"]), "allowed_url_prefix": payload["url"]}
+    page = fetcher.get(payload["url"], **(limits if payload.get("automatic_activation") else {}))
     require_success(page)
     if not any(t in page.content_type.lower() for t in ("text/html", "application/xhtml+xml")):
         raise FetchError(
@@ -327,7 +338,7 @@ def inspect_source(payload: dict, fetcher) -> dict:
                             break
         except (FetchError, ElementTree.ParseError):
             sitemap_note = "No usable recruitment sitemap was available."
-    return {
+    result = {
         "ok": True,
         "outcome": "page_checked",
         "observed_url": page.url,
@@ -339,6 +350,9 @@ def inspect_source(payload: dict, fetcher) -> dict:
         "sitemap_note": sitemap_note,
         "message": "Page inspected. No vacancy or verification decision was created.",
     }
+    from app.services.recruitment_activation import attach_assessment
+
+    return attach_assessment(payload, page, fetcher, result)
 
 
 def execute_discovery(

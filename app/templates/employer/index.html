@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_avatar.html" import avatar with context %}
 {% from "_icons.html" import icon %}
 
 {% block title %}For Employers — Nurse.ng{% endblock %}
@@ -36,8 +37,7 @@
       <div class="community-list" style="max-width:none;margin-top:12px">
             {% for card in cards %}
             <div class="cand">
-                  <span class="group-avatar" aria-hidden="true">{{ (card.fields.get('display_name') or 'N')[:1]|upper
-                        }}</span>
+                  {{ avatar(card.profile.user, card.fields.get('display_name'), 'group-avatar') }}
                   <div class="cand-main">
                         <strong>{{ card.fields.get('display_name', 'Nurse profile') }}</strong>
                         <small>

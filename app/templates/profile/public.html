@@ -1,10 +1,12 @@
 {% extends "base.html" %}
+{% from "_avatar.html" import avatar with context %}
 
 {% block title %}{{ fields.get('display_name', 'Nurse profile') }} — Nurse.ng{% endblock %}
 
 {% block content %}
 <section class="form-page public-profile">
   <p class="eyebrow">Shared profile</p>
+  {{ avatar(profile_owner, fields.get('display_name'), 'pf-avatar') }}
   <h1>{{ fields.get('display_name', 'Nurse profile') }}</h1>
 
   {% if fields.get('headline') %}

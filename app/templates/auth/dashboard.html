@@ -3,6 +3,7 @@
 {% block title %}Dashboard — Nurse.ng{% endblock %}
 {% block content %}
 <section class="db">
+  {% if mail_available and not user.email_verified_at %}<p class="form-notice">Protect access to your account: <a href="/settings">{{ 'verify your email address' if user.email else 'add a recovery email' }}</a> for password recovery.</p>{% endif %}
   <div class="db-top">
     <div class="db-hello"><p class="eyebrow">Your career at a glance</p><h1><span data-greeting>Welcome</span>{% if greeting_name %}, {{ greeting_name }}{% endif %} <span class="greeting-wave" aria-hidden="true">👋</span></h1><p>Keep going — you're making a difference.</p></div>
     {% if user.account_type == 'employer' %}

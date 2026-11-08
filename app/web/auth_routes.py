@@ -13,6 +13,7 @@ from app.core.ratelimit import FixedWindowLimiter
 from app.db.session import get_db
 from app.models.jobs import Job
 from app.models.user import AccountType, User
+from app.services.account_mail import mail_available
 from app.services.auth import (
     AuthError,
     LoginLockedError,
@@ -74,6 +75,7 @@ def _start_session(request: Request, user: User) -> None:
     """Replace the session after authentication to prevent fixation."""
     request.session.clear()
     request.session["user_id"] = str(user.id)
+    request.session["auth_version"] = user.auth_version
 
 
 @router.get("/register")
@@ -259,6 +261,7 @@ def dashboard(
             "title": "Dashboard",
             "page": "dashboard",
             "user": user,
+            "mail_available": mail_available(),
             "profile": profile,
             "greeting_name": name.split()[0] if name else "",
             "profile_completion": round(completed / 8 * 100),

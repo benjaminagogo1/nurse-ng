@@ -18,6 +18,7 @@
     <a href="/feed/following" {% if feed_view == 'people' %}aria-current="page"{% endif %}>People I follow</a>
     {% endif %}
     <a href="/topics">Browse topics</a>
+    <a href="/reels">Reels</a>
   </nav>
   {% include "community/_search.html" %}
   {% if not user %}<p class="field-hint">Anyone can read. <a href="/auth/register">Create an account</a> or <a href="/auth/login">sign in</a> to ask, reply, and follow discussions.</p>{% endif %}

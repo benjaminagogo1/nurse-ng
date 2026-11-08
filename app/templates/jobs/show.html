@@ -14,6 +14,7 @@
     <p>Closing date: {{ job.closing_date }}{% if job.closing_date|length == 10 %} ({{ job.deadline_timezone }}){% endif %}</p>
     <p class="field-hint">Last confirmed: {{ job.confirmed_at.strftime('%Y-%m-%d %H:%M') if job.confirmed_at else 'Not confirmed' }} UTC{% if job.clarified %}. Some fields were clarified by Nurse.ng following staff review.{% endif %}</p>
     {% endif %}
+    {% if job.licence %}<p class="field-hint">Adapted from <a href="{{ job.licence.source_url }}">{{ job.licence.attribution }}</a> under <a href="{{ job.licence.url }}">{{ job.licence.name }}</a>. Text and formatting have been normalized; the original announcement remains the reference.</p>{% endif %}
     <h2>About this opportunity</h2><div class="job-description">{{ job.description or 'The employer has not added a detailed description for this role. You can introduce yourself with a note when applying.' }}</div>
     {% for label, value in job.requirements.items() %}<h2>{{ label }}</h2><div class="job-description">{{ value }}</div>{% endfor %}
     <div class="job-apply">

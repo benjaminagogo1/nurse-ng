@@ -130,6 +130,7 @@ def configure_collector(
             RecruitmentSource.revision == revision,
         )
         .values(
+            approval_mode="staff",
             collection_adapter="jsonld" if enabled else "",
             vacancy_url_prefix=url_prefix if enabled else "",
             deadline_timezone=timezone if enabled else "",
@@ -326,6 +327,13 @@ def ingest_page(db: Session, source, result: dict, timestamp):
                 normalize(raw),
             )
         data = record.normalized
+        if source.approval_mode == "automatic":
+            evidence = source.activation_review["evidence"]
+            data = {**data, "_licence": {
+                "url": evidence["licence_url"], "name": evidence["licence_name"],
+                "attribution": source.organization.name, "source_url": source.original_url,
+            }}
+            record.normalized = data
         review = data.get("_review", {})
         record.issues = validation_issues(
             data,

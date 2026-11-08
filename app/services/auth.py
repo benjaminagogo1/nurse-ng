@@ -177,12 +177,23 @@ def authenticate_user(db: Session, *, phone: str, password: str) -> User | None:
     return user
 
 
-def save_account_details(db: Session, user: User, *, full_name: str, email: str) -> None:
+def save_account_details(db: Session, user: User, *, full_name: str, email: str,
+                         current_password: str = "") -> None:
     full_name, email = full_name.strip(), email.strip()
     if not full_name or len(full_name) > 120:
         raise AuthError("Enter your full name (up to 120 characters).")
     if email and (len(email) > 254 or not _EMAIL_RE.fullmatch(email)):
         raise AuthError("Enter a valid email address.")
+    current_email = user.email or ""
+    if email != current_email:
+        from sqlalchemy import delete
+
+        from app.models.account import AccountToken
+        from app.services.accounts import verify_current_password
+
+        verify_current_password(db, user, current_password)
+        user.email_verified_at = None
+        db.execute(delete(AccountToken).where(AccountToken.user_id == user.id))
     user.full_name = full_name
     user.email = email or None
     try:

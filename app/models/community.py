@@ -23,6 +23,7 @@ from app.models.user import User
 
 
 class ContentStatus(StrEnum):
+    PROCESSING = "processing"
     PUBLISHED = "published"
     REMOVED = "removed"
 
@@ -30,6 +31,9 @@ class ContentStatus(StrEnum):
 class MediaKind(StrEnum):
     IMAGE = "image"
     VIDEO = "video"
+    REEL_SOURCE = "reel_source"
+    REEL_LOW = "reel_low"
+    REEL_POSTER = "reel_poster"
 
 
 class ReportStatus(StrEnum):

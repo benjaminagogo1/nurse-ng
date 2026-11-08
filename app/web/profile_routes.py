@@ -489,6 +489,7 @@ def public_profile(
             "user": user,
             "fields": fields,
             "profile_public_id": profile.public_id,
+            "profile_owner": profile.user,
             **_document_review_context(profile),
             **profile_social_context(db, user, profile),
         },

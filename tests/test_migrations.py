@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import UTC, datetime, timedelta
+from types import SimpleNamespace
 
 import pytest
 from alembic import command
@@ -26,6 +27,17 @@ from app.services.community import (
     discussion_summaries,
     mark_discussion_read,
 )
+
+
+def historical_user(db, **values):
+    """Seed the selected old schema without inserting columns introduced later."""
+    identifier = uuid.uuid4()
+    users = Table("users", MetaData(), autoload_with=db.connection())
+    db.execute(users.insert().values(
+        id=identifier.hex, status="active", phone_verified=False, mfa_enabled=False,
+        is_active=True, is_staff=False, **values,
+    ))
+    return SimpleNamespace(id=identifier)
 
 
 def test_fresh_and_dual_head_upgrades_preserve_accounts(tmp_path, monkeypatch):
@@ -92,15 +104,16 @@ def test_reply_read_upgrade_preserves_existing_follow_cutoff(tmp_path, monkeypat
     engine = create_engine(database_url)
     cutoff = datetime.now(UTC)
     with Session(engine, expire_on_commit=False) as db:
-        author = User(
+        author = historical_user(db,
             phone="+2348111111111",
             hashed_password="unused",
             community_name="Author",
             community_name_key="author",
         )
-        member = User(phone="+2348222222222", hashed_password="unused", community_name="Reader")
+        member = historical_user(
+            db, phone="+2348222222222", hashed_password="unused", community_name="Reader",
+        )
         topic = db.query(CommunityTopic).one()
-        db.add_all([author, member])
         db.flush()
         post = CommunityPost(author_id=author.id, topic_id=topic.id, body="Existing question")
         db.add(post)
@@ -196,13 +209,12 @@ def test_reply_context_migration_preserves_replies_reports_and_read_records(tmp_
     engine = create_engine(database_url)
     enable_sqlite_foreign_keys(engine)
     with Session(engine, expire_on_commit=False) as db:
-        author = User(
+        author = historical_user(db,
             phone="+2348111111111",
             hashed_password="unused",
             community_name="Author",
             community_name_key="author",
         )
-        db.add(author)
         db.flush()
         topic = db.query(CommunityTopic).one()
         post = CommunityPost(author_id=author.id, topic_id=topic.id, body="Keep this discussion")

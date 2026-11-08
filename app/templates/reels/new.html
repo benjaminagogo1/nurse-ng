@@ -1,0 +1,33 @@
+{% extends 'reels/layout.html' %}
+{% from '_icons.html' import icon %}
+{% from '_feedback.html' import feedback_slot %}
+{% block content %}
+<section class="reels-page reels-create">
+  <a class="reels-back" href="/reels">← Back to reels</a>
+  <header class="reels-heading"><div><p class="eyebrow">Your experience could be someone's next step</p><h1>Create a reel</h1><p class="lede">One useful idea. Your voice. A community ready to listen.</p></div></header>
+  {{ feedback_slot(feedback) }}
+  <form action="/reels" method="post" enctype="multipart/form-data" data-reel-upload data-max-bytes="{{ max_bytes }}" data-max-seconds="{{ max_seconds }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="upload_key" value="{{ values.upload_key }}">
+    <div class="reel-create-grid">
+      <div class="reel-upload-column"><div class="reel-upload-zone">{{ icon('play', 38) }}<h2>Start with your video</h2><p>Portrait works beautifully. Landscape is welcome too.</p><label for="reel-file">Choose an MP4 video</label><input id="reel-file" name="video" type="file" accept="video/mp4,.mp4" required aria-describedby="reel-file-hint"><p id="reel-file-hint">Up to {{ max_bytes // 1048576 }} MB · {{ max_seconds }} seconds. Around 30–90 seconds is a good start.</p></div>
+        <video class="reel-upload-preview" data-upload-preview controls playsinline preload="metadata" hidden aria-label="Your video preview"></video>
+        <div class="reel-cover-picker"><label for="reel-cover">Cover frame <span data-cover-label>0s</span></label><input type="range" id="reel-cover" name="cover_seconds" min="0" max="{{ max_seconds - 1 }}" value="{{ values.cover_seconds or 0 }}" step="1"><p class="field-hint">Choose the moment people will see before your video plays.</p></div>
+        <div class="reel-upload-note">{{ icon('shield', 20) }}<p>Use footage you have permission to share. Keep patients and private records out of view.</p></div>
+      </div>
+      <div class="reel-form-fields">
+        {% if not user.community_name %}<label for="reel-community-name">Public creator name</label><input id="reel-community-name" name="community_name" value="{{ values.community_name or '' }}" minlength="2" maxlength="80" required><p class="field-hint">This name appears on your contributions and is locked after your first post.</p>{% else %}<p class="reel-posting-as">Posting as <strong>{{ user.community_name }}</strong></p>{% endif %}
+        <label for="reel-body">Caption</label><textarea id="reel-body" name="body" rows="4" maxlength="2200" placeholder="What should someone take away from this video?" required>{{ values.body or '' }}</textarea>
+        <div class="reel-form-pair"><div><label for="reel-category">Reels topic</label><select id="reel-category" name="category">{% for key,label in categories.items() %}<option value="{{ key }}" {% if values.category == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div><div><label for="reel-audience">Relevant to</label><select id="reel-audience" name="audience"><option value="nigeria" {% if values.audience != 'global' %}selected{% endif %}>Nigeria</option><option value="global" {% if values.audience == 'global' %}selected{% endif %}>Around the world</option></select></div></div>
+        <label for="reel-topic">Community topic</label><select id="reel-topic" name="topic_id" required><option value="">Choose where the conversation belongs</option>{% for topic in topics %}<option value="{{ topic.id }}" {% if values.topic_id == topic.id|string %}selected{% endif %}>{{ topic.name }}</option>{% endfor %}</select>
+        {% if not topics %}<p class="field-hint">A staff member needs to add a community topic before the first upload.</p>{% endif %}
+        <label for="reel-job">Nurse.ng opportunity link <span>(optional)</span></label><input type="text" id="reel-job" name="job_link" value="{{ values.job_link or '' }}" placeholder="/jobs/…" maxlength="100"><p class="field-hint">Link to a listing so viewers can check the details and apply.</p>
+        <label for="reel-captions">Timed captions <span>(optional)</span></label><input type="file" id="reel-captions" name="captions" accept=".vtt,text/vtt"><p class="field-hint">Upload a WebVTT file, up to 64 KB. Captions help people watch without sound.</p>
+        <label class="reel-consent"><input type="checkbox" name="consent" value="yes" required><span>Publish this video and caption publicly once processing is complete. My profile sharing settings stay as they are.</span></label>
+        <div class="reel-upload-progress" data-upload-progress hidden role="status"><strong data-upload-status>Uploading your video…</strong><progress max="100" value="0" aria-label="Video upload progress"></progress><p>Your reel will appear after processing finishes.</p></div>
+        <button class="btn btn-primary reel-publish" type="submit" {% if not topics %}disabled{% endif %}>{{ icon('plus', 19) }} Publish reel</button>
+        <a href="/reels/mine" class="reels-manage">View my uploads</a>
+      </div>
+    </div>
+  </form>
+</section>
+{% endblock %}

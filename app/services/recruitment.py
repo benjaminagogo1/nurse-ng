@@ -1,10 +1,10 @@
-"""Staff-managed source registry. Discovery evidence never grants approval."""
+"""Source registry with staff decisions and separately evaluated automatic activation."""
 
 import hashlib
 import re
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import func, or_, select, update
+from sqlalchemy import case, func, or_, select, update
 from sqlalchemy.orm import Session
 
 from app.models.recruitment import (
@@ -28,6 +28,8 @@ CATEGORIES = {
     "healthcare": "Healthcare organisation",
     "recruitment_agency": "Recruitment agency",
     "government_portal": "Government recruitment portal",
+    "youth_programme": "Youth fellowship or graduate programme",
+    "digital_health": "Digital health organisation",
     "unconfirmed": "Organisation type not confirmed",
 }
 METHODS = {
@@ -258,7 +260,7 @@ def collection_authorized(source: RecruitmentSource, *, at: datetime | None = No
 
 
 def reuse_authorized(source: RecruitmentSource) -> bool:
-    """A recorded staff finding, never an inference from public access or robots.txt."""
+    """Recorded reuse evidence, never an inference from public access or robots.txt."""
     return bool(
         source.reuse_basis in REUSE_BASES
         and all(getattr(source, right) for right in REUSE_RIGHTS)
@@ -321,6 +323,7 @@ def review_source(
             if reuse.get(right) is not True:
                 raise RecruitmentError(f"Permission evidence must explicitly allow: {label}.")
         values.update(
+            approval_mode="staff",
             verification_status="approved",
             permission_status="permitted",
             collection_method=method,
@@ -350,6 +353,7 @@ def review_source(
         )
     elif action in {"reject", "revoke"}:
         values.update(
+            approval_mode="staff",
             verification_status="rejected" if action == "reject" else "revoked",
             permission_status="unknown",
             automation_status="paused",
@@ -363,11 +367,20 @@ def review_source(
         values.update(automation_status="monitoring", next_check_at=now())
     elif action == "reopen":
         values.update(
+            approval_mode="staff",
             verification_status="pending",
             permission_status="unknown",
             approval_expires_at=None,
             automation_status="monitoring",
             next_check_at=now(),
+        )
+    elif action == "automatic":
+        if source.verification_status in {"rejected", "revoked"}:
+            raise RecruitmentError("Reopen the source before requesting automatic assessment.")
+        values.update(
+            approval_mode="", activation_review={}, verification_status="pending",
+            permission_status="unknown", approval_expires_at=None, collection_adapter="",
+            automation_status="monitoring", next_check_at=now(),
         )
     else:
         raise RecruitmentError("Choose a supported review action.")
@@ -435,6 +448,7 @@ def update_organization(
         )
     )
     for item in related:
+        item.approval_mode = "staff"
         if item.verification_status == "approved":
             item.verification_status = "pending"
             item.permission_status = "unknown"
@@ -516,6 +530,7 @@ def list_sources(
     rows = list(
         db.scalars(
             statement.order_by(
+                case((RecruitmentOrganization.country_code == "NG", 0), else_=1),
                 RecruitmentSource.created_at.desc(),
                 RecruitmentSource.id.desc(),
             )
@@ -527,17 +542,24 @@ def list_sources(
 
 
 def initialize_discovery(db: Session) -> dict[str, int]:
-    """Explicit operator setup. Only directories and the user's exact example are seeded."""
+    """Set up Nigerian-first discovery; starter sites remain unapproved candidates."""
     schedules = 0
-    for name, code in [
-        ("Nigerian healthcare institutions", "NG"),
-        ("Worldwide healthcare institutions", ""),
+    for name, code, interval in [
+        ("Nigerian healthcare institutions", "NG", 24),
+        ("Worldwide healthcare institutions", "", 168),
     ]:
-        if not db.scalar(select(DiscoverySchedule.id).where(DiscoverySchedule.name == name)):
+        existing = db.scalar(select(DiscoverySchedule).where(DiscoverySchedule.name == name))
+        if not existing:
             _add_schedule(
-                db, name=name, provider="ror", country_code=code, query="", interval_hours=24
+                db, name=name, provider="ror", country_code=code, query="", interval_hours=interval
             )
             schedules += 1
+        elif (
+            code == "" and existing.provider == "ror" and existing.country_code == ""
+            and existing.query == "" and existing.interval_hours == 24
+        ):
+            # Upgrade the original built-in default, retaining pause state and cursor.
+            existing.interval_hours = interval
     _, created = register_candidate(
         db,
         identity_key="user-provided:lshsc",
@@ -552,8 +574,43 @@ def initialize_discovery(db: Session) -> dict[str, int]:
         source_type="recruitment_page",
         evidence={"note": "Exact source supplied by the user; pending review."},
     )
+    sources = int(created)
+    for identity, name, category, website, url, reference in [
+        (
+            "ng-priority:health-ministry", "Federal Ministry of Health and Social Welfare",
+            "ministry", "https://health.gov.ng/", "https://health.gov.ng/",
+            "https://health.gov.ng/",
+        ),
+        (
+            "ng-priority:health-fellows", "National Health Fellows Programme", "youth_programme",
+            "https://healthfellows.ng/", "https://healthfellows.ng/",
+            "https://health.gov.ng/",
+        ),
+        (
+            "ng-priority:jubilee-fellows", "Nigeria Jubilee Fellows Programme", "youth_programme",
+            "https://njfp.ng/", "https://njfp.ng/", "https://njfp.ng/",
+        ),
+        (
+            "ng-priority:lagoon", "Iwosan Lagoon Hospitals", "private_hospital",
+            "https://www.lagoonhospitals.com/", "https://www.lagoonhospitals.com/careers/",
+            "https://www.lagoonhospitals.com/",
+        ),
+    ]:
+        # Do not duplicate a URL already registered under another identity or
+        # override a staff decision. These are starting points, not a closed list.
+        if db.scalar(select(RecruitmentSource.id).where(RecruitmentSource.url_key == url_key(url))):
+            continue
+        _, created = register_candidate(
+            db, identity_key=identity, name=name, category=category, country_code="NG",
+            location="", website_url=website, source_url=url, discovered_via="manual",
+            reference=reference,
+            source_type="recruitment_page" if "/careers/" in url else "institution_site",
+            evidence={"note": "Nigerian opportunity starter site, checked 2026-11-08. "
+                      "Not a current vacancy or approval; normal source checks still apply."},
+        )
+        sources += int(created)
     db.commit()
-    return {"schedules": schedules, "sources": int(created)}
+    return {"schedules": schedules, "sources": sources}
 
 
 def request_inspection(db: Session, actor: User, source: RecruitmentSource) -> None:

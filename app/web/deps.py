@@ -27,6 +27,9 @@ def get_current_user(
     user = db.get(User, user_id)
     if user is None or not user.is_active or user.status != UserStatus.ACTIVE:
         return None
+    if request.session.get("auth_version", 0) != user.auth_version:
+        request.session.clear()
+        return None
     return user
 
 

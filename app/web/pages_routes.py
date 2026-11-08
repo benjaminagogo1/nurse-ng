@@ -1,13 +1,14 @@
 """Learning, resources, and account settings."""
 
 from fastapi import APIRouter, Depends, Form, Request, Response
-from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.user import User
+from app.services.account_mail import mail_available
 from app.services.auth import AuthError, save_account_details
 from app.web.deps import get_current_user, require_user, verify_csrf
+from app.web.feedback import message, redirect_feedback, render_error
 from app.web.templating import render
 
 router = APIRouter()
@@ -67,21 +68,26 @@ def settings_page(request: Request, user: User = Depends(require_user)) -> Respo
     return render(request, "pages/settings.html", {
         "title": "Account settings", "user": user,
         "values": {"full_name": user.full_name, "email": user.email or ""},
-        "saved": request.query_params.get("saved") == "1",
+        "mail_available": mail_available(),
     })
 
 
 @router.post("/settings")
 def save_settings(
     request: Request, full_name: str = Form(""), email: str = Form(""),
+    current_password: str = Form(""),
     user: User = Depends(require_user), _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
 ) -> Response:
     try:
-        save_account_details(db, user, full_name=full_name, email=email)
+        save_account_details(db, user, full_name=full_name, email=email,
+                             current_password=current_password)
     except AuthError as exc:
-        return render(request, "pages/settings.html", {
+        return render_error(request, "pages/settings.html", {
             "title": "Account settings", "user": user, "error": str(exc),
             "values": {"full_name": full_name, "email": email},
-        }, status_code=400)
-    return RedirectResponse("/settings?saved=1", status_code=303)
+            "mail_available": mail_available(),
+        }, message("Your details weren’t saved", str(exc), tone="error"))
+    return redirect_feedback(request, "/settings", message(
+        "Account details saved", "Your contact details are up to date."
+    ))

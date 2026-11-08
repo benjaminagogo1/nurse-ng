@@ -64,6 +64,7 @@ def test_account_settings_validate_conflicts_and_keep_role(client, db_session, a
     token = csrf_from(client.get("/settings"))
     response = client.post("/settings", data={
         "csrf_token": token, "full_name": "Updated Name", "email": accounts["peer"].email,
+        "current_password": "s3cret-pass",
     })
     assert response.status_code == 400
     assert "already exists" in response.text
@@ -71,6 +72,7 @@ def test_account_settings_validate_conflicts_and_keep_role(client, db_session, a
     assert nurse.full_name == "Ada Nurse"
     response = client.post("/settings", data={
         "csrf_token": token, "full_name": "Updated Name", "email": "ada@EXAMPLE.ORG",
+        "current_password": "s3cret-pass",
         "role": "employer",
     }, follow_redirects=False)
     assert response.status_code == 303

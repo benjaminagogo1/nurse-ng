@@ -1,5 +1,7 @@
+{% from "_avatar.html" import avatar with context %}
 <article class="community-card">
   <header class="community-card-header">
+    {{ avatar(post.author, post.author.community_name) }}
     <div>
       <a class="topic-label" href="/topics/{{ post.topic.slug }}">{{ post.topic.name }}</a>
       <p class="post-byline">

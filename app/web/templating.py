@@ -10,6 +10,8 @@ from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
+from app.web.feedback import pending_feedback
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
@@ -61,6 +63,9 @@ def render(
     }
     if context:
         template_context.update(context)
+    saved_feedback = pending_feedback(request)
+    if saved_feedback:
+        template_context.setdefault("feedback", saved_feedback["notice"])
     user = template_context.get("user")
     template_context["draft_scope"] = (
         sha256(f"{user.id}:{template_context['csrf_token']}".encode()).hexdigest()
@@ -76,4 +81,6 @@ def render(
     )
     # A rendering failure leaves the acknowledgement available for a later page.
     request.session.pop("published_draft", None)
+    if saved_feedback:
+        request.session.pop("account_feedback", None)
     return response

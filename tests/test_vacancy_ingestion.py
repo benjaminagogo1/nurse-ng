@@ -338,6 +338,79 @@ def test_international_salary_country_and_original_application_display(db_sessio
     assert "Registered Nurse" not in client.get("/jobs?country=NG").text
 
 
+@pytest.mark.parametrize(
+    "values",
+    [
+        {"minValue": 100000, "maxValue": 10000},
+        {"minValue": "10.50", "maxValue": "10.49", "value": "10.50"},
+    ],
+)
+def test_reversed_salary_range_is_held_with_original_evidence(db_session, source, staff, values):
+    raw = posting(baseSalary={"currency": "NGN", "value": {"unitText": "MONTH", **values}})
+    collect(db_session, source, [raw])
+    item = record(db_session)
+    assert list_open_jobs(db_session) == []
+    assert item.state == "pending"
+    assert any(issue.startswith("salary:") for issue in item.issues)
+    assert item.raw_record == raw
+    snapshot = db_session.get(VacancySnapshot, item.snapshot_id)
+    assert snapshot.body == base64.b64decode(page_result([raw])["body_base64"])
+
+    with pytest.raises(registry.RecruitmentError, match="salary:"):
+        review_record(
+            db_session,
+            staff,
+            item,
+            revision=item.revision,
+            action="publish",
+            note="Attempt to publish without correcting the salary contradiction",
+            reference=raw["url"],
+        )
+    db_session.rollback()
+    assert list_open_jobs(db_session) == []
+
+
+@pytest.mark.parametrize(
+    "values,expected",
+    [
+        ({"minValue": "9.50", "maxValue": "10.00"}, "NGN 9.50 – 10.00/month"),
+        ({"minValue": 0, "maxValue": 0}, "NGN 0 – 0/month"),
+        ({"minValue": 10000}, "NGN from 10,000/month"),
+        ({"maxValue": 100000}, "NGN up to 100,000/month"),
+        ({"value": 50000}, "NGN 50,000/month"),
+    ],
+)
+def test_valid_salary_amounts_still_publish(db_session, source, values, expected):
+    collect(db_session, source, [posting(baseSalary={
+        "currency": "NGN", "value": {"unitText": "MONTH", **values},
+    })])
+    jobs = list_open_jobs(db_session)
+    assert len(jobs) == 1
+    assert job_card(jobs[0])["salary"] == expected
+
+
+def test_salary_range_regression_hides_job_until_source_corrects_it(db_session, source):
+    valid = posting(baseSalary={
+        "currency": "NGN",
+        "value": {"unitText": "MONTH", "minValue": 10000, "maxValue": 100000},
+    })
+    collect(db_session, source, [valid])
+    job_id = record(db_session).job_id
+
+    collect(db_session, source, [posting(baseSalary={
+        "currency": "NGN",
+        "value": {"unitText": "MONTH", "minValue": 100000, "maxValue": 10000},
+    })])
+    assert list_open_jobs(db_session) == []
+    assert record(db_session).state == "pending"
+    assert effective_job_status(db_session.get(Job, job_id)) == "unconfirmed"
+
+    collect(db_session, source, [valid])
+    assert [job.id for job in list_open_jobs(db_session)] == [job_id]
+    assert record(db_session).state == "published"
+    assert record(db_session).issues == []
+
+
 def test_platform_application_cannot_collect_contacts_for_external_job(db_session, source, staff):
     collect(db_session, source, [posting()])
     with pytest.raises(JobError, match="original announcement"):

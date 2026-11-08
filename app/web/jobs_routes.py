@@ -53,7 +53,7 @@ _EMPTY_FORM = {
     "salary_min": "",
     "salary_max": "",
     "description": "",
-    "country_code": "",
+    "country_code": "NG",
 }
 
 
@@ -63,11 +63,16 @@ def jobs_page(
     job_type: str = Query("", alias="type"),
     q: str = Query("", max_length=120),
     country: str = Query("", max_length=2),
+    scope: str = Query("", max_length=20),
     user: User | None = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> Response:
     job_type = job_type if job_type in JOB_TYPE_LABELS else ""
-    jobs = list_open_jobs(db, job_type=job_type or None, query=q, country_code=country)
+    scope = "international" if scope == "international" else ""
+    jobs = list_open_jobs(
+        db, job_type=job_type or None, query=q, country_code=country,
+        international_only=scope == "international",
+    )
     return render(
         request,
         "jobs/index.html",
@@ -79,6 +84,7 @@ def jobs_page(
             "job_type": job_type if job_type in JOB_TYPE_LABELS else "",
             "q": q,
             "country": country.upper(),
+            "scope": scope,
             "is_employer": _is_employer(user),
         },
     )

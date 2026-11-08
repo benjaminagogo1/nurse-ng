@@ -78,6 +78,10 @@ button:disabled { cursor: not-allowed; }
 .account-menu summary { display: flex; align-items: center; gap: 10px; cursor: pointer; padding-left: 9px; }
 .avatar { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: #def1eb; color: #006c62; font-weight: 650; flex-shrink: 0; }
 .avatar-sm { width: 37px; height: 37px; box-shadow: inset 0 0 0 3px #fff; border: 1px solid #d4e7e4; }
+.avatar img, .pf-avatar img, .group-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+.photo-preview { width: 96px; height: 96px; object-fit: cover; border-radius: 16px; }
+.settings-detail .stacked-form { margin: 16px 0; }
+.account-recovery input { max-width: 100%; }
 .account-label { display: grid; max-width: 170px; }
 .account-label strong { font-size: .79rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .account-label small { font-size: .69rem; color: var(--muted); margin-top: 1px; }
@@ -625,7 +629,10 @@ button:disabled { cursor: not-allowed; }
   .auth-panel h2 { font-size: 1.6rem; line-height: 1.35; margin: 0; max-width: 290px; }
   .auth-panel h2 br { display: none; }
   .auth-panel .hero-eyebrow { margin-bottom: 13px; }
-  .auth-panel-copy > p:not(.hero-eyebrow), .auth-panel .checklist, .auth-photo { display: none; }
+  .auth-panel-copy > p:not(.hero-eyebrow), .auth-panel .checklist { display: none; }
+  .auth-photo { margin-top: 0; min-height: 0; height: clamp(150px, 38vw, 190px); flex: none; }
+  .auth-photo > div { left: 26px; right: 26px; bottom: 18px; }
+  .auth-photo strong { font-size: 1rem; }
   .auth-form-wrap { padding: 29px 26px; }
   .auth-card h1 { font-size: 1.65rem; }
   .role-tabs { gap: 5px; }

@@ -9,10 +9,10 @@ from decimal import Decimal, InvalidOperation
 from html.parser import HTMLParser
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
+from app.services.opportunities import programme_type, relevant_opportunity
 from app.services.recruitment_fetch import FetchError, in_scope, origin, require_success
 
 MAX_RECORDS = 50
-NURSING = re.compile(r"\b(nurs(?:e|es|ing)|midwi(?:fe|ves|fery)|RN)\b", re.I)
 TYPE_MAP = {
     "FULL_TIME": "full_time",
     "PART_TIME": "part_time",
@@ -172,7 +172,8 @@ def normalize(raw: dict) -> dict:
         if isinstance(raw.get("datePosted"), str)
         else "",
         "opening_date": "",
-        "job_type": TYPE_MAP.get(employment, "") if isinstance(employment, str) else "",
+        "job_type": programme_type(plain(raw.get("title")))
+        or (TYPE_MAP.get(employment, "") if isinstance(employment, str) else ""),
         "employment_type_text": _text(raw.get("employmentType")),
         "work_mode": "remote" if raw.get("jobLocationType") == "TELECOMMUTE" else "",
         "responsibilities": _text(raw.get("responsibilities")),
@@ -223,8 +224,10 @@ def validation_issues(
     for field, limit in [("title", 250), ("employer", 250), ("description", 30000)]:
         if not data.get(field) or len(data[field]) > limit:
             issues.append(f"{field}: required, at most {limit} characters")
-    if not nursing_confirmed and not NURSING.search(data.get("title", "")):
-        issues.append("nursing: role relevance requires review")
+    if not nursing_confirmed and not relevant_opportunity(data):
+        issues.append(
+            "nursing: health or Nigerian early-career opportunity relevance requires review"
+        )
 
     def words(value):
         return " ".join(re.findall(r"\w+", value.casefold()))
@@ -237,6 +240,13 @@ def validation_issues(
         issues.append("country: an explicit two-letter vacancy country is required")
     if not in_scope(data.get("announcement_url", ""), source.vacancy_url_prefix):
         issues.append("announcement_url: outside the approved vacancy URL scope")
+    salary = data.get("salary", {})
+    if (
+        "minValue" in salary
+        and "maxValue" in salary
+        and Decimal(salary["minValue"]) > Decimal(salary["maxValue"])
+    ):
+        issues.append("salary: minimum salary cannot exceed maximum salary")
     closing = parse_date(data.get("closing_date", ""), source.deadline_timezone, closing=True)
     posted = parse_date(data.get("publication_date", ""), source.deadline_timezone)
     opening = parse_date(data.get("opening_date", ""), source.deadline_timezone)

@@ -25,6 +25,17 @@
     <dt>Last vacancy discovery</dt><dd>{{ source.last_vacancy_discovery_at or 'No vacancies collected' }}</dd>
   </dl>
   <p class="field-hint">The original URL is retained exactly. Observed addresses and canonical hints do not establish website ownership. Access errors do not prove that an organisation is invalid.</p>
+  <section class="source-card" aria-labelledby="automatic-title">
+    <h2 id="automatic-title">Automatic source checks</h2>
+    {% if source.approval_mode == 'staff' %}
+      <p>This source is under staff control. Automatic checks will not replace the recorded decision.</p>
+    {% elif source.activation_review %}
+      <p><strong>{{ 'Automatically activated' if source.activation_review.status == 'eligible' and current_approval else 'Needs review' }}</strong> · Last assessed {{ source.activation_review.checked_at }}</p>
+      {% if source.activation_review.reasons %}<ul>{% for reason in source.activation_review.reasons %}<li>{{ reason }}</li>{% endfor %}</ul>{% endif %}
+      {% if source.activation_review.evidence %}<dl class="source-facts">{% for key, value in source.activation_review.evidence.items() %}<dt>{{ key|replace('_', ' ')|capitalize }}</dt><dd>{{ value }}</dd>{% endfor %}</dl>{% endif %}
+    {% else %}<p>Waiting for the background worker to assess this source.</p>{% endif %}
+    <p>Sources that pass independent directory, official website, recruitment, reuse and vacancy checks activate without staff approval. Uncertain cases stay available for review. Automatic decisions expire after 48 hours unless renewed by successful checks.</p>
+  </section>
   <section class="source-card" aria-labelledby="activation-title">
     <h2 id="activation-title">Live vacancy collection</h2>
     {% if activation_blockers %}
@@ -106,7 +117,7 @@
     <summary>Manage review and monitoring</summary>
     <form method="post" action="/recruitment/sources/{{ source.id }}/review" class="source-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="revision" value="{{ values.get('revision', source.revision) }}">
-      <label>Action<select name="action">{% for key, label in [('pause', 'Pause page checks'), ('resume', 'Resume page checks'), ('reject', 'Reject source'), ('revoke', 'Revoke approval'), ('reopen', 'Reopen as pending')] %}<option value="{{ key }}" {% if values.get('action') == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+      <label>Action<select name="action">{% for key, label in [('pause', 'Pause page checks'), ('resume', 'Resume page checks'), ('reject', 'Reject source'), ('revoke', 'Revoke approval'), ('reopen', 'Reopen for staff review'), ('automatic', 'Return to automatic checks')] %}<option value="{{ key }}" {% if values.get('action') == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
       <label>Reason<textarea name="note" maxlength="3000" required>{{ values.get('note', '') if values.get('action') != 'approve' else '' }}</textarea></label>
       <button class="button-primary" type="submit">Record action</button>
     </form>

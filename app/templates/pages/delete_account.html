@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "_feedback.html" import feedback_slot %}
+{% block title %}Delete account — Nurse.ng{% endblock %}
+{% block content %}
+<section class="form-page">
+  <h1>Permanently delete your account</h1>
+  <p>This cannot be undone. You will be signed out on all devices.</p>
+  <ul>
+    <li>Your profile, photo, verification documents, connections and private messages will be removed.</li>
+    <li>Your posts and their discussion threads, replies, uploads and job applications will be removed.</li>
+    <li>If you are an employer, your jobs and the applications to those jobs will be removed.</li>
+  </ul>
+  <p>Administrative actions concerning other accounts remain without your account reference. Deletion applies to the live app; backup copies require separate removal by the operator. Copies other people have saved cannot be recalled.</p>
+  {{ feedback_slot(feedback|default(none)) }}
+  <form class="stacked-form" method="post" action="/settings/delete-account" data-feedback-form data-pending-label="Deleting account…">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="delete-password">Current password</label><input id="delete-password" name="password" type="password" autocomplete="current-password" maxlength="128" required>
+    <label for="delete-confirmation">Type DELETE to confirm</label><input id="delete-confirmation" name="confirmation" autocomplete="off" maxlength="6" pattern="DELETE" required>
+    <button class="btn btn-primary" type="submit">Permanently delete my account</button>
+    <a class="btn btn-secondary" href="/settings">Keep my account</a>
+  </form>
+</section>
+{% endblock %}

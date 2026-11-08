@@ -6,6 +6,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from app.core.config import settings
+from app.web.account_routes import router as account_router
 from app.web.auth_routes import router as auth_router
 from app.web.community_routes import router as community_router
 from app.web.jobs_routes import router as jobs_router
@@ -15,6 +16,7 @@ from app.web.pages_routes import router as pages_router
 from app.web.profile_routes import public_router
 from app.web.profile_routes import router as profile_router
 from app.web.recruitment_routes import router as recruitment_router
+from app.web.reel_routes import router as reel_router
 from app.web.review_routes import router as review_router
 from app.web.routes import router
 from app.web.vacancy_routes import router as vacancy_router
@@ -41,11 +43,13 @@ def create_app() -> FastAPI:
     app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
     app.include_router(router)
     app.include_router(auth_router)
+    app.include_router(account_router)
     app.include_router(profile_router)
     app.include_router(review_router)
     app.include_router(recruitment_router)
     app.include_router(vacancy_router)
     app.include_router(community_router)
+    app.include_router(reel_router)
     app.include_router(moderation_router)
     app.include_router(jobs_router)
     app.include_router(messages_router)

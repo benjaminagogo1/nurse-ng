@@ -127,6 +127,7 @@ input[type='file']::file-selector-button { background: var(--action-bg); color: 
 .tag { font-size: .8rem; }
 .group-row:nth-child(3n+2) .group-avatar { background: var(--accent-surface); color: var(--accent-text); }
 .verification-badge, .status-approved, .status-shortlisted { background: var(--success-bg); color: var(--success); border-color: var(--line); }
+.form-notice { background: var(--success-bg); color: var(--success); border-color: var(--line); }
 .verification-badge.muted, .status-withdrawn, .status-rejected { background: var(--soft-surface); color: var(--muted); border-color: var(--line); }
 .status-submitted, .status-reviewing, .status-pending { background: var(--info-bg); color: var(--info-fg); }
 .community-card-header, .review-table td, .review-table th { border-color: var(--line); }

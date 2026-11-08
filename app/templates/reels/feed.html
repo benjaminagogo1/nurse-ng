@@ -1,0 +1,81 @@
+{% extends 'reels/layout.html' %}
+{% from '_icons.html' import icon %}
+{% from '_avatar.html' import avatar with context %}
+{% from '_feedback.html' import feedback_slot %}
+{% block content %}
+<section class="reels-page" data-reels-page>
+  {{ feedback_slot(feedback) }}
+  <header class="reels-heading">
+    <div><p class="eyebrow">A little inspiration. A next step.</p><h1>Reels<span class="reels-heading-dot">.</span></h1></div>
+    <div class="reels-heading-actions">{% if user %}<a href="/reels/mine" class="reels-manage">My reels</a>{% endif %}<a class="btn btn-primary" href="/reels/new">{{ icon('plus', 18) }} Create<span class="reels-wide-label"> a reel</span></a></div>
+  </header>
+  <div class="reels-toolbar">
+    <nav class="reels-tabs" aria-label="Reels feeds">
+      {% for key, label in [('discover','Discover'), ('following','Following'), ('saved','Saved')] %}<a href="/reels?view={{ key }}&amp;category={{ category }}" {% if view == key and not single %}aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
+    </nav>
+    <button type="button" class="reels-data" data-data-saver aria-pressed="false" hidden>{{ icon('filter', 16) }} <span>Data saver off</span></button>
+  </div>
+  <nav class="reels-categories" aria-label="Reels topics">
+    <a href="/reels?view={{ view }}" {% if not category %}aria-current="page"{% endif %}>For you</a>
+    {% for key, label in categories.items() %}<a href="/reels?view={{ view }}&amp;category={{ key }}" {% if category == key %}aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
+  </nav>
+  <div class="reel-notice" data-reel-notice role="status" hidden tabindex="-1"></div>
+  {% if tiles %}
+  <div class="reels-layout">
+    <div class="reels-viewer-wrap">
+      <div class="reels-viewer" tabindex="0" aria-label="Reels. Swipe vertically or use the up and down arrow keys." data-reels-viewer>
+        {% for tile in tiles %}
+        {% set reel = tile.reel %}{% set post = reel.post %}{% set media = tile.media %}
+        <article class="reel" data-reel="{{ post.id }}" data-creator="{{ post.author_id }}" aria-label="Reel by {{ post.author.community_name }}">
+          <div class="reel-screen">
+            <video controls loop playsinline muted preload="none" poster="/community/media/{{ media.reel_poster.id }}"
+              src="/community/media/{{ media.reel_low.id }}" data-main="/community/media/{{ media.video.id }}"
+              data-low="/community/media/{{ media.reel_low.id }}" aria-label="{{ post.body|truncate(120) }}">
+              {% if reel.captions %}<track kind="captions" src="/reels/{{ post.id }}/captions" srclang="en" label="Creator captions" default>{% endif %}
+              Your browser cannot play this video. <a href="/community/media/{{ media.reel_low.id }}">Open video</a>.
+            </video>
+            <div class="reel-top"><span>{{ categories[reel.category] }}</span><span>{{ 'Nigeria' if reel.audience == 'nigeria' else 'Around the world' }}</span></div>
+            <div class="reel-playback" data-reel-controls hidden>
+              <button type="button" data-play aria-label="Play video">{{ icon('play', 22) }}<span data-play-label>Play</span></button>
+              <button type="button" data-mute aria-label="Turn sound on" aria-pressed="false">{{ icon('volume', 20) }}<span data-sound-label>Sound off</span></button>
+              {% if reel.captions %}<button type="button" data-captions aria-pressed="true" aria-label="Show captions">CC</button>{% endif %}
+            </div>
+            <p class="reel-playback-error" data-playback-error hidden role="status">This video could not load. Check your connection and try playing again.</p>
+          </div>
+          <div class="reel-caption">
+            <div class="reel-creator">{{ avatar(post.author, post.author.community_name) }}<div>{% if profile_ids.get(post.author_id) %}<a href="/p/{{ profile_ids[post.author_id] }}">{{ post.author.community_name }}</a>{% else %}<strong>{{ post.author.community_name }}</strong>{% endif %}<span>{{ post.published_at.strftime('%d %b %Y') }}</span></div>
+              {% if user and user.id != post.author_id %}<form action="/reels/{{ post.id }}/follow" method="post" data-reel-action="follow"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="following" value="{{ 'no' if post.author_id in followed_ids else 'yes' }}"><button class="reel-follow" type="submit" aria-pressed="{{ 'true' if post.author_id in followed_ids else 'false' }}">{{ 'Following' if post.author_id in followed_ids else 'Follow' }}</button></form>{% elif not user %}<a href="/auth/login" class="reel-follow">Follow</a>{% endif %}
+            </div>
+            {% if post.body|length > 135 %}<details class="reel-description"><summary>{{ post.body[:130] }}… <span>more</span></summary><p>{{ post.body }}</p></details>{% else %}<p class="reel-description">{{ post.body }}</p>{% endif %}
+            {% if reel.job_id %}<a class="reel-opportunity" href="/jobs/{{ reel.job_id }}">{{ icon('briefcase', 16) }} View opportunity &amp; deadline {{ icon('arrow', 16) }}</a>{% endif %}
+          </div>
+          <div class="reel-actions">
+            <a href="/posts/{{ post.id }}#replies" data-comments="/reels/{{ post.id }}/comments">{{ icon('chat', 22) }}<span><span data-reply-count>{{ summaries[post.id].replies }}</span> comments</span></a>
+            {% if user %}<form action="/reels/{{ post.id }}/save" method="post" data-reel-action="save"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="saved" value="{{ 'no' if post.id in saved_ids else 'yes' }}"><button type="submit" aria-pressed="{{ 'true' if post.id in saved_ids else 'false' }}">{{ icon('bookmark', 22) }}<span data-save-label>{{ 'Saved' if post.id in saved_ids else 'Save' }}</span></button></form>{% else %}<a href="/auth/login">{{ icon('bookmark', 22) }}<span>Save</span></a>{% endif %}
+            <a href="/reels/{{ post.id }}" data-share>{{ icon('share', 22) }}<span>Share</span></a>
+            <a href="/posts/{{ post.id }}#report" {% if user %}data-report="{{ post.id }}"{% endif %}>{{ icon('flag', 21) }}<span>Report</span></a>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      {% if tiles|length > 1 %}<div class="reels-step-controls" hidden data-reel-controls><button type="button" data-previous aria-label="Previous reel">↑</button><button type="button" data-next aria-label="Next reel">↓</button></div>{% endif %}
+      <nav class="reels-pagination" aria-label="More reels">
+        {% if page_number > 1 %}<a href="/reels?view={{ view }}&amp;category={{ category }}&amp;page={{ page_number - 1 }}">← Previous set</a>{% endif %}
+        {% if has_more %}<a href="/reels?view={{ view }}&amp;category={{ category }}&amp;page={{ page_number + 1 }}">More reels →</a>{% elif single %}<a href="/reels">Explore more reels →</a>{% endif %}
+      </nav>
+    </div>
+    <aside class="reels-side-note"><span class="reels-note-icon">{{ icon('sparkle', 28) }}</span><p class="eyebrow">Made for your next chapter</p><h2>Small videos.<br>Real possibilities.</h2><p>Discover a placement. Learn from a colleague. Share something that helped you.</p><div class="reels-local-note">{{ icon('pin', 20) }}<span>Nigerian opportunities and voices come first in Discover.</span></div><a href="/jobs">Explore opportunities {{ icon('arrow', 17) }}</a><p class="reels-key-hint">Swipe to explore · ↑ ↓ on your keyboard</p></aside>
+  </div>
+  {% else %}
+  <div class="reels-empty"><span class="reels-empty-icon">{{ icon('play', 42) }}</span>
+    <p class="eyebrow">{{ 'Your private collection' if view == 'saved' else 'A new way to grow together' }}</p>
+    <h2>{% if view == 'saved' %}Keep the good ones close.{% elif view == 'following' %}Your people. Their perspective.{% else %}Every useful story starts<br>with someone sharing.{% endif %}</h2>
+    <p>{% if view == 'saved' %}Save a reel to find it here whenever you need it. Your saves are visible only to you.{% elif view == 'following' %}Follow a creator from a reel to see their videos here.{% elif page_number > 1 %}You have reached the end of this selection.{% elif category %}There are no published reels in this topic yet.{% else %}A fellowship worth applying for. A lesson from your first placement. A moment that could help the next person.{% endif %}</p>
+    <a class="btn btn-primary" href="{{ '/reels/new' if view == 'discover' else '/reels' }}">{{ 'Share the first reel' if view == 'discover' and page_number == 1 else 'Explore reels' }} {{ icon('arrow', 17) }}</a>
+    {% if view == 'discover' %}<div class="reels-prompts"><span>{{ icon('briefcase', 21) }} Opportunities</span><span>{{ icon('book', 21) }} Useful lessons</span><span>{{ icon('users', 21) }} Your experience</span></div>{% endif %}
+  </div>
+  {% endif %}
+  <dialog class="reel-dialog" id="reel-comments" aria-labelledby="reel-comments-title"><header><h2 id="reel-comments-title">Conversation</h2><button type="button" data-close-dialog aria-label="Close comments">{{ icon('close', 22) }}</button></header><div data-comments-body></div></dialog>
+  <dialog class="reel-dialog" id="reel-report" aria-labelledby="reel-report-title"><header><h2 id="reel-report-title">Report this reel</h2><button type="button" data-close-dialog aria-label="Close report">{{ icon('close', 22) }}</button></header><p>Tell us what needs attention. Your report goes to the moderation team.</p><form method="post" data-reel-action="report"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label for="reel-report-reason">Reason</label><select id="reel-report-reason" name="reason" required><option value="">Choose a reason</option>{% for key,label in report_reasons.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}</select><label for="reel-report-details">Additional details (optional)</label><textarea id="reel-report-details" name="details" maxlength="1000" rows="4"></textarea><p data-dialog-feedback role="status"></p><button class="btn btn-primary" type="submit">Send report</button></form></dialog>
+</section>
+{% endblock %}

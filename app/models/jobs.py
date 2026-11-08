@@ -27,6 +27,8 @@ class JobType(StrEnum):
     PART_TIME = "part_time"
     CONTRACT = "contract"
     INTERNSHIP = "internship"
+    FELLOWSHIP = "fellowship"
+    GRADUATE_PROGRAMME = "graduate_programme"
 
 
 class WorkMode(StrEnum):

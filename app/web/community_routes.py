@@ -24,6 +24,7 @@ from app.core.ratelimit import FixedWindowLimiter
 from app.db.session import get_db
 from app.models.community import CommunityReply, Connection, ConnectionStatus, ContentStatus
 from app.models.profile import NurseProfile, ProfileStatus
+from app.models.reels import Reel
 from app.models.user import User
 from app.services.community import (
     REPORT_REASON_LABELS,
@@ -653,7 +654,7 @@ def community_media(media_id: str, db: Session = Depends(get_db)) -> Response:
         path,
         media_type=media.content_type,
         headers={
-            "Cache-Control": "public, max-age=3600",
+            "Cache-Control": "no-store" if db.get(Reel, media.post_id) else "public, max-age=3600",
             "X-Content-Type-Options": "nosniff",
             "Content-Disposition": "inline",
         },

@@ -16,9 +16,12 @@
   <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', path='/css/design.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', path='/css/appearance.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/feedback.css') }}">
   <script src="{{ url_for('static', path='/js/app.js') }}" defer></script>
+  <script src="{{ url_for('static', path='/js/feedback.js') }}" defer></script>
   <script src="{{ url_for('static', path='/js/community-drafts.js') }}" defer></script>
   <script src="{{ url_for('static', path='/js/community-replies.js') }}" defer></script>
+  {% block extra_head %}{% endblock %}
 </head>
 <body data-draft-scope="{{ draft_scope }}" class="{% if user %}is-app{% else %}is-public{% endif %}{% if page == 'home' and not user %} is-landing{% endif %}{% if is_auth_page %} is-auth{% endif %}">
   {% if published_draft %}<script type="application/json" id="published-draft">{{ published_draft|tojson }}</script>{% endif %}
@@ -38,6 +41,7 @@
           <li><a href="/"{% if page == 'home' %} aria-current="page"{% endif %}>Home</a></li>
           <li><a href="/jobs"{% if page == 'jobs' %} aria-current="page"{% endif %}>Jobs</a></li>
           <li><a href="/feed"{% if page in ['topics', 'feed', 'nurses', 'discussion-follows'] %} aria-current="page"{% endif %}>Community</a></li>
+          <li><a href="/reels"{% if page == 'reels' %} aria-current="page"{% endif %}>Reels</a></li>
           <li><a href="/learning"{% if page == 'learning' %} aria-current="page"{% endif %}>Learning</a></li>
           <li><a href="/resources"{% if page == 'resources' %} aria-current="page"{% endif %}>Resources</a></li>
           <li class="only-mobile"><a href="/employers">For employers</a></li>
@@ -56,7 +60,7 @@
         <a class="icon-button header-messages" href="/messages" aria-label="Messages">{{ icon('chat', 20) }}</a>
         <details class="header-popover account-menu">
           <summary aria-label="Account menu">
-            <span class="avatar avatar-sm" aria-hidden="true">{{ (user.full_name or user.community_name or 'N')[:1]|upper }}</span>
+            {% from "_avatar.html" import avatar with context %}{{ avatar(user, user.full_name or user.community_name) }}
             <span class="account-label"><strong>{{ user.full_name or user.community_name or 'My account' }}</strong><small>{{ user.account_type|capitalize }}</small></span>
             {{ icon('chevron-down', 14) }}
           </summary>
@@ -95,6 +99,7 @@
         <p class="side-heading">Grow together</p>
         <ul class="side-list">
           {{ nav_link('/feed', 'feed', 'Community', 'globe', page) }}
+          {{ nav_link('/reels', 'reels', 'Reels', 'play', page) }}
           {{ nav_link('/feed/discussions', 'discussion-follows', 'Followed discussions', 'feed', page) }}
           {{ nav_link('/topics', 'topics', 'Browse topics', 'users', page) }}
           {{ nav_link('/learning', 'learning', 'Learning', 'book', page) }}

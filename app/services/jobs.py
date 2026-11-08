@@ -4,7 +4,7 @@ import re
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
-from sqlalchemy import and_, or_, select
+from sqlalchemy import and_, case, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
@@ -24,6 +24,8 @@ JOB_TYPE_LABELS = {
     JobType.PART_TIME.value: "Part-time",
     JobType.CONTRACT.value: "Contract",
     JobType.INTERNSHIP.value: "Internship",
+    JobType.FELLOWSHIP.value: "Fellowship",
+    JobType.GRADUATE_PROGRAMME.value: "Graduate programme",
 }
 WORK_MODE_LABELS = {
     WorkMode.ON_SITE.value: "On-site",
@@ -121,8 +123,11 @@ def list_open_jobs(
     query: str = "",
     limit: int = 50,
     country_code: str = "",
+    international_only: bool = False,
 ) -> list[Job]:
     statement = select(Job).where(open_job_condition())
+    if international_only:
+        statement = statement.where(Job.country_code.not_in(["NG", ""]))
     if country_code:
         statement = statement.where(Job.country_code == country_code.upper())
     if job_type:
@@ -136,7 +141,10 @@ def list_open_jobs(
             )
         )
     return list(
-        db.scalars(statement.order_by(Job.posted_at.desc(), Job.id.desc()).limit(limit)).all()
+        db.scalars(statement.order_by(
+            case((Job.country_code == "NG", 0), else_=1),
+            Job.posted_at.desc(), Job.id.desc(),
+        ).limit(limit)).all()
     )
 
 
@@ -252,9 +260,11 @@ def job_card(job: Job) -> dict[str, object]:
         "deadline_timezone": job.source.deadline_timezone if job.source_id else "",
         "confirmed_at": job.confirmed_at,
         "clarified": bool(job.normalized_data.get("_review")) if job.source_id else False,
+        "licence": job.normalized_data.get("_licence") if job.source_id else None,
         "requirements": {
             label: job.normalized_data[key]
             for key, label in {
+                "employment_type_text": "Employment terms stated by the source",
                 "responsibilities": "Responsibilities",
                 "qualifications": "Qualifications",
                 "experience": "Experience",

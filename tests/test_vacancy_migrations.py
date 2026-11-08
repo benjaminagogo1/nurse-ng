@@ -109,7 +109,9 @@ def test_reuse_upgrade_preserves_legacy_evidence_without_inventing_rights(tmp_pa
     with engine.begin() as connection:
         sources = Table("recruitment_sources", MetaData(), autoload_with=connection)
         connection.execute(
-            sources.update().values(
+            sources.update().where(
+                sources.c.original_url == "https://lshsc.ng/recruitment",
+            ).values(
                 verification_status="approved",
                 permission_status="permitted",
                 collection_method="html",
@@ -120,18 +122,24 @@ def test_reuse_upgrade_preserves_legacy_evidence_without_inventing_rights(tmp_pa
                 access_notes="Historical review finding retained",
             )
         )
-        before = dict(connection.execute(sources.select()).mappings().one())
+        before = dict(connection.execute(sources.select().where(
+            sources.c.original_url == "https://lshsc.ng/recruitment",
+        )).mappings().one())
         history = connection.execute(text("SELECT * FROM recruitment_source_events")).all()
     command.upgrade(config, "head")
     command.check(config)
     with engine.connect() as connection:
         sources = Table("recruitment_sources", MetaData(), autoload_with=connection)
-        actual = dict(connection.execute(sources.select()).mappings().one())
+        actual = dict(connection.execute(sources.select().where(
+            sources.c.original_url == "https://lshsc.ng/recruitment",
+        )).mappings().one())
         assert {key: actual[key] for key in before} == before
         assert connection.execute(text("SELECT * FROM recruitment_source_events")).all() == history
         assert connection.execute(text("PRAGMA foreign_key_check")).all() == []
     with Session(engine) as session:
-        source = session.query(RecruitmentSource).one()
+        source = session.query(RecruitmentSource).filter_by(
+            original_url="https://lshsc.ng/recruitment",
+        ).one()
         assert source.reuse_basis == source.reuse_url_prefix == ""
         assert not source.allow_collection and not source.allow_snapshot_retention
         assert not source.allow_republication and not collection_authorized(source)
@@ -160,7 +168,8 @@ def test_downgrade_refuses_populated_vacancy_history_before_mutating_schema(tmp_
             snapshots.insert().values(
                 id=uuid.uuid4().hex,
                 source_id=connection.execute(
-                    text("SELECT id FROM recruitment_sources")
+                    text("SELECT id FROM recruitment_sources "
+                         "WHERE original_url='https://lshsc.ng/recruitment'")
                 ).scalar_one(),
                 original_url="https://example.org",
                 observed_url="https://example.org",
