@@ -7,9 +7,9 @@ someone else's profile by guessing an identifier.
 
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.profile import (
     FieldVisibility,
@@ -18,7 +18,8 @@ from app.models.profile import (
     ProfileStatus,
     Visibility,
 )
-from app.models.user import User
+from app.models.user import User, UserStatus
+from app.services.member_interests import clean_interests
 
 DISPLAY_NAME_MAX = 120
 HEADLINE_MAX = 160
@@ -47,6 +48,7 @@ SHAREABLE_FIELDS: tuple[tuple[str, str], ...] = (
     ("qualification", "Highest qualification"),
     ("years_experience", "Years of experience"),
     ("skills", "Skills"),
+    ("interests", "Professional interests"),
 )
 SHAREABLE_FIELD_NAMES = frozenset(name for name, _ in SHAREABLE_FIELDS)
 
@@ -150,11 +152,16 @@ def validate_profile_input(
     qualification: str = "",
     years_experience: str = "",
     skills: str = "",
+    interests: str = "",
 ) -> dict[str, object]:
     status = (professional_status or "").strip()
     if status not in PROFESSIONAL_STATUS_LABELS:
         raise ProfileError("Choose a valid professional status.")
 
+    try:
+        interests = clean_interests(interests)
+    except ValueError as exc:
+        raise ProfileError(str(exc)) from None
     return {
         "display_name": _clean(
             display_name,
@@ -171,6 +178,7 @@ def validate_profile_input(
         ),
         "years_experience": _clean_years(years_experience),
         "skills": _clean_skills(skills),
+        "interests": interests,
     }
 
 def save_profile(
@@ -185,6 +193,7 @@ def save_profile(
     qualification: str = "",
     years_experience: str = "",
     skills: str = "",
+    interests: str = "",
 ) -> NurseProfile:
     """Create or update the signed-in user's profile (always private by default)."""
     values = validate_profile_input(
@@ -196,6 +205,7 @@ def save_profile(
         qualification=qualification,
         years_experience=years_experience,
         skills=skills,
+        interests=interests,
     )
 
     profile = get_profile_for_user(db, user.id)
@@ -354,16 +364,83 @@ def deactivate_profile(db: Session, profile: NurseProfile) -> NurseProfile:
     return profile
 
 
-def list_discoverable_profiles(db: Session, *, limit: int = 100) -> list[NurseProfile]:
-    """List only profiles whose owners explicitly published them."""
+def public_field_condition(field: str):
+    """Keep visibility in SQL, including filtering, counting and ranking."""
+    return (
+        select(FieldVisibility.id)
+        .where(
+            FieldVisibility.profile_id == NurseProfile.id,
+            FieldVisibility.field == field,
+            FieldVisibility.visibility == Visibility.PUBLIC,
+        )
+        .exists()
+    )
+
+
+def discoverable_condition():
+    return and_(
+        NurseProfile.status == ProfileStatus.ACTIVE,
+        NurseProfile.discoverable.is_(True),
+        public_field_condition("display_name"),
+        select(User.id)
+        .where(
+            User.id == NurseProfile.user_id,
+            User.is_active.is_(True),
+            User.status == UserStatus.ACTIVE,
+        )
+        .exists(),
+    )
+
+
+def directory_conditions(*, query="", location="", interest="", professional_status=""):
+    conditions = [discoverable_condition()]
+    if query.strip():
+        conditions.append(
+            or_(
+                *(
+                    and_(
+                        public_field_condition(field),
+                        getattr(NurseProfile, field).icontains(query.strip(), autoescape=True),
+                    )
+                    for field in ("display_name", "headline", "location", "skills", "interests")
+                )
+            )
+        )
+    for field, value in (("location", location), ("interests", interest)):
+        if value.strip():
+            conditions.append(
+                and_(
+                    public_field_condition(field),
+                    getattr(NurseProfile, field).icontains(value.strip(), autoescape=True),
+                )
+            )
+    if professional_status:
+        conditions.append(
+            and_(
+                public_field_condition("professional_status"),
+                NurseProfile.professional_status == professional_status,
+            )
+        )
+    return conditions
+
+
+def list_discoverable_profiles(
+    db: Session, *, limit: int = 100, offset: int = 0, **filters
+) -> list[NurseProfile]:
+    """Only published fields can affect a directory result."""
     return list(
         db.scalars(
             select(NurseProfile)
-            .where(
-                NurseProfile.status == ProfileStatus.ACTIVE,
-                NurseProfile.discoverable.is_(True),
-            )
-            .order_by(NurseProfile.display_name, NurseProfile.created_at)
+            .where(*directory_conditions(**filters))
+            .options(joinedload(NurseProfile.user))
+            .order_by(func.lower(NurseProfile.display_name), NurseProfile.id)
+            .offset(offset)
             .limit(limit)
         ).all()
+    )
+
+
+def count_discoverable_profiles(db: Session, **filters) -> int:
+    return (
+        db.scalar(select(func.count(NurseProfile.id)).where(*directory_conditions(**filters))) or 0
     )

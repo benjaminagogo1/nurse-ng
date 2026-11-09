@@ -261,35 +261,15 @@ def brave_discovery(payload: dict, fetcher, *, key: str, permission: str) -> dic
     results = data.get("web", {}).get("results", [])
     if not isinstance(results, list):
         raise FetchError("extraction_error", "The search provider returned invalid results.")
-    candidates = []
-    for row in results[:20]:
-        try:
-            target = public_url(row["url"])
-            title = str(row.get("title", ""))[:250]
-            if not title:
-                continue
-            candidates.append(
-                {
-                    "identity_key": "search:" + url_key(target),
-                    "name": title,
-                    "category": "unconfirmed",
-                    "country_code": "",
-                    "location": "",
-                    "website_url": origin(target),
-                    "source_url": target,
-                    "discovered_via": "search",
-                    "reference": target,
-                    "source_type": "search_candidate",
-                    "evidence": {
-                        "query": query,
-                        "target_country": payload.get("country_code", ""),
-                        "permission_reference": permission,
-                        "notice": "Search suggestions are not confirmed organisation identity.",
-                    },
-                }
-            )
-        except (ValueError, KeyError, TypeError):
-            continue
+    from app.services.recruitment_search import candidates_from_results
+
+    candidates = candidates_from_results(
+        results,
+        query=query,
+        provider="brave",
+        permission=permission,
+        target_country=payload.get("country_code", ""),
+    )
     return {
         "ok": True,
         "outcome": "search_checked",
@@ -302,8 +282,8 @@ def brave_discovery(payload: dict, fetcher, *, key: str, permission: str) -> dic
 
 
 def inspect_source(payload: dict, fetcher) -> dict:
-    limits = {"allowed_origin": origin(payload["url"]), "allowed_url_prefix": payload["url"]}
-    page = fetcher.get(payload["url"], **(limits if payload.get("automatic_activation") else {}))
+    # Discovery records public redirects. Collection remains constrained to approved scope.
+    page = fetcher.get(payload["url"])
     require_success(page)
     if not any(t in page.content_type.lower() for t in ("text/html", "application/xhtml+xml")):
         raise FetchError(
@@ -311,7 +291,7 @@ def inspect_source(payload: dict, fetcher) -> dict:
         )
     parsed = PageLinks()
     parsed.feed(page.text)
-    links, terms, seen = [], [], set()
+    links, terms, documents, seen = [], [], [], set()
     for href, label in parsed.links:
         target = _safe_link(page.url, href)
         if not target or url_key(target) in seen or url_key(target) == url_key(payload["url"]):
@@ -319,6 +299,12 @@ def inspect_source(payload: dict, fetcher) -> dict:
         seen.add(url_key(target))
         if CAREER_WORDS.search(href.replace("-", " ").replace("_", " ") + " " + label):
             links.append({"url": target, "label": label[:200]})
+            if re.search(r"\.(?:pdf|docx?)(?:[?#]|$)", target, re.I):
+                documents.append({"url": target, "label": label[:200]})
+        elif re.search(r"\.(?:pdf|docx?)(?:[?#]|$)", target, re.I) and re.search(
+            r"\b(application|vacancy|recruitment|fellowship|internship)\b", label, re.I
+        ):
+            documents.append({"url": target, "label": label[:200]})
         elif TERMS_WORDS.search(label):
             terms.append(target)
     sitemap_note = ""
@@ -347,6 +333,7 @@ def inspect_source(payload: dict, fetcher) -> dict:
         "title": parsed.title.strip(),
         "links": links[:3],
         "terms_links": terms[:3],
+        "document_links": documents[:10],
         "sitemap_note": sitemap_note,
         "message": "Page inspected. No vacancy or verification decision was created.",
     }
@@ -364,6 +351,10 @@ def execute_discovery(
             return ror_discovery(payload, fetcher)
         if kind == "brave":
             return brave_discovery(payload, fetcher, key=search_key, permission=search_permission)
+        if kind == "search":
+            from app.services.recruitment_search import general_search
+
+            return general_search(payload, fetcher, key=search_key, permission=search_permission)
         if kind == "inspect":
             if payload.get("collect_vacancies"):
                 from app.services.vacancy_extraction import collect_page

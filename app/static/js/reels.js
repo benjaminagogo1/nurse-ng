@@ -94,6 +94,13 @@
         button.setAttribute('aria-pressed', String(on));
         if (video.textTracks[0]) video.textTracks[0].mode = on ? 'showing' : 'hidden';
       });
+      video.querySelector('track')?.addEventListener('load', () => {
+        // Keep timed captions above the custom sound and seek controls.
+        for (const cue of video.textTracks[0]?.cues || []) {
+          cue.snapToLines = false;
+          cue.line = 70;
+        }
+      });
       const seek = document.createElement('input');
       seek.type = 'range'; seek.min = '0'; seek.max = '100'; seek.value = '0'; seek.step = '0.1';
       seek.className = 'reel-seek'; seek.setAttribute('aria-label', 'Video position');
@@ -313,7 +320,7 @@
           status.querySelector('[data-status-title]').textContent = data.state === 'ready' ? 'Your reel is live' : 'Your video needs attention';
           status.querySelector('[data-status-body]').textContent = data.state === 'ready' ? 'Your video is ready to watch, share and discuss.' : data.error;
           status.querySelector('[data-watch-reel]').hidden = data.state !== 'ready';
-          const retry = status.querySelector('[data-retry-reel]'); if (retry) retry.hidden = data.state !== 'failed';
+          const retry = status.querySelector('[data-retry-reel]'); if (retry) retry.hidden = !data.can_retry;
           status.querySelectorAll('[data-step]').forEach(step => step.classList.toggle('is-done', step.dataset.step === 'uploaded' || data.state === 'ready'));
           return;
         }

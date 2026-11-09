@@ -232,8 +232,11 @@ def validation_issues(
     def words(value):
         return " ".join(re.findall(r"\w+", value.casefold()))
 
-    if not employer_confirmed and words(data.get("employer", "")) != words(
-        source.organization.name
+    indexing = source.collection_adapter == "factual_index"
+    if (
+        not indexing
+        and not employer_confirmed
+        and words(data.get("employer", "")) != words(source.organization.name)
     ):
         issues.append("employer: name differs from the approved organisation")
     if not re.fullmatch(r"[A-Z]{2}", data.get("country", "")):
@@ -247,12 +250,22 @@ def validation_issues(
         and Decimal(salary["minValue"]) > Decimal(salary["maxValue"])
     ):
         issues.append("salary: minimum salary cannot exceed maximum salary")
-    closing = parse_date(data.get("closing_date", ""), source.deadline_timezone, closing=True)
-    posted = parse_date(data.get("publication_date", ""), source.deadline_timezone)
-    opening = parse_date(data.get("opening_date", ""), source.deadline_timezone)
-    if closing is None:
+    timezone = data.get("_index", {}).get("deadline_timezone", source.deadline_timezone)
+    closing = parse_date(data.get("closing_date", ""), timezone, closing=True)
+    posted = parse_date(data.get("publication_date", ""), timezone)
+    opening = parse_date(data.get("opening_date", ""), timezone)
+    index = data.get("_index", {}) if indexing else {}
+    if closing is None and not (
+        index.get("accepting_applications")
+        and not data.get("closing_date")
+        and not index.get("deadline_unresolved")
+    ):
         issues.append("closing_date: missing or ambiguous deadline")
-    if posted is None or posted > datetime.now(UTC) + timedelta(minutes=5):
+    if index.get("closed"):
+        issues.append("closed: the original announcement no longer accepts applications")
+    if (posted is None and (not indexing or data.get("publication_date"))) or (
+        posted and posted > datetime.now(UTC) + timedelta(minutes=5)
+    ):
         issues.append("publication_date: missing, ambiguous or in the future")
     if closing and posted and closing <= posted:
         issues.append("closing_date: deadline is not after publication")
@@ -274,7 +287,7 @@ def collect_page(payload: dict, fetcher) -> dict:
     if not any(t in page.content_type.lower() for t in ("text/html", "application/xhtml+xml")):
         raise FetchError("unsupported_content", "The structured vacancy adapter requires HTML.")
     # Retain the fetched page before parsing, including extraction failures.
-    return {
+    result = {
         "ok": True,
         "outcome": "vacancies_collected",
         "observed_url": page.url,
@@ -283,3 +296,16 @@ def collect_page(payload: dict, fetcher) -> dict:
         "body_base64": base64.b64encode(page.body).decode(),
         "message": "Fetched the original vacancy page; extraction and validation follow.",
     }
+
+    if payload.get("collection_adapter") == "announcements":
+        from app.services.announcement_extraction import announcement_links
+
+        links = announcement_links(page.body, page.url, prefix)
+        offset = int(payload.get("page_offset", 0)) % max(1, len(links))
+        chosen = (links[offset:] + links[:offset])[:4]
+        result["detail_pages"] = []
+        for target in chosen:
+            child = collect_page({"url": target, "reuse_url_prefix": prefix}, fetcher)
+            result["detail_pages"].append(child)
+        result["detail_count"] = len(links)
+    return result

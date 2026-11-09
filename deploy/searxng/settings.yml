@@ -1,0 +1,18 @@
+# Private service. The application worker owns request scheduling and rate limits.
+# Keep a small, explicitly maintained set of engines; unavailable engines are suspended.
+use_default_settings:
+  engines:
+    keep_only: [bing, duckduckgo, google, brave]
+general:
+  debug: false
+  instance_name: Nurse.ng private search
+search:
+  formats: [html, json]
+  safe_search: 1
+server:
+  limiter: false
+  public_instance: false
+  image_proxy: false
+outgoing:
+  request_timeout: 4.0
+  max_request_timeout: 6.0

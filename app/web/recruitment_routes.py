@@ -73,6 +73,13 @@ def _dashboard(
             if page * 25 < total
             else "",
             "search_enabled": bool(
+                settings.recruitment_searxng_urls
+                or (
+                    settings.recruitment_search_key
+                    and settings.recruitment_search_permission_reference
+                )
+            ),
+            "brave_enabled": bool(
                 settings.recruitment_search_key and settings.recruitment_search_permission_reference
             ),
         },
@@ -196,6 +203,7 @@ def schedule(
 def toggle_schedule(
     schedule_id: str,
     enabled: bool = Form(False),
+    adapter: str = Form("jsonld"),
     user: User = Depends(require_staff),
     _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
@@ -203,6 +211,23 @@ def toggle_schedule(
     item = _load(db, DiscoverySchedule, schedule_id)
     registry.set_schedule_enabled(db, user, item, enabled=enabled)
     return RedirectResponse("/recruitment#schedules", status_code=303)
+
+
+@router.get("/coverage")
+def coverage_page(
+    request: Request, user: User = Depends(require_staff), db: Session = Depends(get_db)
+):
+    from app.services.opportunity_coverage import coverage
+
+    return render(
+        request,
+        "recruitment/coverage.html",
+        {
+            "user": user,
+            "title": "Nigerian opportunity coverage",
+            "coverage": coverage(db),
+        },
+    )
 
 
 @router.get("/sources/{source_id}")
@@ -322,6 +347,7 @@ def collector(
     request: Request,
     revision: int = Form(...),
     enabled: bool = Form(False),
+    adapter: str = Form("jsonld"),
     url_prefix: str = Form(""),
     timezone: str = Form(""),
     note: str = Form(""),
@@ -338,6 +364,7 @@ def collector(
             source,
             revision=revision,
             enabled=enabled,
+            adapter=adapter,
             url_prefix=url_prefix,
             timezone=timezone,
             note=note,

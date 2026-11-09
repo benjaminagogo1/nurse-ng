@@ -154,7 +154,7 @@ def test_directory_to_new_institution_to_recruitment_page_stays_pending(db_sessi
 
 
 def test_initialization_is_idempotent_and_keeps_exact_user_url(db_session):
-    assert registry.initialize_discovery(db_session) == {"schedules": 2, "sources": 5}
+    assert registry.initialize_discovery(db_session) == {"schedules": 2, "sources": 8}
     assert registry.initialize_discovery(db_session) == {"schedules": 0, "sources": 0}
     assert (
         db_session.scalar(select(RecruitmentSource).where(

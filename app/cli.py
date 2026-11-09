@@ -72,13 +72,46 @@ def main(argv: Sequence[str] | None = None) -> int:
     reels.add_argument("--once", action="store_true", help="Drain ready work, then exit.")
     reels.add_argument("--max-tasks", type=int, default=10)
 
+    notices = subparsers.add_parser(
+        "notification-worker", help="Deliver opted-in notification emails."
+    )
+    notices.add_argument("--once", action="store_true", help="Drain ready emails, then exit.")
+    notices.add_argument("--max-tasks", type=int, default=20)
+
     args = parser.parse_args(argv)
+    if args.command == "notification-worker":
+        from app.services.account_mail import mail_available
+        from app.services.notification_worker import run_next
+        from app.services.opportunity_watch import generate_alerts
+
+        if not 1 <= args.max_tasks <= 100:
+            parser.error("--max-tasks must be between 1 and 100")
+        if not mail_available():
+            print("Email is unavailable; in-app opportunity alerts remain active.", flush=True)
+        print("Notification worker started; checking queued email alerts.", flush=True)
+        completed = 0
+        try:
+            while True:
+                with SessionLocal() as db:
+                    generate_alerts(db)
+                    result = run_next(db) if mail_available() else None
+                if result:
+                    print(f"notification={result[0]} state={result[1]}", flush=True)
+                    completed += 1
+                if args.once and (result is None or completed >= args.max_tasks):
+                    break
+                if result is None:
+                    time.sleep(5)
+        except KeyboardInterrupt:
+            print("Notification worker stopped; unfinished leases will be recovered.")
+        return 0
     if args.command == "reels-worker":
         from app.services.reel_worker import ffmpeg_binary, run_next
 
         if not 1 <= args.max_tasks <= 100:
             parser.error("--max-tasks must be between 1 and 100")
         ffmpeg_binary()
+        print("Reels worker started; checking queued uploads.", flush=True)
         completed = 0
         try:
             while True:
@@ -120,11 +153,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"Created {result['schedules']} schedules and {result['sources']} pending sources.")
         return 0
     if args.command == "recruitment-worker":
+        from app.services.recruitment import ensure_search_schedule
+        from app.services.recruitment_search import search_available
         from app.services.recruitment_worker import enqueue_due, run_next
 
         if not 1 <= args.max_tasks <= 100:
             parser.error("--max-tasks must be between 1 and 100")
         completed = 0
+        with SessionLocal() as db:
+            ensure_search_schedule(db)
+        if not search_available():
+            print(
+                "General web search is not configured; directory and source checks remain active.",
+                flush=True,
+            )
         try:
             while True:
                 with SessionLocal() as db:
@@ -133,7 +175,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                     if task is not None:
                         print(
                             f"{task.kind}: {task.status}; {task.result_count} new sources; "
-                            f"{task.outcome}",
+                            f"{task.outcome}; task={task.id}; source={task.source_id}; "
+                            f"{task.message}",
                             flush=True,
                         )
                         completed += 1

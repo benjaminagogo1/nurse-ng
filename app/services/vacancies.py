@@ -34,6 +34,11 @@ from app.services.vacancy_extraction import (
 )
 
 FRESHNESS = timedelta(hours=48)
+COLLECTORS = {
+    "jsonld": "Structured job data",
+    "announcements": "Announcement pages and linked opportunities",
+    "factual_index": "Factual listings with original announcement links",
+}
 EDITABLE = {
     "title",
     "employer",
@@ -61,7 +66,7 @@ def collector_authorized(source) -> bool:
         source
         and collection_authorized(source)
         and source.collection_method == "html"
-        and source.collection_adapter == "jsonld"
+        and source.collection_adapter in COLLECTORS
         and source.vacancy_url_prefix
         and source.deadline_timezone
         and in_scope(source.vacancy_url_prefix, source.reuse_url_prefix)
@@ -77,7 +82,11 @@ def activation_blockers(source) -> list[str]:
         blockers.append(
             "A current source approval with identity and authority evidence is required."
         )
-    if source.permission_status != "permitted" or not reuse_authorized(source):
+    from app.services.factual_opportunities import index_authorized
+
+    if not index_authorized(source) and (
+        source.permission_status != "permitted" or not reuse_authorized(source)
+    ):
         blockers.append(
             "Verified reuse evidence must cover collection, original snapshot retention "
             "and republication within the approved URL scope."
@@ -86,10 +95,8 @@ def activation_blockers(source) -> list[str]:
         blockers.append("Automatic collection is paused or set to administrator-assisted mode.")
     if source.collection_method != "html":
         blockers.append("The available collector requires approval for website collection.")
-    if source.collection_adapter != "jsonld" or not source.deadline_timezone:
-        blockers.append(
-            "Configure the structured JobPosting collector and deadline timezone after approval."
-        )
+    if source.collection_adapter not in COLLECTORS or not source.deadline_timezone:
+        blockers.append("Configure a vacancy collector and deadline timezone after approval.")
     if not source.vacancy_url_prefix or not in_scope(
         source.vacancy_url_prefix, source.reuse_url_prefix
     ):
@@ -98,12 +105,16 @@ def activation_blockers(source) -> list[str]:
 
 
 def configure_collector(
-    db, actor, source, *, revision, enabled, url_prefix, timezone, note, reference
+    db, actor, source, *, revision, enabled, url_prefix, timezone, note, reference, adapter="jsonld"
 ):
     require_operator(db, actor)
     note = clean(note, "Configuration reason and permission scope", 3000)
     reference = checked_url(reference)
+    if adapter not in COLLECTORS:
+        raise RecruitmentError("Choose a supported collection format.")
     if enabled:
+        if adapter == "factual_index":
+            raise RecruitmentError("Factual indexing is configured by automatic publisher checks.")
         if not collection_authorized(source) or source.collection_method != "html":
             raise RecruitmentError("Approve this source for permitted website collection first.")
         url_prefix = checked_url(url_prefix)
@@ -131,7 +142,7 @@ def configure_collector(
         )
         .values(
             approval_mode="staff",
-            collection_adapter="jsonld" if enabled else "",
+            collection_adapter=adapter if enabled else "",
             vacancy_url_prefix=url_prefix if enabled else "",
             deadline_timezone=timezone if enabled else "",
             revision=revision + 1,
@@ -223,7 +234,7 @@ def _publish(db, record, timestamp):
             job.status = "unconfirmed"
             return
     else:
-        job = Job(external_key=key, employer_user_id=None)
+        job = Job(external_key=key, employer_user_id=None, created_at=timestamp)
         db.add(job)
     # Retire the former public URL if this source changes the announcement identity.
     if record.job_id and record.job_id != job.id:
@@ -244,9 +255,10 @@ def _publish(db, record, timestamp):
     job.job_type, job.work_mode = data.get("job_type", ""), data.get("work_mode", "")
     job.salary_min = job.salary_max = None
     job.normalized_data = data
-    job.closes_at = parse_date(data["closing_date"], source.deadline_timezone, closing=True)
-    job.opens_at = parse_date(data.get("opening_date", ""), source.deadline_timezone)
-    job.posted_at = parse_date(data["publication_date"], source.deadline_timezone)
+    timezone = data.get("_index", {}).get("deadline_timezone", source.deadline_timezone)
+    job.closes_at = parse_date(data["closing_date"], timezone, closing=True)
+    job.opens_at = parse_date(data.get("opening_date", ""), timezone)
+    job.posted_at = parse_date(data["publication_date"], timezone) or record.first_seen_at
     job.confirmed_at = timestamp
     job.status = "open"
     db.flush()
@@ -276,11 +288,22 @@ def ingest_page(db: Session, source, result: dict, timestamp):
             body=body,
             content_hash=result["content_hash"],
             collected_at=timestamp,
+            adapter=source.collection_adapter + "-v1",
         )
         db.add(snapshot)
         db.flush()
     try:
-        rows = extract_records(body)
+        if source.collection_adapter == "factual_index":
+            envelope = json.loads(body)
+            if envelope["url"] != result["observed_url"]:
+                raise RecruitmentError("Fact snapshot URL does not match the observed page.")
+            rows = envelope["records"]
+        else:
+            rows = extract_records(body)
+        if source.collection_adapter == "announcements" and not rows:
+            from app.services.announcement_extraction import extract_announcements
+
+            rows = extract_announcements(body, result["observed_url"])
     except FetchError as exc:
         source.health_status = "extraction_error"
         source.failure_count += 1
@@ -327,12 +350,20 @@ def ingest_page(db: Session, source, result: dict, timestamp):
                 normalize(raw),
             )
         data = record.normalized
-        if source.approval_mode == "automatic":
+        if source.collection_adapter == "factual_index":
+            data = {**data, "_index": raw["_index"]}
+            record.normalized = data
+        elif source.approval_mode == "automatic":
             evidence = source.activation_review["evidence"]
-            data = {**data, "_licence": {
-                "url": evidence["licence_url"], "name": evidence["licence_name"],
-                "attribution": source.organization.name, "source_url": source.original_url,
-            }}
+            data = {
+                **data,
+                "_licence": {
+                    "url": evidence["licence_url"],
+                    "name": evidence["licence_name"],
+                    "attribution": source.organization.name,
+                    "source_url": source.original_url,
+                },
+            }
             record.normalized = data
         review = data.get("_review", {})
         record.issues = validation_issues(
@@ -360,7 +391,13 @@ def ingest_page(db: Session, source, result: dict, timestamp):
         published += record.state == "published"
         pending += record.state == "pending"
         db.flush()
-    for record in db.scalars(select(VacancyRecord).where(VacancyRecord.source_id == source.id)):
+    missing_query = select(VacancyRecord).where(VacancyRecord.source_id == source.id)
+    if source.collection_adapter in {"announcements", "factual_index"}:
+        # A bounded page batch cannot establish that unvisited announcements disappeared.
+        missing_query = missing_query.join(VacancySnapshot).where(
+            VacancySnapshot.observed_url == result["observed_url"]
+        )
+    for record in db.scalars(missing_query):
         if record.record_key not in seen and record.state not in {"rejected", "unconfirmed"}:
             record.state = "unconfirmed"
             record.issues = ["missing: not present in the latest successful collection"]
@@ -372,7 +409,34 @@ def ingest_page(db: Session, source, result: dict, timestamp):
             record_event(db, record, "missing")
     if rows:
         source.last_vacancy_discovery_at = timestamp
-    return {"records": len(seen), "published": published, "pending": pending}
+    counts = {"records": len(seen), "published": published, "pending": pending}
+    for detail in result.get("detail_pages", [])[:4]:
+        if source.collection_adapter not in {"announcements", "factual_index"}:
+            raise RecruitmentError("Unexpected detail-page collection.")
+        if not in_scope(detail["observed_url"], source.vacancy_url_prefix):
+            raise RecruitmentError("Detail page outside collection scope.")
+        child = ingest_page(
+            db, source, {k: v for k, v in detail.items() if k != "detail_pages"}, timestamp
+        )
+        for key in counts:
+            counts[key] += child[key]
+        if child.get("error"):
+            counts["error"] = child["error"]
+    for failed in result.get("detail_errors", [])[:4]:
+        for record in db.scalars(
+            select(VacancyRecord)
+            .join(VacancySnapshot)
+            .where(
+                VacancyRecord.source_id == source.id,
+                VacancySnapshot.observed_url == failed["url"],
+            )
+        ):
+            if record.job_id:
+                job = db.get(Job, record.job_id)
+                if job and job.source_id == source.id:
+                    job.status = "unconfirmed"
+        event(db, source, "detail_check_failed", reference=failed["url"], details=failed)
+    return counts
 
 
 def review_record(

@@ -158,7 +158,7 @@ def test_initialization_updates_only_original_worldwide_default(db_session, staf
         DiscoverySchedule.country_code == "NG",
     )).interval_hours == 24
     sources = list(db_session.scalars(select(RecruitmentSource)))
-    assert len(sources) == 5 and all(s.verification_status == "pending" for s in sources)
+    assert len(sources) == 8 and all(s.verification_status == "pending" for s in sources)
     assert all(s.organization.country_code == "NG" for s in sources)
     default.interval_hours = 72
     db_session.commit()

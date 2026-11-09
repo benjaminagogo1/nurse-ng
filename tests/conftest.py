@@ -11,6 +11,9 @@ os.environ.update({
     "NURSE_NG_ALLOWED_HOSTS": "localhost,127.0.0.1,::1",
     "NURSE_NG_SESSION_HTTPS_ONLY": "false",
     "NURSE_NG_SESSION_SAME_SITE": "lax",
+    "NURSE_NG_RECRUITMENT_SEARXNG_URLS": "",
+    "NURSE_NG_RECRUITMENT_SEARCH_KEY": "",
+    "NURSE_NG_RECRUITMENT_SEARCH_PERMISSION_REFERENCE": "",
 })
 
 import pytest

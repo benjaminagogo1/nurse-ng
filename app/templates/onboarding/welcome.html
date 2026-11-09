@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block content %}
+<section class="welcome-page">
+  <p class="eyebrow">A good place to begin · Step 1 of 2</p>
+  <h1>Make Nurse.ng yours.</h1>
+  <p class="lede">A few interests can lead to your next connection or opportunity. Take a moment to choose what matters to you.</p>
+  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+  <form method="post" action="/welcome" class="welcome-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    {% include "onboarding/_interests.html" %}
+    <div class="welcome-location"><label for="welcome-location">Where would you like to connect? <span class="optional">(optional)</span></label>
+    <input id="welcome-location" name="location" value="{{ location }}" maxlength="120" placeholder="e.g. Lagos or Abuja"><p class="field-hint">Saved as your profile location to help suggest nearby people and opportunities.</p></div>
+    <aside class="welcome-privacy" aria-label="Your visibility choices">{{ icon('shield', 24) }}<div>
+      <h2>{{ 'Your sharing choices stay in place' if profile and profile.discoverable else 'Your profile stays private' }}</h2>
+      {% if profile and profile.discoverable %}<p>Your profile is published. Interests are <strong>{{ visibility.get('interests', 'private') }}</strong> and location is <strong>{{ visibility.get('location', 'private') }}</strong>. Updates to public fields will be visible immediately.</p>
+      {% else %}<p>Choosing interests does not publish your profile. You can browse, follow people and explore jobs while keeping your profile private.</p>{% endif %}
+      <p>You decide which profile details become public. Photo sharing has its own control in <a href="/settings">Settings</a>. These choices do not turn on email alerts.</p>
+      {% if profile %}<a href="/profile/sharing">Review profile visibility</a>{% endif %}
+    </div></aside>
+    <button class="btn btn-primary" type="submit">Find my next connections {{ icon('arrow', 17) }}</button>
+  </form>
+  <form method="post" action="/welcome/skip" class="welcome-skip"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit" class="btn btn-ghost">Skip for now</button><span>You can always return from your dashboard.</span></form>
+</section>
+{% endblock %}

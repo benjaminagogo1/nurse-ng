@@ -7,8 +7,10 @@
   <p class="eyebrow">{% if profile %}Edit{% else %}Create{% endif %} profile</p>
   <h1>Your professional profile</h1>
   <p class="lede">
-    This profile is private. It is visible only to you until you activate it and
-    choose fields to share. Your professional status is always self-declared;
+    {% if profile and profile.discoverable %}Your profile is public. Changes to shared fields appear immediately.
+    <a href="/profile/sharing">Review sharing controls</a>.
+    {% else %}This profile is private. It is visible only to you until you activate it and
+    choose fields to share.{% endif %} Your professional status is always self-declared;
     document review checks your licence and identity separately.
   </p>
 
@@ -59,6 +61,9 @@
       placeholder="Patient care, Critical thinking, Leadership">
     <p class="field-hint">Separate skills with commas. Up to 12.</p>
 
+    {% set selected_interests = values.interests.split(', ') if values.interests else [] %}
+    {% include "onboarding/_interests.html" %}
+    <p class="field-hint">Interests help suggest people and opportunities. They follow your <a href="/profile/sharing">sharing controls</a> and start private.</p>
     <button type="submit">Save profile</button>
   </form>
 </section>

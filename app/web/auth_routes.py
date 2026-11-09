@@ -21,7 +21,8 @@ from app.services.auth import (
     register_user,
 )
 from app.services.community import list_connections, list_received_requests, list_topics
-from app.services.jobs import job_card, list_open_jobs, open_job_condition
+from app.services.jobs import open_job_condition
+from app.services.member_discovery import suggested_opportunities, suggested_people
 from app.services.messages import unread_count
 from app.services.profiles import get_profile_for_user
 from app.web.deps import get_current_user, require_user, verify_csrf
@@ -157,7 +158,7 @@ def register(
         )
 
     _start_session(request, user)
-    return RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse("/welcome", status_code=status.HTTP_303_SEE_OTHER)
 
 
 @router.get("/login")
@@ -239,6 +240,7 @@ def dashboard(
     db: Session = Depends(get_db),
 ) -> Response:
     profile = get_profile_for_user(db, user.id)
+    jobs, personalised_jobs = suggested_opportunities(db, user)
     completion_fields = (
         "display_name", "headline", "location", "bio", "qualification", "skills",
     )
@@ -269,7 +271,9 @@ def dashboard(
             "connection_count": len(list_connections(db, user.id)),
             "unread_count": unread_count(db, user),
             "pending_requests": len(list_received_requests(db, user.id)),
-            "jobs": [job_card(job) for job in list_open_jobs(db, limit=3)],
+            "jobs": jobs,
+            "personalised_jobs": personalised_jobs,
+            "people": suggested_people(db, user),
             "topics": list_topics(db)[:3],
         },
     )

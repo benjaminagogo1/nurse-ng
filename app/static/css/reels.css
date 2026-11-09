@@ -7,8 +7,8 @@
 .reels-heading-actions { display: flex; align-items: center; gap: 20px; }
 .reels-manage, .reels-back { font-size: .84rem; font-weight: 600; text-decoration: none; }
 .reels-back { display: inline-block; margin-bottom: 20px; }
-.reels-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); }
-.reels-tabs { display: flex; gap: 26px; }
+.reels-toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); }
+.reels-tabs { display: flex; flex-wrap: wrap; gap: 26px; }
 .reels-tabs a { padding: 12px 0; text-decoration: none; color: var(--muted); font-size: .9rem; font-weight: 600; border-bottom: 3px solid transparent; }
 .reels-tabs a[aria-current] { color: var(--brand-700); border-color: var(--brand-600); }
 .reels-data { display: flex; align-items: center; gap: 5px; padding: 8px 11px; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; font: inherit; font-size: .74rem; }

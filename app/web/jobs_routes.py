@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.jobs import Job, JobApplication, JobStatus
+from app.models.opportunities import SavedOpportunity
 from app.models.user import AccountType, User
 from app.services.jobs import (
     APPLICATION_STATUS_LABELS,
@@ -16,6 +17,7 @@ from app.services.jobs import (
     JobError,
     application_for_job,
     apply_for_job,
+    change_application_status,
     create_job,
     job_card,
     list_applications,
@@ -54,6 +56,7 @@ _EMPTY_FORM = {
     "salary_max": "",
     "description": "",
     "country_code": "NG",
+    "closing_date": "",
 }
 
 
@@ -64,14 +67,19 @@ def jobs_page(
     q: str = Query("", max_length=120),
     country: str = Query("", max_length=2),
     scope: str = Query("", max_length=20),
+    location: str = Query("", max_length=100),
     user: User | None = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> Response:
     job_type = job_type if job_type in JOB_TYPE_LABELS else ""
     scope = "international" if scope == "international" else ""
     jobs = list_open_jobs(
-        db, job_type=job_type or None, query=q, country_code=country,
+        db,
+        job_type=job_type or None,
+        query=q,
+        country_code=country,
         international_only=scope == "international",
+        location=location,
     )
     return render(
         request,
@@ -85,6 +93,7 @@ def jobs_page(
             "q": q,
             "country": country.upper(),
             "scope": scope,
+            "location": location,
             "is_employer": _is_employer(user),
         },
     )
@@ -115,6 +124,7 @@ def publish_job(
     salary_max: str = Form(""),
     description: str = Form(""),
     country_code: str = Form(""),
+    closing_date: str = Form(""),
     user: User = Depends(require_user),
     _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
@@ -131,6 +141,7 @@ def publish_job(
         "salary_max": salary_max,
         "description": description,
         "country_code": country_code,
+        "closing_date": closing_date,
     }
     try:
         create_job(
@@ -145,6 +156,7 @@ def publish_job(
             salary_max=salary_max,
             description=description,
             country_code=country_code,
+            closing_date=closing_date,
         )
     except JobError as exc:
         return render(
@@ -185,7 +197,14 @@ def _job(db: Session, identifier: UUID, user: User | None) -> Job:
             return job
         raise HTTPException(status_code=404, detail="This opportunity is no longer available.")
     if job is None or (
-        job.status != JobStatus.OPEN and (user is None or user.id != job.employer_user_id)
+        job.status != JobStatus.OPEN
+        and (
+            user is None
+            or (
+                user.id != job.employer_user_id
+                and db.get(SavedOpportunity, (user.id, job.id)) is None
+            )
+        )
     ):
         raise HTTPException(status_code=404, detail="This job is no longer available.")
     return job
@@ -212,6 +231,7 @@ def _detail(
             "application": application_for_job(db, user, job) if user else None,
             "error": error,
             "cover_note": cover_note,
+            "saved_opportunity": db.get(SavedOpportunity, (user.id, job.id)) if user else None,
         },
         status_code=400 if error else 200,
     )
@@ -283,9 +303,34 @@ def application_status(
     is_applicant = application.applicant_user_id == user.id
     if not (is_owner or is_applicant):
         raise HTTPException(status_code=404)
-    allowed = {"reviewing", "shortlisted", "rejected"} if is_owner else {"withdrawn"}
-    if new_status not in allowed or application.status == "withdrawn":
-        raise HTTPException(status_code=400, detail="This status change is not available.")
-    application.status = new_status
-    db.commit()
-    return RedirectResponse("/applications", status_code=303)
+    try:
+        change_application_status(db, user, application, new_status)
+    except JobError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
+    return RedirectResponse(f"/applications/{application.id}", status_code=303)
+
+
+@router.get("/applications/{application_id}")
+def application_detail(
+    application_id: UUID,
+    request: Request,
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    application = db.get(JobApplication, application_id)
+    if application is None or user.id not in {
+        application.applicant_user_id,
+        application.job.employer_user_id,
+    }:
+        raise HTTPException(status_code=404)
+    return render(
+        request,
+        "jobs/applications.html",
+        {
+            "title": "Application",
+            "user": user,
+            "is_employer": application.job.employer_user_id == user.id,
+            "applications": [application],
+            "status_labels": APPLICATION_STATUS_LABELS,
+        },
+    )

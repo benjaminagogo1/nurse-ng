@@ -38,6 +38,13 @@ def send_account_mail(recipient: str, purpose: str, token: str) -> None:
         "If you did not request this, you can ignore this email. "
         "Your password has not changed.\n"
     )
+    deliver_mail(message)
+
+
+def deliver_mail(message: EmailMessage) -> None:
+    """Shared verified-TLS transport; caller decides content and retry policy."""
+    if not mail_available():
+        raise MailUnavailable("Email delivery is unavailable. Please try again later.")
     try:
         if settings.account_mail_backend == "file":
             root = Path(settings.account_mail_dir)

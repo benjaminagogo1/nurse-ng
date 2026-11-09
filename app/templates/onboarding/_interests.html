@@ -1,0 +1,7 @@
+<fieldset class="interest-picker" aria-describedby="interests-hint">
+  <legend>What interests you?</legend>
+  <p id="interests-hint" class="field-hint">Choose up to 6. You can change these anytime.</p>
+  <div class="interest-options">{% for interest in interest_options %}
+    <label class="interest-option"><input type="checkbox" name="interests" value="{{ interest }}"{% if interest in selected_interests %} checked{% endif %}><span>{{ interest }}</span></label>
+  {% endfor %}</div>
+</fieldset>

@@ -44,7 +44,7 @@ def _ffmpeg(arguments: list[str]) -> None:
             [ffmpeg_binary(), "-hide_banner", "-loglevel", "error", "-nostdin", "-y",
              "-max_alloc", "134217728", "-filter_threads", "1", *arguments],
             stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-            stderr=subprocess.PIPE, timeout=settings.reels_process_timeout_seconds,
+            stderr=subprocess.DEVNULL, timeout=settings.reels_process_timeout_seconds,
             check=False,
         )
     except subprocess.TimeoutExpired:

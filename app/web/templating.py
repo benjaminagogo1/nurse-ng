@@ -9,7 +9,10 @@ from uuid import UUID
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy.orm import object_session
 
+from app.services.activity import record_visit
+from app.services.notifications import unread_count
 from app.web.feedback import pending_feedback
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -67,6 +70,8 @@ def render(
     if saved_feedback:
         template_context.setdefault("feedback", saved_feedback["notice"])
     user = template_context.get("user")
+    if user is not None and object_session(user) is not None:
+        template_context.setdefault("notification_count", unread_count(object_session(user), user))
     template_context["draft_scope"] = (
         sha256(f"{user.id}:{template_context['csrf_token']}".encode()).hexdigest()
         if user is not None else ""
@@ -83,4 +88,14 @@ def render(
     request.session.pop("published_draft", None)
     if saved_feedback:
         request.session.pop("account_feedback", None)
+    # Only completed page navigations count here. JSON polling, fetch fragments,
+    # prefetches, assets, failures and anonymous visitors do not create visits.
+    if (
+        user is not None and object_session(user) is not None
+        and request.method == "GET" and 200 <= status_code < 300
+        and request.headers.get("sec-fetch-mode", "navigate") == "navigate"
+        and "prefetch" not in request.headers.get("sec-purpose", "").lower()
+        and "prefetch" not in request.headers.get("purpose", "").lower()
+    ):
+        record_visit(object_session(user), user)
     return response

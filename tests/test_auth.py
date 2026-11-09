@@ -42,7 +42,7 @@ def test_register_creates_a_user_and_signs_in(client, db_session):
     )
 
     assert response.status_code == 303
-    assert response.headers["location"] == "/"
+    assert response.headers["location"] == "/welcome"
 
     user = db_session.scalar(select(User).where(User.phone == "+2348012345678"))
     assert user is not None

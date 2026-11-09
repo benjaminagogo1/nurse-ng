@@ -1,6 +1,7 @@
 """Publish, discover and save short videos without a second social graph."""
 
 import re
+import unicodedata
 from datetime import UTC, datetime
 from uuid import UUID
 
@@ -9,14 +10,16 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.community import CommunityPost, ContentStatus, Follow
-from app.models.jobs import Job
 from app.models.reels import Reel, ReelSave
 from app.models.user import User
 from app.services.community import (
+    COMMUNITY_NAME_MAX,
     CommunityError,
     CommunityUpload,
+    _clean_community_name,
     _remove_post_media,
     create_post,
+    set_community_name,
 )
 
 CATEGORIES = {
@@ -73,10 +76,42 @@ def upload_by_key(db: Session, user: User, key: str) -> Reel | None:
     ))
 
 
+def reel_creator_name(user: User) -> str:
+    """Use the existing public identity, or the account name shown before publishing."""
+    if user.community_name:
+        return user.community_name
+    name = " ".join(unicodedata.normalize("NFKC", user.full_name or "").split())
+    name = "".join(char for char in name if not unicodedata.category(char).startswith("C"))
+    try:
+        return _clean_community_name(name[:COMMUNITY_NAME_MAX])[0]
+    except CommunityError:
+        # Older accounts may have no name. Never substitute a private contact
+        # address, phone number or a field from an unpublished nurse profile.
+        return "Nurse.ng member"
+
+
+def _ensure_creator_name(db: Session, user: User) -> None:
+    if user.community_name:
+        return
+    name = reel_creator_name(user)
+    try:
+        set_community_name(db, user, name)
+    except CommunityError as exc:
+        db.refresh(user)
+        if user.community_name:
+            return  # Another contribution from this account chose its name first.
+        if str(exc) != "That community name is already in use.":
+            raise
+        # Existing community names are unique. Namesakes can still upload
+        # without being asked to invent an alias or exposing contact details.
+        suffix = f" · {user.id.hex[-8:]}"
+        set_community_name(db, user, name[:COMMUNITY_NAME_MAX - len(suffix)].rstrip() + suffix)
+
+
 def create_reel(
     db: Session, user: User, *, topic_id: UUID, body: str, video: CommunityUpload,
     category: str, audience: str, upload_key: str, cover_seconds: int = 0,
-    captions: bytes = b"", job_link: str = "",
+    captions: bytes = b"",
 ) -> Reel:
     try:
         upload_key = str(UUID(upload_key))
@@ -93,22 +128,12 @@ def create_reel(
 
     if not 0 <= cover_seconds < settings.community_video_max_seconds:
         raise CommunityError("Choose a cover frame within your video.")
-    job_id = None
-    if job_link.strip():
-        match = re.fullmatch(r"/jobs/([0-9a-fA-F-]{36})", job_link.strip())
-        try:
-            job_id = UUID(match[1]) if match else None
-        except ValueError:
-            job_id = None
-        if job_id is None or db.get(Job, job_id) is None:
-            raise CommunityError(
-                "Use a Nurse.ng opportunity link, such as /jobs/ followed by its ID."
-            )
     reel = Reel(
         upload_key=upload_key, category=category, audience=audience,
-        job_id=job_id, cover_seconds=cover_seconds,
+        cover_seconds=cover_seconds,
         captions=clean_captions(captions, settings.community_video_max_seconds),
     )
+    _ensure_creator_name(db, user)
     try:
         create_post(db, user, topic_id=topic_id, body=body, external_video_url="",
                     video=video, reel=reel)

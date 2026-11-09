@@ -16,7 +16,7 @@
     <button type="button" class="reels-data" data-data-saver aria-pressed="false" hidden>{{ icon('filter', 16) }} <span>Data saver off</span></button>
   </div>
   <nav class="reels-categories" aria-label="Reels topics">
-    <a href="/reels?view={{ view }}" {% if not category %}aria-current="page"{% endif %}>For you</a>
+    <a href="/reels?view={{ view }}" {% if not category %}aria-current="page"{% endif %}>All topics</a>
     {% for key, label in categories.items() %}<a href="/reels?view={{ view }}&amp;category={{ key }}" {% if category == key %}aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
   </nav>
   <div class="reel-notice" data-reel-notice role="status" hidden tabindex="-1"></div>
@@ -31,7 +31,7 @@
             <video controls loop playsinline muted preload="none" poster="/community/media/{{ media.reel_poster.id }}"
               src="/community/media/{{ media.reel_low.id }}" data-main="/community/media/{{ media.video.id }}"
               data-low="/community/media/{{ media.reel_low.id }}" aria-label="{{ post.body|truncate(120) }}">
-              {% if reel.captions %}<track kind="captions" src="/reels/{{ post.id }}/captions" srclang="en" label="Creator captions" default>{% endif %}
+              {% if reel.captions %}<track kind="captions" src="/reels/{{ post.id }}/captions" srclang="und" label="Creator captions" default>{% endif %}
               Your browser cannot play this video. <a href="/community/media/{{ media.reel_low.id }}">Open video</a>.
             </video>
             <div class="reel-top"><span>{{ categories[reel.category] }}</span><span>{{ 'Nigeria' if reel.audience == 'nigeria' else 'Around the world' }}</span></div>
@@ -53,7 +53,7 @@
             <a href="/posts/{{ post.id }}#replies" data-comments="/reels/{{ post.id }}/comments">{{ icon('chat', 22) }}<span><span data-reply-count>{{ summaries[post.id].replies }}</span> comments</span></a>
             {% if user %}<form action="/reels/{{ post.id }}/save" method="post" data-reel-action="save"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="saved" value="{{ 'no' if post.id in saved_ids else 'yes' }}"><button type="submit" aria-pressed="{{ 'true' if post.id in saved_ids else 'false' }}">{{ icon('bookmark', 22) }}<span data-save-label>{{ 'Saved' if post.id in saved_ids else 'Save' }}</span></button></form>{% else %}<a href="/auth/login">{{ icon('bookmark', 22) }}<span>Save</span></a>{% endif %}
             <a href="/reels/{{ post.id }}" data-share>{{ icon('share', 22) }}<span>Share</span></a>
-            <a href="/posts/{{ post.id }}#report" {% if user %}data-report="{{ post.id }}"{% endif %}>{{ icon('flag', 21) }}<span>Report</span></a>
+            {% if user and user.id == post.author_id %}<a href="/reels/{{ post.id }}/status">{{ icon('settings', 21) }}<span>Manage</span></a>{% else %}<a href="/posts/{{ post.id }}#report" {% if user %}data-report="{{ post.id }}"{% endif %}>{{ icon('flag', 21) }}<span>Report</span></a>{% endif %}
           </div>
         </article>
         {% endfor %}

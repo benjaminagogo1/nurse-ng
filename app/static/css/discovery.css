@@ -1,0 +1,61 @@
+/* Directory and onboarding share the app's theme and native form controls. */
+.discovery-page { max-width: 1180px; margin: 0 auto; }
+.discovery-heading, .discovery-results, .discovery-next { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.discovery-heading { margin-bottom: 24px; flex-wrap: wrap; }
+.discovery-heading h1, .welcome-page h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); line-height: 1.15; letter-spacing: -.03em; margin: 8px 0 12px; }
+.directory-search { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 16px; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; }
+.directory-search > div { min-width: 0; }
+.directory-search label, .welcome-location > label { display: block; font-weight: 600; margin-bottom: 8px; }
+.directory-search input, .directory-search select, .welcome-location input { width: 100%; min-width: 0; min-height: 46px; }
+.directory-actions { grid-column: 1 / -1; display: flex; align-items: center; gap: 20px; }
+.discovery-privacy { display: flex; align-items: flex-start; gap: 8px; color: var(--muted); font-size: .88rem; margin: 16px 0 28px; }
+.discovery-privacy .icon { flex-shrink: 0; margin-top: 2px; }
+.discovery-results { margin: 22px 0 16px; flex-wrap: wrap; }
+.discovery-results h2 { font-size: 1.3rem; margin: 0; }
+.discovery-results > span { color: var(--muted); }
+.people-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.person-card { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; padding: 24px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); overflow-wrap: anywhere; }
+.person-avatar { width: 58px; height: 58px; font-size: 1.5rem; border-radius: 18px; }
+.person-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+.person-card h2 { font-size: 1.15rem; margin: 16px 0 8px; }
+.person-card p { margin: 0 0 12px; }
+.person-card .person-location { display: flex; gap: 6px; align-items: center; color: var(--muted); font-size: .9rem; }
+.interest-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 16px; }
+.interest-tags span { padding: 5px 9px; border-radius: 8px; background: var(--accent-surface); color: var(--accent-text); font-size: .8rem; font-weight: 600; }
+.person-card .person-reason { font-size: .82rem; color: var(--muted); }
+.person-action { margin-top: auto; }
+.discovery-empty { grid-column: 1 / -1; border: 1px dashed var(--line-strong); border-radius: 16px; padding: 36px 20px; }
+.directory-pagination { display: flex; gap: 18px; justify-content: center; align-items: center; margin: 28px 0; flex-wrap: wrap; }
+.welcome-page { max-width: 876px; margin: 0 auto; padding: 36px 38px 52px; }
+.welcome-discover { padding: 36px 38px 52px; }
+.welcome-form { margin-top: 28px; padding: 28px; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; }
+.interest-picker { border: 0; padding: 0; margin: 0 0 24px; min-width: 0; }
+.interest-picker legend { font-size: 1.2rem; font-weight: 700; }
+.interest-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+.interest-option { display: flex; align-items: center; gap: 9px; padding: 12px; border: 1px solid var(--line-strong); border-radius: 12px; cursor: pointer; min-height: 52px; font-size: .9rem; background: var(--surface); }
+.interest-option input[type='checkbox'] { width: 17px; height: 17px; min-height: 0; margin: 0; flex: 0 0 auto; accent-color: var(--action-bg); }
+.interest-option:has(input:checked) { background: var(--accent-surface); border-color: var(--accent-text); color: var(--accent-text); }
+.interest-option:focus-within { outline: 2px solid var(--focus); outline-offset: 3px; }
+.welcome-location { margin-top: 22px; }
+.welcome-privacy { display: flex; gap: 16px; border-radius: 14px; background: var(--soft-surface); padding: 22px; margin: 24px 0; }
+.welcome-privacy > .icon { flex-shrink: 0; color: var(--accent-text); }
+.welcome-privacy h2 { font-size: 1.1rem; margin: 0 0 8px; }
+.welcome-privacy p { font-size: .93rem; margin: 0 0 10px; }
+.welcome-skip { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 18px 0; }
+.welcome-skip span { font-size: .88rem; color: var(--muted); }
+.discovery-opportunities { margin: 32px 0; }
+.discovery-next { padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); flex-wrap: wrap; }
+.discovery-next h2 { font-size: 1.2rem; margin: 0 0 8px; }
+.discovery-next p { max-width: 600px; }
+.dashboard-discovery { margin: 28px 0; }
+.dashboard-onboarding { margin-bottom: 24px; background: var(--accent-surface); }
+@media (max-width: 1100px) { .directory-search { grid-template-columns: repeat(2, minmax(0, 1fr)); } .people-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) {
+  .people-grid, .directory-search { grid-template-columns: minmax(0, 1fr); }
+  .directory-search, .welcome-form, .person-card, .discovery-next { padding: 18px; }
+  .welcome-page, .welcome-discover { padding: 27px 18px 35px; }
+  .interest-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .interest-option { padding: 10px 8px; font-size: .85rem; }
+  .welcome-privacy { padding: 16px; gap: 10px; }
+  .welcome-form > .btn, .discovery-next > .btn { width: 100%; white-space: normal; }
+}

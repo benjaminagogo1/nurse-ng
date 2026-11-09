@@ -69,7 +69,8 @@
   </div>
 
   <div class="pf-section" id="skills">
-    <h2>Skills</h2>
+    <h2>Skills and interests</h2>
+    {% if profile.interests %}<h3>Professional interests</h3><div class="interest-tags">{% for interest in profile.interests.split(', ') %}<span>{{ interest }}</span>{% endfor %}</div>{% endif %}
     {% if profile.skills %}
     <div class="chips">
       {% for skill in profile.skills.split(',') if skill.strip() %}

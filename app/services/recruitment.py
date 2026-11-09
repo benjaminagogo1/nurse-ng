@@ -30,6 +30,8 @@ CATEGORIES = {
     "government_portal": "Government recruitment portal",
     "youth_programme": "Youth fellowship or graduate programme",
     "digital_health": "Digital health organisation",
+    "primary_healthcare": "Primary healthcare agency",
+    "public_health": "Public health agency",
     "unconfirmed": "Organisation type not confirmed",
 }
 METHODS = {
@@ -152,6 +154,11 @@ def register_candidate(
     """Write pending candidates only, in the caller's transaction."""
     source_url = checked_url(source_url)
     key = url_key(source_url)
+    if discovered_via == "search":
+        known = db.scalar(select(RecruitmentSource).where(RecruitmentSource.url_key == key))
+        if known is not None:
+            # Search must not duplicate stronger identity evidence or bypass a prior rejection.
+            return known, False
     if organization is None:
         organization = db.scalar(
             select(RecruitmentOrganization).where(
@@ -250,10 +257,14 @@ def approval_current(source: RecruitmentSource, *, at: datetime | None = None) -
 
 def collection_authorized(source: RecruitmentSource, *, at: datetime | None = None) -> bool:
     """Shared gate for subsequent vacancy adapters; page discovery does not use this permission."""
+    from app.services.factual_opportunities import index_authorized
+
     return bool(
         approval_current(source, at=at)
-        and source.permission_status == "permitted"
-        and reuse_authorized(source)
+        and (
+            (source.permission_status == "permitted" and reuse_authorized(source))
+            or index_authorized(source)
+        )
         and source.collection_method in {"api", "rss", "html"}
         and source.automation_status == "monitoring"
     )
@@ -378,9 +389,14 @@ def review_source(
         if source.verification_status in {"rejected", "revoked"}:
             raise RecruitmentError("Reopen the source before requesting automatic assessment.")
         values.update(
-            approval_mode="", activation_review={}, verification_status="pending",
-            permission_status="unknown", approval_expires_at=None, collection_adapter="",
-            automation_status="monitoring", next_check_at=now(),
+            approval_mode="",
+            activation_review={},
+            verification_status="pending",
+            permission_status="unknown",
+            approval_expires_at=None,
+            collection_adapter="",
+            automation_status="monitoring",
+            next_check_at=now(),
         )
     else:
         raise RecruitmentError("Choose a supported review action.")
@@ -484,8 +500,12 @@ def _add_schedule(
 ) -> DiscoverySchedule:
     from app.core.config import settings
 
-    if provider not in {"ror", "brave"}:
+    if provider not in {"ror", "brave", "search"}:
         raise RecruitmentError("Choose a supported discovery provider.")
+    from app.services.recruitment_search import search_available
+
+    if provider == "search" and not search_available():
+        raise RecruitmentError("Configure at least one SearXNG instance. Brave is optional.")
     if provider == "brave" and not (
         settings.recruitment_search_key and settings.recruitment_search_permission_reference
     ):
@@ -497,7 +517,7 @@ def _add_schedule(
     name = clean(name, "Schedule name", 120)
     if db.scalar(select(DiscoverySchedule.id).where(DiscoverySchedule.name == name)):
         raise RecruitmentError("A discovery schedule already has that name.")
-    query = clean(query, "Search query", 300, required=provider == "brave")
+    query = clean(query, "Search query", 300, required=provider in {"brave", "search"})
     schedule = DiscoverySchedule(
         name=name,
         provider=provider,
@@ -543,7 +563,7 @@ def list_sources(
 
 def initialize_discovery(db: Session) -> dict[str, int]:
     """Set up Nigerian-first discovery; starter sites remain unapproved candidates."""
-    schedules = 0
+    schedules = ensure_search_schedule(db)
     for name, code, interval in [
         ("Nigerian healthcare institutions", "NG", 24),
         ("Worldwide healthcare institutions", "", 168),
@@ -555,8 +575,11 @@ def initialize_discovery(db: Session) -> dict[str, int]:
             )
             schedules += 1
         elif (
-            code == "" and existing.provider == "ror" and existing.country_code == ""
-            and existing.query == "" and existing.interval_hours == 24
+            code == ""
+            and existing.provider == "ror"
+            and existing.country_code == ""
+            and existing.query == ""
+            and existing.interval_hours == 24
         ):
             # Upgrade the original built-in default, retaining pause state and cursor.
             existing.interval_hours = interval
@@ -577,22 +600,59 @@ def initialize_discovery(db: Session) -> dict[str, int]:
     sources = int(created)
     for identity, name, category, website, url, reference in [
         (
-            "ng-priority:health-ministry", "Federal Ministry of Health and Social Welfare",
-            "ministry", "https://health.gov.ng/", "https://health.gov.ng/",
+            "ng-priority:health-ministry",
+            "Federal Ministry of Health and Social Welfare",
+            "ministry",
+            "https://health.gov.ng/",
+            "https://health.gov.ng/",
             "https://health.gov.ng/",
         ),
         (
-            "ng-priority:health-fellows", "National Health Fellows Programme", "youth_programme",
-            "https://healthfellows.ng/", "https://healthfellows.ng/",
+            "ng-priority:health-fellows",
+            "National Health Fellows Programme",
+            "youth_programme",
+            "https://healthfellows.ng/",
+            "https://healthfellows.ng/",
             "https://health.gov.ng/",
         ),
         (
-            "ng-priority:jubilee-fellows", "Nigeria Jubilee Fellows Programme", "youth_programme",
-            "https://njfp.ng/", "https://njfp.ng/", "https://njfp.ng/",
+            "ng-priority:jubilee-fellows",
+            "Nigeria Jubilee Fellows Programme",
+            "youth_programme",
+            "https://njfp.ng/",
+            "https://njfp.ng/",
+            "https://njfp.ng/",
         ),
         (
-            "ng-priority:lagoon", "Iwosan Lagoon Hospitals", "private_hospital",
-            "https://www.lagoonhospitals.com/", "https://www.lagoonhospitals.com/careers/",
+            "ng-priority:nphcda",
+            "National Primary Health Care Development Agency",
+            "primary_healthcare",
+            "https://nphcda.gov.ng/",
+            "https://nphcda.gov.ng/",
+            "https://nphcda.gov.ng/",
+        ),
+        (
+            "ng-priority:ncdc",
+            "Nigeria Centre for Disease Control and Prevention",
+            "public_health",
+            "https://ncdc.gov.ng/",
+            "https://ncdc.gov.ng/",
+            "https://ncdc.gov.ng/",
+        ),
+        (
+            "ng-priority:lagos-health",
+            "Lagos State Ministry of Health",
+            "ministry",
+            "https://health.lagosstate.gov.ng/",
+            "https://health.lagosstate.gov.ng/",
+            "https://lagosstate.gov.ng/",
+        ),
+        (
+            "ng-priority:lagoon",
+            "Iwosan Lagoon Hospitals",
+            "private_hospital",
+            "https://www.lagoonhospitals.com/",
+            "https://www.lagoonhospitals.com/careers/",
             "https://www.lagoonhospitals.com/",
         ),
     ]:
@@ -601,16 +661,45 @@ def initialize_discovery(db: Session) -> dict[str, int]:
         if db.scalar(select(RecruitmentSource.id).where(RecruitmentSource.url_key == url_key(url))):
             continue
         _, created = register_candidate(
-            db, identity_key=identity, name=name, category=category, country_code="NG",
-            location="", website_url=website, source_url=url, discovered_via="manual",
+            db,
+            identity_key=identity,
+            name=name,
+            category=category,
+            country_code="NG",
+            location="",
+            website_url=website,
+            source_url=url,
+            discovered_via="manual",
             reference=reference,
             source_type="recruitment_page" if "/careers/" in url else "institution_site",
-            evidence={"note": "Nigerian opportunity starter site, checked 2026-11-08. "
-                      "Not a current vacancy or approval; normal source checks still apply."},
+            evidence={
+                "note": "Nigerian opportunity discovery starting point. "
+                "Not a current vacancy or approval; normal source checks still apply."
+            },
         )
         sources += int(created)
     db.commit()
     return {"schedules": schedules, "sources": sources}
+
+
+def ensure_search_schedule(db: Session) -> int:
+    """A configured provider must actually have a queue schedule; preserve staff pauses."""
+    from app.services.recruitment_search import search_available
+
+    if not search_available():
+        return 0
+    name = "Nigerian opportunities across the web"
+    if db.scalar(select(DiscoverySchedule.id).where(DiscoverySchedule.name == name)):
+        return 0
+    _add_schedule(
+        db,
+        name=name,
+        provider="search",
+        country_code="NG",
+        query="{category} {region} {country} applications careers opportunities",
+        interval_hours=6,
+    )
+    return 1
 
 
 def request_inspection(db: Session, actor: User, source: RecruitmentSource) -> None:

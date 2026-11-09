@@ -20,6 +20,7 @@ from app.core.config import settings
 from app.db.session import get_db
 from app.models.profile import NurseProfile, ProfessionalStatus, ProfileStatus, Visibility
 from app.models.user import User
+from app.services.member_interests import INTEREST_OPTIONS
 from app.services.profiles import (
     PROFESSIONAL_STATUS_LABELS,
     SHAREABLE_FIELDS,
@@ -67,6 +68,7 @@ def _form_values(profile: NurseProfile | None, **overrides: str) -> dict[str, st
             else ""
         ),
         "skills": profile.skills if profile else "",
+        "interests": profile.interests if profile else "",
     }
     values.update(overrides)
     return values
@@ -191,6 +193,7 @@ def edit_profile_form(
             "profile": profile,
             "values": _form_values(profile, **prefill),
             "status_options": list(PROFESSIONAL_STATUS_LABELS.items()),
+            "interest_options": INTEREST_OPTIONS,
         },
     )
 
@@ -206,6 +209,7 @@ def save_profile_form(
     qualification: str = Form(""),
     years_experience: str = Form(""),
     skills: str = Form(""),
+    interests: list[str] = Form([]),
     user: User = Depends(require_user),
     _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
@@ -222,6 +226,7 @@ def save_profile_form(
             qualification=qualification,
             years_experience=years_experience,
             skills=skills,
+            interests=", ".join(interests),
         )
     except ProfileError as exc:
         profile = get_profile_for_user(db, user.id)
@@ -242,8 +247,10 @@ def save_profile_form(
                     qualification=qualification,
                     years_experience=years_experience,
                     skills=skills,
+                    interests=", ".join(interests),
                 ),
                 "status_options": list(PROFESSIONAL_STATUS_LABELS.items()),
+                "interest_options": INTEREST_OPTIONS,
                 "error": str(exc),
             },
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -419,6 +426,7 @@ def submit_verification(
         )
 
     return RedirectResponse("/profile/verification", status_code=status.HTTP_303_SEE_OTHER)
+
 
 
 @router.post("/activate")

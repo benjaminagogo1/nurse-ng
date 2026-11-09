@@ -34,6 +34,7 @@ from app.services.reels import (
     create_reel,
     list_reels,
     public_reel,
+    reel_creator_name,
     reel_query,
     remove_reel,
     retry_reel,
@@ -115,6 +116,7 @@ def _form(request, db, user, values, error="", status_code=200):
         "title": "Create a reel", "user": user, "values": values, "topics": list_topics(db),
         "categories": CATEGORIES, "max_bytes": settings.community_video_max_bytes,
         "max_seconds": settings.community_video_max_seconds,
+        "creator_name": reel_creator_name(user),
         "feedback": message("Check your reel", error, tone="error") if error else None,
     }, status_code=status_code)
 
@@ -123,15 +125,14 @@ def _form(request, db, user, values, error="", status_code=200):
 def upload(
     request: Request, topic_id: str = Form(""), body: str = Form(""),
     category: str = Form("opportunities"), audience: str = Form("nigeria"),
-    community_name: str = Form(""), upload_key: str = Form(""),
-    cover_seconds: int = Form(0), job_link: str = Form(""), consent: str = Form(""),
+    upload_key: str = Form(""),
+    cover_seconds: int = Form(0), consent: str = Form(""),
     video: UploadFile | None = File(None), captions: UploadFile | None = File(None),
     user: User = Depends(require_user), _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
 ):
     values = dict(topic_id=topic_id, body=body, category=category, audience=audience,
-                  community_name=community_name, upload_key=upload_key,
-                  cover_seconds=cover_seconds, job_link=job_link)
+                  upload_key=upload_key, cover_seconds=cover_seconds)
     wants_json = request.headers.get("x-reel-upload") == "1"
     existing = upload_by_key(db, user, upload_key)
     if existing:
@@ -151,13 +152,11 @@ def upload(
             topic = uuid.UUID(topic_id)
         except ValueError:
             raise CommunityError("Choose a community topic.") from None
-        if not user.community_name:
-            set_community_name(db, user, community_name)
         caption_data = captions.file.read(MAX_CAPTIONS_BYTES + 1) if captions else b""
         reel = create_reel(
             db, user, topic_id=topic, body=body, category=category, audience=audience,
             upload_key=upload_key, cover_seconds=cover_seconds, captions=caption_data,
-            job_link=job_link, video=CommunityUpload(video.file, video.filename),
+            video=CommunityUpload(video.file, video.filename),
         )
     except CommunityError as exc:
         error = str(exc)
@@ -189,7 +188,8 @@ def processing_status(post_id: str, request: Request, user: User = Depends(requi
                       db: Session = Depends(get_db)):
     reel = _owned(db, post_id, user)
     if request.headers.get("accept") == "application/json":
-        return JSONResponse({"state": reel.state, "error": reel.error},
+        return JSONResponse({"state": reel.state, "error": reel.error,
+                             "can_retry": reel.state == "failed" and reel.attempts < 3},
                             headers={"Cache-Control": "no-store"})
     return render(request, "reels/status.html", {"title": "Your reel", "user": user, "reel": reel})
 
@@ -260,8 +260,13 @@ def follow(post_id: str, request: Request, following: Literal["yes", "no"] = For
         db.commit()
     except IntegrityError:
         db.rollback()
-        if following != "yes":
-            raise
+        duplicate = db.scalar(select(Follow).where(
+            Follow.follower_user_id == user.id, Follow.followed_user_id == reel.post.author_id,
+        ))
+        if following != "yes" or duplicate is None:
+            raise HTTPException(
+                409, detail="The creator could not be followed. Please retry."
+            ) from None
     return _action_response(request, post_id,
                             "You are now following this creator." if following == "yes" else
                             "You have unfollowed this creator.", following=following == "yes")

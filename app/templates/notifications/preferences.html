@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% from "_feedback.html" import feedback_slot %}
+{% block content %}
+<section class="form-page notification-preferences">
+  <a class="text-link" href="/notifications">← Notifications</a>
+  <p class="eyebrow">Make it yours</p><h1>Notification preferences</h1><p class="lede">Stay informed on your terms.</p>
+  {{ feedback_slot(feedback|default(none)) }}
+  <p>Choose which updates appear in your notification inbox and which arrive by email. Email alerts are off until you choose them.</p>
+  {% if not user.email_verified_at %}<p class="notice-verification">Email alerts need a verified address. <a class="text-link" href="/settings">Verify your email in settings</a>.</p>{% endif %}
+  <p><a class="text-link" href="/jobs/preferences">Choose your opportunity interests</a> and <a class="text-link" href="/jobs/saved">manage saved-job reminders</a>.</p>
+  <form method="post" action="/notifications/preferences" data-feedback-form data-pending-label="Saving preferences…">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    {% for category, labels in categories.items() %}
+    <fieldset class="notice-choice"><legend>{{ labels[0] }}</legend><p>{{ labels[1] }}</p><div class="notice-channels">
+      <label class="notice-switch"><input type="checkbox" role="switch" name="{{ category }}_in_app" {% if choices[category].in_app %}checked{% endif %}><span>In-app<span class="sr-only"> {{ labels[0] }}</span></span></label>
+      <label class="notice-switch"><input type="checkbox" role="switch" name="{{ category }}_email" {% if choices[category].email %}checked{% endif %}><span>Email<span class="sr-only"> {{ labels[0] }}</span></span></label>
+    </div></fieldset>
+    {% endfor %}
+    <p class="field-hint">Changes apply to new activity. Turning email off also cancels alerts waiting to be sent. Account security emails are managed separately.</p>
+    <button type="submit" class="btn btn-primary">Save preferences {{ icon('check', 17) }}</button>
+  </form>
+</section>
+{% endblock %}

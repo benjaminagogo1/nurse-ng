@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block content %}
+<section class="analytics-page" data-analytics-page>
+  <header class="analytics-heading">
+    <div><p class="eyebrow">User insights <span class="analytics-staff-label">Staff workspace</span></p><h1>User overview<span>.</span></h1><p>Monitor your users, daily participation and recent activity.</p></div>
+    <div class="analytics-refresh"><span class="analytics-live" data-analytics-live><i aria-hidden="true"></i><span data-live-label>Updated on page load</span></span><a class="btn btn-secondary" data-analytics-fallback href="{{ request.url }}">{{ icon('clock', 17) }} Refresh view</a><button type="button" class="btn btn-secondary" data-analytics-refresh hidden>{{ icon('clock', 17) }} <span>Refresh now</span></button><p class="sr-only" role="status" data-refresh-status></p></div>
+  </header>
+
+  <form action="/staff/users" method="get" class="analytics-filters" aria-label="Filter user analytics">
+    <input type="hidden" name="days" value="{{ days }}">
+    <div class="analytics-scope"><label for="analytics-type">Account type</label><select id="analytics-type" name="account_type">{% for value, label in account_types.items() %}<option value="{{ value }}" {% if value == account_type %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="analytics-search"><label for="analytics-query">Find a user</label><div>{{ icon('search', 18) }}<input id="analytics-query" type="search" name="q" value="{{ query }}" maxlength="120" placeholder="Search name or user ID"></div></div>
+    <div class="analytics-activity"><label for="analytics-activity">User activity</label><select id="analytics-activity" name="activity">{% for value, label in activity_filters.items() %}<option value="{{ value }}" {% if value == activity %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <label class="analytics-staff-choice"><input type="checkbox" name="include_staff" value="1" {% if include_staff %}checked{% endif %}> Include staff</label>
+    <button type="submit" class="btn btn-primary">Apply filters {{ icon('arrow', 16) }}</button>
+  </form>
+
+  <div data-analytics-content>{% include "staff/_activity_dashboard.html" %}</div>
+  <details class="analytics-method"><summary>How activity is counted {{ icon('chevron-down', 16) }}</summary><div><p>Each signed-in account counts once per Nigerian calendar day (WAT, UTC+1), across visits and devices. The same account counts once in each 7- or 30-day total.</p><p>Page visits and recent interaction on a visible page record activity. Automatic updates, hidden tabs and idle pages do not keep someone active. “Last 5 minutes” is a recent-use estimate, not a guarantee that someone is online.</p><p>Staff accounts are excluded unless you select Include staff. Account type controls the summary cards and chart; name and activity filters narrow the user list. Nurse account type is self-selected and does not establish professional verification.</p><p>History begins with recorded use after this feature was enabled. The first day may be partial. Deleted accounts and their activity are removed from these counts. Activity is visible to staff; it is not shown on public profiles.</p></div></details>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', path='/js/analytics.js') }}" defer></script>{% endblock %}

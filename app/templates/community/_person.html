@@ -1,0 +1,12 @@
+{% from "_avatar.html" import avatar with context %}
+<article class="profile-card person-card">
+  {{ avatar(card.profile.user, card.fields.get('display_name'), 'avatar person-avatar') }}
+  <h2><a href="/p/{{ card.profile.public_id }}">{{ card.fields.get('display_name', 'Nurse profile') }}</a></h2>
+  {% if card.fields.get('headline') %}<p>{{ card.fields.headline }}</p>{% endif %}
+  {% if card.fields.get('professional_status') %}<p class="field-hint">{{ card.fields.professional_status }}</p>{% endif %}
+  {% if card.fields.get('location') %}<p class="person-location">{{ icon('pin', 15) }} {{ card.fields.location }}</p>{% endif %}
+  {% if card.fields.get('interests') %}<div class="interest-tags">{% for interest in card.fields.interests.split(', ') %}<span>{{ interest }}</span>{% endfor %}</div>{% endif %}
+  {% if card.profile.document_reviewed_at %}<span class="verification-badge">Document reviewed</span><p class="field-hint">Reviewed name: {{ card.profile.document_reviewed_name or card.fields.get('display_name') }}</p>{% endif %}
+  {% if card.reason %}<p class="person-reason">{{ card.reason }}</p>{% endif %}
+  <a class="btn btn-secondary btn-sm person-action" href="/p/{{ card.profile.public_id }}">View profile {{ icon('arrow', 15) }}</a>
+</article>

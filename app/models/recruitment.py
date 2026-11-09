@@ -103,7 +103,7 @@ class DiscoverySchedule(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     next_run_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
 
     __table_args__ = (
-        CheckConstraint("provider IN ('ror', 'brave')", name="ck_discovery_provider"),
+        CheckConstraint("provider IN ('ror', 'brave', 'search')", name="ck_discovery_provider"),
         CheckConstraint(
             "interval_hours >= 1 AND interval_hours <= 720", name="ck_discovery_interval"
         ),
@@ -138,7 +138,9 @@ class DiscoveryTask(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     message: Mapped[str] = mapped_column(String(500), default="")
 
     __table_args__ = (
-        CheckConstraint("kind IN ('ror', 'brave', 'inspect')", name="ck_discovery_task_kind"),
+        CheckConstraint(
+            "kind IN ('ror', 'brave', 'search', 'inspect')", name="ck_discovery_task_kind"
+        ),
         CheckConstraint(
             "status IN ('queued', 'running', 'completed', 'failed', 'cancelled')",
             name="ck_discovery_task_status",

@@ -1,31 +1,26 @@
 {% extends "base.html" %}
-{% from "_avatar.html" import avatar with context %}
-
-{% block title %}Find nurses — Nurse.ng{% endblock %}
-
+{% from "_icons.html" import icon %}
+{% block title %}Find people — Nurse.ng{% endblock %}
 {% block content %}
-<section class="community-page">
-  <p class="eyebrow">Community</p>
-  <h1>Find nurses</h1>
-  <p class="lede">Only profiles their owners explicitly made public appear here.</p>
-
-  <div class="profile-card-grid">
-    {% for card in cards %}
-      <article class="profile-card">
-        {{ avatar(card.profile.user, card.fields.get('display_name')) }}
-        <h2><a href="/p/{{ card.profile.public_id }}">{{ card.fields.get('display_name', 'Nurse profile') }}</a></h2>
-        {% if card.fields.get('headline') %}<p>{{ card.fields.get('headline') }}</p>{% endif %}
-        {% if card.fields.get('location') %}<p class="field-hint">{{ card.fields.get('location') }}</p>{% endif %}
-        {% if card.profile.document_reviewed_at %}
-          <span class="verification-badge">Document reviewed</span>
-          <p class="field-hint">
-            Reviewed name: {{ card.profile.document_reviewed_name or card.profile.display_name }}
-          </p>
-        {% endif %}
-      </article>
-    {% else %}
-      <div class="empty-state"><p>No member has published a profile yet.</p></div>
-    {% endfor %}
+<section class="community-page discovery-page">
+  <div class="discovery-heading"><div><p class="eyebrow">Grow your network</p><h1>Find your people</h1><p class="lede">Meet nurses with shared interests, experience and ambition.</p></div>{% if user %}<a class="btn btn-secondary" href="/welcome/discover">{{ icon('sparkle', 18) }} Suggestions for you</a>{% endif %}</div>
+  <form method="get" action="/nurses" role="search" aria-label="Find people" class="directory-search">
+    <div><label for="people-query">Search people</label><input id="people-query" name="q" type="search" value="{{ q }}" maxlength="120" placeholder="Name, headline or skill"></div>
+    <div><label for="people-location">Location</label><input id="people-location" name="location" value="{{ location }}" maxlength="120" placeholder="e.g. Lagos or Abuja"></div>
+    <div><label for="people-interest">Professional interest</label><select id="people-interest" name="interest"><option value="">All interests</option>{% for option in interest_options %}<option value="{{ option }}"{% if interest == option %} selected{% endif %}>{{ option }}</option>{% endfor %}</select></div>
+    <div><label for="people-status">Career stage</label><select id="people-status" name="professional_status"><option value="">All career stages</option>{% for value, label in status_options %}<option value="{{ value }}"{% if professional_status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="directory-actions"><button type="submit" class="btn btn-primary">{{ icon('search', 17) }} Find people</button>{% if has_filters %}<a href="/nurses">Clear filters</a>{% endif %}</div>
+  </form>
+  <p class="discovery-privacy">{{ icon('shield', 16) }} Only published profiles and public details appear in searches. Private photos stay private.</p>
+  <div class="discovery-results"><h2>{{ total }} {{ 'person' if total == 1 else 'people' }}{% if has_filters %} found{% endif %}</h2>{% if page_count > 1 %}<span>Page {{ directory_page }} of {{ page_count }}</span>{% endif %}</div>
+  <div class="profile-card-grid people-grid">
+    {% for card in cards %}{% include "community/_person.html" %}{% else %}
+    <div class="empty-state discovery-empty">{{ icon('users', 32) }}
+      {% if has_filters %}<h2>No public profiles match yet</h2><p>Try fewer filters or a nearby city. Members choose which details they share.</p><a class="btn btn-secondary" href="/nurses">Browse all people</a>
+      {% else %}<h2>Your community is growing</h2><p>No member has published a profile yet. You can explore opportunities while people join.</p><a class="btn btn-primary" href="/jobs">Explore opportunities</a>{% endif %}
+    </div>{% endfor %}
   </div>
+  {% if page_count > 1 %}<nav class="directory-pagination" aria-label="People pages">{% if directory_page > 1 %}<a class="btn btn-secondary" rel="prev" href="{{ previous_url }}">Previous</a>{% endif %}<span>Page {{ directory_page }} of {{ page_count }}</span>{% if directory_page < page_count %}<a class="btn btn-secondary" rel="next" href="{{ next_url }}">Next</a>{% endif %}</nav>{% endif %}
+  {% if user %}<p class="field-hint">Want to appear here? <a href="/profile">Review your profile and sharing choices</a>. Browsing never publishes your profile.</p>{% endif %}
 </section>
 {% endblock %}

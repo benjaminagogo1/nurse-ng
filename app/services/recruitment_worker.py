@@ -15,6 +15,7 @@ from app.models.recruitment import (
     DiscoveryTask,
     RecruitmentOrganization,
     RecruitmentSource,
+    SourceEvent,
 )
 from app.services.recruitment import checked_url, event, now, register_candidate, utc
 from app.services.recruitment_activation import POLICY_VERSION, apply_assessment, context, eligible
@@ -26,6 +27,20 @@ TASK_SECONDS = 45
 LEASE_SECONDS = 90
 MAX_ATTEMPTS = 3
 NETWORK_COOLDOWN_SECONDS = 60
+
+
+def _nigerian_source():
+    """Search targeting affects queue priority, never verified country or publication."""
+    return or_(
+        RecruitmentOrganization.country_code == "NG",
+        select(SourceEvent.id)
+        .where(
+            SourceEvent.source_id == RecruitmentSource.id,
+            SourceEvent.kind.in_(["discovered", "discovery_target"]),
+            SourceEvent.details["evidence"]["target_country"].as_string() == "NG",
+        )
+        .exists(),
+    )
 
 
 def enqueue_due(db: Session) -> int:
@@ -46,32 +61,53 @@ def enqueue_due(db: Session) -> int:
     # the queue ahead of due Nigerian source checks. Ignore already queued items.
     due = union_all(
         select(
-            DiscoverySchedule.id.label("id"), literal("schedule").label("kind"),
+            DiscoverySchedule.id.label("id"),
+            literal("schedule").label("kind"),
             DiscoverySchedule.country_code.label("country"),
             DiscoverySchedule.next_run_at.label("due_at"),
         ).where(
-            DiscoverySchedule.enabled.is_(True), DiscoverySchedule.next_run_at <= timestamp,
-            ~select(DiscoveryTask.id).where(
+            DiscoverySchedule.enabled.is_(True),
+            DiscoverySchedule.next_run_at <= timestamp,
+            ~select(DiscoveryTask.id)
+            .where(
                 DiscoveryTask.schedule_id == DiscoverySchedule.id,
                 DiscoveryTask.active_key.is_not(None),
-            ).exists(),
+            )
+            .exists(),
         ),
         select(
-            RecruitmentSource.id, literal("source"), RecruitmentOrganization.country_code,
+            RecruitmentSource.id,
+            literal("source"),
+            case((_nigerian_source(), "NG"), else_=RecruitmentOrganization.country_code),
             RecruitmentSource.next_check_at,
-        ).join(RecruitmentOrganization).where(
+        )
+        .join(RecruitmentOrganization)
+        .where(
             RecruitmentSource.next_check_at <= timestamp,
             RecruitmentSource.automation_status == "monitoring",
             RecruitmentSource.verification_status.not_in(["rejected", "revoked"]),
-            ~select(DiscoveryTask.id).where(
+            ~select(DiscoveryTask.id)
+            .where(
                 DiscoveryTask.source_id == RecruitmentSource.id,
                 DiscoveryTask.active_key.is_not(None),
-            ).exists(),
+            )
+            .exists(),
         ),
     ).subquery()
-    groups = [deque(db.execute(select(due).where(condition).order_by(
-        due.c.due_at, due.c.id,
-    ).limit(room))) for condition in (due.c.country == "NG", due.c.country != "NG")]
+    groups = [
+        deque(
+            db.execute(
+                select(due)
+                .where(condition)
+                .order_by(
+                    due.c.due_at,
+                    due.c.id,
+                )
+                .limit(room)
+            )
+        )
+        for condition in (due.c.country == "NG", due.c.country != "NG")
+    ]
     admitted = db.scalar(select(func.count()).select_from(DiscoveryTask)) or 0
     candidates = []
     for slot in range(room):
@@ -205,7 +241,11 @@ def claim_next(db: Session) -> DiscoveryTask | None:
                 outcome="lease_expired",
                 message="A worker stopped before completing this check.",
             )
+            .execution_options(synchronize_session=False)
         )
+        # SQLite returns naive timestamps. Let SQL compare lease times and reload
+        # the object rather than evaluating aware-vs-naive datetime predicates in Python.
+        db.expire(expired)
     db.commit()
     pause_until = db.scalar(select(func.max(DiscoveryTask.network_pause_until)))
     if pause_until and utc(pause_until) > timestamp:
@@ -224,25 +264,44 @@ def claim_next(db: Session) -> DiscoveryTask | None:
     if db.scalar(select(DiscoveryTask.id).where(DiscoveryTask.running_key == "network")):
         return None
     local_task = or_(
-        select(DiscoverySchedule.id).where(
+        select(DiscoverySchedule.id)
+        .where(
             DiscoverySchedule.id == DiscoveryTask.schedule_id,
             DiscoverySchedule.country_code == "NG",
-        ).exists(),
-        select(RecruitmentSource.id).join(RecruitmentOrganization).where(
+        )
+        .exists(),
+        select(RecruitmentSource.id)
+        .join(RecruitmentOrganization)
+        .where(
             RecruitmentSource.id == DiscoveryTask.source_id,
-            RecruitmentOrganization.country_code == "NG",
-        ).exists(),
+            _nigerian_source(),
+        )
+        .exists(),
     )
     # Four of every five attempt slots prefer Nigeria. The fifth prefers other
     # countries; either group can use a slot when the preferred queue is empty.
     preferred = ~local_task if used % 5 == 4 else local_task
+    active_source = (
+        select(RecruitmentSource.id)
+        .where(
+            RecruitmentSource.id == DiscoveryTask.source_id,
+            RecruitmentSource.verification_status == "approved",
+            RecruitmentSource.collection_adapter != "",
+        )
+        .exists()
+    )
     task = db.scalar(
         select(DiscoveryTask)
         .where(
             DiscoveryTask.status == "queued",
             DiscoveryTask.available_at <= timestamp,
         )
-        .order_by(case((preferred, 0), else_=1), DiscoveryTask.available_at, DiscoveryTask.id)
+        .order_by(
+            case((preferred, 0), else_=1),
+            case((active_source, 0), (DiscoveryTask.attempts == 0, 1), else_=2),
+            DiscoveryTask.available_at,
+            DiscoveryTask.id,
+        )
         .limit(1)
     )
     if task is None:
@@ -422,9 +481,10 @@ def apply_result(db: Session, task_id, token: str, payload: dict, result: dict) 
             source.last_success_at = timestamp
             source.health_status = "healthy"
             source.failure_count = 0
-            if source.content_hash != result["content_hash"]:
+            observed_hash = result.get("original_content_hash", result["content_hash"])
+            if source.content_hash != observed_hash:
                 source.last_changed_at = timestamp
-            source.content_hash = result["content_hash"]
+            source.content_hash = observed_hash
             source.observed_url = checked_url(result["observed_url"])
             source.canonical_hint = (
                 checked_url(result["canonical_hint"]) if result.get("canonical_hint") else ""
@@ -467,17 +527,24 @@ def apply_result(db: Session, task_id, token: str, payload: dict, result: dict) 
             source.revision += 1
             automatically_activated = apply_assessment(db, source, result, timestamp, task.id)
             if result.get("activation_review") and not automatically_activated:
-                task.message = "Automatic activation needs review: " + "; ".join(
-                    result["activation_review"]["reasons"]
-                )[:440]
+                task.message = (
+                    "Automatic activation needs review: "
+                    + "; ".join(result["activation_review"]["reasons"])[:440]
+                )
             if (
                 payload.get("collect_vacancies") or automatically_activated
             ) and collector_authorized(source):
                 counts = ingest_page(db, source, result, timestamp)
+                # Revisit bounded batches often enough to keep valid opportunities fresh.
+                source.next_check_at = timestamp + timedelta(hours=6)
                 task.message = (
                     f"Collected {counts['records']} vacancies; "
                     f"{counts['published']} publishable, {counts['pending']} need review."
                 )
+                if result.get("detail_errors"):
+                    task.message += (
+                        f" {len(result['detail_errors'])} detail pages deferred or unavailable."
+                    )
                 if counts.get("error"):
                     task.status, task.outcome = "failed", "extraction_error"
                     task.message = counts["error"][:500]
@@ -494,8 +561,10 @@ def apply_result(db: Session, task_id, token: str, payload: dict, result: dict) 
                         "observed_url",
                         "canonical_hint",
                         "content_hash",
+                        "original_content_hash",
                         "links",
                         "terms_links",
+                        "document_links",
                         "sitemap_note",
                     )
                 },
@@ -508,6 +577,12 @@ def apply_result(db: Session, task_id, token: str, payload: dict, result: dict) 
             }:
                 org = source.organization
                 for link in result.get("links", [])[:3]:
+                    if (
+                        automatically_activated
+                        and source.collection_adapter == "factual_index"
+                        and in_scope(link["url"], source.vacancy_url_prefix)
+                    ):
+                        continue
                     _, created = register_candidate(
                         db,
                         identity_key=org.identity_key,
@@ -518,7 +593,7 @@ def apply_result(db: Session, task_id, token: str, payload: dict, result: dict) 
                         website_url=org.website_url,
                         source_url=link["url"],
                         discovered_via="institution_link",
-                        reference=source.original_url,
+                        reference=link.get("reference", source.original_url),
                         source_type="recruitment_page",
                         organization=org,
                         task_id=task.id,
@@ -530,10 +605,20 @@ def apply_result(db: Session, task_id, token: str, payload: dict, result: dict) 
             if payload.get("collect_vacancies") or source.approval_mode == "automatic":
                 mark_source_unconfirmed(db, source.id)
             if payload.get("automatic_activation"):
-                apply_assessment(db, source, {"activation_review": {
-                    "status": "needs_review", "policy_version": POLICY_VERSION, "evidence": {},
-                    "reasons": ["Automatic checks could not complete: " + task.outcome],
-                }}, timestamp, task.id)
+                apply_assessment(
+                    db,
+                    source,
+                    {
+                        "activation_review": {
+                            "status": "needs_review",
+                            "policy_version": POLICY_VERSION,
+                            "evidence": {},
+                            "reasons": ["Automatic checks could not complete: " + task.outcome],
+                        }
+                    },
+                    timestamp,
+                    task.id,
+                )
             source.last_attempt_at = timestamp
             source.health_status = task.outcome[:30]
             source.failure_count += 1
@@ -572,9 +657,11 @@ def run_next(db: Session, *, executor=None) -> DiscoveryTask | None:
                 "revision": source.revision,
                 "collect_vacancies": collector_authorized(source),
                 "reuse_url_prefix": source.reuse_url_prefix,
+                "collection_adapter": source.collection_adapter,
+                "page_offset": max(0, source.revision - 1) * 4,
             }
             if eligible(source):
-                payload["automatic_activation"] = context(source)
+                payload["automatic_activation"] = context(source, db)
                 # Recheck independent identity and current reuse evidence on every collection.
                 payload["collect_vacancies"] = False
         else:

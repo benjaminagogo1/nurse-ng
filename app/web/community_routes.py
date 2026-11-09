@@ -1,6 +1,7 @@
 """Public community pages and authenticated participation actions."""
 
 import uuid
+from urllib.parse import urlencode
 
 from fastapi import (
     APIRouter,
@@ -61,7 +62,10 @@ from app.services.community import (
     unfollow_profile,
     users_by_id,
 )
+from app.services.member_interests import INTEREST_OPTIONS
 from app.services.profiles import (
+    PROFESSIONAL_STATUS_LABELS,
+    count_discoverable_profiles,
     get_active_profile_by_public_id,
     list_discoverable_profiles,
     public_profile_fields,
@@ -664,18 +668,64 @@ def community_media(media_id: str, db: Session = Depends(get_db)) -> Response:
 @router.get("/nurses")
 def nurse_directory(
     request: Request,
+    q: str = Query("", max_length=120),
+    location: str = Query("", max_length=120),
+    interest: str = Query("", max_length=60),
+    professional_status: str = Query("", max_length=20),
+    page: int = Query(1, ge=1, le=10000),
     user: User | None = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> Response:
-    profiles = list_discoverable_profiles(db)
+    filters = dict(
+        query=q, location=location, interest=interest, professional_status=professional_status
+    )
+    total = count_discoverable_profiles(db, **filters)
+    page_count = max(1, (total + 11) // 12)
+    page = min(page, page_count)
+    profiles = list_discoverable_profiles(db, limit=12, offset=(page - 1) * 12, **filters)
     cards = [
-        {"profile": profile, "fields": public_profile_fields(db, profile)}
-        for profile in profiles
+        {"profile": profile, "fields": public_profile_fields(db, profile)} for profile in profiles
     ]
     return render(
         request,
         "community/nurses.html",
-        {"title": "Find nurses", "user": user, "cards": cards},
+        {
+            "title": "Find people",
+            "user": user,
+            "cards": cards,
+            "page": "nurses",
+            "q": q,
+            "location": location,
+            "interest": interest,
+            "professional_status": professional_status,
+            "interest_options": INTEREST_OPTIONS,
+            "status_options": PROFESSIONAL_STATUS_LABELS.items(),
+            "total": total,
+            "directory_page": page,
+            "page_count": page_count,
+            "has_filters": bool(q or location or interest or professional_status),
+            "previous_url": "/nurses?"
+            + urlencode(
+                dict(
+                    q=q,
+                    location=location,
+                    interest=interest,
+                    professional_status=professional_status,
+                    page=page - 1,
+                )
+            ),
+            "next_url": "/nurses?"
+            + urlencode(
+                dict(
+                    q=q,
+                    location=location,
+                    interest=interest,
+                    professional_status=professional_status,
+                    page=page + 1,
+                )
+            ),
+        },
+        headers={"X-Robots-Tag": "noindex, nofollow"},
     )
 
 

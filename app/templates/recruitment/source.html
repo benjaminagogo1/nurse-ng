@@ -34,7 +34,7 @@
       {% if source.activation_review.reasons %}<ul>{% for reason in source.activation_review.reasons %}<li>{{ reason }}</li>{% endfor %}</ul>{% endif %}
       {% if source.activation_review.evidence %}<dl class="source-facts">{% for key, value in source.activation_review.evidence.items() %}<dt>{{ key|replace('_', ' ')|capitalize }}</dt><dd>{{ value }}</dd>{% endfor %}</dl>{% endif %}
     {% else %}<p>Waiting for the background worker to assess this source.</p>{% endif %}
-    <p>Sources that pass independent directory, official website, recruitment, reuse and vacancy checks activate without staff approval. Uncertain cases stay available for review. Automatic decisions expire after 48 hours unless renewed by successful checks.</p>
+    <p>Verified government publishers, directory-backed organisations and programmes linked by authoritative sources can activate factual listings without staff approval or a page licence. Full-content collection still requires reuse evidence. Uncertain identities stay available for review. Automatic decisions expire after 48 hours unless renewed by successful checks.</p>
   </section>
   <section class="source-card" aria-labelledby="activation-title">
     <h2 id="activation-title">Live vacancy collection</h2>
@@ -46,7 +46,7 @@
       <p>Valid vacancies publish after a successful collection. Keep the recruitment worker running. Enabling collection does not confirm that this page contains an open vacancy.</p>
     {% endif %}
     {% if source.health_status != 'healthy' %}<p>Last access result: {{ source.health_status|replace('_', ' ') }}. A successful check is still needed; access failures do not establish that the institution is invalid.</p>{% endif %}
-    <p>Recorded reuse basis: {{ reuse_bases.get(source.reuse_basis, 'Not recorded') }}. Permitted URL scope: {{ source.reuse_url_prefix or 'Not recorded' }}.</p>
+    <p>Recorded reuse basis: {{ 'Factual listings and original links only' if source.reuse_basis == 'factual_index' else reuse_bases.get(source.reuse_basis, 'Not recorded') }}. Permitted URL scope: {{ source.reuse_url_prefix or 'Not recorded' }}.</p>
     <p>A separate licence is not mandatory where another documented legal basis applies. Government ownership and public access do not by themselves establish unrestricted reuse.</p>
   </section>
   {% if source.automation_status == 'monitoring' %}
@@ -56,15 +56,16 @@
   {% endif %}
 
   <p><a href="/recruitment/vacancies?source_id={{ source.id }}&amp;state=">View collected vacancy records</a></p>
-  {% if snapshots %}<details class="source-card"><summary>Recent original page snapshots</summary><ul>{% for snapshot in snapshots %}<li><a href="/recruitment/vacancies/snapshots/{{ snapshot.id }}/original">{{ snapshot.collected_at.strftime('%Y-%m-%d %H:%M') }} UTC — download as text</a></li>{% endfor %}</ul></details>{% endif %}
+  {% if snapshots %}<details class="source-card"><summary>Recent collection records</summary><ul>{% for snapshot in snapshots %}<li><a href="/recruitment/vacancies/snapshots/{{ snapshot.id }}/original">{{ snapshot.collected_at.strftime('%Y-%m-%d %H:%M') }} UTC — {{ 'factual record' if snapshot.adapter == 'factual_index-v1' else 'original page' }} as text</a></li>{% endfor %}</ul></details>{% endif %}
   <details class="source-card">
     <summary>Configure vacancy collection</summary>
-    <p>Current collector: {{ source.collection_adapter or 'Disabled' }}. The first adapter reads schema.org JobPosting data embedded in this source page. General guidance does not become a vacancy.</p>
+    <p>Current collector: {{ source.collection_adapter or 'Disabled' }}. Choose structured job data or ordinary announcement pages. Missing or ambiguous fields stay in the vacancy review queue.</p>
     <p>Approve website collection first. Record the permitted vacancy URL scope and the timezone used for date-only deadlines. External recruitment portals require their own approved source.</p>
     <form method="post" action="/recruitment/sources/{{ source.id }}/collector" class="source-form">
       <input name="csrf_token" type="hidden" value="{{ csrf_token }}"><input name="revision" type="hidden" value="{{ source.revision }}">
       <label>Collection<select name="enabled"><option value="false">Disabled</option><option value="true" {% if source.collection_adapter %}selected{% endif %}>Structured JobPosting data</option></select></label>
       <label>Permitted vacancy URL prefix<input name="url_prefix" type="url" value="{{ source.vacancy_url_prefix or source.original_url }}" maxlength="2048"></label>
+      <label>Page format<select name="adapter"><option value="jsonld" {% if source.collection_adapter == 'jsonld' %}selected{% endif %}>Structured job data</option><option value="announcements" {% if source.collection_adapter == 'announcements' %}selected{% endif %}>Announcement pages and linked opportunities</option></select></label>
       <label>Deadline timezone<input name="timezone" value="{{ source.deadline_timezone }}" placeholder="Africa/Lagos" maxlength="80"></label>
       <label>Permission evidence URL<input name="reference" type="url" required maxlength="2048"></label>
       <label>Permission scope and configuration reason<textarea name="note" required maxlength="3000"></textarea></label>

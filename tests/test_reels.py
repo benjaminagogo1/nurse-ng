@@ -10,7 +10,7 @@ from sqlalchemy import func, select
 
 from app.core.community_storage import community_media_path
 from app.core.config import settings
-from app.models.community import CommunityMedia, CommunityPost, ContentReport, ContentStatus, Follow
+from app.models.community import CommunityMedia, ContentReport, ContentStatus, Follow
 from app.models.reels import Reel, ReelSave
 from app.services import reel_worker
 from app.services.accounts import delete_account
@@ -88,6 +88,60 @@ def test_public_empty_feed_and_auth_boundaries(client):
     assert client.get("/reels/not-a-uuid").status_code == 404
 
 
+def test_first_reel_uses_account_name_without_extra_fields(client, db_session):
+    register_and_sign_in(client, phone=AUTHOR_PHONE, password=PASSWORD)
+    user = user_by_phone(db_session, AUTHOR_PHONE)
+    user.full_name = "Ada Okafor"
+    db_session.commit()
+    topic = create_topic(db_session)
+    page = client.get("/reels/new")
+    assert "Posting as <strong>Ada Okafor</strong>" in page.text
+    assert 'name="community_name"' not in page.text
+    assert 'name="job_link"' not in page.text
+    assert not user.community_name  # Viewing the form does not change identity.
+    response = upload(client, topic, mp4(2), community_name="A forged name",
+                      job_link="https://example.org/unused")
+    assert response.status_code == 201, response.text
+    db_session.refresh(user)
+    reel = latest(db_session)
+    assert user.community_name == "Ada Okafor"
+    assert user.community_name_locked and reel.job_id is None
+    assert reel.post.author.community_name == "Ada Okafor"
+
+
+def test_existing_public_identity_is_preserved(client, db_session, author):
+    user, topic = author
+    user.full_name = "Different account name"
+    db_session.commit()
+    response = upload(client, topic, mp4(2))
+    assert response.status_code == 201
+    assert latest(db_session).post.author.community_name == "Reels Creator"
+
+
+def test_members_with_same_account_name_can_both_upload(client, db_session, author):
+    client.cookies.clear()
+    register_and_sign_in(client, phone=READER_PHONE, password=PASSWORD)
+    reader = user_by_phone(db_session, READER_PHONE)
+    reader.full_name = author[0].community_name
+    db_session.commit()
+    response = upload(client, author[1], mp4(2))
+    assert response.status_code == 201, response.text
+    db_session.refresh(reader)
+    assert reader.community_name.startswith("Reels Creator · ")
+    assert reader.community_name_key != author[0].community_name_key
+
+
+def test_legacy_unnamed_account_does_not_expose_contact_details(client, db_session):
+    register_and_sign_in(client, phone=AUTHOR_PHONE, password=PASSWORD)
+    user = user_by_phone(db_session, AUTHOR_PHONE)
+    user.email = "private@example.org"
+    db_session.commit()
+    response = upload(client, create_topic(db_session), mp4(2))
+    assert response.status_code == 201
+    db_session.refresh(user)
+    assert user.community_name == "Nurse.ng member"
+
+
 def test_upload_is_private_and_repeated_request_does_not_duplicate(
     client, db_session, author, real_video,
 ):
@@ -139,7 +193,8 @@ def test_real_worker_publishes_compatible_renditions_and_removes_original(
             "-f", "null", "-",
         ], capture_output=True, timeout=30)
         assert decoded.returncode == 0, decoded.stderr.decode()
-        response = client.get(f"/community/media/{media[kind].id}", headers={"Range": "bytes=0-127"})
+        response = client.get(f"/community/media/{media[kind].id}",
+                              headers={"Range": "bytes=0-127"})
         assert response.status_code == 206 and len(response.content) == 128
         assert response.headers["cache-control"] == "no-store"
     assert client.get(f"/community/media/{media['reel_poster'].id}").headers[
@@ -151,7 +206,6 @@ def test_real_worker_publishes_compatible_renditions_and_removes_original(
 @pytest.mark.parametrize("values", [
     {"consent": ""}, {"category": "invented"}, {"audience": "invented"},
     {"body": ""}, {"cover_seconds": "8"}, {"upload_key": "invalid"},
-    {"job_link": "https://evil.example/path"},
 ])
 def test_invalid_upload_does_not_publish_or_retain_files(
     client, db_session, author, real_video, media_dir, values,
@@ -276,6 +330,9 @@ def test_comments_and_reports_use_existing_conversation_and_moderation(
     }, headers={"X-Reel-Action": "1"}).status_code == 200
     assert "Where can I apply?" in client.get(f"/posts/{reel.post_id}").text
     assert "Where can I apply?" in client.get(f"/reels/{reel.post_id}/comments").text
+    client.cookies.clear()
+    register_and_sign_in(client, phone=READER_PHONE, password=PASSWORD)
+    token = csrf_from(client.get("/reels"))
     assert client.post(f"/reels/{reel.post_id}/report", data={
         "csrf_token": token, "reason": "privacy", "details": "Private record visible",
     }, headers={"X-Reel-Action": "1"}).status_code == 200

@@ -480,6 +480,8 @@ What would make it world-class, in my judgment, is the following work—in this 
 
 ## Assessment baseline and completion tracker — 6 November 2026
 
+For the seven priorities discussed after the account and Reels work, see [Seven priorities for a world-standard app](WORLD_STANDARD_ROADMAP.md), recorded on 8 November 2026. The dated assessment below remains the historical baseline.
+
 **Purpose:** preserve the assessment requested on 6 November 2026 and measure later work against it. This section supplements the earlier assessments; it does not rewrite their history. Saving these recommendations does not mark them implemented or authorize their implementation.
 
 **Assessment scope:** local source code, automated checks, and isolated probes using an in-memory database. No live deployment was assessed, and no fresh browser visual or accessibility audit was performed. The observations below are the fixed baseline; update the tracker and evidence log as work progresses.

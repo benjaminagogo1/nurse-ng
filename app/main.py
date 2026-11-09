@@ -7,11 +7,15 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from app.core.config import settings
 from app.web.account_routes import router as account_router
+from app.web.activity_routes import router as activity_router
 from app.web.auth_routes import router as auth_router
 from app.web.community_routes import router as community_router
 from app.web.jobs_routes import router as jobs_router
 from app.web.messages_routes import router as messages_router
 from app.web.moderation_routes import router as moderation_router
+from app.web.notification_routes import router as notification_router
+from app.web.onboarding_routes import router as onboarding_router
+from app.web.opportunity_routes import router as opportunity_router
 from app.web.pages_routes import router as pages_router
 from app.web.profile_routes import public_router
 from app.web.profile_routes import router as profile_router
@@ -43,7 +47,9 @@ def create_app() -> FastAPI:
     app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
     app.include_router(router)
     app.include_router(auth_router)
+    app.include_router(onboarding_router)
     app.include_router(account_router)
+    app.include_router(activity_router)
     app.include_router(profile_router)
     app.include_router(review_router)
     app.include_router(recruitment_router)
@@ -51,8 +57,10 @@ def create_app() -> FastAPI:
     app.include_router(community_router)
     app.include_router(reel_router)
     app.include_router(moderation_router)
+    app.include_router(opportunity_router)
     app.include_router(jobs_router)
     app.include_router(messages_router)
+    app.include_router(notification_router)
     app.include_router(pages_router)
     app.include_router(public_router)
     return app

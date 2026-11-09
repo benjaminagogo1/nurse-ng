@@ -94,9 +94,7 @@ class Settings(BaseSettings):
     community_upload_window_seconds: int = 24 * 60 * 60
     community_storage_quota_bytes: int = 5 * 1024 * 1024 * 1024
     community_upload_chunk_bytes: int = 1024 * 1024
-    community_malware_scan_mode: Literal["disabled", "optional", "required"] = (
-        "optional"
-    )
+    community_malware_scan_mode: Literal["disabled", "optional", "required"] = "optional"
     community_malware_scan_command: str = "clamscan"
     community_malware_scan_timeout_seconds: int = 60
 
@@ -109,6 +107,9 @@ class Settings(BaseSettings):
     # The agreement must permit retaining candidate URLs/results for this registry.
     recruitment_search_key: str = Field(default="", repr=False)
     recruitment_search_permission_reference: str = ""
+    # Operator-configured services only; these addresses never come from search results.
+    recruitment_searxng_urls: str = Field(default="", repr=False)
+    recruitment_search_timeout_seconds: int = Field(default=10, ge=2, le=12)
     recruitment_daily_task_limit: int = Field(default=100, ge=1, le=1000)
     recruitment_pending_task_limit: int = Field(default=500, ge=20, le=5000)
 
@@ -143,10 +144,42 @@ class Settings(BaseSettings):
         self.allowed_hosts = ",".join(dict.fromkeys(hosts))
         from urllib.parse import urlsplit
 
+        endpoints = [
+            v.strip().rstrip("/") for v in self.recruitment_searxng_urls.split(",") if v.strip()
+        ]
+        if len(endpoints) > 3:
+            raise ValueError("Configure at most three SearXNG instances.")
+        for endpoint in endpoints:
+            try:
+                parsed = urlsplit(endpoint)
+                if (
+                    parsed.scheme not in {"http", "https"}
+                    or not parsed.hostname
+                    or parsed.username
+                    or parsed.password
+                    or parsed.query
+                    or parsed.fragment
+                    or re.search(r"[\s\\\\]", endpoint)
+                    or "%" in endpoint
+                    or ".." in parsed.path.split("/")
+                    or not 1 <= (parsed.port or 80) <= 65535
+                ):
+                    raise ValueError
+            except ValueError:
+                raise ValueError(
+                    "SearXNG instances must be HTTP(S) base URLs without credentials, "
+                    "query or fragment."
+                ) from None
+        self.recruitment_searxng_urls = ",".join(dict.fromkeys(endpoints))
+
         base = urlsplit(self.public_base_url)
         if (
-            base.scheme not in {"http", "https"} or not base.hostname
-            or base.username or base.password or base.query or base.fragment
+            base.scheme not in {"http", "https"}
+            or not base.hostname
+            or base.username
+            or base.password
+            or base.query
+            or base.fragment
             or base.path not in {"", "/"}
         ):
             raise ValueError("NURSE_NG_PUBLIC_BASE_URL must be an HTTP(S) origin.")
@@ -155,7 +188,9 @@ class Settings(BaseSettings):
         if production and self.account_mail_backend == "file":
             raise ValueError("The file email backend is only available in development.")
         if self.account_mail_backend == "smtp" and (
-            not self.smtp_host or not self.smtp_from or "@" not in self.smtp_from
+            not self.smtp_host
+            or not self.smtp_from
+            or "@" not in self.smtp_from
             or any(c in self.smtp_from for c in "\r\n")
         ):
             raise ValueError("SMTP requires NURSE_NG_SMTP_HOST and a valid NURSE_NG_SMTP_FROM.")

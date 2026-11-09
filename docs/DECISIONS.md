@@ -619,3 +619,64 @@ The choices below were made after reviewing the first community implementation. 
 - **Interaction:** progressively enhance account forms with pending labels, duplicate-submit prevention, field errors and preserved inputs after failure. Retain ordinary form submission without JavaScript. A network interruption or lost response has an unconfirmed result, so never automatically retry it or claim that it saved/failed. Email-request confirmation does not claim inbox delivery.
 - **Confirmation:** populate a destination-bound, one-time message only after the server completes the action; query flags cannot produce a success banner. Keep only display copy in the signed session. Password-reset confirmation survives deliberate session clearing, while previous authentication is still revoked. Verification and settings submissions redirect after success so refresh does not repeat them.
 - **Scope:** apply the pattern to account photos/privacy, contact details, email verification/recovery, password reset and deletion. Preserve existing token, permission, CSRF and rate-limit controls. No database migration or runtime dependency is required.
+
+### L87 — Reels reuse community identity and publish after video processing
+
+- **User direction:** implement a professional Reels experience following the agreed first-release approach. Prioritise Nigerian opportunities, learning and community voices, with visible operation feedback.
+- **Integration:** a Reel extends a community post. Replies, creator follows, reports, moderation, quotas and account-file deletion stay shared. Public posting consent is explicit; profile and photo privacy remain unchanged. Existing uploaded community videos do not become Reels automatically. Saves are private.
+- **Publishing:** queue the upload with a unique submission key, keep the post and source private, then use a separate leased CLI worker to generate H.264/AAC playback, a smaller data-saving version and a JPEG cover. Publish only after all outputs are attached. Fence stale workers, recover expired leases, cap attempts, validate decoded duration and remove the original through the deletion queue. Processing completion publishes automatically without introducing a staff approval gate.
+- **Experience:** a vertical viewer with muted playback, pause/sound/seek/caption controls, reduced-motion and data-saving behavior, only one active media source, mobile/desktop layouts, comments drawer, save/follow/share/report actions, upload preview/progress and private processing/error status pages.
+- **Discovery:** Nigerian relevance first, then recency; category, Following and Saved views are explicit filters. No invented engagement counts or claim of personalised recommendation ranking. Creator captions are uploaded as plain WebVTT; automatic transcription is not included.
+- **Delivery boundary:** this release uses local media storage with a separate background worker. It provides two progressive MP4 versions, not adaptive streaming. Object storage, CDN delivery and production worker supervision/resource isolation remain deployment work; see [Reels operations](REELS.md). No paid provider was provisioned.
+
+- **Upload simplification (user follow-up):** remove the creator-name and opportunity-link inputs. Derive new creators from their account name while preserving existing community names; show Posting as before publication. Keep the existing unique-name rule with a short suffix for namesakes, and use a generic member label for unnamed legacy accounts without reading private profile/contact data. Existing stored opportunity links remain intact.
+
+
+### L88 — LinkedIn-style notifications and dependable connection messaging
+
+- **User direction:** implement roadmap point 5 using the LinkedIn model. Provide a recognisable activity feed and channel controls while retaining Nurse.ng's design.
+- **Channels:** in-app on by default; email separately opt-in per category and limited to currently verified addresses. Device push is outside this delivery scope. Account security emails retain their existing path.
+- **Integrity:** emit deduplicated notifications in the source transaction, recheck current access for display/delivery, use an owned watermark for mark-all-read and conditional application status transitions to protect withdrawal from stale employer updates.
+- **Conversations:** 40-message history pages, visible-page polling with backoff, explicit read acknowledgements, in-memory drafts and unique send references for safe retries. A connection remains required on every endpoint. No WebSocket infrastructure added.
+- **Delivery:** persistent email outbox with conditional leases, bounded retries, eligibility checks and generic authenticated links. SMTP delivery is at-least-once; stable Message-ID is not an exactly-once guarantee. Production worker supervision/monitoring remains roadmap point 1.
+- **Operations and evidence:** see [notifications and messaging](NOTIFICATIONS.md) and the work log. Existing local data was backed up, checked on a migrated clone and preserved on upgrade to `9de420c3b287`.
+
+
+### L89 — Nigerian opportunity collection, saved jobs and interest alerts
+
+- **User direction:** implement roadmap priority 3, retaining broad Nigerian-first coverage rather than promoting only the previously named programmes.
+- **Collection:** preserve structured extraction and add bounded ordinary HTML announcements within the existing approved source scope. Extract explicit facts, hold ambiguity for review, rotate detail-page batches and preserve snapshot/freshness controls. Read-only discovery may observe public redirects; automatic approval and publication evidence are unchanged.
+- **Member controls:** private bookmarks, optional reminders within 48 hours of a stated deadline, explicit text/location/type interests and new-only matching alerts. Reuse the notification inbox/outbox; email remains separately opt-in. Suppressed matching events are retained privately for idempotency, not replayed after re-enabling a channel.
+- **Status accuracy:** the coverage screen distinguishes candidates, healthy/current collectors and current openings. Actual source approval/reachability and sustained nationwide coverage remain ongoing; programme names and homepage HTTP 200 responses do not establish open applications.
+- **Operations:** migration `ae5314d8c902` preserves existing messages/notifications; the notification worker also generates opportunity alerts. See [Nigerian opportunity operations](NIGERIAN_OPPORTUNITIES.md) for tests, live observations and deployment limits.
+
+
+## L90 — Python search orchestration and separate factual indexing (9 November 2026)
+
+Reuse the persistent recruitment queue and public-page fetcher. Add a configured-service-only SearXNG JSON client with at most three instances and optional Brave fallback, without adding a Nurse.ng runtime dependency. General search retains only minimal candidate facts, not snippets. Operator-configured private service addresses never enter the public source-fetch path. Direct monitoring remains independent of search availability.
+
+Separate verified publisher identity from full-content reuse rights. Automatically verified government domains, independent directory identities and authoritative portal links may index factual opportunity records with original links, hashes and audit history; `permission_status=limited`, `reuse_basis=factual_index`, and full-snapshot/full-republication flags remain false. Full-content collectors keep their existing evidence requirements. Missing publication dates are labelled first-listed; no-deadline opportunities require a freshly linked open-vacancy index and job-bound application form. Other ambiguities remain unpublished. Preserve staff decisions, bounded requests, source scope, TLS and expiry controls.
+
+## L91 — Private member analytics using permanent account IDs (9 November 2026)
+
+- **User direction:** expose the unique user ID, implement daily activity and activeness,
+  and build a polished modern dashboard for monitoring them.
+- **Identity and access:** retain `users.id` unchanged. Members can copy their own ID
+  in Settings; the searchable account/activity dashboard and refresh endpoint are
+  staff-only. Public profile visibility remains independent of usage measurement.
+- **Counting:** one account per Nigerian calendar day, with distinct 7/30-day counts
+  and a five-minute recent-use estimate. Staff are excluded by default and can be
+  included explicitly. Account role is self-declared, not professional verification.
+- **Signals:** successful signed-in page navigations and recent trusted input on
+  visible pages. Background polling, automatic scrolling and hidden/idle tabs do not
+  renew presence. The server owns identity/time; CSRF, current account status and
+  session version are checked before writing. Concurrent devices share one daily row.
+- **Presentation:** responsive light/dark dashboard, summary cards, daily chart/table,
+  member filters, pagination, copy feedback and a manual-refresh fallback. Live
+  refresh preserves selections and reports stale/offline data explicitly.
+- **Data:** additive migration `d537f982ac14` stores only account/day and first/last
+  activity timestamps. No historical visits are fabricated; deletion removes owned
+  history. No external analytics provider, dependency or worker is introduced.
+- **Evidence and limits:** see [member analytics](MEMBER_ANALYTICS.md) and the work
+  log. Local verification does not establish production PostgreSQL behavior or
+  unique real-world professional identities.

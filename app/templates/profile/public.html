@@ -75,6 +75,12 @@
     <div class="profile-bio">{{ fields.get('bio') }}</div>
   {% endif %}
 
+  {% if fields.get('interests') %}
+  <section class="public-interests"><h2>Professional interests</h2><div class="interest-tags">
+    {% for interest in fields.get('interests').split(', ') %}<span>{{ interest }}</span>{% endfor %}
+  </div></section>
+  {% endif %}
+
   {% if not fields %}
     <p class="lede">This profile is active but shares no details yet.</p>
   {% endif %}

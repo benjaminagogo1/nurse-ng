@@ -106,8 +106,6 @@ def test_passing_source_activates_and_publishes_without_staff(db_session, source
 
 
 @pytest.mark.parametrize("kwargs,reason", [
-    ({"licence": ""}, "reuse terms"),
-    ({"licence": "https://creativecommons.org/licenses/by-nc/4.0/"}, "reuse terms"),
     ({"home_link": SITE + "/other"}, "direct link"),
     ({"directory": {"status": "inactive"}}, "directory record"),
     ({"directory": {"links": [{"type": "website", "value": "https://other.example.org"}]}},
@@ -172,7 +170,7 @@ def test_reversed_salary_goes_to_vacancy_review_without_blocking_source(db_sessi
     assert db_session.scalar(select(func.count()).select_from(VacancySnapshot)) == 1
 
 
-def test_changed_terms_disable_then_restore_automatic_collection(db_session, source):
+def test_changed_terms_switch_to_facts_then_restore_licensed_collection(db_session, source):
     check(db_session, source, evidence())
     job_id = list_open_jobs(db_session)[0].id
     first_expiry = source.approval_expires_at
@@ -180,9 +178,10 @@ def test_changed_terms_disable_then_restore_automatic_collection(db_session, sou
     assert source.approval_expires_at > first_expiry
     assert db_session.scalar(select(func.count()).select_from(VacancySnapshot)) == 1
     check(db_session, source, evidence(licence=""))
-    assert source.verification_status == "pending" and not collector_authorized(source)
-    assert list_open_jobs(db_session) == []
-    assert effective_job_status(db_session.get(Job, job_id)) == "unconfirmed"
+    assert collector_authorized(source) and source.collection_adapter == "factual_index"
+    assert not source.allow_republication
+    assert len(list_open_jobs(db_session)) == 1
+    assert effective_job_status(db_session.get(Job, job_id)) == "open"
     check(db_session, source, evidence())
     assert [job.id for job in list_open_jobs(db_session)] == [job_id]
 
@@ -277,7 +276,7 @@ def test_conflicting_canonical_address_requires_review(db_session, source):
 def test_automatic_review_ui_is_staff_only_and_reassessment_requires_csrf(
     db_session, source, client,
 ):
-    check(db_session, source, evidence(licence=""))
+    check(db_session, source, evidence(directory={"status": "inactive"}))
     response = client.get(f"/recruitment/sources/{source.id}", follow_redirects=False)
     assert response.status_code == 303
     register_and_sign_in(client)
@@ -286,7 +285,7 @@ def test_automatic_review_ui_is_staff_only_and_reassessment_requires_csrf(
     db_session.commit()
     page = client.get(f"/recruitment/sources/{source.id}")
     assert "Needs review" in page.text
-    assert "No unambiguous supported page-level reuse terms" in page.text
+    assert "directory record does not match" in page.text
     assert page.headers["Cache-Control"] == "no-store"
     target = f"/recruitment/sources/{source.id}/review"
     values = {"revision": source.revision, "action": "automatic", "note": "Try automatic checks"}

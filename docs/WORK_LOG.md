@@ -794,3 +794,164 @@ This is the pre-hardening result: the previously documented 89 cases plus 14 com
 - **Automated checks:** **84 targeted integration tests passed**, followed by the full suite: **390 passed in 209.74 seconds**. Added checks for server-confirmed/one-time feedback, unrelated-page reads, rejected uploads preserving the old photo, reset confirmation after session revocation, forged query flags and repeated verification requests. Ruff, JavaScript syntax checks and `git diff --check` passed.
 - **Browser evidence:** final isolated Chrome run passed at 320, 390 and 1280 px, including larger text. Assertions verify feedback is fully visible below the header. Covered valid/invalid photos, preview retention offline, a paused upload with duplicate-submit prevention, a lost response after the server commits, email verification, password mismatch/success and deletion. Text contrast measured 5.81:1 in light mode and 8.40:1 in dark mode. Inspected final success/error screenshots, including the password result and large-text layout. Final artifacts: `/tmp/nurse-account-feedback-gge50g85/`; repeatable runner: `tests/browser/account_feedback.py`. The runner uses the repository's basic password-store setting to avoid desktop keyring prompts, and disables GPU acceleration in its temporary profile.
 - **Local delivery:** the running app serves the new feedback assets and enhanced recovery form. Browser checks used temporary accounts/databases and a private file mailbox; no real account was changed and no external email was sent for this UI task. Temporary browser/server processes exited. Updated the account guide and recorded L86.
+
+
+## Session 2026-11-08 — First Reels release
+
+- **User direction:** implement the agreed professional Reels experience, reusing existing community features and prioritising Nigerian opportunities and voices.
+- **Delivered:** `/reels`, `/reels/new`, `/reels/mine`, owner-only processing pages, vertical playback, topic/Following/Saved feeds, upload preview and cover selection, optional WebVTT captions and opportunity links, follows, private saves, comments drawer, sharing, reporting and creator removal. Added Reels navigation to the app, public navigation and community feed. Public posting leaves profile and photo privacy settings unchanged.
+- **Worker:** introduced a separate durable CLI queue with atomic claims, expiring leases, bounded retries and stale-worker fencing. The real encoder produces H.264/AAC standard and data-saving MP4 renditions plus JPEG covers before publishing. Original uploads remain private and are queued for deletion after publication. Existing community quotas, moderation and account deletion cover all Reel media records.
+- **Feedback and playback:** real upload progress, preserved inputs offline, idempotent upload keys, queued/processing/ready/failed states, retry and removal. Only the current video has a source; hidden pages/dialogs pause playback. Data saver and reduced-motion disable autoplay. Sound controls, keyboard navigation, captions, seek controls and accessible feedback are present.
+- **Verification:** full regression suite passed **413 tests in 339.09 seconds**; the initial focused Reels/migration/community run passed **38 tests**. Ruff across app/tests, JavaScript syntax and diff-whitespace checks passed. Isolated Chrome runs exercised actual upload, offline feedback, CLI worker processing and logs, status polling, real browser playback, one active source, data saver, saves, comments and navigation at 320/390/1280 px in light/dark appearance. Test videos and accounts existed only in temporary databases.
+- **Local migration:** applied `8cf309b2a176` after a SQLite backup at `/tmp/nurse-reels-migration-ynz1085g/before.db`. All existing rows across 29 tables matched their before-migration hashes; no foreign-key violations or schema drift. The running local server serves `/reels` and both assets, and a local Reels worker was started alongside it.
+- **Operations:** documented startup, retry/recovery, deletion, maintenance and production limitations in `docs/REELS.md`, updated README and example configuration, and recorded L87. The local implementation is ready to use. Object-storage/CDN integration, adaptive streaming and production service supervision remain future deployment work; no external provider was configured, deployment performed, or real user email sent.
+
+- **Final refinements and evidence:** the final focused rerun passed **23 Reels tests in 14.68 seconds** after the status-response refinement. The final isolated browser/CLI-worker run passed with a real captioned clip and light/dark/large-text checks; artifacts and worker logs: `/tmp/nurse-reels-browser-9cyg8v30/`. Moved timed cues above the custom controls and allowed feed controls to wrap with enlarged text. A sandboxed focused rerun stalled before results; it was stopped and the successful rerun used the local socket access needed by TestClient. Temporary browser/server processes exited; the local application worker remains running.
+
+
+## Session 2026-11-08 — Simplify the Reels upload form
+
+- **User direction:** remove Public creator name and the optional Nurse.ng opportunity link. Use the poster's existing name automatically.
+- **Change:** removed both inputs and their upload-route parameters. The form shows a non-editable Posting as line. First-time creators use their account name; existing public community names are preserved. Namesakes receive a short suffix under the current unique-name rule, and unnamed legacy accounts use a generic member label without exposing phone, email or private profile fields. Creator-name setup also applies to service callers. New reels no longer accept an opportunity link; existing stored links remain intact.
+- **Scope:** no schema change, no bulk identity updates, and no change to video processing or profile/photo sharing. Publishing consent now explicitly mentions publishing under the displayed name.
+- **Validation:** 62 Reels/community/discussion tests passed in 49.02 seconds, including first-upload naming, preserved existing names, namesakes, legacy-account privacy and ignored removed form fields. Focused Ruff and diff-whitespace checks passed.
+
+## Session 2026-11-08 — Record the seven readiness priorities
+
+- **User direction:** save the seven recommendations from the discussion about bringing Nurse.ng to a world-standard level in a project file.
+- **Documentation:** added `docs/WORLD_STANDARD_ROADMAP.md` with all seven priorities: public hosting/recovery, trust/account protection, Nigerian opportunity coverage, member discovery/onboarding, notifications/messaging, consistent experience quality, and real-user validation/support. Each records the current foundation and remaining work, followed by the recommended sequence and links to existing operating guides.
+- **Discoverability:** linked the roadmap from README's Documents list and the build-plan assessment tracker. Preserved the historical assessment and distinguished remaining work from features already implemented. This change records recommendations; it does not mark them completed or change application behaviour.
+
+
+## Session 2026-11-08 — Simplify the jobs-page filters
+
+- **User direction:** remove Nigeria first, Full-time, Part-time and Contract from the jobs page because the controls clutter the mobile layout.
+- **Change:** removed those four filter buttons from the jobs listing. Nigerian-first result ordering, job information and the remaining filters retain their existing behaviour.
+- **Validation:** rendered the actual jobs template for default, Nigeria-only and international filter states; confirmed the four buttons are absent and remaining controls render. Diff-whitespace check passed. No application logic or schema changed.
+
+## Session 2026-11-08 — Roadmap point 5: LinkedIn-style notifications and messaging
+
+- **User direction:** implement point 5 and use the LinkedIn model. Completed a private notification feed with All/Unread/category filters, unread bell badges, read/open controls, older-page navigation, preferences linked from Settings, and visible save feedback. Styling follows Nurse.ng and adapts to mobile, desktop and display themes.
+- **Events and access:** replies, connection invitations/acceptances, messages and application changes now emit notifications in the same transaction. Self-events and duplicate recipients are excluded. Display and delivery recheck current source/relationship permissions. Application updates use conditional transitions so a stale employer request cannot overwrite withdrawal; direct application destinations retain applicant/employer ownership checks.
+- **Conversations:** automatic updates, bounded read receipts, 40-message history pages beyond the previous 100-message limit, preserved drafts/scroll position, a New messages affordance and visible send/error states. Stable client references prevent duplicate messages when a successful response is lost. Mobile threads keep the composer accessible and provide an All connections return link. Existing server forms/history navigation work without JavaScript.
+- **Email:** separate per-category opt-in, verified recipients only, persistent outbox, conditional 120-second leases, five-attempt exponential retries, current eligibility checks and generic authenticated links without private message content. Shared SMTP transport retains certificate validation. Email defaults off. SMTP remains at-least-once; crash-after-acceptance duplicates are documented.
+- **Migration:** backed up the local SQLite database to `/tmp/nurse-notifications-migration-7q_1p224/backup.sqlite`, tested upgrade and metadata checks on a clone, then applied `9de420c3b287`. All original table/column values were preserved, with no foreign-key violations or metadata drift. The final local check showed zero notification rows and zero email opt-ins before starting the worker.
+- **Validation:** **441 tests passed in 303.73 seconds**, including 25 dedicated notification/messaging/migration cases. Focused Ruff, JavaScript syntax and diff-whitespace checks passed. Socket-restricted test execution was rerun with local socket access; no real test emails were sent.
+- **Browser/worker evidence:** final isolated Chrome run passed at 320, 390 and 1280 pixels with unread badges, opt-in settings, live arrival, preserved drafts, 128-message history, stable reading position, offline failure, dropped-success-response retry without duplicates, revoked-access clearing and the actual CLI worker delivering to a file mailbox. JavaScript and server logs were clean. Screenshots and worker/server logs: `/tmp/nurse-notifications-browser-40xx_oeb/`.
+- **Local operation:** started `venv/bin/python -m app.cli notification-worker` alongside the existing web app; startup confirmed it is checking queued email alerts. This uses the existing configured transport only for future opted-in events. No synthetic activities were inserted into the real database. Production worker supervision/monitoring remains roadmap priority 1.
+- **Documentation:** added `docs/NOTIFICATIONS.md`, updated roadmap point 5 to implemented locally, linked operations in README, documented the shared transport in `.env.example` and recorded decision L88. No deployment or commit was requested or performed.
+
+## Session 2026-11-08 — Roadmap priority 3: Nigerian opportunity features and collection
+
+- **User direction:** implement number 3 from the recorded roadmap. Kept Nigerian-first ordering, broad programme coverage, the existing 4-of-5 local discovery preference and the previously removed mobile filter buttons.
+- **Collection:** added an ordinary HTML announcement adapter beside JSON-LD, with explicit-field extraction, unambiguous date parsing, retained source snapshots, bounded scoped detail-page batches, rotating offsets and page-specific missing-record reconciliation. The normal source permissions, validation/review, expiry and 48-hour freshness checks remain enforced. Public read-only redirects can now be observed without automatically establishing source approval. Added a worker integration case for the new adapter.
+- **Member features:** private paginated saves, removable unavailable bookmarks, reminder controls, keyword/location/type interests, Nigerian-default matches and new-only matching alerts. System notifications reuse the existing inbox/outbox. Email is separately opt-in. Deadline changes, unavailable jobs, deleted saves, disabled reminders and replaced matching criteria are checked before delivery. Conditional reminder claims avoid attempting to update a bookmark deleted by another request during a scan.
+- **Employer deadlines:** optional deadlines now have explicit Nigerian-date/international-timezone handling; expired jobs leave current listings and refuse applications. Extra location filters are collapsed on mobile until needed. Added visible save/remove/preference feedback and Settings links.
+- **Source operations:** registered NPHCDA, NCDC and Lagos health ministry as three additional pending candidates without changing existing decisions. Added `/recruitment/coverage`, separating registered sources, current healthy collectors and real openings, with categories, recorded state/FCT locations and daily discovery-budget status.
+- **Live evidence and limits:** read-only TLS-verified checks reached NCDC and NJFP homepages with HTTP 200 but found no current extractable opportunity records there. Health ministry/NPHCDA checks hit redirect limits; Lagos health ministry timed out; Health Fellows returned a connection failure. No openings or permissions were inferred. The final local state had 42 Nigerian sources, zero active approved collectors and zero current Nigerian opportunities. Discovery had used 100 of its 100 daily attempts, with 21 checks queued. The existing budget, source evidence and approval rules were preserved. Sustained live coverage remains ongoing.
+- **Migration:** applied `ae5314d8c902` after a private backup at `/tmp/nurse-notifications-migration-zvcwl7u1/backup.sqlite` and a clone upgrade/metadata check. All original columns/records were preserved and foreign-key checks passed. The migration adds saved interests/bookmarks and nullable system-actor/job/deadline notification targets. Downgrade guards protect the new data.
+- **Tests:** the initial focused regression run passed 93 tests. The full regression run passed 460 cases and found two test issues: a stale expected starter count and an omitted enqueue step in the new worker test. Both were corrected and passed their targeted rerun (2 passed). The final complete opportunity module rerun passed **21 tests in 40.92 seconds**, including the worker path, after the reminder-claim refinement. The coverage-route check also passed after daily-budget display was added. Ruff and diff-whitespace checks passed. No claim is made that a second full-suite run was performed after those targeted corrections.
+- **Browser evidence:** final Chrome run passed at 320, 390 and 1280 pixels, checking saves/reminders, matching preferences, email opt-in, the coverage screen and actual notification CLI-worker generation/delivery of a match plus a deadline email into a private file mailbox. JavaScript and server logs were clean. Artifacts: `/tmp/nurse-opportunities-browser-iuq133gb/`. No real test emails or synthetic real-database jobs were created.
+- **Local workers:** restarted the recruitment worker and notification worker as detached local processes with private logs. Recruitment process 360122 remained running at the final process check; its log is `/tmp/nurse-opportunity-workers-314cp6f5/recruitment-worker.log`. The notification worker was reloaded again after its final reminder-claim change. Startup and process checks were verified; production supervision/restart monitoring remains roadmap priority 1.
+- **Documentation:** added `docs/NIGERIAN_OPPORTUNITIES.md`, recorded L89, linked the guide in README/notification operations and updated roadmap point 3 to distinguish implemented features from ongoing live-source coverage. No commit or deployment was performed.
+
+## Session 2026-11-09 — Self-hosted search and live factual opportunity collection
+
+- Reused the Python discovery worker, leases, persistent queue, public fetcher, source registry and job-ingestion pipeline. Added `search` schedules using configured SearXNG JSON instances with rotation/failover and optional Brave API fallback. No Nurse.ng runtime dependency was added. Brave is no longer required for general search; direct monitoring and ROR remain independent.
+- Added configured-service transport with bounded time/response size, verified HTTPS, no redirects or credential-bearing endpoints, and clear failure outcomes. Public search results still go through the SSRF/robots/TLS-restricted webpage transport. Candidate URL deduplication preserves known sources and prior rejections; only minimal candidate facts are retained.
+- Removed the ROR-healthcare/CC/JSON-LD bottleneck for factual indexing. Government publishers, independently identified organisations and authoritative recruitment-portal links can activate automatically. Full-content rights remain separate. Ordinary announcements retain facts, generated summaries, original links, hashes and history; full page prose is not retained in this mode. Staff decisions remain binding.
+- Added bounded traversal through careers indexes, safe handling of partial page failures, truthful missing-date labels, and current-index plus job-bound-form evidence for postings without deadlines. Stated ambiguous deadlines still prevent publication. The original page hash remains available for change tracking. Linked recruitment documents are recorded without pretending to parse their contents.
+- Retained Nigerian queue preference and daily/lease/cooldown limits. Search targeting can prioritise a candidate without asserting its verified country. Active collections and first checks take precedence over repeated failures from stale directory addresses. No daily-budget history was reset.
+- Applied migration `b715a203ce46` after a clone upgrade, row comparison, foreign-key check and metadata check; all original data was preserved. Private backup: `/tmp/nurse-notifications-migration-cslmxexi/backup.sqlite`.
+- Started a private local SearXNG Python service from upstream revision `3a3dd15bfafcb645a1b45c2c6c0798a8f786aaaf`, with JSON enabled. Configured Nurse.ng to use `http://127.0.0.1:8888`; the Brave key remains empty. Docker daemon access is unavailable to this account, so the supplied container deployment has not been launched here.
+- Live verification: the SearXNG API returned 19 results despite one upstream CAPTCHA; the isolated app worker returned 20 candidates without a Brave key. Live failover from an unavailable first instance to the working instance also returned 20. The normal persistent search schedule completed and registered 10 new candidates, reporting one unavailable upstream engine without losing the other results.
+- The actual persistent worker activated NCDC and published `Medical Laboratory Scientist - Lagos` from the official employer-linked EHA Clinics portal. This is a real Nigerian vacancy, not seeded sample activity. NCDC's sampled pages had no current vacancies; other unreachable programme sites retain their failure states. The local job page correctly displays first-listed timing, an unstated deadline and the original application link.
+- Verification: full pytest suite passed; focused queue, SearXNG and factual-indexing checks passed after final refinements. The opportunity browser runner passed at 320/390/1280px with an isolated database and file email backend, including saved opportunities, reminders, matching, actual alert-worker delivery and coverage. Browser artifacts: `/tmp/nurse-opportunities-browser-_oelkysp/`. Ruff and whitespace checks passed.
+- Added deployment/configuration/cost/security notes in `docs/SEARCH_DISCOVERY.md`, a private container example under `deploy/searxng/`, and updated the roadmap and source-operation documents. Production supervision, persistent hosting, a pinned image and optional additional instances remain deployment tasks. Existing unrelated workspace changes were preserved; no commit or public deployment was requested.
+
+- Final live restart uncovered an existing SQLite stale-lease recovery failure (naive versus timezone-aware datetime evaluation in SQLAlchemy). Fixed recovery to compare in SQL, reload the expired task, and preserve token fencing. The 48-case search/worker regression set passed, including a reloaded-SQLite lease-recovery test.
+
+- Final live outcome: after recovering the stale lease, the persistent worker reconfirmed the same EHA Clinics job at `2026-11-09 00:27:10 UTC` (first publication `00:19:50 UTC`), without duplicates or review exceptions. Both checks published one factual record; three other detail pages were deferred within the existing request budget. Final log: `/tmp/nurse-opportunity-workers-le1xlvfo/recruitment-worker.log`. Recruitment, notification and local SearXNG processes remain running. Final Ruff and whitespace checks passed.
+
+## 9 November 2026 — Member discovery and onboarding (priority 4)
+
+- Extended the existing public-profile directory with combined search, location,
+  professional interests and career-stage filters, plus deterministic 12-person pages.
+  Visibility restrictions apply to SQL filtering, counts and recommendation ranking.
+- Added an optional two-step registration welcome flow, persistent completion state,
+  a shared interest vocabulary, private-by-default profile interests, and clear privacy
+  explanations. Members can skip, revisit or edit interests from their profile.
+- Added Find people to desktop/mobile navigation, network links and dashboard suggestions.
+  People suggestions exclude self/existing relationships and explain public-field matches;
+  opportunity suggestions reuse current-open/source-freshness checks and Nigeria-first order.
+  Existing field/photo sharing, opportunity preferences and email consent are preserved.
+- Applied migration c426ed871b03 after a clone migration, Alembic metadata/FK checks and
+  exact comparisons of original columns. Backup: `/tmp/nurse-notifications-migration-xuy9yp5k`.
+  Restored the existing notification and recruitment workers; the local directory returns HTTP 200.
+- The 23 focused discovery/privacy/onboarding tests and existing profile/auth/community
+  regression tests passed. The isolated Chrome journey passed at 320/390/1280 pixels,
+  including registration, success feedback, private fields/photos, filters, pagination,
+  mobile navigation, follow/connect, dashboard, dark theme and enlarged text.
+  Browser artifacts: `/tmp/nurse-discovery-browser-4pyakrt4`. No real test emails were sent.
+- Updated priority 4 and recorded implementation/deployment details in `MEMBER_DISCOVERY.md`.
+- Final regression coverage: all 516 collected tests were covered across runs. The combined
+  run was interrupted after 262 passing tests; the remaining modules completed in two
+  successful batches (141 and 131 tests, including overlap). Ruff and whitespace checks passed.
+
+## 9 November 2026 — Member IDs, daily activity and the staff analytics dashboard
+
+- **User direction:** make unique account IDs visible, implement daily activity and
+  activeness, and provide a polished modern dashboard for monitoring those measures.
+- **Delivered:** `/staff/users`, accessible through Staff → Member analytics, has
+  summary cards, 7/14/30-day daily charts, an accessible daily-count table, role/staff
+  filters, name/UUID search, 25-account pages, last activity and active-day counts.
+  Members can copy their own unchanged `users.id` in Settings. The interface supports
+  light/dark/high-contrast preferences, keyboard use, enlarged text and narrow screens.
+- **Live behavior:** the visible dashboard refreshes every 30 seconds, preserves
+  selections, identifies stale/offline data and clears results after staff access is
+  revoked. A working manual refresh remains available without JavaScript. Staff
+  accounts are excluded by default and can be included explicitly.
+- **Counting:** one account per Nigerian calendar day, distinct 7/30-day accounts,
+  and a five-minute recent-use estimate. Record successful authenticated page visits
+  and recent trusted input on visible pages. Ignore polling, prefetch, errors,
+  anonymous visitors, hidden/idle pages and automatic scrolling. The browser check
+  specifically covers script-generated scrolling so new chat messages cannot keep
+  an idle account active. No historical activity is inferred from profile timestamps.
+- **Integrity/privacy:** CSRF and current account/session eligibility guard pulses;
+  server-owned identity/time and an atomic composite-key upsert deduplicate concurrent
+  devices. Recording cannot commit a route's unrelated changes. Store only account,
+  date and first/last activity timestamps. Staff access and account deletion cascades
+  cover the history; no public last-seen field or external analytics provider is added.
+- **Migration:** backed up the local SQLite database and upgraded a clone to
+  `d537f982ac14`. Exact original-row comparisons preserved all 35 existing tables;
+  foreign-key and Alembic metadata checks passed. Applied the same additive migration
+  locally after a fresh backup. It created zero activity rows and preserved account
+  IDs. Backup/reports: `/tmp/nurse-activity-migration-nnafdvta/`, with the immediate
+  pre-upgrade copy at `pre-apply.sqlite` (0600). One enabled staff account already
+  exists; no account permissions were changed.
+- **Automated verification:** all **538 collected tests passed** in completed groups
+  of 48, 193 and 297 after interrupted combined runs. Compared every JUnit test ID
+  with fresh collection: no missing, duplicate or extra tests. Report:
+  `/tmp/nurse-activity-regression-complete.json`. Ruff, JavaScript syntax and whitespace
+  checks passed. The new tests include midnight boundaries, stale/revoked identity,
+  concurrent writes, privacy, polling exclusions and preservation on migration.
+- **Browser verification:** isolated Chrome passed the full staff journey at
+  320/390/1280/1440 widths: chart focus, label resizing, search/pagination, both ID-copy
+  paths, actual refresh, no-JavaScript fallback, trusted input versus automatic/hidden
+  activity, offline recovery and permission revocation. Light/dark, enlarged text,
+  screenshots and zero JavaScript exceptions were checked. Final artifacts:
+  `/tmp/nurse-activity-browser-0a63eypt/`. All sample accounts/history were confined to
+  its temporary database; no real emails were sent. Temporary server/browser stopped.
+- **Live readiness:** the existing local app returns HTTP 200 for health and dashboard
+  assets; anonymous dashboard and data requests reach sign-in. Tracking is enabled
+  for subsequent real use. Public deployment, real-device assistive technology and
+  production PostgreSQL validation remain separate tasks. Existing unrelated workspace
+  changes were preserved; no commit or public deployment was performed.
+
+### Dashboard wording follow-up
+
+- The user questioned “Member overview” for the administrative dashboard. Updated
+  its heading to **User overview** and aligned navigation, page title, directory,
+  filters and accessible labels with **User analytics** terminology.
+- Updated the current operating documentation. The existing protected-dashboard
+  rendering check passed (1 test); whitespace checks passed.

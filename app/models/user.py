@@ -48,6 +48,7 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     account_mail_requested_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     photo_storage_name: Mapped[str] = mapped_column(String(32), default="", server_default="")
     photo_public: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
+    onboarding_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     status: Mapped[str] = mapped_column(String(20), default=UserStatus.ACTIVE)
     phone_verified: Mapped[bool] = mapped_column(Boolean, default=False)

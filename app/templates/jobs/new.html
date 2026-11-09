@@ -44,6 +44,9 @@
             <label for="salary_max">Maximum salary per month (₦) <span class="optional">(optional)</span></label>
             <input id="salary_max" name="salary_max" inputmode="numeric" value="{{ values.salary_max }}">
 
+            <label for="closing_date">Application deadline <span class="optional">(optional)</span></label>
+            <input id="closing_date" name="closing_date" value="{{ values.closing_date|default('') }}" maxlength="40" placeholder="2026-12-31">
+            <p class="field-hint">Nigerian dates include the full closing day in Africa/Lagos. For another country, include a timezone, for example 2026-12-31T17:00:00+01:00.</p>
             <label for="description">Description <span class="optional">(optional)</span></label>
             <textarea id="description" name="description" rows="8" maxlength="5000">{{ values.description }}</textarea>
 

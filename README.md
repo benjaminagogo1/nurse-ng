@@ -4,7 +4,14 @@ A professional platform for nurses and healthcare employers, beginning in Nigeri
 
 ## Documents
 
+- [User analytics, unique IDs and daily activity](docs/MEMBER_ANALYTICS.md).
+
+- [Nigerian opportunity coverage, saves and alerts](docs/NIGERIAN_OPPORTUNITIES.md).
+
+- [Notifications and messaging](docs/NOTIFICATIONS.md) — inbox, preferences, live conversations and email-worker operations.
+
 - [Strategic product roadmap](Nurse_ng_Strategic_Product_Roadmap.md) ([PDF](Nurse_ng_Strategic_Product_Roadmap.pdf))
+- [Seven priorities for a world-standard app](docs/WORLD_STANDARD_ROADMAP.md): remaining work, current foundations, and recommended delivery order, recorded on 8 November 2026
 - [Build plan](docs/BUILD_PLAN.md): review, decisions, repository structure, and phased delivery
 - [Assessment baseline and completion tracker](docs/BUILD_PLAN.md#assessment-baseline-and-completion-tracker--6-november-2026): findings, closure criteria, and evidence for measuring progress
 - [Community delivery progress](docs/BUILD_PLAN.md#community-delivery-progress--6-november-2026): implemented conversations, search, and discussion follows, with verification evidence
@@ -16,11 +23,18 @@ A professional platform for nurses and healthcare employers, beginning in Nigeri
 
 ## Status
 
+Staff can monitor account IDs, daily active users, recent activity, 7/30-day
+participation and daily history at `/staff/users` (**Staff → User analytics**).
+Users can copy their own ID in Settings. Counts use Nigeria's calendar day and
+exclude staff by default. History starts with recorded visits after installation;
+upgrade to schema `d537f982ac14` before running this version. See
+[user analytics](docs/MEMBER_ANALYTICS.md) for definitions and access controls.
+
 The current application includes the refreshed public site and member workspace, phone/password authentication and account settings, professional profiles, document review, public community discussions and media, nurse discovery and connections, employer job posting, applications, and private messaging between accepted connections. Applications require consent to share a snapshot of the applicant's contact details; private profile fields remain private. Profiles start as private drafts. Choosing “Make public” lists a profile in nurse discovery and exposes only the fields its owner marks public.
 
 Account settings now includes profile photo upload, email verification and permanent account deletion. **Forgot password** sends a reset link to a verified email address; real delivery requires SMTP configuration. Photos start private, and password resets revoke existing sessions. See [account features and email setup](docs/ACCOUNT_MANAGEMENT.md). Upgrade to schema `7bd28ea64c10` before running this version.
 
-Latest verification on 8 November 2026: **390 tests pass**, plus isolated Chrome account flows at mobile and desktop widths. Account actions now show visible success/error cards, pending button labels and field errors, with results brought below the header. Settings retains verified-email and photo-privacy status. The local database is upgraded with existing records preserved. Brevo SMTP is enabled locally and verified TLS/authentication passed. After correcting the configured sender to the identity verified in Brevo, the user received the email and completed verification. A database check confirmed the account is verified and the single-use link was consumed. Deployed environments need their own email configuration and public URL.
+Account-feature verification on 8 November 2026: **390 tests passed**, plus isolated Chrome account flows at mobile and desktop widths. Account actions now show visible success/error cards, pending button labels and field errors, with results brought below the header. Settings retains verified-email and photo-privacy status. The local database is upgraded with existing records preserved. Brevo SMTP is enabled locally and verified TLS/authentication passed. After correcting the configured sender to the identity verified in Brevo, the user received the email and completed verification. A database check confirmed the account is verified and the single-use link was consumed. Deployed environments need their own email configuration and public URL.
 
 Local verification on 2 November 2026: **115 tests pass**, Ruff (Python linter) and dependency checks pass, and Alembic (database migration tool) reports no schema drift. Fresh installation, upgrades from the previous two migration heads, and downgrade/upgrade cycles are covered. The development database is backed up and upgraded to `b2c3d4e5f6a7`.
 
@@ -42,7 +56,7 @@ Use the half-circle **Display and accessibility** button in the header (also ava
 
 ## Development
 
-Recruitment-source discovery and staff review are now implemented. Open `/recruitment` with a staff account to manage pending sources, evidence, approvals and discovery schedules. ROR finds Nigerian and international institutions without a supplied list of hospital URLs; optional search requires configured credentials and storage permissions. The exact LSHSC source is retained. Configured approved HTML sources can now supply structured JobPosting vacancies to `/jobs`; exceptions go to `/recruitment/vacancies`. Sources that pass automatic evidence checks activate and configure their collectors without staff approval; uncertain cases show reasons for review. Staff decisions remain authoritative. AI remains pending. See the [capability tracker](docs/AUTOMATED_RECRUITMENT_SOURCE_DISCOVERY.md#implementation-progress--7-november-2026) and [operating instructions](docs/RECRUITMENT_SOURCE_OPERATIONS.md).
+Recruitment-source discovery and staff review are now implemented. Open `/recruitment` with a staff account to manage pending sources, evidence, approvals and discovery schedules. ROR finds Nigerian and international institutions without a supplied list of hospital URLs; general search uses configured self-hosted SearXNG instances without API keys, with optional Brave API fallback. The exact LSHSC source is retained. Configured approved HTML sources can now supply structured JobPosting vacancies to `/jobs`; exceptions go to `/recruitment/vacancies`. Sources that pass automatic evidence checks activate and configure their collectors without staff approval; uncertain cases show reasons for review. Staff decisions remain authoritative. AI remains pending. See the [capability tracker](docs/AUTOMATED_RECRUITMENT_SOURCE_DISCOVERY.md#implementation-progress--7-november-2026) and [operating instructions](docs/RECRUITMENT_SOURCE_OPERATIONS.md).
 
 Nigerian opportunities take priority in the jobs feed, source registry and worker queue. Coverage includes government/private health roles and Nigerian youth fellowships, internships and graduate programmes across sectors; international opportunities remain accessible. Repeat `recruitment-init` to add pending local starter sites and update the original worldwide directory schedule from daily to weekly. Source registration does not establish a current opening; structured vacancy and source evidence checks still apply.
 
@@ -73,6 +87,10 @@ Start the development server from the repository root after configuring `.env`:
 ```
 
 Open <http://127.0.0.1:8000>, or <http://127.0.0.1:8000/feed> for community. Keep the terminal open; press Ctrl+C to stop. If startup reports an invalid signing key, check the `.env` setup above; without that file or explicit environment variables, the application defaults to production configuration.
+
+Reels are available at <http://127.0.0.1:8000/reels>. Migrate to `8cf309b2a176`, install the updated dependencies, and keep `venv/bin/python -m app.cli reels-worker` running alongside the web server. Uploads remain private until this worker creates playback versions and a cover image. See [Reels operations](docs/REELS.md) for processing, captions, testing and the remaining storage/CDN deployment requirements.
+
+Notifications are available at <http://127.0.0.1:8000/notifications>. Final notification/messaging verification: **441 tests passed**, plus isolated mobile/desktop browser and CLI-worker checks. Run `venv/bin/alembic upgrade head` (current revision `ae5314d8c902`) and keep `venv/bin/python -m app.cli notification-worker` running for opted-in email alerts. The inbox and automatic message updates work through the web application; email defaults off. See [notification operations](docs/NOTIFICATIONS.md).
 
 To repeat the draft-recovery and reply-context browser checks, run `./venv/bin/python tests/browser/community_drafts.py`. The runner requires Chrome at `/usr/bin/google-chrome`, uses an isolated temporary database/server, and reports its screenshots/log directory. It exercises recovery, failed/offline submission, confirmed publication, browser Back, tab/discussion separation, expiry, blocked storage, logout, and selecting/restoring/changing a response across pages. It does not use the application database.
 
@@ -105,3 +123,8 @@ Document-review evidence is stored under `evidence/` by default (ignored by Git)
 ```bash
 ./venv/bin/python -m app.cli set-staff +2348012345678
 ```
+
+
+Members can save opportunities, set matching interests and choose deadline reminders from the Jobs page. The notification worker generates these alerts; email remains optional. Source operators can select the ordinary-announcement collector and inspect `/recruitment/coverage`. See [Nigerian opportunity operations](docs/NIGERIAN_OPPORTUNITIES.md) for setup and live-coverage limits.
+
+Search and automatic factual indexing updated on 9 November 2026: SearXNG works through the Python worker without a Brave key, with instance failover and independent direct monitoring. Verified government sources and authoritative publisher links can activate factual listings without full-content reuse permission. See [search deployment and operations](docs/SEARCH_DISCOVERY.md).

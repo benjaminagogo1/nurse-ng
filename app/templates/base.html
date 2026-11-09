@@ -21,6 +21,15 @@
   <script src="{{ url_for('static', path='/js/feedback.js') }}" defer></script>
   <script src="{{ url_for('static', path='/js/community-drafts.js') }}" defer></script>
   <script src="{{ url_for('static', path='/js/community-replies.js') }}" defer></script>
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/notifications.css') }}">
+  {% if user %}<script src="{{ url_for('static', path='/js/notifications.js') }}" defer></script>{% endif %}
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/opportunities.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/discovery.css') }}">
+  {% if user %}
+  <meta name="activity-csrf" content="{{ csrf_token }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/analytics.css') }}">
+  <script src="{{ url_for('static', path='/js/activity.js') }}" defer></script>
+  {% endif %}
   {% block extra_head %}{% endblock %}
 </head>
 <body data-draft-scope="{{ draft_scope }}" class="{% if user %}is-app{% else %}is-public{% endif %}{% if page == 'home' and not user %} is-landing{% endif %}{% if is_auth_page %} is-auth{% endif %}">
@@ -40,7 +49,8 @@
         <ul>
           <li><a href="/"{% if page == 'home' %} aria-current="page"{% endif %}>Home</a></li>
           <li><a href="/jobs"{% if page == 'jobs' %} aria-current="page"{% endif %}>Jobs</a></li>
-          <li><a href="/feed"{% if page in ['topics', 'feed', 'nurses', 'discussion-follows'] %} aria-current="page"{% endif %}>Community</a></li>
+          <li><a href="/feed"{% if page in ['topics', 'feed', 'discussion-follows'] %} aria-current="page"{% endif %}>Community</a></li>
+          <li><a href="/nurses"{% if page == 'nurses' %} aria-current="page"{% endif %}>Find people</a></li>
           <li><a href="/reels"{% if page == 'reels' %} aria-current="page"{% endif %}>Reels</a></li>
           <li><a href="/learning"{% if page == 'learning' %} aria-current="page"{% endif %}>Learning</a></li>
           <li><a href="/resources"{% if page == 'resources' %} aria-current="page"{% endif %}>Resources</a></li>
@@ -53,10 +63,7 @@
       <div class="header-actions">
         {{ display_button() }}
         {% if user %}
-        <details class="header-popover notifications">
-          <summary class="icon-button" aria-label="Notifications">{{ icon('bell', 20) }}</summary>
-          <div class="popover-content"><strong>Keep in touch</strong><p>Return to your discussions, connection requests, and messages.</p><a href="/feed/discussions">Discussion replies {{ icon('arrow', 15) }}</a><a href="/network">View network {{ icon('arrow', 15) }}</a><a href="/messages">View messages {{ icon('arrow', 15) }}</a></div>
-        </details>
+        <a class="icon-button notification-bell" href="/notifications" data-notification-bell aria-label="Notifications{% if notification_count %}, {{ notification_count }} unread{% endif %}"{% if page == 'notifications' %} aria-current="page"{% endif %}>{{ icon('bell', 20) }}<span class="notification-badge" data-notification-badge aria-hidden="true" {% if not notification_count %}hidden{% endif %}>{{ '99+' if notification_count|default(0) > 99 else notification_count|default(0) }}</span></a>
         <a class="icon-button header-messages" href="/messages" aria-label="Messages">{{ icon('chat', 20) }}</a>
         <details class="header-popover account-menu">
           <summary aria-label="Account menu">
@@ -67,6 +74,7 @@
           <div class="popover-content">
             <p class="account-phone">{{ user.phone }}</p>
             <a href="/profile">{{ icon('user', 17) }} My profile</a>
+            <a href="/welcome">{{ icon('sparkle', 17) }} My interests</a>
             <a href="/settings">{{ icon('settings', 17) }} Settings</a>
             <form method="post" action="/auth/logout"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit" class="menu-signout">{{ icon('logout', 17) }} Sign out</button></form>
           </div>
@@ -93,8 +101,10 @@
           {{ nav_link('/jobs', 'jobs', 'Jobs', 'briefcase', page) }}
           {{ nav_link('/applications', 'applications', 'Applications', 'file', page) }}
           {{ nav_link('/profile/verification', 'verification', 'Verification', 'shield', page) }}
+          {{ nav_link('/notifications', 'notifications', 'Notifications', 'bell', page) }}
           {{ nav_link('/messages', 'messages', 'Messages', 'chat', page) }}
           {{ nav_link('/network', 'network', 'Network', 'users', page) }}
+          {{ nav_link('/nurses', 'nurses', 'Find people', 'search', page) }}
         </ul>
         <p class="side-heading">Grow together</p>
         <ul class="side-list">
@@ -108,11 +118,11 @@
         </ul>
         {% if user.account_type == 'employer' %}
         <p class="side-heading">Recruitment</p>
-        <ul class="side-list">{{ nav_link('/employers', 'employers', 'For employers', 'building', page) }}{{ nav_link('/nurses', 'nurses', 'Find nurses', 'search', page) }}</ul>
+        <ul class="side-list">{{ nav_link('/employers', 'employers', 'For employers', 'building', page) }}</ul>
         {% endif %}
         {% if user.is_staff %}
         <p class="side-heading">Staff</p>
-        <ul class="side-list">{{ nav_link('/review', 'review', 'Document reviews', 'review', page) }}{{ nav_link('/moderation', 'moderation', 'Moderation', 'flag', page) }}{{ nav_link('/recruitment', 'recruitment', 'Recruitment sources', 'building', page) }}</ul>
+        <ul class="side-list">{{ nav_link('/staff/users', 'staff-users', 'User analytics', 'dashboard', page) }}{{ nav_link('/review', 'review', 'Document reviews', 'review', page) }}{{ nav_link('/moderation', 'moderation', 'Moderation', 'flag', page) }}{{ nav_link('/recruitment', 'recruitment', 'Recruitment sources', 'building', page) }}</ul>
         {% endif %}
       </nav>
       <div class="sidebar-note">{{ icon('heart', 23) }}<strong>Your next chapter starts here.</strong><p>Keep learning. Keep connecting. Keep making a difference.</p><a href="/resources">Explore resources {{ icon('arrow', 15) }}</a></div>

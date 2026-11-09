@@ -41,6 +41,7 @@ from app.models.community import (
 )
 from app.models.profile import NurseProfile, ProfileStatus
 from app.models.user import User
+from app.services.notifications import notify_connection, notify_reply
 
 if TYPE_CHECKING:
     from app.models.reels import Reel
@@ -657,6 +658,8 @@ def add_reply(
     )
     _lock_community_name(db, user)
     db.add(reply)
+    db.flush()
+    notify_reply(db, reply, post)
     db.commit()
     db.refresh(reply)
     return reply
@@ -947,6 +950,8 @@ def request_connection(
             existing.recipient_user_id = profile.user_id
             existing.status = ConnectionStatus.PENDING
             existing.responded_at = None
+            db.flush()
+            notify_connection(db, existing)
             db.commit()
             db.refresh(existing)
         return existing
@@ -958,6 +963,8 @@ def request_connection(
     )
     db.add(item)
     try:
+        db.flush()
+        notify_connection(db, item)
         db.commit()
     except IntegrityError:
         db.rollback()
@@ -1010,6 +1017,13 @@ def respond_to_connection(
     if result.rowcount != 1:
         db.rollback()
         raise CommunityError("This connection request has already been answered.")
+    if accept:
+        notify_connection(db, connection, accepted=True)
+    from app.models.notifications import Notification
+
+    db.execute(update(Notification).where(
+        Notification.connection_id == connection.id, Notification.recipient_id == user.id,
+    ).values(read_at=datetime.now(UTC)))
     db.commit()
     db.refresh(connection)
     return connection
