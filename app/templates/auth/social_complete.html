@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Finish connecting your account — Nurse.ng{% endblock %}
+{% block content %}
+<section class="form-page">
+  <h1>Finish connecting {{ provider_name }}</h1>
+  <p>{{ provider_name }} confirmed {{ email }}. Connect it to your existing Nurse.ng account, or create an account.</p>
+  <form method="post" action="/auth/social/complete" class="stacked-form" data-pending-label="Connecting account…">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="social-mode">Account choice</label><select id="social-mode" name="mode"><option value="existing" {% if values.mode != 'new' %}selected{% endif %}>Connect my existing account</option><option value="new" {% if values.mode == 'new' %}selected{% endif %}>Create a new account</option></select>
+    <label for="social-phone">Phone number</label><input id="social-phone" name="phone" type="tel" autocomplete="tel" required value="{{ values.phone }}">
+    <label for="social-password">Password</label><input id="social-password" name="password" type="password" autocomplete="current-password" required maxlength="128" aria-describedby="social-password-hint"><p class="field-hint" id="social-password-hint">For an existing account, enter its current password. For a new account, choose at least 8 characters so you can also sign in by phone.</p>
+    <fieldset><legend>For a new account</legend><label for="social-name">Full name</label><input id="social-name" name="full_name" maxlength="120" autocomplete="name" value="{{ values.full_name }}"><label for="social-role">Account type</label><select id="social-role" name="role">{% for value, label in [('nurse','Nurse'),('employer','Employer'),('partner','Partner')] %}<option value="{{ value }}" {% if values.role == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></fieldset>
+    <button type="submit">Connect and continue</button>
+  </form><p><a href="/auth/forgot-password">Forgot your existing password?</a> · <a href="/auth/login">Return to sign-in</a></p>
+</section>
+{% endblock %}

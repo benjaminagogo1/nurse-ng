@@ -99,6 +99,11 @@
       controllers.forEach(controller => controller.published(confirmation));
     }
   };
+  document.addEventListener('nurse:offline-published', event => {
+    if (!enabled) return;
+    acknowledge(event.detail);
+    send({type: 'published', confirmation: event.detail});
+  });
   if (enabled && scope) {
     try {
       eachDraft(key => { if (!key.endsWith(':cleared')) read(key); });
@@ -229,9 +234,13 @@
     form.addEventListener('input', () => save());
     form.addEventListener('change', () => save());
     form.addEventListener('submit', event => {
-      if (enabled) save(true);
+      // Enhanced forms announce when validation passes and a request actually starts.
+      if (enabled) save(!form.hasAttribute('data-feedback-form'));
       if (fields.some(field => field.disabled)) event.preventDefault();
     });
+    form.addEventListener('nurse:submission-started', () => save(true));
+    form.addEventListener('nurse:offline-draft-saved', () => save());
+    form.addEventListener('nurse:submission-rejected', () => save(false, true));
     discard.addEventListener('click', () => {
       try {
         storage?.removeItem(key);
@@ -245,13 +254,17 @@
     form.dataset.replyTargetExplicit = 'false';
   });
 
-  document.querySelectorAll('form[action="/auth/logout"]').forEach(form => {
-    form.addEventListener('submit', () => {
+  const clearAfterSignOut = () => {
       try {
         revoke(scope);
         shared.setItem(activeKey, '');
       } catch { send({ type: 'logout' }); }
       signedOut();
+  };
+  document.addEventListener('nurse:signed-out', clearAfterSignOut);
+  document.querySelectorAll('form[action="/auth/logout"]').forEach(form => {
+    form.addEventListener('submit', () => {
+      if (!form.hasAttribute('data-feedback-form')) clearAfterSignOut();
     });
   });
   const checkSession = () => {

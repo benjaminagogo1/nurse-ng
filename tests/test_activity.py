@@ -208,6 +208,14 @@ def test_navigations_record_activity_but_polling_prefetch_assets_and_errors_do_n
     ):
         client.get(path)
     client.get("/settings", headers={"Sec-Fetch-Mode": "cors"})
+    worker_navigation = {
+        "X-Nurse-Navigation": "document",
+        "Sec-Fetch-Mode": "same-origin",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Site": "same-origin",
+    }
+    client.get("/settings", headers={**worker_navigation, "X-Nurse-Navigation": ""})
+    client.get("/settings", headers={**worker_navigation, "Sec-Purpose": "prefetch"})
     client.get("/settings", headers={"Sec-Purpose": "prefetch"})
     client.post("/activity/pulse", data={"csrf_token": "bad"})
     row = db_session.get(Activity, (user.id, service.local_day(AT)))
@@ -215,6 +223,11 @@ def test_navigations_record_activity_but_polling_prefetch_assets_and_errors_do_n
     assert client.get("/settings").status_code == 200
     db_session.expire(row)
     assert service.utc(row.last_seen_at) == AT + timedelta(minutes=10)
+    assert db_session.scalar(select(func.count()).select_from(Activity)) == 1
+    monkeypatch.setattr(service, "now", lambda: AT + timedelta(minutes=20))
+    assert client.get("/settings", headers=worker_navigation).status_code == 200
+    db_session.expire(row)
+    assert service.utc(row.last_seen_at) == AT + timedelta(minutes=20)
     assert db_session.scalar(select(func.count()).select_from(Activity)) == 1
 
 

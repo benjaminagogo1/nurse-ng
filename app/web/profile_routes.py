@@ -44,6 +44,7 @@ from app.services.verification import (
 )
 from app.web.community_routes import profile_social_context
 from app.web.deps import get_current_user, require_user, verify_csrf
+from app.web.feedback import message, redirect_feedback
 from app.web.templating import render
 
 router = APIRouter(prefix="/profile", tags=["profile"])
@@ -141,11 +142,13 @@ def _document_review_context(profile: NurseProfile) -> dict[str, object]:
 
 def _verification_context(
     db: Session,
-    profile: NurseProfile,
+    profile: NurseProfile | None,
     *,
     registration_number: str = "",
     error: str | None = None,
 ) -> dict[str, object]:
+    if profile is None:
+        return {"title": "Verification", "profile": None, "error": error}
     return {
         "title": "Document review",
         "profile": profile,
@@ -179,6 +182,7 @@ def show_profile(
 @router.get("/edit")
 def edit_profile_form(
     request: Request,
+    return_to: str = "",
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ) -> Response:
@@ -192,6 +196,7 @@ def edit_profile_form(
             "user": user,
             "profile": profile,
             "values": _form_values(profile, **prefill),
+            "return_to": "verification" if return_to == "verification" else "",
             "status_options": list(PROFESSIONAL_STATUS_LABELS.items()),
             "interest_options": INTEREST_OPTIONS,
         },
@@ -210,6 +215,7 @@ def save_profile_form(
     years_experience: str = Form(""),
     skills: str = Form(""),
     interests: list[str] = Form([]),
+    return_to: str = Form(""),
     user: User = Depends(require_user),
     _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
@@ -252,11 +258,21 @@ def save_profile_form(
                 "status_options": list(PROFESSIONAL_STATUS_LABELS.items()),
                 "interest_options": INTEREST_OPTIONS,
                 "error": str(exc),
+                "return_to": "verification" if return_to == "verification" else "",
             },
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 
-    return RedirectResponse("/profile", status_code=status.HTTP_303_SEE_OTHER)
+    # Keep the continuation local to this form and allow only a named destination.
+    continuing_verification = return_to == "verification"
+    return redirect_feedback(
+        request, "/profile/verification" if continuing_verification else "/profile",
+        message(
+            'Profile saved',
+            'You can now submit your documents for review.' if continuing_verification
+            else 'Your profile details have been saved.',
+        ),
+    )
 
 
 @router.get("/sharing")
@@ -338,7 +354,13 @@ def save_sharing_form(
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 
-    return RedirectResponse("/profile", status_code=status.HTTP_303_SEE_OTHER)
+    return redirect_feedback(
+        request, "/profile",
+        message(
+            'Sharing choices saved',
+            'Your selected fields now use these visibility settings.',
+        ),
+    )
 
 
 @router.get("/verification")
@@ -348,9 +370,6 @@ def verification_page(
     db: Session = Depends(get_db),
 ) -> Response:
     profile = get_profile_for_user(db, user.id)
-    if profile is None:
-        return RedirectResponse("/profile/edit", status_code=status.HTTP_303_SEE_OTHER)
-
     return render(
         request,
         "profile/verification.html",
@@ -373,7 +392,15 @@ def submit_verification(
 ) -> Response:
     profile = get_profile_for_user(db, user.id)
     if profile is None:
-        return RedirectResponse("/profile/edit", status_code=status.HTTP_303_SEE_OTHER)
+        return render(
+            request,
+            "profile/verification.html",
+            {"user": user, **_verification_context(
+                db, None,
+                error="Create and save your profile before submitting documents for review.",
+            )},
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
 
     if consent != "on":
         return render(
@@ -425,7 +452,13 @@ def submit_verification(
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 
-    return RedirectResponse("/profile/verification", status_code=status.HTTP_303_SEE_OTHER)
+    return redirect_feedback(
+        request, "/profile/verification",
+        message(
+            'Documents submitted',
+            'Your documents are waiting for review. You can check progress here.',
+        ),
+    )
 
 
 
@@ -454,7 +487,13 @@ def activate(
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 
-    return RedirectResponse("/profile", status_code=status.HTTP_303_SEE_OTHER)
+    return redirect_feedback(
+        request, "/profile",
+        message(
+            'Profile is public',
+            'Your profile is now discoverable with only the fields you chose to share.',
+        ),
+    )
 
 
 @router.post("/deactivate")
@@ -469,7 +508,13 @@ def deactivate(
         return RedirectResponse("/profile/edit", status_code=status.HTTP_303_SEE_OTHER)
 
     deactivate_profile(db, profile)
-    return RedirectResponse("/profile", status_code=status.HTTP_303_SEE_OTHER)
+    return redirect_feedback(
+        request, "/profile",
+        message(
+            'Profile is private',
+            'Your profile is no longer listed publicly.',
+        ),
+    )
 
 
 @public_router.get("/p/{public_id}", name="public_profile")

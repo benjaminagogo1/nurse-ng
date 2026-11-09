@@ -26,7 +26,7 @@
       <p class="field-hint">{{ 'Staff decision' if source.approval_mode == 'staff' else 'Automatically activated' if source.approval_mode == 'automatic' and source.verification_status == 'approved' else 'Needs review' if source.activation_review else 'Awaiting automatic checks' }}{% if source.activation_review.reasons and source.approval_mode != 'staff' %}: {{ source.activation_review.reasons[0] }}{% endif %}</p>
       <p class="field-hint">{{ source.source_type|replace('_', ' ')|capitalize }} · Found through {{ source.discovered_via|replace('_', ' ') }} · Last check: {{ source.health_status|replace('_', ' ') }}</p>
     </article>
-  {% else %}<p>No matching sources. Initialise discovery with the operator command or add a schedule below.</p>{% endfor %}
+  {% else %}<p>{% if query or status or country %}No sources match these filters. Try a different name, status or country.{% else %}No sources have been added. Add a source you know or set up a discovery schedule below.{% endif %}</p>{% endfor %}
   </div>
   <nav class="source-actions" aria-label="Source pages">{% if previous_url %}<a href="{{ previous_url }}">Previous</a>{% endif %}<span>Page {{ page_number }}</span>{% if next_url %}<a href="{{ next_url }}">Next</a>{% endif %}</nav>
 
@@ -58,7 +58,7 @@
       <button class="button-primary" type="submit">{{ 'Pause' if schedule.enabled else 'Enable' }} schedule</button>
     </form>
   </article>
-  {% else %}<p>No schedules yet.</p>{% endfor %}
+  {% else %}<p>No discovery schedules yet. Add one below to choose where and how often to look for recruitment sources.</p>{% endfor %}
   <details class="source-card">
     <summary>Add a discovery schedule</summary>
     <form method="post" action="/recruitment/schedules" class="source-form">
@@ -83,6 +83,6 @@
     <p>{{ task.message or 'Waiting for a worker.' }}</p>
     <p class="field-hint">{{ task.result_count }} new sources · Attempt {{ task.attempts }}{% if task.source_id %} · <a href="/recruitment/sources/{{ task.source_id }}">View source</a>{% endif %}</p>
   </article>
-  {% else %}<p>No tasks have run yet.</p>{% endfor %}
+  {% else %}<p>No tasks have run yet. Discovery and source-check results will appear here after the worker processes them.</p>{% endfor %}
 </section>
 {% endblock %}

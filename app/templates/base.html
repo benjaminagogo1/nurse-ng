@@ -1,5 +1,6 @@
 {%- from "_icons.html" import icon -%}
 {%- from "_display.html" import display_button, display_dialog -%}
+{%- from "_feedback.html" import feedback_slot -%}
 {%- macro nav_link(href, key, label, name, current) -%}
 <li><a href="{{ href }}"{% if current == key %} aria-current="page"{% endif %}>{{ icon(name, 19) }}<span>{{ label }}</span></a></li>
 {%- endmacro -%}
@@ -9,32 +10,42 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#073c40">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <script src="/static/js/offline-store.js?v=6" defer></script>
+  <script src="/static/js/offline.js?v=10" defer></script>
+  <script src="/static/js/offline-sync.js?v=6" defer></script>
+  <script src="/static/js/offline-data.js?v=10" defer></script>
+  <script src="/static/js/offline-content.js?v=10" defer></script>
+  <script src="/static/js/offline-upload.js?v=6" defer></script>
   <meta name="description" content="A professional home for Nigerian nurses. Find opportunities, build your profile, and grow with your community.">
   <title>{% block title %}{{ title or 'Nurse.ng' }} — Nurse.ng{% endblock %}</title>
   <script src="{{ url_for('static', path='/js/display.js') }}"></script>
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', path='/img/favicon.svg') }}">
-  <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', path='/css/design.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', path='/css/appearance.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}?v=7">
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/design.css') }}?v=8">
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/appearance.css') }}?v=7">
   <link rel="stylesheet" href="{{ url_for('static', path='/css/feedback.css') }}">
   <script src="{{ url_for('static', path='/js/app.js') }}" defer></script>
-  <script src="{{ url_for('static', path='/js/feedback.js') }}" defer></script>
-  <script src="{{ url_for('static', path='/js/community-drafts.js') }}" defer></script>
+  <script src="{{ url_for('static', path='/js/feedback.js') }}?v=7" defer></script>
+  {% if draft_session_known|default(true) %}<script src="{{ url_for('static', path='/js/community-drafts.js') }}" defer></script>{% endif %}
   <script src="{{ url_for('static', path='/js/community-replies.js') }}" defer></script>
-  <link rel="stylesheet" href="{{ url_for('static', path='/css/notifications.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/notifications.css') }}?v=7">
   {% if user %}<script src="{{ url_for('static', path='/js/notifications.js') }}" defer></script>{% endif %}
   <link rel="stylesheet" href="{{ url_for('static', path='/css/opportunities.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', path='/css/discovery.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/discovery.css') }}?v=7">
+  <link rel="stylesheet" href="/static/css/offline.css?v=10">
+  <link rel="stylesheet" href="/static/css/profile.css?v=1">
+  <link rel="stylesheet" href="/static/css/jobs.css?v=2">
   {% if user %}
   <meta name="activity-csrf" content="{{ csrf_token }}">
-  <link rel="stylesheet" href="{{ url_for('static', path='/css/analytics.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/analytics.css') }}?v=7">
   <script src="{{ url_for('static', path='/js/activity.js') }}" defer></script>
   <link rel="stylesheet" href="{{ url_for('static', path='/css/tour.css') }}">
   <script src="{{ url_for('static', path='/js/tour.js') }}" defer></script>
   {% endif %}
   {% block extra_head %}{% endblock %}
 </head>
-<body data-draft-scope="{{ draft_scope }}" class="{% if user %}is-app{% else %}is-public{% endif %}{% if page == 'home' and not user %} is-landing{% endif %}{% if is_auth_page %} is-auth{% endif %}">
+<body data-draft-scope="{{ draft_scope }}" data-offline-session="{{ 'known' if draft_session_known|default(true) else 'unknown' }}" data-offline-shell="{{ 'true' if offline_shell|default(false) else 'false' }}" class="{% if user %}is-app{% else %}is-public{% endif %}{% if page == 'home' and not user %} is-landing{% endif %}{% if is_auth_page %} is-auth{% endif %}">
   {% if published_draft %}<script type="application/json" id="published-draft">{{ published_draft|tojson }}</script>{% endif %}
   <a class="skip-link" href="#main">Skip to main content</a>
   {% block header %}
@@ -52,9 +63,10 @@
           <li><a href="/"{% if page == 'home' %} aria-current="page"{% endif %}>Home</a></li>
           <li><a href="/jobs"{% if page == 'jobs' %} aria-current="page"{% endif %}>Jobs</a></li>
           <li><a href="/feed"{% if page in ['topics', 'feed', 'discussion-follows'] %} aria-current="page"{% endif %}>Community</a></li>
-          <li><a href="/nurses"{% if page == 'nurses' %} aria-current="page"{% endif %}>Find people</a></li>
+          <li><a href="/nurses"{% if page == 'nurses' %} aria-current="page"{% endif %}>Find colleagues</a></li>
           <li><a href="/reels"{% if page == 'reels' %} aria-current="page"{% endif %}>Reels</a></li>
           <li><a href="/learning"{% if page == 'learning' %} aria-current="page"{% endif %}>Learning</a></li>
+          <li><a href="/events"{% if page == 'events' %} aria-current="page"{% endif %}>Events</a></li>
           <li><a href="/resources"{% if page == 'resources' %} aria-current="page"{% endif %}>Resources</a></li>
           <li class="only-mobile"><a href="/employers">For employers</a></li>
           <li class="only-mobile"><a href="/auth/login">Sign in</a></li>
@@ -63,6 +75,7 @@
       </nav>
       {% endif %}
       <div class="header-actions">
+        <a class="connectivity-link" href="/offline" data-connectivity aria-label="Connection and offline changes">Online</a>
         {{ display_button() }}
         {% if user %}
         <a class="icon-button notification-bell" href="/notifications" data-notification-bell aria-label="Notifications{% if notification_count %}, {{ notification_count }} unread{% endif %}"{% if page == 'notifications' %} aria-current="page"{% endif %}>{{ icon('bell', 20) }}<span class="notification-badge" data-notification-badge aria-hidden="true" {% if not notification_count %}hidden{% endif %}>{{ '99+' if notification_count|default(0) > 99 else notification_count|default(0) }}</span></a>
@@ -106,7 +119,7 @@
           {{ nav_link('/notifications', 'notifications', 'Notifications', 'bell', page) }}
           {{ nav_link('/messages', 'messages', 'Messages', 'chat', page) }}
           {{ nav_link('/network', 'network', 'Network', 'users', page) }}
-          {{ nav_link('/nurses', 'nurses', 'Find people', 'search', page) }}
+          {{ nav_link('/nurses', 'nurses', 'Find colleagues', 'search', page) }}
         </ul>
         <p class="side-heading">Grow together</p>
         <ul class="side-list">
@@ -115,8 +128,10 @@
           {{ nav_link('/feed/discussions', 'discussion-follows', 'Followed discussions', 'feed', page) }}
           {{ nav_link('/topics', 'topics', 'Browse topics', 'users', page) }}
           {{ nav_link('/learning', 'learning', 'Learning', 'book', page) }}
+          {{ nav_link('/events', 'events', 'Events', 'calendar', page) }}
           {{ nav_link('/resources', 'resources', 'Resources', 'folder', page) }}
           {{ nav_link('/settings', 'settings', 'Settings', 'settings', page) }}
+          {{ nav_link('/offline', 'offline', 'Offline & sync', 'folder', page) }}
         </ul>
         {% if user.account_type == 'employer' %}
         <p class="side-heading">Recruitment</p>
@@ -130,7 +145,7 @@
       <div class="sidebar-note">{{ icon('heart', 23) }}<strong>Your next chapter starts here.</strong><p>Keep learning. Keep connecting. Keep making a difference.</p><a href="/resources">Explore resources {{ icon('arrow', 15) }}</a></div>
     </aside>
     {% endif %}
-    <main id="main" tabindex="-1" class="{% if user %}app-main{% else %}site-main{% endif %}">{% if tour %}{% include "_tour_prompt.html" %}{% endif %}{% block content %}{% endblock %}</main>
+    <main id="main" tabindex="-1" class="{% if user %}app-main{% else %}site-main{% endif %}">{{ feedback_slot(feedback|default(none)) }}{% if tour %}{% include "_tour_prompt.html" %}{% endif %}{% block content %}{% endblock %}</main>
   </div>
 
   <footer class="site-footer">

@@ -3,7 +3,6 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Form, Query, Request, Response
-from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -13,6 +12,7 @@ from app.models.vacancies import VacancyEvent, VacancyRecord, VacancySnapshot
 from app.services.recruitment import RecruitmentError
 from app.services.vacancies import EDITABLE, record_list, review_record
 from app.web.deps import require_staff, verify_csrf
+from app.web.feedback import message, redirect_feedback
 from app.web.recruitment_routes import _load
 from app.web.templating import render
 
@@ -164,4 +164,10 @@ async def review(
             error=str(exc),
             values={key: value for key, value in form.items() if isinstance(value, str)},
         )
-    return RedirectResponse(f"/recruitment/vacancies/{record.id}", status_code=303)
+    return redirect_feedback(
+        request, f"/recruitment/vacancies/{record.id}",
+        message(
+            'Opportunity review saved',
+            'Your decision and any listing changes have been saved.',
+        ),
+    )

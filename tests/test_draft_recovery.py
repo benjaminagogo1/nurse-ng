@@ -5,7 +5,10 @@ import re
 import uuid
 
 import pytest
+from fastapi.testclient import TestClient
 
+from app.db.session import get_db
+from app.main import create_app
 from tests.helpers import csrf_from
 from tests.test_discussions import as_member
 from tests.test_discussions import community as community
@@ -89,3 +92,48 @@ def test_csrf_failure_does_not_acknowledge_or_publish_a_draft(client, community)
     assert response.status_code == 400
     assert confirmation(client.get("/feed")) is None
     assert "Must not publish" not in client.get("/feed").text
+
+
+@pytest.mark.parametrize("path, code", [
+    ("/missing-destination", 404), ("/events/new", 403), ("/events?page=invalid", 422),
+])
+def test_error_page_preserves_pending_publication_confirmation(client, community, path, code):
+    users, topic, _ = community
+    as_member(client, users[1])
+    form = client.get("/posts/new")
+    version = str(uuid.uuid4())
+    result = client.post("/posts", data={
+        "csrf_token": csrf_from(form), "body": "Published before visiting an error page",
+        "topic_id": str(topic.id), "draft_version": version,
+    }, follow_redirects=False)
+    assert result.status_code == 303
+    error = client.get(path, headers={"Accept": "text/html"})
+    assert error.status_code == code
+    assert confirmation(error) is None
+    # Error rendering does not establish whether the account session has ended.
+    assert "js/community-drafts.js" not in error.text
+    landed = client.get(result.headers["location"])
+    assert scope(landed) == scope(form)
+    assert confirmation(landed) == {"key": "post", "version": version}
+
+
+def test_database_failure_renders_without_treating_the_member_as_signed_out(client, community):
+    users, _, _ = community
+    as_member(client, users[1])
+    original_scope = scope(client.get("/posts/new"))
+    failing_app = create_app()
+
+    def unavailable_db():
+        raise RuntimeError("Private database failure details")
+
+    failing_app.dependency_overrides[get_db] = unavailable_db
+    with TestClient(
+        failing_app, base_url="http://localhost", raise_server_exceptions=False,
+    ) as failing_client:
+        failing_client.cookies.update(client.cookies)
+        error = failing_client.get("/settings", headers={"Accept": "text/html"})
+    assert error.status_code == 500
+    assert "js/community-drafts.js" not in error.text
+    assert "Private database failure" not in error.text
+    assert "Check whether the action completed" in error.text
+    assert scope(client.get("/posts/new")) == original_scope

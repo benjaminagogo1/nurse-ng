@@ -50,7 +50,9 @@ from app.models.user import User
 command.upgrade(Config(str(ROOT / "alembic.ini")), "head")
 from sqlalchemy import select
 
+from app.models.community import Connection
 from app.models.profile import NurseProfile
+from app.services.community import connection_pair_key
 from app.services.jobs import create_job
 from app.services.profiles import get_visibility_map
 from tests.test_member_discovery import person
@@ -269,7 +271,7 @@ try:
         ),
         "filtered directory",
     )
-    assert js('document.querySelector(".discovery-results h2").textContent === "14 people found"')
+    assert js('document.querySelector(".discovery-results h2").textContent === "14 colleagues found"')
     assert js('document.querySelectorAll(".person-card").length === 12')
     js('document.querySelector(`a[rel="next"]`).click()')
     wait_for(
@@ -303,6 +305,42 @@ try:
         ),
         "connection request",
     )
+
+    # Accept/Decline buttons are named "action"; their names must not mask the form URL.
+    with SessionLocal() as db:
+        member = db.scalar(select(User).where(User.phone == "+2348000000077"))
+        colleagues = db.scalars(
+            select(NurseProfile).where(
+                NurseProfile.display_name.in_(["Nurse Colleague 01", "Nurse Colleague 02"])
+            ).order_by(NurseProfile.display_name)
+        ).all()
+        requests = [
+            Connection(
+                requester_user_id=colleague.user_id,
+                recipient_user_id=member.id,
+                pair_key=connection_pair_key(colleague.user_id, member.id),
+                status="pending",
+            )
+            for colleague in colleagues
+        ]
+        db.add_all(requests)
+        db.commit()
+        request_ids = [item.id for item in requests]
+    for request_id, decision in zip(request_ids, ["accept", "decline"], strict=True):
+        navigate("/network")
+        selector = f'form[action="/connections/{request_id}/respond"]'
+        js(f'document.querySelector({json.dumps(selector + " button[value=" + decision + "]")}).click()')
+        wait_for(
+            lambda selector=selector: js(
+                'document.querySelector("#feedback-title")?.textContent === "Connection request updated" && '
+                f'!document.querySelector({json.dumps(selector)})'
+            ),
+            decision + " connection request",
+        )
+        with SessionLocal() as db:
+            assert db.get(Connection, request_id).status == (
+                "accepted" if decision == "accept" else "declined"
+            )
     navigate("/auth/dashboard")
     assert js('document.querySelector("#dashboard-people") !== null')
     assert js('document.querySelector(".dashboard-onboarding") === null')
@@ -337,6 +375,7 @@ try:
                     "mobile navigation",
                     "following",
                     "connection requests",
+                    "accept and decline connection requests",
                     "dashboard",
                     "dark theme and enlarged text",
                 ],

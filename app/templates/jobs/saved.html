@@ -1,11 +1,10 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
-{% from "_feedback.html" import feedback_slot %}
 {% block content %}
 <section class="jb">
   <p class="eyebrow">Make your next move</p><h1>{{ 'Opportunities for you' if matching else 'Saved opportunities' }}</h1>
   <p class="lede">{{ 'Based on your chosen interests, with Nigerian opportunities first.' if matching else 'Your shortlist, with reminders for deadlines you choose to follow.' }}</p>
-  {{ feedback_slot(feedback|default(none)) }}
+
   <nav class="opportunity-nav" aria-label="My opportunities"><a href="/jobs">All opportunities</a><a href="/jobs/matches" {% if matching %}aria-current="page"{% endif %}>For you</a><a href="/jobs/saved" {% if not matching %}aria-current="page"{% endif %}>Saved opportunities</a><a href="/jobs/preferences">Opportunity alerts</a></nav>
   <div class="job-list">
   {% for item in jobs %}

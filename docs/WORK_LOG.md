@@ -1003,3 +1003,329 @@ This is the pre-hardening result: the previously documented 89 cases plus 14 com
   Health returns 200 and it serves the new tour assets. Browser data stayed in
   temporary databases, with no real-account changes or external messages. The guide
   records Chromium/SQLite validation limits; public deployment was not part of this task.
+
+## 9 November 2026 — Offline reading, deferred contributions and resumable Reels
+
+- **Continuation:** resumed the interrupted offline rollout and completed upload
+  recovery, integration fixes, verification, documentation and the local upgrade.
+  Retained the FastAPI/Jinja/plain-JavaScript stack, existing trust rules, media
+  validation and background workers.
+- **Delivered:** a neutral service-worker fallback, connection and synchronization
+  status, encrypted selected records, local search, explicit contribution drafts,
+  an original downloadable application checklist, and queued profile, bookmark,
+  connection, message, application, text-post/reply and Reel operations. Each write
+  rechecks the sign-in session, CSRF, permissions and domain rules. A receipt and
+  its database change commit together; concurrent retries return the stored result.
+- **Recovery:** profile conflicts preserve other changes and require review when
+  fields overlap. Queued draft state is atomic in IndexedDB. Confirmed message and
+  Reel forms rotate submission references while retaining newer text. Ordinary
+  connected publication clears its matching saved offline copy. Draft controls wait
+  for preparation and existing deferred scripts before accepting input.
+- **Reels:** encrypted local video chunks, explicit publication consent, bounded
+  server reservations, matching duplicate chunks, resume from the confirmed byte
+  position, existing media checks and processing, and staging cleanup through
+  `cleanup-community-media`. Confirmation distinguishes received video from a
+  processed/public Reel. No third-party upload service was introduced.
+- **Interface:** meaningful conflict descriptions, links to confirmed results,
+  dated snapshots and consistent buttons. Visual inspection caught an expanded-text
+  header overflow hidden by mobile viewport expansion; the header now wraps and the
+  offline browser runner checks client width and visible header control bounds.
+- **Regression:** all **619 Python tests passed in 444.74 seconds**; JUnit report
+  `/tmp/nurse-offline-regression.xml`. This includes upload validation/recovery,
+  duplicate receipts, transaction rollback, current permissions, profile conflicts,
+  concurrent requests and guarded migrations. Ruff, JavaScript syntax and whitespace
+  checks passed. Subsequent frontend refinements passed the expanded browser runner.
+- **Browser evidence:** the final expanded offline journey passed in
+  `/tmp/nurse-offline-browser-nl282b11/`. It stopped the server for real offline
+  navigation, examined encrypted/expired storage, injected a failed IndexedDB queue
+  transaction and lost server acknowledgements, composed and synchronized deferred
+  contributions, resumed video at the next chunk, processed real test MP4 files,
+  repeated sends/uploads without reloading, preserved newer edits, cleared ordinary
+  publication copies, isolated tabs and revoked them on sign-out. Reflow and selected
+  axe rules passed at 320/390/1280 pixels, with 200% text at 320 pixels.
+- **Existing browser regressions:** community drafts/reply context passed in
+  `/tmp/nurse-ng-draft-browser-chi73j0n/`; the quality runner passed 23 page states
+  plus offline/interrupted forms, duplicate prevention, keyboard dialogs and event
+  journeys in `/tmp/nurse-quality-browser-c81bywox/`. Test accounts, messages,
+  applications and videos stayed in temporary databases; no external email was sent.
+- **Migration:** backed up the local SQLite database, upgraded and checked a clone,
+  then applied `e6480b1d9a72` and `e6480c2ea831`. All original columns and **869 rows
+  across 42 tables** matched exactly; integrity, foreign keys and Alembic metadata
+  checks passed. New offline tables started empty. Private backup, inventories and
+  reports: `/tmp/nurse-offline-migration-pk5w5u7n/`, with the immediate pre-apply
+  backup at `pre-apply.sqlite` (0600).
+- **Local operation:** started Uvicorn with reload at `http://127.0.0.1:8000` and
+  the existing `reels-worker`; startup and the HTTP health response were verified.
+  The offline workspace is `/offline`. Added [the operating guide](OFFLINE.md), linked
+  it in README and the original architecture/quality records. No commit or public
+  deployment was performed.
+- **Limits:** private offline access belongs to the tab/sign-in session and can be
+  lost when the tab closes. Community attachments, security/verification/staff
+  actions, events and external destinations still need a connection. Production
+  PostgreSQL, live HTTPS, physical Android/iPhone storage and eviction, assistive
+  technologies and closed-browser scheduling remain deployment/device validation.
+
+## 9 November 2026 — Durable offline storage across browser closure
+
+- **Scope:** implemented the requested continuation for saved offline records,
+  explicit drafts, pending operations and video chunks. This supersedes the
+  tab-closure limitation in the preceding entry.
+- **Persistence:** AES-GCM keys now persist as non-exportable IndexedDB `CryptoKey`
+  objects. Fresh tabs and browser restarts reopen the same sign-in workspace without
+  sessionStorage secrets. Pending sends resume after reopening and reconnecting;
+  partially received Reels continue from the server's recorded byte position.
+- **Shared tabs:** Web Locks and IndexedDB leases coordinate queue insertion,
+  draft changes and sending. Transaction checks reject expired lease holders and
+  old workspace generations. Stale draft editors retain typed text and must open
+  the latest saved version. Cross-tab confirmation signals contain IDs only; each tab resolves
+  its own saved snapshot so matching forms rotate submission references without
+  erasing newer text.
+- **Clearing:** sign-out, account changes and explicit clearing delete private
+  records and keys and lock other tabs. Revocation is recorded before deletion, so
+  interrupted cleanup cannot restore the old data after restart. Delayed clearing
+  from a locked tab cannot delete a replacement workspace.
+- **Upgrade:** live legacy keys are committed before raw tab secrets are removed.
+  Secondary legacy drafts recover under separate IDs; receipt UUIDs and server
+  payloads remain unchanged. Failed merges preserve source keys and rows for retry.
+  The v6 service worker and versioned scripts update cached code without forcing
+  forms to reload. No additional server schema migration is needed.
+- **Verification:** all **17 focused offline backend tests passed in 25.04 seconds**.
+  The final expanded Chrome journey passed in
+  `/tmp/nurse-offline-browser-cfd6d17j/`: stopped-server fresh tabs and full browser
+  restarts, automatic delivery and stable receipts after lost acknowledgements,
+  interrupted video recovery and real processing, transaction failures, ordinary
+  publication clearing, same-account tabs, competing senders with and without Web
+  Locks, stale drafts/leases/clears, sign-out and account isolation, legacy upgrade
+  failures, and reopening after a failed clear. Accessibility and reflow checks
+  passed at 320/390/1280 pixels, including enlarged text. Ruff, all seven offline
+  JavaScript syntax checks and whitespace checks passed.
+- **Community regression:** the existing community-draft/reply-context browser
+  journey also passed in `/tmp/nurse-ng-draft-browser-ofyx5nex/`, including ordinary
+  publication, history, failed/offline submissions, blocked storage, sign-out,
+  account switching and mobile/desktop reflow. Its response checks now recognize
+  the expected anonymous `/offline/session` verification.
+- **Limits:** existing record/draft/file expiry and browser quotas still apply.
+  Persistent storage is requested on a best-effort basis; private browsing and
+  clearing site data can remove it. Automatic community text recovery remains
+  tab-local unless **Save draft locally** is used. Delivery while the browser is
+  closed and recovery of already-lost legacy keys are not promised. The operating
+  and architecture guides and README describe the revised behavior.
+
+## 9 November 2026 — Platform UI consistency refinement
+
+- **Scope:** reviewed the shared Jinja/CSS interface and equivalent pages across
+  the platform. Preserved the existing theme, colours, sidebar, navigation and
+  functional page structures. Added no dependencies. All 94 application Python
+  files match their pre-refinement hashes; backend and business rules are unchanged.
+- **Network:** balanced connections/following and requests in two bounded columns
+  that stack responsively. Added useful empty guidance, section counts and one
+  contextual discovery action. Standardized discovery labels to **Find colleagues**
+  and **Suggested colleagues**.
+- **Shared design:** ordinary page headings now use 28px on desktop and about 26px
+  on narrow screens; section headings use about 19px. Sizes follow the existing text
+  preference. Reused a small empty-state macro and removed competing heading rules.
+  Simplified empty Messages and Notifications layouts and repeated actions in
+  dashboard, applications, suggestions, community and Reels. Improved staff queue
+  guidance and spacing below recruitment filters.
+- **Profile:** retained the professional-profile editor's original left alignment
+  after the user's visual review. The temporary centering rules were removed.
+  Versioned stylesheet and shell-cache URLs deliver the final styles to returning
+  browsers; offline data and synchronization behavior are unchanged.
+- **Interaction repair:** the shared feedback handler now reads the form's HTML
+  action attribute, avoiding a collision with buttons named `action`. Accept/Decline
+  work through their existing endpoints and have browser regression coverage.
+- **Verification:** 68 member-page states and eight staff states checked across
+  desktop, tablet and mobile, with selected dark/light, larger-text and 200% text
+  cases. Selected axe audits and document reflow checks passed. Existing quality,
+  discovery and notifications browser journeys passed, including network actions,
+  messages and interrupted submissions. The 114 focused Python cases passed across
+  the main run and a corrected Reels-copy assertion rerun. Jinja parsing, JavaScript
+  syntax, Ruff and whitespace checks passed. Temporary accounts/databases were used.
+- **Limits:** the first-sign-in tour invitation remains a separate issue in the
+  original browser runner. Tour targets and keyboard behavior were verified through
+  Settings. Physical-device, Safari and assistive-technology acceptance testing
+  remain outside these Chrome checks. Purpose-specific reading widths and marketing
+  typography were deliberately retained.
+- **Record:** [UI refinement audit](UI_REFINEMENT.md) lists inspected pages,
+  corrections, verification artifacts and deliberate exceptions. No commit or
+  deployment was performed.
+
+## 9 November 2026 — Restore the first-sign-in tour invitation
+
+- **Scope:** completed the interrupted investigation recorded after the UI
+  refinement. The first-sign-in invitation issue above is resolved.
+- **Cause:** reproduced the hidden invitation on the welcome page. A temporary
+  isolated server probe confirmed that the offline worker's timeout-enabled fetch
+  changes browser navigation metadata from `navigate/document` to
+  `same-origin/empty`. The renderer consequently treated the displayed page as a
+  background request and did not offer the tour. Baseline evidence:
+  `/tmp/nurse-tour-browser-f4l0ffz_/` and `/tmp/nurse-tour-browser-6kt46e04/`.
+- **Fix:** the v9 service worker preserves top-level navigation intent with
+  `X-Nurse-Navigation: document`. Rendering recognizes the hint with matching
+  same-origin metadata on successful GET pages. Background requests, prefetches
+  and unsuccessful pages remain excluded. This also restores activity recording
+  for these navigations. The existing timeout, offline fallback, authentication,
+  CSRF rules and saved tour preferences remain intact; no migration is needed.
+- **Regression coverage:** added direct/worker navigation cases for registration
+  and an existing account's first login; extended checks for background requests,
+  prefetches, mismatched metadata and activity counting. The browser runner now
+  waits for worker control before registration and reports invitation state when
+  a journey fails.
+- **Backend verification:** all **78 focused tests passed** in two completed runs:
+  31 tour/migration tests in 33.65 seconds and 47 activity, authentication, feedback
+  and offline tests in 31.37 seconds. Reports:
+  `/tmp/nurse-tour-invitation-tests.xml` and
+  `/tmp/nurse-tour-invitation-regressions.xml`. Earlier combined/concurrent runs
+  ended with SIGTERM without test failures; the completed runs supersede them.
+  Ruff, service-worker JavaScript syntax and whitespace checks passed.
+- **Tour browser verification:** the complete original Chrome runner passed for
+  nurse, employer, partner and staff accounts, including first invitations, repeat
+  login, all steps at 320/390/1280px, keyboard containment, completion, restart,
+  skip/pause/resume, lost responses, stale tabs, hidden/missing targets and display
+  preferences. Artifacts: `/tmp/nurse-tour-browser-bbt7ansm/` (32 screenshots).
+  Visually reviewed the invitation. The focused delayed-save and repeated-input
+  journey also passed in `/tmp/nurse-tour-browser-dxmxsusi/`.
+- **Offline browser verification:** the full durable-storage regression passed in
+  `/tmp/nurse-offline-browser-ymw4l7uz/`, covering stopped-server navigation,
+  browser restarts, automatic retries with stable receipts, interrupted video
+  uploads, competing tabs, stale drafts/leases, legacy migration, account isolation
+  and revocation after failed clearing. All fixtures stayed in temporary databases.
+- **Documentation:** updated the [tour guide](ONBOARDING_TOUR.md) and marked the
+  [UI audit's invitation issue](UI_REFINEMENT.md) resolved. Changes remain local;
+  no commit or deployment was performed. Browser evidence is Chrome-based;
+  physical-device, Safari and assistive-technology acceptance remain separate.
+
+## 9 November 2026 — Offline & sync workspace redesign
+
+- **User direction:** arrange the Offline & sync page as a modern website. The
+  user confirmed this meant the destination opened by the header's Online link.
+- **Layout:** replaced the plain vertical list with a clear page heading, connection
+  summary and linked counts for local drafts, waiting changes and saved items.
+  Desktop uses a main column for drafts/library and a separate sync activity panel;
+  narrow screens stack these sections. Reused the existing theme, typography and
+  icon macro, adding a refresh icon without dependencies or bitmap assets.
+- **Content:** added useful empty states, compact draft/status labels and consistent
+  action rows. Search belongs to the saved library. Long saved details expand on
+  demand and stay expanded when the list refreshes. Storage guidance and the existing
+  clear action sit under About offline storage. The sync button reflects offline,
+  syncing and unavailable-storage states.
+- **Integration:** counts come from the existing encrypted store. Draft editing,
+  queueing, retries, conflicts and clear behavior retain their existing services.
+  Cleared workspaces reset their counts. Versioned the changed CSS/scripts and the
+  neutral shell cache as v10 so returning browsers receive matching assets. No
+  backend, schema or dependency changes were needed.
+- **Visual verification:** baseline captures are in `/tmp/nurse-offline-ui-3x2w7hk0/`.
+  Empty-page review covered seven light/dark, desktop/tablet/mobile and enlarged-text
+  states in `/tmp/nurse-offline-ui-pkwfiq99/`. The final eight-state run in
+  `/tmp/nurse-offline-ui-3ywf81bh/` covered populated content, pending/confirmed/failed/
+  conflicting changes and the stopped-server shell. All selected axe audits and
+  overflow checks passed. Desktop/mobile screenshots were visually reviewed.
+  Search, keyboard expansion, retained expansion after refresh, editing/saving a
+  draft, offline button state and clearing data passed in the final run. Temporary
+  runner selectors/search text were corrected; an interrupted run was repeated.
+- **Regression:** the complete existing offline browser journey passed in
+  `/tmp/nurse-offline-browser-d48497zc/`, including actual offline opening, browser
+  restarts, queued submissions, stable receipts after lost responses, resumable
+  video uploads, competing tabs, stale drafts/leases, legacy recovery and account
+  isolation. Its three accessibility/reflow states also passed. JavaScript syntax
+  and whitespace checks passed. Fixtures stayed in temporary databases.
+- **Delivery:** updated the offline operating guide. Work remains local and
+  uncommitted; no deployment was performed. Verification uses desktop Chrome with
+  emulated mobile sizes, rather than physical devices or assistive technologies.
+
+## 9 November 2026 — Separate Verification from profile setup
+
+- **User direction:** keep My profile and Verification as distinct destinations.
+  When a profile is missing, explain the prerequisite on Verification and return
+  there after profile creation.
+- **Delivered:** `/profile/verification` now stays on its own page, keeps its
+  navigation item selected and shows **Create your profile to start document
+  review** with a **Create profile** action. No profile or review is created by
+  visiting it. Existing profiles retain document uploads, progress and history.
+- **Continuation:** the profile form carries a named `verification` destination
+  in its own hidden field. **Save and continue to verification** returns to document
+  review after a successful save. Validation errors retain the destination and
+  entered values. Ordinary edits still return to My profile, including another tab
+  opened during setup. Arbitrary URLs and unrecognized destinations are ignored.
+- **Prerequisite handling:** document submissions without a profile now receive
+  an explanatory error on Verification, or the existing enhanced-form JSON error,
+  without creating cases or storing evidence. Authentication, CSRF, profile privacy
+  and review rules remain unchanged. No schema or dependency changes were needed.
+- **Verification:** all **35 profile-page and document-review tests passed in
+  32.14 seconds**; report `/tmp/nurse-verification-setup-tests.xml`. Ruff and
+  whitespace checks passed. The isolated Chrome journey passed six audited states
+  across desktop/mobile, light/dark and enlarged text, with no selected axe violations
+  or document overflow. It exercised keyboard setup navigation, server validation,
+  the save-and-return flow and ordinary profile editing. Screenshots were visually
+  reviewed; artifacts: `/tmp/nurse-verification-ui-ux3jdt57/`.
+- **Delivery:** changes remain local and uncommitted. Browser fixtures used a
+  temporary database; no real account was changed and no deployment was performed.
+
+## 9 November 2026 — Modern My profile workspace
+
+- **User direction:** improve the appearance of My profile and keep the editor
+  clear and left aligned.
+- **Delivered:** a restrained teal cover, avatar/name/headline header and clear
+  edit/share actions. About, professional background, and skills/interests sit
+  together; visibility and document review have separate supporting cards.
+  Replaced the static tab row and repeated statistics with useful empty states,
+  section-specific edit links and exact experience values. Reviewed names/dates,
+  name-change notices, and publication controls retain their existing behavior.
+- **Editor:** grouped essentials, story, background, and interests with explicit
+  labels and contextual guidance. Retained the profile tour target, field names,
+  validation, local-save action and continuation back to Verification. Shared
+  field markup also works in the offline editor. Added a screen-reader status
+  message when a profile link is copied.
+- **Assets:** added scoped `profile.css?v=1` to the shared layout and public asset
+  cache; shell cache is now v11. Existing navigation metadata handling remains.
+  No backend, database, dependency or real-account changes were necessary.
+- **Verification:** all **56 profile, sharing and verification tests passed** in
+  34.37 seconds (`/tmp/nurse-profile-redesign-tests.xml`). Updated one assertion
+  for the intentional Create your profile heading. The focused tour browser
+  journey passed (`/tmp/nurse-tour-browser-cu3__2n4/`). The final isolated browser
+  journey passed 13 selected axe/reflow audits across populated/empty profiles,
+  desktop/mobile, light/dark, high contrast and enlarged text, plus profile
+  creation, validation, saving, sharing, clipboard, publication/privacy, reviewed
+  name changes and actual stopped-server offline editing and synchronization.
+  Artifacts: `/tmp/nurse-profile-ui-7ydijenv/`; screenshots visually reviewed.
+  Temporary runner storage assertions/health URL were corrected before the final
+  successful run. Syntax/whitespace checks passed.
+- **Delivery:** local and uncommitted. No deployment performed. Mobile checks use
+  Chrome viewport emulation; physical-device acceptance remains separate.
+
+## 9 November 2026 — Modern Jobs workspace and opportunity details
+
+- **User direction:** continue the visual redesign on Jobs after My profile.
+- **Discovery:** introduced a dedicated search panel, workspace navigation,
+  grouped filters and clear location tabs including All locations. All existing
+  opportunity types are now available through the filter selector, including
+  full-time, part-time and contract. Native GET controls preserve query, location,
+  country and international scope; mobile filters collapse and remain operable
+  by keyboard. Counts describe the returned listings without inventing totals.
+- **Listings:** shared cards now give the role and organisation a clear heading,
+  group location/type/work arrangement, and separate pay, deadlines and source
+  information. Dates retain the distinction between Posted and First listed.
+  Saved/matched opportunities use the same cards and retain their controls.
+- **Details:** separated the description, summary, source and application into
+  readable sections. Preserved contact consent, saved-job/reminder forms, prior
+  application status, employer controls, external application links, source
+  attribution and closed/unconfirmed vacancy handling. Desktop uses two columns;
+  mobile presents description, summary and application in document order. A final
+  grid adjustment removed excess spacing on short external descriptions.
+- **Assets:** added scoped `jobs.css?v=1` and updated the public shell cache to v12,
+  retaining profile CSS and the navigation marker fix. No backend, schema or
+  dependency changes. Adapted the existing filter-preservation test to the new
+  selector and location navigation.
+- **Verification:** **104 tests passed** in 60.53 seconds across workspace flows,
+  local opportunities, opportunity watches, factual listings and vacancy ingestion
+  (`/tmp/nurse-jobs-redesign-tests.xml`). The isolated browser journey passed 16
+  selected axe/reflow audits across desktop/tablet/mobile, light/dark, high contrast,
+  enlarged text and expanded filters. It exercised combined search filters, scope
+  preservation, clearing, saving/reminders, actual application submission, external
+  links, expired vacancies, guest prompts and employer actions. Artifacts:
+  `/tmp/nurse-jobs-ui-k4z5bxoi/`. Final spacing checks and three additional audited
+  detail states passed in `/tmp/nurse-jobs-ui-_o9wqvwr/`. Screenshots were visually
+  reviewed. Ruff, JavaScript syntax and whitespace checks passed.
+- **Delivery:** changes remain local and uncommitted; no deployment performed.
+  Browser fixtures used temporary databases and scripted recruitment responses.
+  Mobile evidence uses Chrome viewport emulation.

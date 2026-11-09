@@ -147,6 +147,13 @@ def exists(selector):
     return evaluate(f"!!document.querySelector({json.dumps(selector)})")
 
 
+def feedback(title):
+    return evaluate(
+        '!document.querySelector("[data-feedback-panel]").hidden && '
+        f'document.querySelector("#feedback-title").textContent === {json.dumps(title)}'
+    )
+
+
 def fill(selector, value):
     evaluate(
         f"(() => {{const element=document.querySelector({json.dumps(selector)}); "
@@ -293,11 +300,30 @@ try:
     ws = main_ws
     command_cdp("Page.bringToFront")
 
+    # An error page must not revoke a valid session or discard drafts in either tab.
+    for error_path in ("/missing-draft-page", "/events/new", "/events?page=invalid"):
+        saved_draft = evaluate("sessionStorage.getItem(" + json.dumps(draft_key) + ")")
+        navigate(error_path)
+        assert feedback("We couldn’t complete this action")
+        assert evaluate("sessionStorage.getItem(" + json.dumps(draft_key) + ")") == saved_draft
+        ws = other_ws
+        command_cdp("Page.bringToFront")
+        assert (
+            evaluate('document.querySelector("#body").value') == "Independent second-tab question"
+        )
+        assert not evaluate('document.querySelector("#body").disabled')
+        ws = main_ws
+        command_cdp("Page.bringToFront")
+        navigate("/posts/new", "#body")
+        assert evaluate('document.querySelector("#body").value') == draft_text
+        assert not evaluate('document.querySelector("#body").disabled')
+        assert evaluate("document.body.dataset.draftScope") == first_scope
+
     # Known validation failures retain the exact submitted text and clear the unknown-outcome hint.
     fill("#community-name", "Admin")
     fill("#external-video-url", "")
     submit('form[action="/posts"]')
-    wait_for(lambda: exists('[data-draft-error="true"]'), "validation error")
+    wait_for(lambda: feedback("Please check this action"), "validation error")
     assert evaluate('document.querySelector("#body").value') == draft_text
     assert (
         evaluate("JSON.parse(sessionStorage.getItem(" + json.dumps(draft_key) + ")).pending")
@@ -307,7 +333,7 @@ try:
     assert evaluate('document.querySelector("#body").value') == draft_text
     fill("#community-name", "Draft Nurse")
 
-    # No response means no confirmation: keep the draft and never retry automatically.
+    # Offline validation prevents a request, so it must not mark the draft as pending.
     command_cdp(
         "Network.emulateNetworkConditions",
         {
@@ -318,12 +344,9 @@ try:
         },
     )
     submit('form[action="/posts"]')
-    wait_for(
-        lambda: evaluate(
-            'location.href.startsWith("chrome-error:") || document.title.includes("127.0.0.1")'
-        ),
-        "offline submission",
-    )
+    wait_for(lambda: feedback("You’re offline"), "offline submission")
+    assert evaluate('document.querySelector("#body").value') == draft_text
+    assert not evaluate("JSON.parse(sessionStorage.getItem(" + json.dumps(draft_key) + ")).pending")
     command_cdp(
         "Network.emulateNetworkConditions",
         {
@@ -333,6 +356,20 @@ try:
             "uploadThroughput": -1,
         },
     )
+    navigate("/posts/new", "#body")
+    assert evaluate('document.querySelector("#body").value') == draft_text
+    assert not evaluate(
+        'document.querySelector("[data-draft-status]")'
+        '.textContent.includes("Check the conversation")'
+    )
+    # A request with no response has an unknown outcome and retains its pending draft.
+    evaluate("""window.draftReviewFetch = window.fetch;
+window.fetch = (...args) => String(args[0]).endsWith('/posts')
+  ? Promise.reject(new TypeError('Interrupted request')) : window.draftReviewFetch(...args);""")
+    submit('form[action="/posts"]')
+    wait_for(lambda: feedback("We couldn’t confirm the result"), "interrupted submission")
+    assert evaluate("JSON.parse(sessionStorage.getItem(" + json.dumps(draft_key) + ")).pending")
+    evaluate("window.fetch = window.draftReviewFetch")
     navigate("/posts/new", "#body")
     assert evaluate('document.querySelector("#body").value') == draft_text
     assert evaluate(
@@ -503,7 +540,7 @@ try:
     assert target_value() == source_id
     assert evaluate('document.querySelector("#reply-body").value') == reply_text
     submit('form[action$="/replies"]')
-    wait_for(lambda: exists('[data-draft-error="true"]'), "removed target rejected")
+    wait_for(lambda: feedback("Please check this action"), "removed target rejected")
     assert evaluate('document.querySelector("#reply-body").value') == reply_text
     navigate(post_path + "?page=2&reply_to=" + alternative_id, "#reply-body")
     wait_for(lambda: context_includes("Hospital placement update 01"), "choose available target")
@@ -521,14 +558,8 @@ try:
     )
     assert target_value() == "" and evaluate('document.querySelector("#reply-body").value') == ""
     check_reflow("targeted reply mobile")
-    wait_for(
-        lambda: evaluate(
-            '(() => { const top = document.querySelector(".reply-card")'
-            '.getBoundingClientRect().top; '
-            "return top >= 0 && top < 300; })()"
-        ),
-        "published reply scroll settles",
-    )
+    wait_for(lambda: feedback("Reply published"), "published reply confirmation")
+    assert evaluate('document.activeElement.matches("[data-feedback-panel]")')
     screenshot("targeted-reply-mobile.png")
     with SessionLocal() as db:
         submitted = db.scalar(select(CommunityReply).where(CommunityReply.body == reply_text))
@@ -664,6 +695,11 @@ try:
     check_reflow("draft composer desktop")
     assert not errors, errors
     expected_failures = {
+        # Anonymous pages verify sign-out before clearing durable offline storage.
+        (401, base_url + "/offline/session"),
+        (404, base_url + "/missing-draft-page"),
+        (403, base_url + "/events/new"),
+        (422, base_url + "/events?page=invalid"),
         (400, base_url + "/posts"),
         (400, base_url + post_path + "/replies"),
         (404, base_url + source_context_path),
@@ -673,7 +709,8 @@ try:
         "Reply-context and draft browser checks passed: response selection across pages, "
         "changed/removed targets, linked publication, restore, validation, offline submission, "
         "confirmation, "
-        "history, tab/discussion isolation, discard, expiry, malformed/blocked storage, "
+        "history, error-page preservation, tab/discussion isolation, discard, expiry, "
+        "malformed/blocked storage, "
         "logout across tabs, account switch, and mobile/desktop reflow."
     )
     print(f"Screenshots and logs: {artifacts}")

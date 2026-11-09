@@ -121,12 +121,19 @@ Visible account feedback, display preferences, responsive layouts and Reels proc
 already implemented. Reels include a smaller data-saving playback version and support
 creator-provided captions.
 
+The 9 November quality increment extends shared feedback to ordinary forms across
+member and staff journeys, implements event publishing/RSVPs/calendar downloads,
+and connects the existing Google/LinkedIn controls to provider integrations.
+Provider credentials and live sign-in validation are still required. See
+[quality verification](QUALITY_VERIFICATION.md), [events](EVENTS.md) and
+[social sign-in setup](SOCIAL_SIGN_IN.md).
+
 Remaining work:
 
-- Extend clear success, failure and pending feedback to every important user action.
+- Verify the expanded success, failure and pending feedback against real-device journeys.
 - Test complete journeys on real Android phones and iPhones, including Safari and slow connections.
 - Test screen-reader use, keyboard navigation and enlarged text across the main journeys.
-- Ensure every visible button and destination provides a useful, finished action.
+- Finish provider configuration and verify visible controls across all roles and devices.
 - Consider adaptive video streaming and automatic captions as later Reels improvements.
 
 Local automated and browser checks are valuable evidence, but do not replace testing with
@@ -147,8 +154,7 @@ application outcomes and support performance still need their own evidence.
 Remaining work:
 
 - Run a small pilot with nurses, students, opportunity seekers and legitimate employers.
-- Measure relevant opportunity discovery, completed applications, employer responses and
-  whether members return.
+- Measure relevant opportunity discovery, completed applications, employer responses and whether members return.
 - Observe where people abandon tasks or need help, and use those findings to set priorities.
 - Establish who handles support, reports, appeals and failed uploads, with clear response targets.
 - Set pilot targets and a measurement period before evaluating the results.
@@ -159,6 +165,7 @@ Remaining work:
 2. Prioritise member discovery and notifications as the next visible product improvements.
 3. Continue expanding Nigerian opportunity coverage and improving experience quality.
 4. Use a supported pilot to validate the full journey and decide which improvements matter most.
+
 
 This sequence is a recommendation, not a claim that the remaining items are completed.
 Some older build-plan tracker entries predate the account and Reels work; update their

@@ -62,6 +62,14 @@ rendering consumes the invitation flag from the signed session; prefetches and
 background requests do not. No historical completions or preferences are inferred.
 Changing the definition version does not automatically re-offer a dismissed tour.
 
+The offline service worker preserves top-level navigation intent with
+`X-Nurse-Navigation: document`. Its timeout-enabled fetch otherwise changes the
+browser's fetch metadata from `navigate/document` to `same-origin/empty`, which
+previously hid the first invitation. The renderer accepts the hint only with the
+matching same-origin metadata on successful GET pages, excluding prefetches. The
+hint also preserves ordinary activity counting; it grants no account permissions.
+The v9 worker update retains the existing timeout and neutral offline fallback.
+
 **GET /tour** reads the current account's eligible steps and progress. **POST /tour**
 accepts a fixed action, revision and run ID, protected by existing authentication
 and CSRF checks. The server chooses the step, destination and completion status.
@@ -112,6 +120,8 @@ an isolated Chrome profile and temporary localhost ports. It saves screenshots
 under the printed artifact directory and stops only its own server/browser.
 It covers lifecycle, actual mouse/keyboard interaction, responsive positioning,
 role-specific steps, missing targets, lost responses and existing display controls.
+It waits for the offline worker to control the registration page before submitting,
+so the first invitation is exercised through the same path as returning browsers.
 Use the same script with --loading-only for focused delayed-save, repeated-input
 and pause/resume checks.
 

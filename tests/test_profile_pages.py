@@ -1,3 +1,4 @@
+import pytest
 from sqlalchemy import select
 
 from app.models.profile import NurseProfile, ProfileStatus
@@ -58,6 +59,57 @@ def test_create_profile(client, db_session):
     assert profile.display_name == "Ada Obi"
     assert profile.status == ProfileStatus.DRAFT
     assert profile.discoverable is False
+
+
+@pytest.mark.parametrize("enhanced", [False, True])
+def test_profile_setup_returns_to_verification_without_affecting_ordinary_edits(
+    client, db_session, enhanced,
+):
+    register_and_sign_in(client)
+    page = client.get("/profile/edit?return_to=verification")
+    assert 'name="return_to" value="verification"' in page.text
+    assert "Save and continue to verification" in page.text
+    # Opening setup must not change the destination of an ordinary edit in another tab.
+    assert 'name="return_to"' not in client.get("/profile/edit").text
+    response = client.post(
+        "/profile/edit",
+        data={**PROFILE, "csrf_token": csrf_from(page), "return_to": "verification"},
+        headers={"X-Account-Feedback": "1"} if enhanced else {},
+        follow_redirects=False,
+    )
+    if enhanced:
+        assert response.json() == {"redirect": "/profile/verification"}
+    else:
+        assert response.status_code == 303
+        assert response.headers["location"] == "/profile/verification"
+    verification = client.get("/profile/verification")
+    assert "You can now submit your documents for review." in verification.text
+    assert 'name="registration_number"' in verification.text
+    assert 'type="file"' in verification.text
+    assert "Create your profile to start document review" not in verification.text
+    assert db_session.scalar(select(NurseProfile)).discoverable is False
+    assert save_profile(client).headers["location"] == "/profile"
+
+
+def test_profile_validation_keeps_verification_continuation_and_entered_values(client):
+    register_and_sign_in(client)
+    response = save_profile(client, display_name="", return_to="verification")
+    assert response.status_code == 400
+    assert 'name="return_to" value="verification"' in response.text
+    assert 'value="Lagos"' in response.text
+    assert "Save and continue to verification" in response.text
+    response = save_profile(client, token=csrf_from(response), return_to="verification")
+    assert response.headers["location"] == "/profile/verification"
+
+
+@pytest.mark.parametrize("destination", ["https://example.org", "//example.org", "/review"])
+def test_profile_continuation_accepts_only_the_named_verification_destination(client, destination):
+    register_and_sign_in(client)
+    page = client.get("/profile/edit", params={"return_to": destination})
+    assert 'name="return_to"' not in page.text
+    response = save_profile(client, return_to=destination)
+    assert response.status_code == 303
+    assert response.headers["location"] == "/profile"
 
 
 def test_edit_updates_the_existing_profile(client, db_session):

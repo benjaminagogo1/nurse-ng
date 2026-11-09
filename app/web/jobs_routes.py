@@ -3,7 +3,6 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request, Response, status
-from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -26,6 +25,7 @@ from app.services.jobs import (
 from app.services.profiles import list_discoverable_profiles, public_profile_fields
 from app.services.vacancies import collector_authorized
 from app.web.deps import get_current_user, require_user, verify_csrf
+from app.web.feedback import message, redirect_feedback
 from app.web.templating import render
 
 router = APIRouter(tags=["jobs"])
@@ -165,7 +165,13 @@ def publish_job(
             _form_context(user, values=values, error=str(exc)),
             status_code=status.HTTP_400_BAD_REQUEST,
         )
-    return RedirectResponse("/jobs", status_code=status.HTTP_303_SEE_OTHER)
+    return redirect_feedback(
+        request, "/jobs",
+        message(
+            'Job published',
+            'Your listing is now available on the jobs page.',
+        ),
+    )
 
 
 @router.get("/employers")
@@ -266,7 +272,13 @@ def apply(
         apply_for_job(db, user, job, cover_note=cover_note)
     except JobError as exc:
         return _detail(request, db, user, job, error=str(exc), cover_note=cover_note)
-    return RedirectResponse("/applications", status_code=303)
+    return redirect_feedback(
+        request, "/applications",
+        message(
+            'Application sent',
+            'Track your application and its status here.',
+        ),
+    )
 
 
 @router.get("/applications")
@@ -290,6 +302,7 @@ def applications(
 
 @router.post("/applications/{application_id}/status")
 def application_status(
+    request: Request,
     application_id: UUID,
     new_status: str = Form(""),
     user: User = Depends(require_user),
@@ -307,7 +320,13 @@ def application_status(
         change_application_status(db, user, application, new_status)
     except JobError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from None
-    return RedirectResponse(f"/applications/{application.id}", status_code=303)
+    return redirect_feedback(
+        request, f"/applications/{application.id}",
+        message(
+            'Application updated',
+            'The new application status has been saved.',
+        ),
+    )
 
 
 @router.get("/applications/{application_id}")

@@ -266,7 +266,15 @@ try:
     assert js('document.querySelector("#message-body").value === "Keep this draft"')
     js('document.querySelector(".thread-messages").scrollTop=0')
     incoming("Do not move my reading position")
-    wait_for(lambda: js('!document.querySelector(".thread-new").hidden'), "new message affordance")
+    # A previous live arrival can already have made the jump button visible.
+    wait_for(
+        lambda: js(
+            '!document.querySelector(".thread-new").hidden && '
+            'document.querySelector(".thread-messages").textContent.includes('
+            '"Do not move my reading position")'
+        ),
+        "new message arrival and affordance",
+    )
     assert js('document.querySelector(".thread-messages").scrollTop < 10')
     for _ in range(3):
         js('document.querySelector("[data-older]").click()')

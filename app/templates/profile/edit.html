@@ -1,70 +1,50 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% set page = 'profile' %}
 
 {% block title %}{% if profile %}Edit{% else %}Create{% endif %} your profile — Nurse.ng{% endblock %}
 
 {% block content %}
-<section class="form-page">
-  <p class="eyebrow">{% if profile %}Edit{% else %}Create{% endif %} profile</p>
-  <h1>Your professional profile</h1>
-  <p class="lede">
-    {% if profile and profile.discoverable %}Your profile is public. Changes to shared fields appear immediately.
-    <a href="/profile/sharing">Review sharing controls</a>.
-    {% else %}This profile is private. It is visible only to you until you activate it and
-    choose fields to share.{% endif %} Your professional status is always self-declared;
-    document review checks your licence and identity separately.
-  </p>
+<section class="profile-page profile-editor">
+  {% if profile %}<a class="profile-back-link" href="/profile">{{ icon('chevron', 15) }} Back to my profile</a>{% else %}<p class="eyebrow">My profile</p>{% endif %}
+  <header class="profile-editor-heading">
+    <h1>{{ 'Edit your profile' if profile else 'Create your profile' }}</h1>
+    <p>Bring your experience, skills and professional story together.</p>
+  </header>
+  {% if return_to == 'verification' %}<p class="form-notice">Save your profile to continue to document review. You’ll return to Verification next.</p>{% endif %}
+  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
 
-  {% if error %}
-    <p class="form-error" role="alert">{{ error }}</p>
-  {% endif %}
+  <div class="profile-layout">
+    <form method="post" action="/profile/edit" class="stacked-form profile-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      {% if return_to == 'verification' %}<input type="hidden" name="return_to" value="verification">{% endif %}
+      {% include "profile/_fields.html" %}
+      <div class="profile-form-footer">
+        <div class="profile-save-actions">
+          <button type="submit" class="btn btn-primary">{{ icon('check', 18) }} {{ 'Save and continue to verification' if return_to == 'verification' else 'Save profile' }}</button>
+          {% if profile %}<a href="/profile" class="btn btn-secondary">Cancel</a>{% endif %}
+        </div>
+        <div class="profile-local-save">
+          <button type="button" class="profile-inline-link" data-offline-profile>{{ icon('refresh', 16) }} Save locally for synchronization</button>
+          <p class="profile-caption">Local changes stay in this browser until they sync. Review them in <a href="/offline">Offline &amp; sync</a>.</p>
+        </div>
+      </div>
+    </form>
 
-  <form method="post" action="/profile/edit" class="stacked-form">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-
-    <label for="display_name">Display name</label>
-    <input id="display_name" name="display_name" type="text" maxlength="120" data-tour="profile"
-           value="{{ values.display_name }}" required>
-
-    <label for="professional_status">Professional status</label>
-    <select id="professional_status" name="professional_status">
-      {% for value, label in status_options %}
-        <option value="{{ value }}"{% if values.professional_status == value %} selected{% endif %}>{{ label }}</option>
-      {% endfor %}
-    </select>
-    <p class="field-hint">
-      Self-declared. <a href="/profile/verification">Document review</a> checks
-      your licence and identity separately.
-    </p>
-
-    <label for="headline">Headline <span class="optional">(optional)</span></label>
-    <input id="headline" name="headline" type="text" maxlength="160"
-           value="{{ values.headline }}">
-
-    <label for="location">Location <span class="optional">(optional)</span></label>
-    <input id="location" name="location" type="text" maxlength="120"
-           value="{{ values.location }}">
-
-    <label for="bio">About you <span class="optional">(optional)</span></label>
-    <textarea id="bio" name="bio" rows="6" maxlength="5000">{{ values.bio }}</textarea>
-
-
-    <label for="qualification">Highest qualification <span class="optional">(optional)</span></label>
-    <input id="qualification" name="qualification" type="text" maxlength="120" value="{{ values.qualification }}"
-      placeholder="e.g. BSc Nursing">
-    
-    <label for="years_experience">Years of experience <span class="optional">(optional)</span></label>
-    <input id="years_experience" name="years_experience" type="number" min="0" max="60"
-      value="{{ values.years_experience if values.years_experience is not none else '' }}">
-    
-    <label for="skills">Skills <span class="optional">(optional)</span></label>
-    <input id="skills" name="skills" type="text" maxlength="600" value="{{ values.skills }}"
-      placeholder="Patient care, Critical thinking, Leadership">
-    <p class="field-hint">Separate skills with commas. Up to 12.</p>
-
-    {% set selected_interests = values.interests.split(', ') if values.interests else [] %}
-    {% include "onboarding/_interests.html" %}
-    <p class="field-hint">Interests help suggest people and opportunities. They follow your <a href="/profile/sharing">sharing controls</a> and start private.</p>
-    <button type="submit">Save profile</button>
-  </form>
+    <aside class="profile-side-column" aria-label="Profile guidance">
+      <section class="profile-panel profile-editor-guide">
+        <span class="profile-review-icon">{{ icon('globe' if profile and profile.discoverable else 'lock', 23) }}</span>
+        <h2>Your profile, your choice</h2>
+        {% if profile and profile.discoverable %}
+        <p class="profile-support-copy">Your profile is public. Changes to shared fields appear immediately.</p>
+        {% else %}
+        <p class="profile-support-copy">This profile is private. It is visible only to you until you activate it and choose fields to share.</p>
+        {% endif %}
+        {% if profile %}<a class="profile-inline-link" href="/profile/sharing">Review sharing controls {{ icon('arrow', 16) }}</a>{% endif %}
+        <div class="profile-guide-note"><h3>{{ icon('shield', 18) }} A separate review</h3><p class="profile-support-copy">Your professional status is self-declared. Document review checks your licence and identity separately.</p></div>
+      </section>
+      <p class="profile-editor-tip">A good profile sounds like you. Keep your headline specific, and use your bio to share the experience behind your skills.</p>
+    </aside>
+  </div>
 </section>
 {% endblock %}

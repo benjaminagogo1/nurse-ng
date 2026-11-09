@@ -1,13 +1,12 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
 {% from "_avatar.html" import avatar with context %}
-{% from "_feedback.html" import feedback_slot %}
 {% block title %}Account settings — Nurse.ng{% endblock %}
 {% block content %}
 <section class="form-page account-settings">
   <p class="eyebrow">Your account, your way</p><h1>Account settings</h1><p class="lede">Manage your profile, security and privacy.</p>
-  {{ feedback_slot(feedback|default(none)) }}
-  <div class="settings-display"><button type="button" class="btn btn-secondary" data-display-open aria-haspopup="dialog" aria-controls="display-preferences" hidden>{{ icon('appearance', 18) }} Display &amp; accessibility</button></div>
+
+  <div class="settings-display"><button type="button" class="btn btn-secondary" data-display-open aria-haspopup="dialog" aria-controls="display-preferences" hidden>{{ icon('appearance', 18) }} Display &amp; accessibility</button> <a class="btn btn-secondary" href="/settings/social">Connected sign-ins</a></div>
   <section class="settings-detail" id="guided-tour-settings" aria-labelledby="guided-tour-heading">
     <div class="account-section-heading"><div><h2 id="guided-tour-heading">Your guided tour</h2><p>A short walkthrough of Nurse.ng, using the pages and tools available to your account.</p></div>{{ icon('sparkle', 22) }}</div>
     <p class="tour-settings-status" data-tour-settings-status></p>

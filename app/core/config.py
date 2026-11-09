@@ -61,6 +61,10 @@ class Settings(BaseSettings):
     avatar_max_bytes: int = Field(default=5 * 1024 * 1024, ge=1024, le=10 * 1024 * 1024)
     # Email links use a configured origin, never the request's Host header.
     public_base_url: str = "http://127.0.0.1:8000"
+    google_client_id: str = ""
+    google_client_secret: str = Field(default="", repr=False)
+    linkedin_client_id: str = ""
+    linkedin_client_secret: str = Field(default="", repr=False)
     account_mail_backend: Literal["disabled", "file", "smtp"] = "disabled"
     account_mail_dir: str = "private-mail"
     smtp_host: str = ""

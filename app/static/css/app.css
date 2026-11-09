@@ -788,7 +788,6 @@ a.topic-label:hover {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-width: 46rem;
   margin: 16px 0 8px;
 }
 
@@ -1724,8 +1723,6 @@ a.topic-label:hover {
   color: #fff;
   max-width: 26rem;
   margin-bottom: 10px;
-  font-size: clamp(1.75rem, 4.5vw, 2.75rem);
-  line-height: 1.08;
 }
 
 .banner p {
@@ -1843,7 +1840,6 @@ a.topic-label:hover {
   align-items: center;
   gap: 8px;
   margin: 0 0 2px;
-  font-size: 1.625rem;
 }
 
 .pf-verified {

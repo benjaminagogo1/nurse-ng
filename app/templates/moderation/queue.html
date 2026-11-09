@@ -31,13 +31,13 @@
         </form>
       </article>
     {% else %}
-      <p class="field-hint">No open reports.</p>
+      <p class="field-hint">No reports need review. Reports from members will appear here with the content and reason.</p>
     {% endfor %}
   </div>
 
   <h2>Topics</h2>
   <ul class="plain-list">
-    {% for topic in topics %}<li>{{ topic.name }}{% if not topic.is_active %} · Inactive{% endif %}</li>{% else %}<li>No topics yet.</li>{% endfor %}
+    {% for topic in topics %}<li>{{ topic.name }}{% if not topic.is_active %} · Inactive{% endif %}</li>{% else %}<li>No topics yet. Use the form below to create a place for members to start conversations.</li>{% endfor %}
   </ul>
   <form method="post" action="/moderation/topics" class="stacked-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">

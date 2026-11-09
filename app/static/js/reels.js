@@ -12,7 +12,7 @@
   let active = null;
   let visible = true;
   let sound = false;
-  let saver = navigator.connection?.saveData || false;
+  let saver = navigator.connection?.saveData || ['slow-2g', '2g', '3g'].includes(navigator.connection?.effectiveType);
   try { saver = localStorage.getItem('nurse-reels-data') === 'on' || saver; } catch { /* Optional preference. */ }
   const dialogs = [...document.querySelectorAll('.reel-dialog')];
   const modalOpen = () => document.querySelector('dialog[open]') !== null;
@@ -292,10 +292,13 @@
       };
       const uncertain = () => showError('We could not confirm your upload. Check My reels before trying again. Retrying this form will not publish the same upload twice.');
       xhr.onerror = uncertain; xhr.ontimeout = uncertain;
-      xhr.onload = () => {
+      xhr.onload = async () => {
         try {
           const result = JSON.parse(xhr.responseText);
-          if (xhr.status >= 200 && xhr.status < 300 && /^\/reels\/[a-f0-9-]+\/status$/.test(result.redirect)) location.assign(result.redirect);
+          if (xhr.status >= 200 && xhr.status < 300 && /^\/reels\/[a-f0-9-]+\/status$/.test(result.redirect)) {
+            await window.NurseOffline?.acknowledgeConnected?.(upload, {body: data.get('body'), upload_key: data.get('upload_key')})?.catch(() => {});
+            location.assign(result.redirect);
+          }
           else showError(result.error || 'Your session or upload could not be verified. Check My reels or sign in again.');
         } catch { uncertain(); }
       };

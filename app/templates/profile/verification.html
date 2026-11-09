@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
+{% from "_empty_state.html" import empty_state %}
 {% set page = 'verification' %}
 
 {% block title %}Verification — Nurse.ng{% endblock %}
@@ -16,12 +17,19 @@
 </div>
 {% endmacro %}
 
-{% set step = 4 if document_reviewed_on else (2 if pending else 1) %}
-
 <section class="vf">
   <h1>Verification</h1>
   <p class="lede">Build trust in your professional story.</p>
 
+  {% if not profile %}
+    {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+    {{ empty_state(
+      'Create your profile to start document review',
+      'Add your professional details first. Then return here to upload your documents and follow their review. Your profile starts private.',
+      '/profile/edit?return_to=verification', 'Create profile', symbol='shield', primary=true
+    ) }}
+  {% else %}
+  {% set step = 4 if document_reviewed_on else (2 if pending else 1) %}
   <ol class="stepper" aria-label="Verification progress">
     {% for label in ['Documents', 'Review', 'Verification', 'Complete'] %}
     <li
@@ -125,6 +133,7 @@
   {% endif %}
 
   <p class="form-alt"><a href="/profile">Back to profile</a></p>
+  {% endif %}
 </section>
 
 {% endblock %}

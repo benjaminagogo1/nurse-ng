@@ -143,6 +143,7 @@ def list_open_jobs(
     job_type: str | None = None,
     query: str = "",
     limit: int = 50,
+    offset: int = 0,
     country_code: str = "",
     international_only: bool = False,
     location: str = "",
@@ -170,7 +171,7 @@ def list_open_jobs(
                 case((Job.country_code == "NG", 0), else_=1),
                 Job.posted_at.desc(),
                 Job.id.desc(),
-            ).limit(limit)
+            ).offset(offset).limit(limit)
         ).all()
     )
 

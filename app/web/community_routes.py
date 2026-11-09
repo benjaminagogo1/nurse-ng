@@ -71,6 +71,7 @@ from app.services.profiles import (
     public_profile_fields,
 )
 from app.web.deps import get_current_user, require_user, verify_csrf
+from app.web.feedback import message, redirect_feedback
 from app.web.templating import confirm_published_draft, render
 
 router = APIRouter(tags=["community"])
@@ -348,7 +349,13 @@ def save_community_settings(
             },
             status_code=status.HTTP_400_BAD_REQUEST,
         )
-    return RedirectResponse("/feed", status_code=status.HTTP_303_SEE_OTHER)
+    return redirect_feedback(
+        request, "/feed",
+        message(
+            'Community name saved',
+            'This name will appear with your contributions.',
+        ),
+    )
 
 
 @router.get("/posts/new")
@@ -431,8 +438,12 @@ def publish_post(
             error = str(exc)
         else:
             confirm_published_draft(request, "post", draft_version)
-            return RedirectResponse(
-                f"/posts/{post.id}", status_code=status.HTTP_303_SEE_OTHER
+            return redirect_feedback(
+                request, f"/posts/{post.id}",
+                message(
+                    'Conversation published',
+                    'Your conversation is now available to the community.',
+                ),
             )
 
     return render(
@@ -517,6 +528,7 @@ def reply_context(post_id: str, reply_id: str, db: Session = Depends(get_db)) ->
 
 @router.post("/posts/{post_id}/follow")
 def subscribe_to_discussion(
+    request: Request,
     post_id: str, user: User = Depends(require_user),
     _: None = Depends(verify_csrf), db: Session = Depends(get_db),
 ) -> Response:
@@ -524,11 +536,18 @@ def subscribe_to_discussion(
     if post is None:
         raise HTTPException(status_code=404)
     follow_discussion(db, user, post)
-    return RedirectResponse(f"/posts/{post.id}", status_code=303)
+    return redirect_feedback(
+        request, f"/posts/{post.id}",
+        message(
+            'Discussion followed',
+            'Find this conversation in Followed discussions.',
+        ),
+    )
 
 
 @router.post("/posts/{post_id}/unfollow")
 def unsubscribe_from_discussion(
+    request: Request,
     post_id: str, user: User = Depends(require_user),
     _: None = Depends(verify_csrf), db: Session = Depends(get_db),
 ) -> Response:
@@ -536,7 +555,13 @@ def unsubscribe_from_discussion(
     if post is None:
         raise HTTPException(status_code=404)
     unfollow_discussion(db, user, post)
-    return RedirectResponse(f"/posts/{post.id}", status_code=303)
+    return redirect_feedback(
+        request, f"/posts/{post.id}",
+        message(
+            'Discussion unfollowed',
+            'This conversation has been removed from your followed discussions.',
+        ),
+    )
 
 
 @router.post("/posts/{post_id}/replies")
@@ -585,14 +610,18 @@ def publish_reply(
             headers={"Cache-Control": "no-store"},
         )
     confirm_published_draft(request, f"reply:{post.id}", draft_version)
-    return RedirectResponse(
-        f"/posts/{post.id}?page={reply_page_number(db, reply)}#reply-{reply.id}",
-        status_code=status.HTTP_303_SEE_OTHER,
+    return redirect_feedback(
+        request, f"/posts/{post.id}?page={reply_page_number(db, reply)}#reply-{reply.id}",
+        message(
+            'Reply published',
+            'Your reply has been added to the conversation.',
+        ),
     )
 
 
 @router.post("/posts/{post_id}/report")
 def submit_post_report(
+    request: Request,
     post_id: str,
     reason: str = Form(""),
     details: str = Form(""),
@@ -612,13 +641,18 @@ def submit_post_report(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
         ) from None
-    return RedirectResponse(
-        f"/posts/{post.id}", status_code=status.HTTP_303_SEE_OTHER
+    return redirect_feedback(
+        request, f"/posts/{post.id}",
+        message(
+            'Report received',
+            'The moderation team can now review your report.',
+        ),
     )
 
 
 @router.post("/replies/{reply_id}/report")
 def submit_reply_report(
+    request: Request,
     reply_id: str,
     reason: str = Form(""),
     details: str = Form(""),
@@ -638,8 +672,12 @@ def submit_reply_report(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
         ) from None
-    return RedirectResponse(
-        f"/posts/{reply.post_id}", status_code=status.HTTP_303_SEE_OTHER
+    return redirect_feedback(
+        request, f"/posts/{reply.post_id}",
+        message(
+            'Report received',
+            'The moderation team can now review your report.',
+        ),
     )
 
 
@@ -731,6 +769,7 @@ def nurse_directory(
 
 @router.post("/nurses/{public_id}/follow")
 def follow_nurse(
+    request: Request,
     public_id: str,
     user: User = Depends(require_user),
     _: None = Depends(verify_csrf),
@@ -741,13 +780,18 @@ def follow_nurse(
         follow_profile(db, user, profile)
     except CommunityError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from None
-    return RedirectResponse(
-        f"/p/{profile.public_id}", status_code=status.HTTP_303_SEE_OTHER
+    return redirect_feedback(
+        request, f"/p/{profile.public_id}",
+        message(
+            'Following',
+            'Their community contributions can appear in your Following feed.',
+        ),
     )
 
 
 @router.post("/nurses/{public_id}/unfollow")
 def unfollow_nurse(
+    request: Request,
     public_id: str,
     user: User = Depends(require_user),
     _: None = Depends(verify_csrf),
@@ -755,13 +799,18 @@ def unfollow_nurse(
 ) -> Response:
     profile = _public_profile(db, public_id)
     unfollow_profile(db, user, profile)
-    return RedirectResponse(
-        f"/p/{profile.public_id}", status_code=status.HTTP_303_SEE_OTHER
+    return redirect_feedback(
+        request, f"/p/{profile.public_id}",
+        message(
+            'Unfollowed',
+            'Their contributions will no longer be included because of this follow.',
+        ),
     )
 
 
 @router.post("/nurses/{public_id}/connect")
 def connect_with_nurse(
+    request: Request,
     public_id: str,
     user: User = Depends(require_user),
     _: None = Depends(verify_csrf),
@@ -772,8 +821,12 @@ def connect_with_nurse(
         request_connection(db, user, profile)
     except CommunityError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from None
-    return RedirectResponse(
-        f"/p/{profile.public_id}", status_code=status.HTTP_303_SEE_OTHER
+    return redirect_feedback(
+        request, f"/p/{profile.public_id}",
+        message(
+            'Connection requested',
+            'Your request is waiting for their response.',
+        ),
     )
 
 
@@ -825,6 +878,7 @@ def network_page(
 
 @router.post("/connections/{connection_id}/respond")
 def answer_connection(
+    request: Request,
     connection_id: str,
     action: str = Form(""),
     user: User = Depends(require_user),
@@ -840,11 +894,18 @@ def answer_connection(
         respond_to_connection(db, user, connection, accept=action == "accept")
     except CommunityError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from None
-    return RedirectResponse("/network", status_code=status.HTTP_303_SEE_OTHER)
+    return redirect_feedback(
+        request, "/network",
+        message(
+            'Connection request updated',
+            'Your response has been saved.',
+        ),
+    )
 
 
 @router.post("/connections/{connection_id}/remove")
 def disconnect(
+    request: Request,
     connection_id: str,
     user: User = Depends(require_user),
     _: None = Depends(verify_csrf),
@@ -857,7 +918,13 @@ def disconnect(
         remove_connection(db, user, connection)
     except CommunityError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from None
-    return RedirectResponse("/network", status_code=status.HTTP_303_SEE_OTHER)
+    return redirect_feedback(
+        request, "/network",
+        message(
+            'Connection removed',
+            'You are no longer connected to this member.',
+        ),
+    )
 
 
 def profile_social_context(

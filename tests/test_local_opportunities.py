@@ -85,10 +85,13 @@ def test_feed_ranks_nigeria_before_newer_foreign_jobs_and_preserves_filters(
     assert "Local Fellowship" not in page.text and "Unspecified Fellowship" not in page.text
     links = PageLinks()
     links.feed(page.text)
-    internship = next(url for url, label in links.links if label == "Internship")
-    assert parse_qs(urlsplit(internship).query) == {
-        "scope": ["international"], "type": ["internship"], "q": ["Fellowship"],
+    nigeria = next(url for url, label in links.links if label == "Nigeria only")
+    assert parse_qs(urlsplit(nigeria).query) == {
+        "country": ["NG"], "type": ["fellowship"], "q": ["Fellowship"],
     }
+    assert 'name="type" form="jobs-search-form"' in page.text
+    assert '<option value="fellowship" selected>' in page.text
+    assert '<option value="internship">Internship</option>' in page.text
     assert 'name="scope" value="international"' in page.text
     assert "Overseas Fellowship" not in client.get("/jobs?country=NG").text
 

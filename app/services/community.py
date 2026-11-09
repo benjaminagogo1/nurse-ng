@@ -1115,6 +1115,10 @@ def public_profile_ids(
 
 def reconcile_community_media(db: Session, *, dry_run: bool = False) -> dict[str, int]:
     """Remove orphan files and reconcile retained-byte counters."""
+    if not dry_run:
+        from app.services.offline_uploads import cleanup
+
+        cleanup(db)
     stale_media = list(
         db.scalars(
             select(CommunityMedia)

@@ -1,6 +1,11 @@
 {% from "_icons.html" import icon %}
-<article class="job-row">
-  <span class="job-logo tone-{{ loop.index0 % 4 if loop is defined else 0 }}">{{ icon('building', 24) }}</span>
-  <div class="job-main"><a class="job-title" href="/jobs/{{ job.id }}">{{ job.title }}</a><p class="job-org">{{ job.organization }}{% if job.location %}<span>·</span>{{ job.location }}{% endif %}</p><p class="job-salary">{{ job.salary }}</p><div class="job-tags"><span class="tag">{{ job.type }}</span><span class="tag tag-neutral">{{ job.mode }}</span></div><p class="job-provenance">{{ 'Approved recruitment source' if job.external else 'Employer submission' }}{% if job.external %} · {{ job.status|replace('_', ' ')|capitalize }}{% endif %}</p></div>
-  <div class="job-side"><a class="job-arrow" href="/jobs/{{ job.id }}" aria-label="View {{ job.title }}">{{ icon('chevron', 17) }}</a><span class="job-time">{{ job.posted }}</span></div>
+<article class="job-row opportunity-card">
+  <div class="opportunity-card-top">
+    <span class="opportunity-logo">{{ icon('building', 24) }}</span>
+    <div class="opportunity-card-title"><h2><a class="job-title" href="/jobs/{{ job.id }}">{{ job.title }}</a></h2><p>{{ job.organization }}</p></div>
+    <span class="opportunity-posted">{{ job.date_label }} {{ job.posted|lower }}</span>
+  </div>
+  <div class="opportunity-card-meta"><span>{{ icon('pin', 15) }} {{ job.location or 'Location not specified' }}</span><span>{{ icon('briefcase', 15) }} {{ job.type }}</span><span>{{ job.mode }}</span></div>
+  <div class="opportunity-card-pay"><strong>{{ job.salary }}</strong>{% if job.closing_date %}<span>{{ icon('calendar', 15) }} Closes {{ job.closing_date }}</span>{% endif %}</div>
+  <div class="opportunity-card-footer"><span>{{ icon('globe' if job.external else 'building', 14) }} {{ 'Approved recruitment source' if job.external else 'Employer submission' }}{% if job.external %} · {{ job.status|replace('_', ' ')|capitalize }}{% endif %}</span><a href="/jobs/{{ job.id }}" aria-label="View {{ job.title }}">View opportunity {{ icon('arrow', 16) }}</a></div>
 </article>

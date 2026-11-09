@@ -115,6 +115,7 @@
     const submitted = body.value;
     if (lastBody !== null && lastBody !== submitted) key.value = crypto.randomUUID();
     lastBody = submitted;
+    const submittedKey = key.value;
     sending = true; button.disabled = true; say('Sending message…');
     try {
       const data = await request(base, {method: 'POST', body: new FormData(form)});
@@ -122,9 +123,15 @@
       add([data.message]); bottom();
       if (body.value === submitted) body.value = '';
       key.value = crypto.randomUUID(); lastBody = null;
+      await window.NurseOffline?.acknowledgeConnected?.(form, {body: submitted, client_key: submittedKey})?.catch(() => {});
       say('Message sent.'); body.focus();
     } catch (error) { if (!stopped) say(`Message not confirmed. ${error.message || 'Check your connection.'} Your text is saved here; press Send to retry.`, true); }
     finally { sending = false; button.disabled = stopped; }
+  });
+  form.addEventListener('nurse:offline-confirmed', () => {
+    lastBody = null;
+    say(body.value ? 'Queued message sent. Your newer text stays here.' : 'Message sent.');
+    poll();
   });
   jump.addEventListener('click', bottom);
   list.addEventListener('scroll', () => { if (atBottom()) jump.hidden = true; });

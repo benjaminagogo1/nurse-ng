@@ -26,7 +26,7 @@
   });
   close?.addEventListener('click', () => {
     panel.hidden = true;
-    const target = lastForm?.querySelector('input:not([type="hidden"]), button') || document.getElementById('main');
+    const target = lastForm?.querySelector('input:not([type="hidden"]), textarea, select, button') || document.getElementById('main');
     target?.focus({preventScroll: true});
   });
   const descriptions = new WeakMap();
@@ -57,7 +57,11 @@
   const markFields = (form, fields = {}) => {
     Object.entries(fields).forEach(([name, text]) => markField(form.elements.namedItem(name), text));
   };
-  const forms = [...document.querySelectorAll('[data-feedback-form]')];
+  // Controls named "action" can mask the form.action DOM property.
+  const formAction = form => new URL(form.getAttribute('action') || location.href, document.baseURI);
+  const forms = [...document.querySelectorAll('form[method="post" i]')].filter(form =>
+    !form.matches('.message-compose, [data-reel-action], [data-reel-upload], [data-native-submit]') &&
+    formAction(form).origin === location.origin);
   const initialFields = document.querySelector('[data-feedback-fields]');
   if (initialFields) {
     try { forms.forEach(form => markFields(form, JSON.parse(initialFields.textContent))); } catch { /* Text feedback remains available. */ }
@@ -72,7 +76,28 @@
     });
   }
   if (!window.fetch || !window.AbortController) return;
+  document.querySelectorAll('[data-native-submit]').forEach(form => {
+    const button = form.querySelector('[type="submit"]');
+    const original = button ? [...button.childNodes] : [];
+    const restore = () => {
+      form.removeAttribute('aria-busy');
+      if (button) { button.replaceChildren(...original); button.disabled = false; }
+    };
+    window.addEventListener('pageshow', restore);
+    form.addEventListener('submit', event => {
+      if (!navigator.onLine) {
+        event.preventDefault();
+        show({tone: 'error', title: 'You’re offline', body: 'Reconnect to continue to your sign-in provider.'});
+      } else if (form.hasAttribute('aria-busy')) {
+        event.preventDefault();
+      } else {
+        form.setAttribute('aria-busy', 'true');
+        if (button) { button.textContent = 'Connecting…'; button.disabled = true; }
+      }
+    });
+  });
   forms.forEach(form => {
+    form.dataset.feedbackForm = '';
     form.noValidate = true;
     let busy = false;
     let restoreButton = () => {};
@@ -93,7 +118,9 @@
         if (event.target.dataset.match) event.target.setCustomValidity('');
       }
     });
-    form.addEventListener('submit', async event => {
+    // Run after composer listeners have written the current draft version into the form.
+    document.addEventListener('submit', async event => {
+      if (event.target !== form || event.defaultPrevented) return;
       event.preventDefault();
       if (busy) return;
       lastForm = form;
@@ -112,10 +139,12 @@
         show({tone: 'error', title: 'You’re offline', body: 'Reconnect to the internet, then try again. Your entries are still here.'});
         return;
       }
+      const button = event.submitter || form.querySelector('button:not([type]), [type="submit"]');
+      form.dispatchEvent(new Event('nurse:submission-started'));
       const data = new FormData(form);
-      const button = event.submitter || form.querySelector('[type="submit"]');
+      if (button?.name) data.append(button.name, button.value);
       const original = button ? [...button.childNodes] : [];
-      const label = form.dataset.pendingLabel || 'Saving…';
+      const label = form.dataset.pendingLabel || 'Working…';
       busy = true;
       panel.hidden = true;
       form.setAttribute('aria-busy', 'true');
@@ -137,20 +166,31 @@
       const timer = setTimeout(() => controller.abort(), 60000);
       let navigating = false;
       try {
-        const response = await fetch(form.action, {
+        const response = await fetch(formAction(form).href, {
           method: 'POST', body: data, credentials: 'same-origin', signal: controller.signal,
           headers: {'X-Account-Feedback': '1', 'Accept': 'application/json'},
         });
         if (response.redirected && new URL(response.url).pathname === '/auth/login') {
+          show({tone: 'error', title: 'Please sign in again', body: 'Your session has ended. Your entries are still here. Sign in in another tab, then reload this page after keeping a copy of your work.'});
+          return;
+        }
+        if (response.redirected && response.ok && new URL(response.url).origin === location.origin) {
           navigating = true;
-          window.location.assign('/auth/login');
+          window.location.assign(response.url);
           return;
         }
         let result = {};
         if (response.headers.get('content-type')?.includes('application/json')) result = await response.json();
+        // Rejections have a known outcome; timeouts and server errors may have committed.
+        if ([400, 401, 403, 404, 422, 429].includes(response.status)) {
+          form.dispatchEvent(new Event('nurse:submission-rejected'));
+        }
         if (response.ok && result.redirect) {
           const destination = new URL(result.redirect, location.origin);
           if (destination.origin !== location.origin) throw new Error('Unexpected destination');
+          if (formAction(form).pathname === '/auth/logout') {
+            document.dispatchEvent(new CustomEvent('nurse:signed-out'));
+          }
           navigating = true;
           window.location.assign(destination.href);
           return;
@@ -166,10 +206,10 @@
         } else if ([400, 401, 403].includes(response.status)) {
           show({tone: 'error', title: 'Please refresh this page', body: 'Your session may have expired. Reload the page, sign in if needed, then try again.'});
         } else {
-          show({tone: 'error', title: 'We couldn’t confirm the result', body: 'Something interrupted this request. Check your account before trying again. Your entries are still here.'});
+          show({tone: 'error', title: 'We couldn’t confirm the result', body: 'Something interrupted this request. Check whether the action completed before trying again. Your entries are still here.'});
         }
       } catch {
-        show({tone: 'error', title: 'We couldn’t confirm the result', body: 'The connection was interrupted. Check your account before trying again. Your entries are still here.'});
+        show({tone: 'error', title: 'We couldn’t confirm the result', body: 'The connection was interrupted. Check whether the action completed before trying again. Your entries are still here.'});
       } finally {
         clearTimeout(timer);
         if (!navigating) unlock();

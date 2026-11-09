@@ -129,6 +129,49 @@ def test_verification_page_requires_sign_in(client):
     assert response.headers["location"] == "/auth/login"
 
 
+def test_missing_profile_keeps_verification_as_its_own_page(client, db_session):
+    register_and_sign_in(client)
+    page = client.get("/profile/verification", follow_redirects=False)
+
+    assert page.status_code == 200
+    assert '<h1>Verification</h1>' in page.text
+    assert 'href="/profile/verification" aria-current="page"' in page.text
+    assert "Create your profile to start document review" in page.text
+    assert 'href="/profile/edit?return_to=verification"' in page.text
+    assert 'type="file"' not in page.text
+    assert 'name="display_name"' not in page.text
+    assert db_session.scalar(select(NurseProfile)) is None
+    assert db_session.scalar(select(VerificationCase)) is None
+
+    profile_page = client.get("/profile")
+    assert "<h1>Create your profile</h1>" in profile_page.text
+    assert 'name="display_name"' in profile_page.text
+
+
+@pytest.mark.parametrize("enhanced", [False, True])
+def test_submission_without_profile_explains_prerequisite_without_storing_evidence(
+    client, db_session, evidence_dir, enhanced,
+):
+    register_and_sign_in(client)
+    token = csrf_from(client.get("/profile/verification"))
+    response = client.post(
+        "/profile/verification",
+        data={"csrf_token": token, "consent": "on", "registration_number": "NMCN/12345"},
+        files={"licence": ("licence.jpg", JPEG, "image/jpeg")},
+        headers={"X-Account-Feedback": "1"} if enhanced else {},
+        follow_redirects=False,
+    )
+    assert response.status_code == 400
+    assert "Create and save your profile" in response.text
+    if enhanced:
+        assert response.json()["feedback"]["tone"] == "error"
+    else:
+        assert '<h1>Verification</h1>' in response.text
+    assert db_session.scalar(select(VerificationCase)) is None
+    assert db_session.scalar(select(EvidenceDocument)) is None
+    assert stored_files(evidence_dir) == []
+
+
 def test_submission_stores_private_evidence_and_a_pending_case(
     client, db_session, evidence_dir
 ):

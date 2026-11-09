@@ -3,9 +3,9 @@
 .analytics-heading { display: flex; align-items: center; justify-content: space-between; gap: 28px; margin-bottom: 27px; }
 .analytics-heading .eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 12px; font-size: .73rem; }
 .analytics-staff-label { font-size: .78rem; font-weight: 600; letter-spacing: .02em; color: var(--muted); border-left: 1px solid var(--line-strong); padding-left: 12px; text-transform: none; }
-.analytics-heading h1 { font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -.045em; line-height: 1.12; margin: 0 0 12px; }
+.analytics-heading h1 { margin: 0 0 12px; }
 .analytics-heading h1 > span { color: var(--accent-text); }
-.analytics-heading p:not(.eyebrow), .analytics-panel-heading p:not(.analytics-kicker) { color: var(--muted); margin: 0; font-size: .9rem; }
+.analytics-heading p:not(.eyebrow), .analytics-panel-heading p:not(.analytics-kicker) { color: var(--muted); margin: 0; font-size: var(--font-size-support); }
 .analytics-refresh { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; flex-shrink: 0; }
 .analytics-live { display: inline-flex; align-items: center; gap: 7px; font-size: .82rem; font-weight: 600; color: var(--muted); }
 .analytics-live i, .analytics-presence-dot, .analytics-activity-state i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent-text); flex-shrink: 0; }
@@ -56,8 +56,7 @@
 .analytics-chart-panel, .analytics-members { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; margin-top: 23px; overflow: hidden; scroll-margin-top: 100px; }
 .analytics-chart-panel { padding: 25px 28px 18px; }
 .analytics-panel-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
-.analytics-panel-heading h2 { margin: 0 0 8px; font-size: 1.3rem; font-weight: 650; letter-spacing: -.025em; }
-.analytics-panel-heading p:not(.analytics-kicker) { font-size: .75rem; }
+.analytics-panel-heading h2 { margin: 0 0 8px; font-size: var(--font-size-section); font-weight: 650; letter-spacing: -.025em; }
 .analytics-ranges { display: flex; padding: 4px; gap: 2px; background: var(--soft-surface); border: 1px solid var(--line); border-radius: 9px; }
 .analytics-ranges a { padding: 6px 11px; border-radius: 6px; font-size: .81rem; font-weight: 600; color: var(--muted); text-decoration: none; }
 .analytics-ranges a[aria-current] { color: var(--accent-text); background: var(--surface); box-shadow: 0 1px 3px #0000000d; }
@@ -85,8 +84,8 @@
 .analytics-history th, .analytics-history td { padding: 7px 10px; border-bottom: 1px solid var(--line); }
 .analytics-empty-chart, .analytics-empty-members { padding: 44px 24px; text-align: center; color: var(--muted); }
 .analytics-empty-chart > .icon, .analytics-empty-members > .icon { color: var(--accent-text); }
-.analytics-empty-chart h3, .analytics-empty-members h3 { color: var(--fg); font-size: 1rem; margin: 16px 0 10px; }
-.analytics-empty-chart p, .analytics-empty-members p { font-size: .83rem; max-width: 430px; margin: 0 auto 12px; }
+.analytics-empty-chart h3, .analytics-empty-members h3 { color: var(--fg); font-size: 1.15rem; margin: 16px 0 10px; }
+.analytics-empty-chart p, .analytics-empty-members p { font-size: var(--font-size-support); max-width: 48ch; margin: 0 auto 12px; }
 .analytics-members > .analytics-panel-heading { padding: 25px 28px 19px; }
 .analytics-count { display: inline-block; font-size: .8rem; padding: 4px 8px; color: var(--accent-text); background: var(--accent-surface); border-radius: 6px; vertical-align: middle; margin-left: 5px; }
 .analytics-table { border-collapse: collapse; width: 100%; text-align: left; table-layout: fixed; }
@@ -156,7 +155,6 @@
 @media (max-width: 600px) {
   .analytics-page { padding: 25px 18px 36px; }
   .analytics-heading { display: block; margin-bottom: 20px; }
-  .analytics-heading h1 { font-size: 2.1rem; }
   .analytics-heading .eyebrow { gap: 9px; font-size: .76rem; }
   .analytics-staff-label { font-size: .73rem; padding-left: 9px; }
   .analytics-heading p:not(.eyebrow) { font-size: .83rem; }
@@ -175,7 +173,6 @@
   .analytics-metric > p { font-size: .77rem; }
   .analytics-chart-panel { padding: 21px 16px 16px; }
   .analytics-panel-heading { gap: 16px; }
-  .analytics-panel-heading h2 { font-size: 1.07rem; }
   .analytics-chart-summary { margin-top: 20px; }
   .analytics-chart { height: 165px; }
   .analytics-ranges { width: 100%; }

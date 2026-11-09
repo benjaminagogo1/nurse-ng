@@ -21,12 +21,14 @@ from app.services.auth import (
     register_user,
 )
 from app.services.community import list_connections, list_received_requests, list_topics
+from app.services.events import local_time, upcoming
 from app.services.jobs import open_job_condition
 from app.services.member_discovery import suggested_opportunities, suggested_people
 from app.services.messages import unread_count
 from app.services.profiles import get_profile_for_user
 from app.services.tours import offer_on_sign_in
 from app.web.deps import get_current_user, require_user, verify_csrf
+from app.web.feedback import message, redirect_feedback
 from app.web.templating import render
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -161,7 +163,13 @@ def register(
         )
 
     _start_session(request, user, db)
-    return RedirectResponse("/welcome", status_code=status.HTTP_303_SEE_OTHER)
+    return redirect_feedback(
+        request, "/welcome",
+        message(
+            'Account created',
+            'Choose your interests to get started.',
+        ),
+    )
 
 
 @router.get("/login")
@@ -224,7 +232,13 @@ def login(
         )
 
     _start_session(request, user, db)
-    return RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
+    return redirect_feedback(
+        request, "/",
+        message(
+            'Signed in',
+            'Welcome back to Nurse.ng.',
+        ),
+    )
 
 
 @router.post("/logout")
@@ -233,7 +247,13 @@ def logout(
     _: None = Depends(verify_csrf),
 ) -> RedirectResponse:
     request.session.clear()
-    return RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
+    return redirect_feedback(
+        request, "/",
+        message(
+            'Signed out',
+            'You have signed out of this browser.',
+        ),
+    )
 
 
 @router.get("/dashboard")
@@ -278,5 +298,7 @@ def dashboard(
             "personalised_jobs": personalised_jobs,
             "people": suggested_people(db, user),
             "topics": list_topics(db)[:3],
+            "events": upcoming(db, limit=3),
+            "local_time": local_time,
         },
     )

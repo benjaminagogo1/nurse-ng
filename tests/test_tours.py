@@ -15,6 +15,13 @@ from app.services import tours
 from app.services.auth import register_user
 from tests.helpers import csrf_from, register_and_sign_in
 
+WORKER_NAVIGATION = {
+    "X-Nurse-Navigation": "document",
+    "Sec-Fetch-Mode": "same-origin",
+    "Sec-Fetch-Dest": "empty",
+    "Sec-Fetch-Site": "same-origin",
+}
+
 
 def bootstrap(response):
     assert response.status_code == 200, response.text
@@ -47,9 +54,10 @@ def sign_out_and_in(client):
     assert response.status_code == 303
 
 
-def test_first_registration_offers_once_without_changing_welcome_flow(client, db_session):
+@pytest.mark.parametrize("headers", [{}, WORKER_NAVIGATION], ids=["direct", "offline-worker"])
+def test_first_registration_offers_once_without_changing_welcome_flow(client, db_session, headers):
     register_and_sign_in(client)
-    welcome = bootstrap(client.get("/welcome"))
+    welcome = bootstrap(client.get("/welcome", headers=headers))
     assert welcome["offer"] is True
     assert welcome["state"]["status"] == "offered"
     user = db_session.scalar(select(User))
@@ -61,10 +69,13 @@ def test_first_registration_offers_once_without_changing_welcome_flow(client, db
     assert db_session.scalar(select(func.count()).select_from(UserTour)) == 1
 
 
-def test_existing_account_gets_one_invitation_on_first_login_after_install(client, db_session):
+@pytest.mark.parametrize("headers", [{}, WORKER_NAVIGATION], ids=["direct", "offline-worker"])
+def test_existing_account_gets_one_invitation_on_first_login_after_install(
+    client, db_session, headers,
+):
     register_user(db_session, phone="+2348012345678", password="s3cret-pass")
     sign_out_and_in(client)
-    assert bootstrap(client.get("/"))["offer"] is True
+    assert bootstrap(client.get("/", headers=headers))["offer"] is True
     sign_out_and_in(client)
     assert bootstrap(client.get("/"))["offer"] is False
 
@@ -82,8 +93,18 @@ def test_failed_login_and_anonymous_pages_never_create_tour(client, db_session):
 
 def test_prefetch_and_background_requests_do_not_consume_invitation(client):
     register_and_sign_in(client)
-    assert bootstrap(client.get("/jobs", headers={"Purpose": "prefetch"}))["offer"] is False
-    assert bootstrap(client.get("/jobs", headers={"Sec-Fetch-Mode": "cors"}))["offer"] is False
+    for headers in (
+        {"Purpose": "prefetch"},
+        {"Sec-Fetch-Mode": "cors"},
+        {"Sec-Fetch-Mode": "same-origin", "Sec-Fetch-Dest": "empty"},
+        {**WORKER_NAVIGATION, "X-Nurse-Navigation": ""},
+        {**WORKER_NAVIGATION, "Sec-Fetch-Mode": "cors"},
+        {**WORKER_NAVIGATION, "Sec-Fetch-Site": "cross-site"},
+        {**WORKER_NAVIGATION, "Sec-Fetch-Dest": "iframe"},
+        {**WORKER_NAVIGATION, "Purpose": "prefetch"},
+        {**WORKER_NAVIGATION, "Sec-Purpose": "prefetch;prerender"},
+    ):
+        assert bootstrap(client.get("/jobs", headers=headers))["offer"] is False, headers
     assert bootstrap(client.get("/auth/dashboard"))["offer"] is True
 
 

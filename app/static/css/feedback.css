@@ -1,4 +1,13 @@
 /* Account feedback shares the active light/dark and accessibility palette. */
+.social-row > form { flex: 1; min-width: 0; }
+.social-row > form > button { width: 100%; }
+.event-card { padding: 20px; margin-block: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow-wrap: anywhere; }
+.event-card h2, .event-card h3 { margin-top: 0; }
+.event-description { white-space: pre-wrap; overflow-wrap: anywhere; }
+.event-detail h1, .event-detail p { overflow-wrap: anywhere; }
+.event-detail form { margin-block: 20px; }
+.event-detail summary { cursor: pointer; padding-block: 16px; }
+main > .feedback-slot { max-width: 100%; }
 .feedback-slot:has(> [hidden]) { margin: 0; }
 .action-feedback {
   --feedback-fg: var(--info-fg); --feedback-bg: var(--info-bg);

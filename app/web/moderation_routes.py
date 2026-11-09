@@ -3,7 +3,6 @@
 import uuid
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response, status
-from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -18,6 +17,7 @@ from app.services.community import (
     moderate_report,
 )
 from app.web.deps import require_staff, verify_csrf
+from app.web.feedback import message, redirect_feedback
 from app.web.templating import render
 
 router = APIRouter(prefix="/moderation", tags=["moderation"])
@@ -64,11 +64,18 @@ def add_topic(
             {"user": user, **_context(db, error=str(exc))},
             status_code=status.HTTP_400_BAD_REQUEST,
         )
-    return RedirectResponse("/moderation", status_code=status.HTTP_303_SEE_OTHER)
+    return redirect_feedback(
+        request, "/moderation",
+        message(
+            'Topic created',
+            'The new topic is available to the community.',
+        ),
+    )
 
 
 @router.post("/reports/{report_id}")
 def review_report(
+    request: Request,
     report_id: str,
     action: str = Form(""),
     note: str = Form(""),
@@ -87,4 +94,10 @@ def review_report(
         moderate_report(db, user, report, action=action, note=note)
     except CommunityError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from None
-    return RedirectResponse("/moderation", status_code=status.HTTP_303_SEE_OTHER)
+    return redirect_feedback(
+        request, "/moderation",
+        message(
+            'Report reviewed',
+            'Your moderation decision has been saved.',
+        ),
+    )

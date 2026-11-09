@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse
 from sqlalchemy import and_, or_, update
 from sqlalchemy.orm import Session
 
@@ -104,6 +104,7 @@ async def save_preferences(
 
 @router.post("/read-all")
 def read_all(
+    request: Request,
     watermark: UUID = Form(...),
     user: User = Depends(require_user),
     _: None = Depends(verify_csrf),
@@ -128,11 +129,18 @@ def read_all(
         execution_options={"synchronize_session": False},
     )
     db.commit()
-    return RedirectResponse("/notifications", status_code=303)
+    return redirect_feedback(
+        request, "/notifications",
+        message(
+            'Notifications marked read',
+            'Notifications through the selected point are now marked read.',
+        ),
+    )
 
 
 @router.post("/{notification_id}/open")
 def open_notification(
+    request: Request,
     notification_id: UUID,
     user: User = Depends(require_user),
     _: None = Depends(verify_csrf),
@@ -143,11 +151,18 @@ def open_notification(
         raise HTTPException(status_code=404, detail="This notification is no longer available.")
     destination = service.card(db, notice)["path"]
     service.mark_read(db, user, [notice.id])
-    return RedirectResponse(destination, status_code=303)
+    return redirect_feedback(
+        request, destination,
+        message(
+            'Notification opened',
+            'The notification has been marked read.',
+        ),
+    )
 
 
 @router.post("/{notification_id}/read")
 def read_notification(
+    request: Request,
     notification_id: UUID,
     user: User = Depends(require_user),
     _: None = Depends(verify_csrf),
@@ -157,4 +172,10 @@ def read_notification(
     if notice is None:
         raise HTTPException(status_code=404)
     service.mark_read(db, user, [notice.id])
-    return RedirectResponse("/notifications", status_code=303)
+    return redirect_feedback(
+        request, "/notifications",
+        message(
+            'Notification marked read',
+            'This notification is now marked read.',
+        ),
+    )

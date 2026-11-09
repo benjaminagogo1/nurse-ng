@@ -203,7 +203,13 @@ def retry(post_id: str, request: Request, user: User = Depends(require_user),
     except CommunityError as exc:
         return redirect_feedback(request, f"/reels/{post_id}/status",
                                  message("Cannot retry", str(exc), tone="error"))
-    return RedirectResponse(f"/reels/{post_id}/status", status_code=303)
+    return redirect_feedback(
+        request, f"/reels/{post_id}/status",
+        message(
+            'Processing queued',
+            'The worker will retry your upload. Check its progress here.',
+        ),
+    )
 
 
 @router.post("/{post_id}/remove")

@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
-{% from "_feedback.html" import feedback_slot %}
 {% block title %}Account recovery — Nurse.ng{% endblock %}
 {% block content %}
 <section class="form-page account-recovery">
@@ -9,7 +8,7 @@
   {% if mode == 'forgot' %}
   <h1>Forgot your password?</h1>
   <p class="lede">Let’s get you back in. Enter the phone number you use to sign in.</p>
-  {{ feedback_slot(feedback|default(none)) }}
+
   {% if mail_available %}
   <form class="stacked-form" method="post" action="/auth/forgot-password" data-feedback-form data-pending-label="Requesting reset link…">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -20,14 +19,14 @@
   <p class="field-hint">We’ll send a link to your verified email address. Recovery requires an email address verified in Account settings.</p>
   {% elif mode == 'sent' %}
   <h1>Check your email</h1>
-  {{ feedback_slot(feedback|default(none)) }}
+
   <div class="account-security-note">{{ icon('clock', 22) }}<div><strong>Your next step</strong><p>Open the latest reset link and choose a new password. Keep this window open while you check your inbox.</p></div></div>
   <p class="field-hint">Didn’t see it? Check Spam, then wait a minute before requesting another link.</p>
   <a class="btn btn-secondary" href="/auth/forgot-password">Request another link</a>
   {% else %}
   <h1>{{ 'Choose a new password' if mode == 'reset' else 'Verify your email' }}</h1>
   <p class="lede">{{ 'A fresh password keeps your account secure.' if mode == 'reset' else 'One last step to protect access to your account.' }}</p>
-  {{ feedback_slot(feedback|default(none)) }}
+
   <form class="stacked-form" method="post" action="/auth/{{ 'reset-password' if mode == 'reset' else 'verify-email' }}" data-feedback-form data-pending-label="{{ 'Updating password…' if mode == 'reset' else 'Verifying email…' }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div data-token-field><label for="account-token">Code from your email</label><input id="account-token" name="token" type="text" value="{{ token or '' }}" maxlength="100" autocomplete="off" autocapitalize="none" spellcheck="false" required data-account-token></div>

@@ -1,0 +1,63 @@
+<section class="profile-form-section" aria-labelledby="basics-heading">
+  <h2 id="basics-heading">The essentials</h2>
+  <p class="profile-section-intro">Start with how you’d like to introduce yourself.</p>
+  <div class="profile-field-grid">
+    <div class="profile-field">
+      <label for="display_name">Display name <span class="optional">(required)</span></label>
+      <input id="display_name" name="display_name" type="text" maxlength="120" data-tour="profile" value="{{ values.display_name }}" required autocomplete="name">
+    </div>
+    <div class="profile-field">
+      <label for="professional_status">Professional status</label>
+      <select id="professional_status" name="professional_status" aria-describedby="status-hint">
+        {% for value, label in status_options %}<option value="{{ value }}"{% if values.professional_status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+      <p id="status-hint" class="field-hint">Self-declared. <a href="/profile/verification">Document review</a> is separate.</p>
+    </div>
+    <div class="profile-field profile-field-wide">
+      <label for="headline">Headline <span class="optional">(optional)</span></label>
+      <input id="headline" name="headline" type="text" maxlength="160" value="{{ values.headline }}" placeholder="e.g. Registered nurse with a passion for community health" aria-describedby="headline-hint">
+      <p id="headline-hint" class="field-hint">A short introduction that appears beneath your name.</p>
+    </div>
+    <div class="profile-field profile-field-wide">
+      <label for="location">Location <span class="optional">(optional)</span></label>
+      <input id="location" name="location" type="text" maxlength="120" value="{{ values.location }}" placeholder="e.g. Lagos, Nigeria">
+    </div>
+  </div>
+</section>
+
+<section class="profile-form-section" aria-labelledby="story-heading">
+  <h2 id="story-heading">Your story</h2>
+  <p class="profile-section-intro">Go beyond a job title. Tell people what matters to you.</p>
+  <div class="profile-field">
+    <label for="bio">About you <span class="optional">(optional)</span></label>
+    <textarea id="bio" name="bio" rows="5" maxlength="5000" placeholder="Share your experience, the care you’re passionate about and your career goals.">{{ values.bio }}</textarea>
+  </div>
+</section>
+
+<section class="profile-form-section" aria-labelledby="background-heading">
+  <h2 id="background-heading">Professional background</h2>
+  <p class="profile-section-intro">Add your education and experience. These details are self-declared.</p>
+  <div class="profile-field-grid">
+    <div class="profile-field">
+      <label for="qualification">Highest qualification <span class="optional">(optional)</span></label>
+      <input id="qualification" name="qualification" type="text" maxlength="120" value="{{ values.qualification }}" placeholder="e.g. BSc Nursing">
+    </div>
+    <div class="profile-field">
+      <label for="years_experience">Years of experience <span class="optional">(optional)</span></label>
+      <input id="years_experience" name="years_experience" type="number" min="0" max="60" value="{{ values.years_experience if values.years_experience is not none else '' }}" placeholder="e.g. 3">
+    </div>
+  </div>
+</section>
+
+<section class="profile-form-section" id="interests-section" aria-labelledby="skills-form-heading">
+  <h2 id="skills-form-heading">Skills &amp; interests</h2>
+  <p class="profile-section-intro">Highlight your strengths and the areas you’d like to explore.</p>
+  <div class="profile-field">
+    <label for="skills">Skills <span class="optional">(optional)</span></label>
+    <input id="skills" name="skills" type="text" maxlength="600" value="{{ values.skills }}" placeholder="Patient care, Critical thinking, Leadership" aria-describedby="skills-hint">
+    <p id="skills-hint" class="field-hint">Separate skills with commas. Up to 12.</p>
+  </div>
+  {% set selected_interests = values.interests.split(', ') if values.interests else [] %}
+  {% include "onboarding/_interests.html" %}
+  <p class="field-hint">Interests help suggest people and opportunities. They follow your <a href="/profile/sharing">sharing controls</a> and start private.</p>
+</section>

@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
 {% from "_display.html" import display_button %}
-{% from "_feedback.html" import feedback_slot %}
 {% block title %}Sign in — Nurse.ng{% endblock %}
 {% block header %}
 <header class="site-header auth-header"><div class="site-header-inner"><a class="brand" href="/">{{ icon('logo', 31) }}<span>Nurse.ng</span></a><p class="header-hint">New to Nurse.ng? <a href="/auth/register">Get started {{ icon('arrow', 15) }}</a></p>{{ display_button() }}</div></header>
@@ -14,7 +13,7 @@
   </aside>
   <div class="auth-form-wrap"><div class="auth-card">
     <span class="welcome-icon">{{ icon('heart', 27) }}</span><p class="eyebrow">Your next chapter continues</p><h1>Welcome back.</h1><p class="lede">Sign in to your Nurse.ng account.</p>
-    {{ feedback_slot({'tone': 'error', 'title': 'We couldn’t sign you in', 'body': error} if error else feedback|default(none)) }}
+
     <form method="post" action="/auth/login" class="stacked-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <label for="phone">Phone number</label>
@@ -24,6 +23,7 @@
       <button type="submit" class="btn btn-primary btn-block">Sign in {{ icon('arrow', 17) }}</button>
     </form>
     <p><a class="text-link" href="/auth/forgot-password">Forgot password?</a></p>
+    {% include 'auth/_social_buttons.html' %}
     <p class="auth-privacy">{{ icon('lock', 14) }} A secure space for your professional journey.</p>
     <p class="form-alt">New here? <a href="/auth/register">Create an account</a></p>
   </div></div>

@@ -4,6 +4,11 @@ A professional platform for nurses and healthcare employers, beginning in Nigeri
 
 ## Documents
 
+- [Offline reading, drafts and sync](docs/OFFLINE.md) — supported actions, resumable Reel uploads, storage limits and setup.
+- [App quality and device verification](docs/QUALITY_VERIFICATION.md).
+- [Community events](docs/EVENTS.md) — publishing, RSVPs and calendar downloads.
+- [Google and LinkedIn sign-in](docs/SOCIAL_SIGN_IN.md) — implementation and provider setup.
+
 - [Interactive onboarding tour](docs/ONBOARDING_TOUR.md) — walkthrough, saved progress, role-specific steps and restart.
 
 - [User analytics, unique IDs and daily activity](docs/MEMBER_ANALYTICS.md).
@@ -24,6 +29,13 @@ A professional platform for nurses and healthcare employers, beginning in Nigeri
 - [Work log](docs/WORK_LOG.md): every step, including blocked and unverified work
 
 ## Status
+
+**Offline & sync** now supports selected saved information, explicit contribution
+drafts and queued changes, with resumable Reel uploads. Upgrade through
+`e6480c2ea831` before serving this version. Saved work survives tab and browser
+closure in the same browser profile and sign-in session. Reopen and reconnect to
+resume pending sends; signing out clears private offline data. See the
+[offline guide](docs/OFFLINE.md) for supported behavior and verification.
 
 Staff can monitor account IDs, daily active users, recent activity, 7/30-day
 participation and daily history at `/staff/users` (**Staff → User analytics**).
@@ -48,11 +60,14 @@ Targeted mobile/desktop browser checks passed for posting, replying, following, 
 
 Reply pagination follow-up on 6 November 2026: **177 tests pass**. Conversations now show 20 replies per page. Click a new-reply indicator in Following discussions, or **First unread reply** inside a conversation, to jump to the first unopened reply. Only replies on a successfully rendered page are marked read; skipped pages stay unread. Each reply has a permanent link that resolves its current page, and submitting a reply opens the page containing it. Browser checks passed on mobile and desktop. The local database is now backed up and upgraded to `d4e5f6a7b8c9`, with no schema drift. Other environments need `./venv/bin/alembic upgrade head`. See [delivery evidence](docs/BUILD_PLAN.md#reply-pagination-and-unread-navigation--6-november-2026).
 
-Draft recovery on 7 November 2026: **182 tests pass**, plus the repeatable Chrome draft checks. Questions and replies save while typing and restore when returning to the same composer in the same tab, for up to 24 hours. Each discussion has a separate reply draft. Drafts clear on explicit discard or confirmed publication; failed/interrupted submissions retain the text. Signing out clears drafts across open tabs, and changing accounts cannot restore the previous session's drafts. Files must be selected again. Closing a tab can remove its drafts; this is not cross-device storage. No additional migration is needed. See [draft delivery evidence](docs/BUILD_PLAN.md#community-draft-recovery--7-november-2026).
+Automatic community draft recovery on 7 November 2026: **182 tests pass**, plus the repeatable Chrome draft checks. Questions and replies save while typing and restore when returning to the same composer in the same tab, for up to 24 hours. Each discussion has a separate reply draft. Drafts clear on explicit discard or confirmed publication; failed/interrupted submissions retain the text. Signing out clears drafts across open tabs, and changing accounts cannot restore the previous session's drafts. Files must be selected again. Closing a tab can remove its drafts; this is not cross-device storage. No additional migration is needed. See [draft delivery evidence](docs/BUILD_PLAN.md#community-draft-recovery--7-november-2026).
+
+Use **Save draft locally** for the [durable offline copy](docs/OFFLINE.md) added on
+9 November, which survives normal tab and browser closure.
 
 Reply context on 7 November 2026: **192 tests pass**. Use **Reply** beneath a response to answer that specific response; the composer shows whom you are answering and keeps your typed text when you change the selection. Published responses show a short reference with a link back, while the discussion stays chronological. Drafts preserve the selected response across pages. Removed responses no longer expose their text through references, and unavailable or cross-discussion targets cannot be used for publication. The local database was backed up and upgraded to `e5f6a7b8c9d0`, with original data and foreign keys preserved and no schema drift. Other environments need `./venv/bin/alembic upgrade head`. See [reply-context evidence](docs/BUILD_PLAN.md#replying-to-a-specific-response--7-november-2026).
 
-Document review is not source confirmation: no NMCN (Nursing and Midwifery Council of Nigeria) register is checked, no authenticity is asserted, and no competence is assessed. Public profile responses and `robots.txt` request exclusion from search indexing. The build plan's Phase 0 verification-source gate remains open, and its research is deferred by the user's direction. Learning pages link to external resources; events and social sign-in remain placeholders.
+Document review is not source confirmation: no NMCN (Nursing and Midwifery Council of Nigeria) register is checked, no authenticity is asserted, and no competence is assessed. Public profile responses and `robots.txt` request exclusion from search indexing. The build plan's Phase 0 verification-source gate remains open, and its research is deferred by the user's direction. Learning pages link to external resources. Community events now support staff publishing, RSVPs and calendar downloads. Google and LinkedIn sign-in integrations require provider credentials and callback configuration before live use.
 
 Use the half-circle **Display and accessibility** button in the header (also available on login and registration), or the matching button in account settings, to choose System, Light, or Dark appearance, larger text, higher contrast, and reduced motion. Preferences are saved in this browser. The site respects the device's reduced-motion setting and supports keyboard navigation and forced colors. Automated accessibility checks cover the main page/theme states; assistive-technology testing and author-provided descriptions/captions for community media remain further work.
 
@@ -84,9 +99,12 @@ python3.12 -m venv venv
 
 Start the development server from the repository root after configuring `.env`:
 
+
 ```bash
 ./venv/bin/python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
+
+
 
 Open <http://127.0.0.1:8000>, or <http://127.0.0.1:8000/feed> for community. Keep the terminal open; press Ctrl+C to stop. If startup reports an invalid signing key, check the `.env` setup above; without that file or explicit environment variables, the application defaults to production configuration.
 

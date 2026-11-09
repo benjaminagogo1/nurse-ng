@@ -1,4 +1,6 @@
-"""Account action feedback, with ordinary forms and optional JSON enhancement."""
+"""Action feedback, with ordinary forms and optional JSON enhancement."""
+
+from urllib.parse import urlsplit
 
 from fastapi import Request
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -21,7 +23,9 @@ def pending_feedback(request: Request):
 
 def redirect_feedback(request: Request, path: str, notice: dict, *, code: str = ""):
     # Store only display text, never passwords, addresses, or verification tokens.
-    request.session["account_feedback"] = {"path": path, "notice": notice, "code": code}
+    request.session["account_feedback"] = {
+        "path": urlsplit(path).path, "notice": notice, "code": code,
+    }
     headers = {"Cache-Control": "no-store", "Referrer-Policy": "no-referrer"}
     if enhanced(request):
         return JSONResponse({"redirect": path}, headers=headers)

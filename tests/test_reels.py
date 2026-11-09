@@ -82,7 +82,7 @@ def ready(client, db, topic, data):
 
 
 def test_public_empty_feed_and_auth_boundaries(client):
-    assert "Every useful story starts" in client.get("/reels").text
+    assert "Share the first reel" in client.get("/reels").text
     for path in ("/reels/new", "/reels/mine", "/reels?view=saved", "/reels?view=following"):
         assert client.get(path, follow_redirects=False).headers["location"] == "/auth/login"
     assert client.get("/reels/not-a-uuid").status_code == 404

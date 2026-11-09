@@ -4,7 +4,6 @@ from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
-from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -16,6 +15,7 @@ from app.models.vacancies import VacancySnapshot
 from app.services import recruitment as registry
 from app.services.vacancies import activation_blockers, configure_collector
 from app.web.deps import require_staff, verify_csrf
+from app.web.feedback import message, redirect_feedback
 from app.web.templating import render
 
 router = APIRouter(prefix="/recruitment", tags=["recruitment sources"])
@@ -168,7 +168,13 @@ def register(
     except registry.RecruitmentError as exc:
         db.rollback()
         return _dashboard(request, db, user, error=str(exc), values=values)
-    return RedirectResponse(f"/recruitment/sources/{source.id}", status_code=303)
+    return redirect_feedback(
+        request, f"/recruitment/sources/{source.id}",
+        message(
+            'Source registered',
+            'The source is ready for evidence checks.',
+        ),
+    )
 
 
 @router.post("/schedules")
@@ -196,11 +202,18 @@ def schedule(
     except registry.RecruitmentError as exc:
         db.rollback()
         return _dashboard(request, db, user, error=str(exc))
-    return RedirectResponse("/recruitment#schedules", status_code=303)
+    return redirect_feedback(
+        request, "/recruitment#schedules",
+        message(
+            'Schedule created',
+            'The worker will use this discovery schedule.',
+        ),
+    )
 
 
 @router.post("/schedules/{schedule_id}")
 def toggle_schedule(
+    request: Request,
     schedule_id: str,
     enabled: bool = Form(False),
     adapter: str = Form("jsonld"),
@@ -210,7 +223,13 @@ def toggle_schedule(
 ):
     item = _load(db, DiscoverySchedule, schedule_id)
     registry.set_schedule_enabled(db, user, item, enabled=enabled)
-    return RedirectResponse("/recruitment#schedules", status_code=303)
+    return redirect_feedback(
+        request, "/recruitment#schedules",
+        message(
+            'Schedule updated',
+            'The discovery schedule now uses your selected setting.',
+        ),
+    )
 
 
 @router.get("/coverage")
@@ -290,7 +309,13 @@ async def review(
     except registry.RecruitmentError as exc:
         db.rollback()
         return _detail(request, db, user, source, error=str(exc), values=values)
-    return RedirectResponse(f"/recruitment/sources/{source.id}", status_code=303)
+    return redirect_feedback(
+        request, f"/recruitment/sources/{source.id}",
+        message(
+            'Source review saved',
+            'Your decision has been recorded.',
+        ),
+    )
 
 
 @router.post("/sources/{source_id}/organisation")
@@ -321,7 +346,13 @@ def organisation(
     except registry.RecruitmentError as exc:
         db.rollback()
         return _detail(request, db, user, source, error=str(exc))
-    return RedirectResponse(f"/recruitment/sources/{source.id}", status_code=303)
+    return redirect_feedback(
+        request, f"/recruitment/sources/{source.id}",
+        message(
+            'Organisation updated',
+            'The organisation details have been saved.',
+        ),
+    )
 
 
 @router.post("/sources/{source_id}/check")
@@ -338,7 +369,13 @@ def check(
     except registry.RecruitmentError as exc:
         db.rollback()
         return _detail(request, db, user, source, error=str(exc))
-    return RedirectResponse(f"/recruitment/sources/{source.id}", status_code=303)
+    return redirect_feedback(
+        request, f"/recruitment/sources/{source.id}",
+        message(
+            'Inspection queued',
+            'The worker will check this source. Return here for the result.',
+        ),
+    )
 
 
 @router.post("/sources/{source_id}/collector")
@@ -373,4 +410,10 @@ def collector(
     except registry.RecruitmentError as exc:
         db.rollback()
         return _detail(request, db, user, source, error=str(exc))
-    return RedirectResponse(f"/recruitment/sources/{source.id}", status_code=303)
+    return redirect_feedback(
+        request, f"/recruitment/sources/{source.id}",
+        message(
+            'Collector updated',
+            'The source collector configuration has been saved.',
+        ),
+    )

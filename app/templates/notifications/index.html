@@ -1,11 +1,10 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
+{% from "_empty_state.html" import empty_state %}
 {% block content %}
 <section class="community-page notice-page" data-notice-feed data-watermark="{{ watermark }}">
   <div class="page-heading-row" data-tour="notifications"><div><p class="eyebrow">Your professional world</p><h1>Notifications</h1><p class="lede">Conversations, connections and opportunities, together.</p></div><a class="btn btn-secondary btn-sm" href="/notifications/preferences">{{ icon('settings', 17) }} Preferences</a></div>
   <a class="notice-refresh btn btn-primary" href="/notifications" hidden data-notice-refresh>New activity · Refresh notifications</a>
-  <div class="notice-layout">
-    <aside class="notice-sidebar"><h2>Stay in the loop</h2><p>Choose the updates that matter to you.</p><a class="text-link" href="/notifications/preferences">Manage notifications {{ icon('arrow', 16) }}</a></aside>
     <div class="notice-feed">
       <nav class="notice-filters" aria-label="Notification filters">
         <a href="/notifications" {% if not category and not unread %}aria-current="page"{% endif %}>All</a>
@@ -23,9 +22,14 @@
         </div>
         {% if not item.notice.read_at %}<span class="notice-dot" aria-label="Unread"></span>{% endif %}
       </article>
-      {% else %}<div class="empty-state"><span class="empty-icon">{{ icon('bell', 30) }}</span><h2>{{ 'You’re all caught up' if unread else 'Your next connection starts here' }}</h2><p>{{ 'No unread notifications in this view.' if unread else 'Replies, invitations, messages and application updates will appear here as they happen.' }}</p><a href="/feed" class="btn btn-secondary">Explore the community</a></div>{% endfor %}
+      {% else %}
+        {% if unread or category %}
+          {{ empty_state('You’re all caught up' if unread else 'No updates in this category', 'There are no unread notifications in this view.' if unread else 'Updates will appear here when there is activity in this category.', '/notifications', 'View all notifications', 'bell') }}
+        {% else %}
+          {{ empty_state('No notifications yet', 'Replies, connection requests, messages and application updates will appear here. Join a conversation to get involved.', '/feed', 'Browse conversations', 'bell') }}
+        {% endif %}
+      {% endfor %}
       {% if next_page %}<a class="notice-pagination btn btn-secondary" href="/notifications?before={{ next_page }}&amp;category={{ category }}&amp;unread={{ 'true' if unread else 'false' }}">Older notifications {{ icon('arrow', 16) }}</a>{% endif %}
     </div>
-  </div>
 </section>
 {% endblock %}

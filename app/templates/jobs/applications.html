@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
+{% from "_empty_state.html" import empty_state %}
 {% block title %}Applications — Nurse.ng{% endblock %}
 {% block content %}
 <section class="jb">
-  <p class="eyebrow">Your next step</p><div class="page-heading-row"><div><h1>{% if is_employer %}Candidate applications{% else %}My applications{% endif %}</h1><p class="lede">{% if is_employer %}Meet the people who want to make a difference with your team.{% else %}Every application is a step toward a new possibility.{% endif %}</p></div><a class="btn btn-secondary btn-sm" href="/jobs">Browse jobs {{ icon('arrow', 16) }}</a></div>
+  <p class="eyebrow">Your next step</p><div class="page-heading-row"><div><h1>{% if is_employer %}Candidate applications{% else %}My applications{% endif %}</h1><p class="lede">{% if is_employer %}Review applications and keep candidates updated.{% else %}Keep track of the roles you have applied for and their status.{% endif %}</p></div>{% if applications or is_employer %}<a class="btn btn-secondary btn-sm" href="/jobs">Browse jobs {{ icon('arrow', 16) }}</a>{% endif %}</div>
   <div class="application-list">
     {% for application in applications %}
     <article class="application-card">
@@ -25,7 +26,7 @@
       {% endif %}
     </article>
     {% else %}
-    <div class="empty-state"><span class="empty-icon">{{ icon('file', 29) }}</span><h2>{% if is_employer %}Your next teammate could be one post away{% else %}A fresh start is waiting{% endif %}</h2><p>{% if is_employer %}Publish a role to start receiving applications from nurses.{% else %}When you apply for a role, you'll find your application and its status here.{% endif %}</p><a class="btn btn-primary" href="{% if is_employer %}/jobs/new{% else %}/jobs{% endif %}">{% if is_employer %}Post a job{% else %}Find an opportunity{% endif %} {{ icon('arrow', 17) }}</a></div>
+    {{ empty_state('No applications yet', 'Publish a role to start receiving applications from nurses.' if is_employer else 'Browse open roles and apply from a job page. Applications submitted on Nurse.ng will appear here.', '/jobs/new' if is_employer else '/jobs', 'Post a job' if is_employer else 'Browse jobs', 'file', primary=true) }}
     {% endfor %}
   </div>
 </section>

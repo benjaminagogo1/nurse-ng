@@ -1,10 +1,9 @@
 {% extends 'reels/layout.html' %}
 {% from '_icons.html' import icon %}
-{% from '_feedback.html' import feedback_slot %}
 {% block content %}
 <section class="reels-page reels-status" data-processing-status="/reels/{{ reel.post_id }}/status" data-state="{{ reel.state }}">
   <a class="reels-back" href="/reels/mine">← My reels</a>
-  {{ feedback_slot(feedback) }}
+
   <div class="reel-status-card" role="status" aria-live="polite">
     <span class="reels-empty-icon">{{ icon('play', 36) }}</span>
     <p class="eyebrow">Your reel</p>

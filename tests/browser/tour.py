@@ -67,6 +67,7 @@ with SessionLocal() as db:
         db.commit()
 
 processes, logs, errors, paused = [], [], [], []
+navigation_requests = {}
 ws, sequence = None, 0
 
 
@@ -97,6 +98,18 @@ def cdp(method, params=None):
             errors.append(response["params"])
         if response.get("method") == "Fetch.requestPaused":
             paused.append(response["params"])
+        if response.get("method") == "Network.requestWillBeSent":
+            event = response["params"]
+            if event.get("type") == "Document":
+                navigation_requests.setdefault(event["requestId"], {}).update(
+                    url=event["request"]["url"],
+                )
+        if response.get("method") == "Network.requestWillBeSentExtraInfo":
+            event = response["params"]
+            metadata = {key.lower(): value for key, value in event["headers"].items()
+                        if key.lower().startswith("sec-fetch-")}
+            if metadata.get("sec-fetch-dest") == "document":
+                navigation_requests.setdefault(event["requestId"], {}).update(metadata)
         if response.get("id") == sequence:
             assert "error" not in response, response
             return response.get("result", {})
@@ -249,6 +262,10 @@ try:
     cdp("Page.bringToFront")
     viewport()
     navigate("/auth/register")
+    # Registration must run after the offline worker controls the page: its
+    # forwarded navigation previously suppressed the one-time invitation.
+    js("navigator.serviceWorker.ready.then(() => true)")
+    wait_for(lambda: js("!!navigator.serviceWorker.controller"), "offline worker control")
     js("""document.querySelector('#full_name').value='Ada Tour';
       document.querySelector('#phone').value='+2348000000088';
       document.querySelector('#password').value='browser-password';
@@ -256,6 +273,7 @@ try:
     wait_for(lambda: js('location.pathname === "/welcome" && document.readyState === "complete"'), "welcome")
     assert js('!document.querySelector(".tour-prompt").hidden')
     assert not js('document.querySelector("#guided-tour").open')
+    assert js('JSON.parse(document.querySelector("#tour-config").textContent).offer')
     js("""(() => {const f=document.querySelector('#display-form');
       f.elements.theme.value='light'; f.dispatchEvent(new Event('change',{bubbles:true}));})()""")
     screenshot("first-sign-in-invitation.png")
@@ -508,6 +526,13 @@ except Exception:
         screenshot("failure.png")
         print("Page:", js("location.pathname + location.search"))
         print("Tour:", js("document.querySelector('#tour-title')?.textContent"))
+        print("Invitation:", js("""(() => {
+          const config = document.querySelector('#tour-config');
+          const tour = config ? JSON.parse(config.textContent) : null;
+          return {offer: tour?.offer, status: tour?.state.status,
+            worker: !!navigator.serviceWorker?.controller};
+        })()"""))
+        print("Navigations:", list(navigation_requests.values()))
         print("Input:", js("""({events:window.tourTestClicks,focus:document.hasFocus(),
           viewport:{scale:visualViewport?.scale,x:visualViewport?.offsetLeft,y:visualViewport?.offsetTop},
           dialogs:[...document.querySelectorAll('dialog[open]')].map(el=>el.id),

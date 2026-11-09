@@ -1,13 +1,12 @@
 {% extends 'reels/layout.html' %}
 {% from '_icons.html' import icon %}
 {% from '_avatar.html' import avatar with context %}
-{% from '_feedback.html' import feedback_slot %}
 {% block content %}
 <section class="reels-page" data-reels-page>
-  {{ feedback_slot(feedback) }}
+
   <header class="reels-heading" data-tour="reels">
     <div><p class="eyebrow">A little inspiration. A next step.</p><h1>Reels<span class="reels-heading-dot">.</span></h1></div>
-    <div class="reels-heading-actions">{% if user %}<a href="/reels/mine" class="reels-manage">My reels</a>{% endif %}<a class="btn btn-primary" href="/reels/new">{{ icon('plus', 18) }} Create<span class="reels-wide-label"> a reel</span></a></div>
+    <div class="reels-heading-actions">{% if user %}<a href="/reels/mine" class="reels-manage">My reels</a>{% endif %}{% if tiles or view != 'discover' or page_number > 1 or category %}<a class="btn btn-primary" href="/reels/new">{{ icon('plus', 18) }} Create<span class="reels-wide-label"> a reel</span></a>{% endif %}</div>
   </header>
   <div class="reels-toolbar">
     <nav class="reels-tabs" aria-label="Reels feeds">
@@ -69,10 +68,13 @@
   {% else %}
   <div class="reels-empty"><span class="reels-empty-icon">{{ icon('play', 42) }}</span>
     <p class="eyebrow">{{ 'Your private collection' if view == 'saved' else 'A new way to grow together' }}</p>
-    <h2>{% if view == 'saved' %}Keep the good ones close.{% elif view == 'following' %}Your people. Their perspective.{% else %}Every useful story starts<br>with someone sharing.{% endif %}</h2>
-    <p>{% if view == 'saved' %}Save a reel to find it here whenever you need it. Your saves are visible only to you.{% elif view == 'following' %}Follow a creator from a reel to see their videos here.{% elif page_number > 1 %}You have reached the end of this selection.{% elif category %}There are no published reels in this topic yet.{% else %}A fellowship worth applying for. A lesson from your first placement. A moment that could help the next person.{% endif %}</p>
-    <a class="btn btn-primary" href="{{ '/reels/new' if view == 'discover' else '/reels' }}">{{ 'Share the first reel' if view == 'discover' and page_number == 1 else 'Explore reels' }} {{ icon('arrow', 17) }}</a>
-    {% if view == 'discover' %}<div class="reels-prompts"><span>{{ icon('briefcase', 21) }} Opportunities</span><span>{{ icon('book', 21) }} Useful lessons</span><span>{{ icon('users', 21) }} Your experience</span></div>{% endif %}
+    <h2>{% if page_number > 1 %}No more reels in this view{% elif category %}No reels in this topic yet{% elif view == 'saved' %}Keep useful reels for later{% elif view == 'following' %}Follow colleagues to see their reels{% else %}Share the first reel{% endif %}</h2>
+    <p>{% if page_number > 1 %}You have reached the end of this selection. Return to the first page to keep exploring.{% elif category %}Try another topic or view all topics in this feed.{% elif view == 'saved' %}Save a reel to find it here whenever you need it. Your saves are visible only to you.{% elif view == 'following' %}Follow a colleague from a reel to see their videos here.{% else %}Share an opportunity, a lesson from your first placement or an experience that could help a colleague.{% endif %}</p>
+    {% if page_number > 1 %}<a class="btn btn-secondary" href="/reels?view={{ view }}&amp;category={{ category }}">Back to first page {{ icon('arrow', 17) }}</a>
+    {% elif category %}<a class="btn btn-secondary" href="/reels?view={{ view }}">View all topics {{ icon('arrow', 17) }}</a>
+    {% elif view == 'discover' %}<a class="btn btn-primary" href="/reels/new">Create a reel {{ icon('arrow', 17) }}</a>
+    {% else %}<a class="btn btn-secondary" href="/reels">Explore reels {{ icon('arrow', 17) }}</a>{% endif %}
+    {% if view == 'discover' and not category and page_number == 1 %}<div class="reels-prompts"><span>{{ icon('briefcase', 21) }} Opportunities</span><span>{{ icon('book', 21) }} Useful lessons</span><span>{{ icon('users', 21) }} Your experience</span></div>{% endif %}
   </div>
   {% endif %}
   <dialog class="reel-dialog" id="reel-comments" aria-labelledby="reel-comments-title"><header><h2 id="reel-comments-title">Conversation</h2><button type="button" data-close-dialog aria-label="Close comments">{{ icon('close', 22) }}</button></header><div data-comments-body></div></dialog>

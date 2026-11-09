@@ -1,15 +1,11 @@
 .notification-bell { position: relative; flex-shrink: 0; }
 .notification-badge { position: absolute; top: -3px; right: -5px; border: 2px solid var(--surface); border-radius: 20px; min-width: 21px; padding: 0 4px; background: #b42318; color: white; font-size: .68rem; font-weight: 750; line-height: 17px; text-align: center; }
-.notice-page { max-width: 1100px; margin-inline: auto; }
-.notice-layout { display: grid; grid-template-columns: 230px minmax(0,1fr); gap: 22px; align-items: start; }
-.notice-sidebar, .notice-feed { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); overflow: hidden; }
-.notice-sidebar { padding: 24px; }
-.notice-sidebar h2 { font-size: 1.05rem; margin-bottom: 10px; }
-.notice-sidebar p { color: var(--muted); margin-bottom: 18px; }
+.notice-feed { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); overflow: hidden; }
+.notice-feed > .empty-state { border: 0; border-radius: 0; }
 .notice-filters { display: flex; flex-wrap: wrap; gap: 8px; padding: 20px; border-bottom: 1px solid var(--line); }
 .notice-filters a { border: 1px solid var(--line-strong); border-radius: 24px; padding: 8px 13px; color: var(--fg); font-weight: 600; font-size: .88rem; text-decoration: none; }
 .notice-filters a[aria-current] { color: var(--on-action); background: var(--action-bg); border-color: var(--action-bg); }
-.notice-tools { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 20px; font-size: .85rem; color: var(--muted); }
+.notice-tools { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 20px; font-size: .85rem; color: var(--muted); }
 .notice-tools button, .notice-read { border: 0; background: transparent; cursor: pointer; font: inherit; padding: 6px 0; }
 .notice-item { display: flex; align-items: flex-start; gap: 15px; padding: 23px 20px; border-top: 1px solid var(--line); }
 .notice-item.is-unread { background: var(--accent-surface); }
@@ -43,7 +39,6 @@
 .thread-messages > * { flex-shrink: 0; }
 .message-compose { align-items: end; }
 .message-compose textarea { min-width: 0; }
-@media (max-width: 900px) { .notice-layout { grid-template-columns: 1fr; } .notice-sidebar { display: none; } }
 @media (max-width: 600px) {
   .notice-filters { gap: 6px; padding: 15px; }
   .notice-filters a { padding: 8px 11px; }

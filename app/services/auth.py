@@ -98,6 +98,7 @@ def register_user(
     full_name: str = "",
     email: str = "",
     account_type: str = AccountType.NURSE.value,
+    commit: bool = True,
 ) -> User:
     """Create an active user. Raises ``AuthError`` for invalid input."""
     validate_password(password)
@@ -130,7 +131,9 @@ def register_user(
     user.set_password(password)
     db.add(user)
     try:
-        db.commit()
+        db.flush()
+        if commit:
+            db.commit()
     except IntegrityError:
         # The unique constraint is the authority if two requests race.
         db.rollback()

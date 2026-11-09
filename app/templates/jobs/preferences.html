@@ -1,22 +1,84 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
-{% from "_feedback.html" import feedback_slot %}
+{% set page = 'jobs' %}
+{% block title %}Opportunity alerts — Nurse.ng{% endblock %}
 {% block content %}
-<section class="form-page">
-  <a class="text-link" href="/jobs">← Opportunities</a>
-  <p class="eyebrow">Your next step, closer</p><h1>Opportunity interests</h1>
-  <p class="lede">Find roles and programmes that fit what you’re looking for.</p>
-  {{ feedback_slot(feedback|default(none)) }}
-  <form method="post" action="/jobs/preferences" class="stacked-form" data-feedback-form data-pending-label="Saving interests…">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <label for="interest-country">Where are you looking?</label><select id="interest-country" name="country_code"><option value="NG" {% if values.country_code == 'NG' %}selected{% endif %}>Nigeria</option><option value="" {% if not values.country_code %}selected{% endif %}>All countries, Nigeria first</option></select>
-    <label for="interest-keyword">Keyword or organisation <span class="optional">(optional)</span></label><input id="interest-keyword" name="keyword" value="{{ values.keyword }}" maxlength="120" placeholder="Public health, digital health, fellowship…">
-    <label for="interest-location">State or city <span class="optional">(optional)</span></label><input id="interest-location" name="location" value="{{ values.location }}" maxlength="100" placeholder="Any location, or enter Lagos, Abuja…"><p class="field-hint">Leave this blank to include nationwide programmes. Matches use the location stated by the source.</p>
-    <label for="interest-type">Opportunity type</label><select id="interest-type" name="job_type"><option value="">All opportunities</option>{% for value, label in job_types.items() %}<option value="{{ value }}" {% if values.job_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
-    <label class="consent-choice"><input type="checkbox" name="enabled" value="true" {% if values.enabled %}checked{% endif %}><span>Notify me when new opportunities match these interests.</span></label>
-    <p class="field-hint">These are interest matches. Always check the original eligibility requirements before applying. <a href="/notifications/preferences">Choose in-app or email delivery</a>.</p>
-    <button class="btn btn-primary" type="submit">Save interests {{ icon('check', 17) }}</button>
-  </form>
-  <a class="text-link" href="/jobs/matches">View opportunities for you {{ icon('arrow', 16) }}</a>
+<section class="jobs-page opportunity-preferences-page">
+  <a class="jobs-back-link" href="/jobs">{{ icon('chevron', 15) }} Back to opportunities</a>
+  <header class="jobs-heading opportunity-preferences-heading">
+    <div><h1>Opportunity alerts</h1><p>A little about your next move. We’ll help you find opportunities that fit.</p></div>
+  </header>
+  <nav class="jobs-navigation" aria-label="My opportunities">
+    <a href="/jobs">{{ icon('briefcase', 17) }} Explore jobs</a>
+    <a href="/jobs/matches">{{ icon('sparkle', 17) }} For you</a>
+    <a href="/jobs/saved">{{ icon('bookmark', 17) }} Saved opportunities</a>
+    <a href="/jobs/preferences" aria-current="page">{{ icon('bell', 17) }} Opportunity alerts</a>
+  </nav>
+
+  <div class="opportunity-preferences-layout">
+    <form method="post" action="/jobs/preferences" class="opportunity-preferences-form" data-feedback-form data-pending-label="Saving preferences…">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <section class="opportunity-preferences-section" aria-labelledby="opportunity-interests-heading">
+        <div class="opportunity-preferences-section-heading">
+          <span class="opportunity-preferences-icon">{{ icon('briefcase', 21) }}</span>
+          <div><h2 id="opportunity-interests-heading">Your ideal opportunity</h2><p>Choose the roles and places you’re interested in.</p></div>
+        </div>
+        <div class="opportunity-preferences-grid">
+          <div class="opportunity-preferences-field">
+            <label for="interest-country">Where are you looking?</label>
+            <select id="interest-country" name="country_code">
+              <option value="NG"{% if values.country_code == 'NG' %} selected{% endif %}>Nigeria</option>
+              <option value=""{% if not values.country_code %} selected{% endif %}>All countries, Nigeria first</option>
+            </select>
+          </div>
+          <div class="opportunity-preferences-field">
+            <label for="interest-type">Opportunity type</label>
+            <select id="interest-type" name="job_type">
+              <option value="">All opportunities</option>
+              {% for value, label in job_types.items() %}<option value="{{ value }}"{% if values.job_type == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="opportunity-preferences-field">
+            <label for="interest-keyword">Keyword or organisation <span class="optional">(optional)</span></label>
+            <input id="interest-keyword" name="keyword" value="{{ values.keyword }}" maxlength="120" placeholder="e.g. Public health" aria-describedby="interest-keyword-hint">
+            <p id="interest-keyword-hint">Focus your matches on a role, topic or organisation.</p>
+          </div>
+          <div class="opportunity-preferences-field">
+            <label for="interest-location">State or city <span class="optional">(optional)</span></label>
+            <input id="interest-location" name="location" value="{{ values.location }}" maxlength="100" placeholder="e.g. Lagos or Abuja" aria-describedby="interest-location-hint">
+            <p id="interest-location-hint">Leave blank to include nationwide programmes. Matches use the location stated by the source.</p>
+          </div>
+        </div>
+      </section>
+
+      <div class="opportunity-preferences-alerts">
+        <div class="opportunity-preferences-alert-choice">
+          <span class="opportunity-preferences-icon">{{ icon('bell', 21) }}</span>
+          <div><label for="opportunity-alerts-enabled">New opportunity alerts</label><p id="opportunity-alerts-hint">Notify me when new opportunities match these interests.</p></div>
+          <input id="opportunity-alerts-enabled" class="opportunity-preferences-switch" type="checkbox" role="switch" name="enabled" value="true" aria-describedby="opportunity-alerts-hint"{% if values.enabled %} checked{% endif %}>
+        </div>
+        <p class="opportunity-preferences-save-hint">Changes take effect when you save your preferences.</p>
+      </div>
+
+      <div class="opportunity-preferences-actions">
+        <button class="btn btn-primary" type="submit">{{ icon('check', 17) }} Save preferences</button>
+        <a class="btn btn-secondary" href="/jobs/matches">View my matches {{ icon('arrow', 16) }}</a>
+      </div>
+    </form>
+
+    <aside class="opportunity-preferences-aside" aria-label="About opportunity alerts">
+      <section class="opportunity-delivery-card" aria-labelledby="opportunity-delivery-heading">
+        <span class="opportunity-preferences-icon">{{ icon('mail', 23) }}</span>
+        <h2 id="opportunity-delivery-heading">Your alerts, your way</h2>
+        <p>Choose where you hear about new opportunities.</p>
+        <ul class="opportunity-delivery-options">
+          <li>{{ icon('bell', 18) }}<div><h3>In-app notifications</h3><p>Keep updates in your notification inbox.</p></div></li>
+          <li>{{ icon('mail', 18) }}<div><h3>Email updates</h3><p>Manage email delivery in notification settings.</p></div></li>
+        </ul>
+        <a class="btn btn-secondary" href="/notifications/preferences">Manage delivery {{ icon('arrow', 16) }}</a>
+      </section>
+      <div class="opportunity-preferences-note">{{ icon('info', 18) }}<p>These are interest matches. Check the original eligibility requirements before applying.</p></div>
+    </aside>
+  </div>
 </section>
 {% endblock %}

@@ -7,7 +7,7 @@ private store, and each read is written to the access log (DECISIONS L49).
 import uuid
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response, status
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.core.storage import CONTENT_TYPE_SUFFIX, EvidenceStorageError, evidence_path
@@ -24,6 +24,7 @@ from app.services.verification import (
     record_evidence_access,
 )
 from app.web.deps import require_staff, verify_csrf
+from app.web.feedback import message, redirect_feedback
 from app.web.templating import render
 
 router = APIRouter(prefix="/review", tags=["review"])
@@ -139,7 +140,13 @@ def review_decision(
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 
-    return RedirectResponse("/review", status_code=status.HTTP_303_SEE_OTHER)
+    return redirect_feedback(
+        request, "/review",
+        message(
+            'Review saved',
+            'Your document-review decision has been recorded.',
+        ),
+    )
 
 
 def _load_case(db: Session, raw_id: str):
