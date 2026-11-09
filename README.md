@@ -4,6 +4,8 @@ A professional platform for nurses and healthcare employers, beginning in Nigeri
 
 ## Documents
 
+- [Interactive onboarding tour](docs/ONBOARDING_TOUR.md) — walkthrough, saved progress, role-specific steps and restart.
+
 - [User analytics, unique IDs and daily activity](docs/MEMBER_ANALYTICS.md).
 
 - [Nigerian opportunity coverage, saves and alerts](docs/NIGERIAN_OPPORTUNITIES.md).

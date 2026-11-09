@@ -14,7 +14,7 @@
     {% endif %}
   </div>
 
-  <div class="db-stats">
+  <div class="db-stats" data-tour="dashboard">
     <a class="db-card db-stat" href="/jobs"><span class="db-stat-icon">{{ icon('briefcase', 24) }}</span><div><small>New job opportunities</small><b>{{ new_job_count }}</b><span class="stat-link">Explore this week's jobs {{ icon('arrow', 14) }}</span></div></a>
     <a class="db-card db-stat" href="/messages"><span class="db-stat-icon blue">{{ icon('chat', 24) }}</span><div><small>Messages</small><b>{{ unread_count|default(0) }}</b><span class="stat-link">View messages {{ icon('arrow', 14) }}</span></div></a>
     <a class="db-card db-stat" href="/network"><span class="db-stat-icon violet">{{ icon('users', 24) }}</span><div><small>Network connections</small><b>{{ connection_count }}</b><span class="stat-link">{% if pending_requests %}{{ pending_requests }} pending request{{ 's' if pending_requests != 1 }}{% else %}Grow your network{% endif %} {{ icon('arrow', 14) }}</span></div></a>

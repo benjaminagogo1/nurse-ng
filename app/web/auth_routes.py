@@ -25,6 +25,7 @@ from app.services.jobs import open_job_condition
 from app.services.member_discovery import suggested_opportunities, suggested_people
 from app.services.messages import unread_count
 from app.services.profiles import get_profile_for_user
+from app.services.tours import offer_on_sign_in
 from app.web.deps import get_current_user, require_user, verify_csrf
 from app.web.templating import render
 
@@ -72,11 +73,13 @@ def _render_rate_limited(
     )
 
 
-def _start_session(request: Request, user: User) -> None:
+def _start_session(request: Request, user: User, db: Session) -> None:
     """Replace the session after authentication to prevent fixation."""
     request.session.clear()
     request.session["user_id"] = str(user.id)
     request.session["auth_version"] = user.auth_version
+    if offer_on_sign_in(db, user):
+        request.session["tour_invitation"] = True
 
 
 @router.get("/register")
@@ -157,7 +160,7 @@ def register(
             else status.HTTP_400_BAD_REQUEST,
         )
 
-    _start_session(request, user)
+    _start_session(request, user, db)
     return RedirectResponse("/welcome", status_code=status.HTTP_303_SEE_OTHER)
 
 
@@ -220,7 +223,7 @@ def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
 
-    _start_session(request, user)
+    _start_session(request, user, db)
     return RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
 
 

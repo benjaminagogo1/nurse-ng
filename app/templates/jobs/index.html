@@ -10,7 +10,7 @@
     <a class="pill-tab" href="/jobs?location={{ location|urlencode }}&amp;country=NG&amp;type={{ job_type }}&amp;q={{ q|urlencode }}"{% if country == 'NG' and not scope %} aria-current="page"{% endif %}>Nigeria only</a>
     <a class="pill-tab" href="/jobs?location={{ location|urlencode }}&amp;scope=international&amp;type={{ job_type }}&amp;q={{ q|urlencode }}"{% if scope == 'international' %} aria-current="page"{% endif %}>International</a>
   </nav>
-  <form class="jobs-toolbar" action="/jobs" method="get" role="search">
+  <form class="jobs-toolbar" action="/jobs" method="get" role="search" data-tour="jobs">
     <div class="jobs-search">{{ icon('search', 19) }}<label class="sr-only" for="jobs-q">Search opportunities, organisations, or locations</label><input id="jobs-q" name="q" type="search" value="{{ q }}" maxlength="120" placeholder="Search opportunities, organisations, or locations…"></div>
     {% if job_type %}<input type="hidden" name="type" value="{{ job_type }}">{% endif %}
     {% if scope %}<input type="hidden" name="scope" value="{{ scope }}">{% endif %}

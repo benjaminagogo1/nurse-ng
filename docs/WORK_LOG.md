@@ -955,3 +955,51 @@ This is the pre-hardening result: the previously documented 89 cases plus 14 com
   filters and accessible labels with **User analytics** terminology.
 - Updated the current operating documentation. The existing protected-dashboard
   rendering check passed (1 test); whitespace checks passed.
+
+## 9 November 2026 — Interactive onboarding tour
+
+- **User direction and inspection:** inspected and reported the existing FastAPI,
+  SQLAlchemy/Alembic, Jinja/plain-JavaScript architecture, authentication, navigation,
+  roles, welcome flow and shared dialogs before implementing. Reused that structure.
+- **Walkthrough:** real targets for dashboard shortcuts, profile editing, jobs,
+  published-profile search, Reels, external learning resources, notifications and
+  conversations. Employer accounts also see recruitment controls; staff see User
+  analytics. Placeholder events and unavailable capabilities are excluded.
+- **Experience:** one opt-in invitation after successful registration/first sign-in
+  after installation; progress, Previous/Next, Skip, Finish, Pause/Escape and Settings
+  restart. Page transitions save progress first. Manual browsing provides Resume.
+  Tour steps do not publish profiles or change the separate welcome preferences.
+- **Persistence and recovery:** a private user_tours row uses the permanent account
+  ID, status, step key, timestamps, version, revision and run ID. Authentication and
+  CSRF protect transitions; concurrent/stale requests return current progress.
+  Lost responses are reconciled before further movement. Missing targets advance
+  in either direction and cannot falsely produce a completed tour.
+- **Accessibility:** native modal isolation with explicit Tab/Shift+Tab wrapping,
+  step announcements, arrow keys, restored focus and an always-available pause.
+  Viewport-aware placement, scrollable explanations and persistent controls support
+  narrow/short screens, light/dark, large text, high contrast and reduced motion.
+- **Migration:** backed up the local database to
+  /tmp/nurse-tour-migration-vuqick14/before.db (0600), then upgraded and verified a
+  clone. All 867 rows in 36 pre-existing tables matched exactly; foreign-key,
+  integrity and Alembic metadata checks passed. Applied e6480ab31c95 locally and
+  rechecked preservation. The new table started empty; account IDs/roles were retained.
+- **Automated verification:** all 567 collected tests passed in completed groups of
+  64, 157, 91 and 255. These cover the existing application and 29 new tour/migration
+  cases, including sign-in, skipped/completed persistence, restart, role boundaries,
+  duplicate requests, missing targets, CSRF, session revocation, deletion and
+  preservation on upgrade. Ruff, JavaScript syntax and whitespace checks passed.
+- **Documentation:** added [the operating and extension guide](ONBOARDING_TOUR.md),
+  a README entry and decision L92.
+- **Browser verification:** the complete isolated Chromium journey passed for nurse,
+  employer, partner and staff accounts, including all eight common steps at
+  320/390/1280 widths, large text, dark/high-contrast/reduced-motion preferences,
+  forced colours, landscape, actual pointer input, focus containment, restart,
+  skip/finish persistence, manual navigation/reload, unavailable targets, stale tabs
+  and a dropped committed response. Reviewed screenshots in
+  /tmp/nurse-tour-browser-rfnbgsiy/ (32 captures). A focused final check also passed
+  for delayed responses, repeated input, pausing during a save and resuming its
+  stored step: /tmp/nurse-tour-browser-ztimuuwt/.
+- **Local readiness:** the existing development server runs with automatic reload.
+  Health returns 200 and it serves the new tour assets. Browser data stayed in
+  temporary databases, with no real-account changes or external messages. The guide
+  records Chromium/SQLite validation limits; public deployment was not part of this task.

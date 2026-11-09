@@ -680,3 +680,30 @@ Separate verified publisher identity from full-content reuse rights. Automatical
 - **Evidence and limits:** see [member analytics](MEMBER_ANALYTICS.md) and the work
   log. Local verification does not establish production PostgreSQL behavior or
   unique real-world professional identities.
+
+## L92 — Interactive, account-scoped onboarding tour (9 November 2026)
+
+- **User direction:** implement a reusable walkthrough of actual Nurse.ng controls,
+  with saved progress, role-appropriate steps, mobile positioning and manual restart.
+- **Architecture:** retain server-rendered Jinja pages, FastAPI, SQLAlchemy and
+  Alembic. Reuse native dialogs, icons and appearance preferences; add no dependency.
+  A central step registry supplies approved destinations and stable target hooks.
+- **Account state:** a separate user_tours row records offered, active, completed
+  or skipped status. The interest/location welcome flow keeps its existing meaning.
+  Offer once on successful authentication, including existing accounts' first sign-in
+  after installation; ignored invitations do not repeat on later sign-ins.
+- **Transitions:** authenticated, CSRF-protected actions save before navigation.
+  Revisions and run IDs prevent duplicate requests, old tabs and browser history
+  from overwriting newer progress. Pausing or browsing elsewhere leaves a Resume
+  option; Settings also offers a fresh start. Version changes do not reset dismissal.
+- **Interface:** eight shared steps, an employer-only recruitment step and a
+  staff-only User analytics step. Native modal isolation, explicit keyboard wrapping,
+  a real-element spotlight and viewport-aware placement support existing themes and
+  text sizes. Short screens can scroll the explanation while controls stay visible.
+- **Unavailable features:** re-evaluate role access and tolerate delayed targets;
+  pass missing/hidden targets in the current direction. Exhausting available targets
+  closes as skipped, without inventing a completed walkthrough.
+- **Data and evidence:** additive migration e6480ab31c95 creates no historical
+  preferences and cascades deletion with the account. The local upgrade preserved
+  all existing rows after backup and clone verification. See
+  [the onboarding guide](ONBOARDING_TOUR.md) and the work log for validation.

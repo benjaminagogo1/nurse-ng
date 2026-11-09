@@ -23,6 +23,7 @@ from app.web.recruitment_routes import router as recruitment_router
 from app.web.reel_routes import router as reel_router
 from app.web.review_routes import router as review_router
 from app.web.routes import router
+from app.web.tour_routes import router as tour_router
 from app.web.vacancy_routes import router as vacancy_router
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -48,6 +49,7 @@ def create_app() -> FastAPI:
     app.include_router(router)
     app.include_router(auth_router)
     app.include_router(onboarding_router)
+    app.include_router(tour_router)
     app.include_router(account_router)
     app.include_router(activity_router)
     app.include_router(profile_router)

@@ -22,7 +22,7 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
     <label for="display_name">Display name</label>
-    <input id="display_name" name="display_name" type="text" maxlength="120"
+    <input id="display_name" name="display_name" type="text" maxlength="120" data-tour="profile"
            value="{{ values.display_name }}" required>
 
     <label for="professional_status">Professional status</label>

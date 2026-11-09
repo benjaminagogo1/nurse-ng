@@ -1,0 +1,19 @@
+{% from "_icons.html" import icon %}
+<script type="application/json" id="tour-config">{{ tour|tojson }}</script>
+<dialog id="guided-tour" class="tour-dialog" aria-labelledby="tour-title" aria-describedby="tour-copy tour-position">
+  <div class="tour-spotlight" aria-hidden="true"></div>
+  <div class="tour-card">
+    <div class="tour-card-top"><span class="tour-label">{{ icon('sparkle', 16) }} Your quick tour</span><button type="button" class="icon-button" data-tour-pause aria-label="Pause tour" title="Pause tour (Escape)">{{ icon('close', 19) }}</button></div>
+    <p id="tour-position" class="tour-position"></p>
+    <progress class="tour-progress" aria-label="Tour progress" max="8" value="1"></progress>
+    <div class="tour-content">
+      <h2 id="tour-title" tabindex="-1"></h2>
+      <p id="tour-copy"></p>
+      <p class="tour-note" data-tour-note role="status" hidden></p>
+      <div class="tour-error" hidden><p role="alert" data-tour-error></p><button class="text-link" type="button" data-tour-sync>Check saved progress</button><a href="/auth/login" data-tour-login hidden>Sign in again</a></div>
+    </div>
+    <div class="tour-controls"><button type="button" class="tour-skip" data-tour-action="skip">Skip tour</button><div><button type="button" class="btn btn-secondary" data-tour-action="previous">Previous</button><button type="button" class="btn btn-primary" data-tour-next>Next {{ icon('arrow', 16) }}</button></div></div>
+    <p class="tour-key-hint">Arrow keys to move · Esc to pause</p>
+    <span class="sr-only" role="status" data-tour-saving></span>
+  </div>
+</dialog>

@@ -2,7 +2,7 @@
 {% from "_icons.html" import icon %}
 {% block content %}
 <section class="analytics-page" data-analytics-page>
-  <header class="analytics-heading">
+  <header class="analytics-heading" data-tour="analytics">
     <div><p class="eyebrow">User insights <span class="analytics-staff-label">Staff workspace</span></p><h1>User overview<span>.</span></h1><p>Monitor your users, daily participation and recent activity.</p></div>
     <div class="analytics-refresh"><span class="analytics-live" data-analytics-live><i aria-hidden="true"></i><span data-live-label>Updated on page load</span></span><a class="btn btn-secondary" data-analytics-fallback href="{{ request.url }}">{{ icon('clock', 17) }} Refresh view</a><button type="button" class="btn btn-secondary" data-analytics-refresh hidden>{{ icon('clock', 17) }} <span>Refresh now</span></button><p class="sr-only" role="status" data-refresh-status></p></div>
   </header>

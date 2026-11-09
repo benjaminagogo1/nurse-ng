@@ -2,7 +2,7 @@
 {% from "_icons.html" import icon %}
 {% block content %}
 <section class="community-page notice-page" data-notice-feed data-watermark="{{ watermark }}">
-  <div class="page-heading-row"><div><p class="eyebrow">Your professional world</p><h1>Notifications</h1><p class="lede">Conversations, connections and opportunities, together.</p></div><a class="btn btn-secondary btn-sm" href="/notifications/preferences">{{ icon('settings', 17) }} Preferences</a></div>
+  <div class="page-heading-row" data-tour="notifications"><div><p class="eyebrow">Your professional world</p><h1>Notifications</h1><p class="lede">Conversations, connections and opportunities, together.</p></div><a class="btn btn-secondary btn-sm" href="/notifications/preferences">{{ icon('settings', 17) }} Preferences</a></div>
   <a class="notice-refresh btn btn-primary" href="/notifications" hidden data-notice-refresh>New activity · Refresh notifications</a>
   <div class="notice-layout">
     <aside class="notice-sidebar"><h2>Stay in the loop</h2><p>Choose the updates that matter to you.</p><a class="text-link" href="/notifications/preferences">Manage notifications {{ icon('arrow', 16) }}</a></aside>

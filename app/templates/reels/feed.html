@@ -5,7 +5,7 @@
 {% block content %}
 <section class="reels-page" data-reels-page>
   {{ feedback_slot(feedback) }}
-  <header class="reels-heading">
+  <header class="reels-heading" data-tour="reels">
     <div><p class="eyebrow">A little inspiration. A next step.</p><h1>Reels<span class="reels-heading-dot">.</span></h1></div>
     <div class="reels-heading-actions">{% if user %}<a href="/reels/mine" class="reels-manage">My reels</a>{% endif %}<a class="btn btn-primary" href="/reels/new">{{ icon('plus', 18) }} Create<span class="reels-wide-label"> a reel</span></a></div>
   </header>

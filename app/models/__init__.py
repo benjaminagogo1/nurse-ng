@@ -26,6 +26,7 @@ from app.models.recruitment import (
     SourceEvent,
 )
 from app.models.reels import Reel, ReelSave
+from app.models.tour import UserTour
 from app.models.user import User
 from app.models.vacancies import VacancyEvent, VacancyRecord, VacancySnapshot
 from app.models.verification import EvidenceAccess, EvidenceDocument, VerificationCase
@@ -63,6 +64,7 @@ __all__ = [
     "SourceEvent",
     "User",
     "UserDailyActivity",
+    "UserTour",
     "VacancyEvent",
     "VacancyRecord",
     "VacancySnapshot",

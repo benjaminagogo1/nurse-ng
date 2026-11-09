@@ -1,0 +1,6 @@
+{% from "_icons.html" import icon %}
+<aside class="tour-prompt" aria-labelledby="tour-prompt-title" hidden>
+  <span class="tour-prompt-symbol" aria-hidden="true">{{ icon('sparkle', 22) }}</span>
+  <div class="tour-prompt-copy"><h2 id="tour-prompt-title" tabindex="-1">Get to know Nurse.ng</h2><p data-tour-prompt-copy>A short, guided look at the tools for your career. Explore at your own pace.</p><p class="tour-prompt-error" role="status" data-tour-prompt-error hidden></p></div>
+  <div class="tour-prompt-actions"><button type="button" class="btn btn-primary" data-tour-start hidden>Start tour {{ icon('arrow', 16) }}</button><button type="button" class="btn btn-primary" data-tour-resume hidden>Resume tour {{ icon('arrow', 16) }}</button><button type="button" class="tour-skip" data-tour-action="skip" hidden>Skip tour</button><button type="button" class="btn btn-secondary" data-tour-sync hidden>Check saved progress</button><a href="/settings#guided-tour-settings" class="btn btn-secondary" data-tour-settings hidden>Account settings</a><button type="button" class="icon-button" data-tour-dismiss aria-label="Dismiss tour notice" hidden>{{ icon('close', 19) }}</button></div>
+</aside>

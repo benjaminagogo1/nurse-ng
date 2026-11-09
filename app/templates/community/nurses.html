@@ -5,7 +5,7 @@
 <section class="community-page discovery-page">
   <div class="discovery-heading"><div><p class="eyebrow">Grow your network</p><h1>Find your people</h1><p class="lede">Meet nurses with shared interests, experience and ambition.</p></div>{% if user %}<a class="btn btn-secondary" href="/welcome/discover">{{ icon('sparkle', 18) }} Suggestions for you</a>{% endif %}</div>
   <form method="get" action="/nurses" role="search" aria-label="Find people" class="directory-search">
-    <div><label for="people-query">Search people</label><input id="people-query" name="q" type="search" value="{{ q }}" maxlength="120" placeholder="Name, headline or skill"></div>
+    <div data-tour="people"><label for="people-query">Search people</label><input id="people-query" name="q" type="search" value="{{ q }}" maxlength="120" placeholder="Name, headline or skill"></div>
     <div><label for="people-location">Location</label><input id="people-location" name="location" value="{{ location }}" maxlength="120" placeholder="e.g. Lagos or Abuja"></div>
     <div><label for="people-interest">Professional interest</label><select id="people-interest" name="interest"><option value="">All interests</option>{% for option in interest_options %}<option value="{{ option }}"{% if interest == option %} selected{% endif %}>{{ option }}</option>{% endfor %}</select></div>
     <div><label for="people-status">Career stage</label><select id="people-status" name="professional_status"><option value="">All career stages</option>{% for value, label in status_options %}<option value="{{ value }}"{% if professional_status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>

@@ -29,6 +29,8 @@
   <meta name="activity-csrf" content="{{ csrf_token }}">
   <link rel="stylesheet" href="{{ url_for('static', path='/css/analytics.css') }}">
   <script src="{{ url_for('static', path='/js/activity.js') }}" defer></script>
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/tour.css') }}">
+  <script src="{{ url_for('static', path='/js/tour.js') }}" defer></script>
   {% endif %}
   {% block extra_head %}{% endblock %}
 </head>
@@ -128,7 +130,7 @@
       <div class="sidebar-note">{{ icon('heart', 23) }}<strong>Your next chapter starts here.</strong><p>Keep learning. Keep connecting. Keep making a difference.</p><a href="/resources">Explore resources {{ icon('arrow', 15) }}</a></div>
     </aside>
     {% endif %}
-    <main id="main" tabindex="-1" class="{% if user %}app-main{% else %}site-main{% endif %}">{% block content %}{% endblock %}</main>
+    <main id="main" tabindex="-1" class="{% if user %}app-main{% else %}site-main{% endif %}">{% if tour %}{% include "_tour_prompt.html" %}{% endif %}{% block content %}{% endblock %}</main>
   </div>
 
   <footer class="site-footer">
@@ -139,6 +141,7 @@
   </footer>
   <div class="toast" role="status" aria-live="polite" hidden></div>
   {{ display_dialog() }}
+  {% if tour %}{% include "_tour.html" %}{% endif %}
   <dialog id="mobile-navigation" class="mobile-navigation" aria-label="Main navigation">
     <div class="mobile-navigation-heading"><strong>Menu</strong><button type="button" class="icon-button" data-navigation-close aria-label="Close navigation">{{ icon('close', 22) }}</button></div>
     <div data-navigation-content></div>

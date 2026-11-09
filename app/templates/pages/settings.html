@@ -8,6 +8,14 @@
   <p class="eyebrow">Your account, your way</p><h1>Account settings</h1><p class="lede">Manage your profile, security and privacy.</p>
   {{ feedback_slot(feedback|default(none)) }}
   <div class="settings-display"><button type="button" class="btn btn-secondary" data-display-open aria-haspopup="dialog" aria-controls="display-preferences" hidden>{{ icon('appearance', 18) }} Display &amp; accessibility</button></div>
+  <section class="settings-detail" id="guided-tour-settings" aria-labelledby="guided-tour-heading">
+    <div class="account-section-heading"><div><h2 id="guided-tour-heading">Your guided tour</h2><p>A short walkthrough of Nurse.ng, using the pages and tools available to your account.</p></div>{{ icon('sparkle', 22) }}</div>
+    <p class="tour-settings-status" data-tour-settings-status></p>
+    <button class="btn btn-primary" type="button" data-tour-start hidden>Start tour {{ icon('arrow', 16) }}</button>
+    <button class="btn btn-secondary" type="button" data-tour-resume hidden>Resume tour</button>
+    <noscript><p>Enable JavaScript to use the interactive tour. You can explore each section from the main navigation.</p></noscript>
+    <p data-tour-unsupported hidden>Your browser does not support this guided tour. You can explore each section from the main navigation.</p>
+  </section>
   <section class="settings-detail"><div class="account-section-heading"><div><h2>Notifications</h2><p>Choose updates about your conversations, connections and applications.</p></div>{{ icon('bell', 22) }}</div><a href="/notifications/preferences" class="btn btn-secondary">Manage notification preferences</a> <a href="/jobs/preferences" class="btn btn-secondary">Opportunity interests &amp; alerts</a></section>
   <section class="settings-detail" aria-labelledby="photo-heading">
     <div class="account-section-heading"><div><h2 id="photo-heading">Profile photo</h2><p>A familiar face for your professional community.</p></div><span class="account-status">{{ 'Public photo' if user.photo_public and user.photo_storage_name else 'Private photo' if user.photo_storage_name else 'No photo yet' }}</span></div>

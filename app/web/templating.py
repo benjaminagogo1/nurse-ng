@@ -13,6 +13,7 @@ from sqlalchemy.orm import object_session
 
 from app.services.activity import record_visit
 from app.services.notifications import unread_count
+from app.services.tours import snapshot as tour_snapshot
 from app.web.feedback import pending_feedback
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -50,6 +51,12 @@ def render(
     rate-limited form is re-rendered.
     """
     path = request.url.path
+    page_navigation = (
+        request.method == "GET" and 200 <= status_code < 300
+        and request.headers.get("sec-fetch-mode", "navigate") == "navigate"
+        and "prefetch" not in request.headers.get("sec-purpose", "").lower()
+        and "prefetch" not in request.headers.get("purpose", "").lower()
+    )
     section = path.strip("/").split("/")[0] or "home"
     if path == "/auth/dashboard":
         section = "dashboard"
@@ -72,6 +79,11 @@ def render(
     user = template_context.get("user")
     if user is not None and object_session(user) is not None:
         template_context.setdefault("notification_count", unread_count(object_session(user), user))
+        template_context["tour"] = {
+            **tour_snapshot(object_session(user), user),
+            "csrf": template_context["csrf_token"],
+            "offer": bool(request.session.get("tour_invitation")) and page_navigation,
+        }
     template_context["draft_scope"] = (
         sha256(f"{user.id}:{template_context['csrf_token']}".encode()).hexdigest()
         if user is not None else ""
@@ -86,16 +98,15 @@ def render(
     )
     # A rendering failure leaves the acknowledgement available for a later page.
     request.session.pop("published_draft", None)
+    if user is not None and page_navigation:
+        request.session.pop("tour_invitation", None)
     if saved_feedback:
         request.session.pop("account_feedback", None)
     # Only completed page navigations count here. JSON polling, fetch fragments,
     # prefetches, assets, failures and anonymous visitors do not create visits.
     if (
         user is not None and object_session(user) is not None
-        and request.method == "GET" and 200 <= status_code < 300
-        and request.headers.get("sec-fetch-mode", "navigate") == "navigate"
-        and "prefetch" not in request.headers.get("sec-purpose", "").lower()
-        and "prefetch" not in request.headers.get("purpose", "").lower()
+        and page_navigation
     ):
         record_visit(object_session(user), user)
     return response
