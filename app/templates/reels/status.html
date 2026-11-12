@@ -1,20 +1,98 @@
-{% extends 'reels/layout.html' %}
-{% from '_icons.html' import icon %}
-{% block content %}
-<section class="reels-page reels-status" data-processing-status="/reels/{{ reel.post_id }}/status" data-state="{{ reel.state }}">
+{% extends 'reels/layout.html' %} {% from '_icons.html' import icon %} {% block
+content %}
+<section
+  class="reels-page reels-status"
+  data-processing-status="/reels/{{ reel.post_id }}/status"
+  data-state="{{ reel.state }}"
+>
   <a class="reels-back" href="/reels/mine">← My reels</a>
 
   <div class="reel-status-card" role="status" aria-live="polite">
     <span class="reels-empty-icon">{{ icon('play', 36) }}</span>
     <p class="eyebrow">Your reel</p>
-    <h1 data-status-title>{{ 'Your reel is live' if reel.state == 'ready' else 'Your video needs attention' if reel.state == 'failed' else 'Making your reel ready' }}</h1>
-    <p data-status-body>{% if reel.state == 'ready' %}Your video is ready to watch, share and discuss.{% elif reel.state == 'failed' %}{{ reel.error }}{% elif reel.state == 'queued' %}Upload received. Your video is waiting to be processed. You can leave this page and return from My reels.{% else %}We are preparing your video and cover image. You can leave this page and return from My reels.{% endif %}</p>
-    <ol class="reel-processing-steps"><li data-step="uploaded" class="is-done">{{ icon('check', 18) }} Uploaded</li><li data-step="processing" class="{{ 'is-done' if reel.state == 'ready' else '' }}">{{ icon('clock', 18) }} Processing</li><li data-step="ready" class="{{ 'is-done' if reel.state == 'ready' else '' }}">{{ icon('play', 18) }} Ready</li></ol>
-    <a class="btn btn-primary" href="/reels/{{ reel.post_id }}" data-watch-reel {% if reel.state != 'ready' %}hidden{% endif %}>Watch your reel {{ icon('arrow', 18) }}</a>
-    <p data-status-connection class="field-hint" hidden>We could not refresh the status. Your upload is still saved. Refresh this page when you reconnect.</p>
-    {% if reel.attempts < 3 %}<form action="/reels/{{ reel.post_id }}/retry" method="post" data-retry-reel {% if reel.state != 'failed' %}hidden{% endif %}><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="btn btn-primary" type="submit">Retry processing</button></form>{% endif %}
-    <noscript><p><a href="/reels/{{ reel.post_id }}/status">Refresh processing status</a></p></noscript>
+    <h1 data-status-title>
+      {{ 'Your reel is live' if reel.state == 'ready' else 'Your video needs attention' if reel.state == 'failed' else 'Making your reel ready' }}
+    </h1>
+    <p data-status-body>
+      {% if reel.state == 'ready' %}Your video is ready to watch, share and
+      discuss.{% elif reel.state == 'failed' %}{{ reel.error }}{% elif
+      reel.state == 'queued' %}Upload received. Your video is waiting to be
+      processed. You can leave this page and return from My reels.{% else %}We
+      are preparing your video and cover image. You can leave this page and
+      return from My reels.{% endif %}
+    </p>
+    <ol class="reel-processing-steps">
+      <li data-step="uploaded" class="is-done">
+        {{ icon('check', 18) }} Uploaded
+      </li>
+      <li
+        data-step="processing"
+        class="{{ 'is-done' if reel.state == 'ready' else '' }}"
+      >
+        {{ icon('clock', 18) }} Processing
+      </li>
+      <li
+        data-step="ready"
+        class="{{ 'is-done' if reel.state == 'ready' else '' }}"
+      >
+        {{ icon('play', 18) }} Ready
+      </li>
+    </ol>
+    <a
+      class="btn btn-primary"
+      href="/reels/{{ reel.post_id }}"
+      data-watch-reel
+      {%
+      if
+      reel.state
+      !="ready"
+      %}hidden{%
+      endif
+      %}
+      >Watch your reel {{ icon('arrow', 18) }}</a
+    >
+    <p data-status-connection class="field-hint" hidden>
+      We could not refresh the status. Your upload is still saved. Refresh this
+      page when you reconnect.
+    </p>
+    {% if reel.attempts < 3 %}
+    <form
+      action="/reels/{{ reel.post_id }}/retry"
+      method="post"
+      data-retry-reel
+      {%
+      if
+      reel.state
+      !="failed"
+      %}hidden{%
+      endif
+      %}
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" /><button
+        class="btn btn-primary"
+        type="submit"
+      >
+        Retry processing
+      </button>
+    </form>
+    {% endif %}
+    <noscript
+      ><p>
+        <a href="/reels/{{ reel.post_id }}/status">Refresh processing status</a>
+      </p></noscript
+    >
   </div>
-  <details class="reel-remove"><summary>Remove this reel</summary><p>This removes the video and its public conversation from view.</p><form action="/reels/{{ reel.post_id }}/remove" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit" class="btn btn-secondary">Remove reel</button></form></details>
+  <details class="reel-remove">
+    <summary>Remove this reel</summary>
+    <p>This removes the video and its public conversation from view.</p>
+    <form action="/reels/{{ reel.post_id }}/remove" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" /><button
+        type="submit"
+        class="btn btn-secondary"
+      >
+        Remove reel
+      </button>
+    </form>
+  </details>
 </section>
 {% endblock %}

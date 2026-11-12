@@ -1,136 +1,130 @@
-{% extends "base.html" %}
-{% from "_avatar.html" import avatar with context %}
-
-{% block title %}{{ fields.get('display_name', 'Nurse profile') }} — Nurse.ng{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% from "_avatar.html" import avatar with context %}
+{% block title %}{{ fields.get('display_name', 'Nurse profile') }} — Nurse.ng{%
+endblock %} {% block content %}
 <section class="form-page public-profile">
   <p class="eyebrow">Shared profile</p>
   {{ avatar(profile_owner, fields.get('display_name'), 'pf-avatar') }}
   <h1>{{ fields.get('display_name', 'Nurse profile') }}</h1>
 
   {% if fields.get('headline') %}
-    <p class="lede">{{ fields.get('headline') }}</p>
-  {% endif %}
-
-  {% if document_reviewed_on %}
-    <section class="verification-panel">
-      <p class="verification-badge">Document reviewed · {{ document_reviewed_on }}</p>
-      <h2>What “document reviewed” means</h2>
-      <p>
-        A Nurse.ng reviewer inspected an uploaded NMCN (Nursing and Midwifery
-        Council of Nigeria) licence or certificate and a government-issued
-        photo ID, and matched the name on them to
-        <strong>{{ document_reviewed_name or fields.get('display_name', 'the submitted profile') }}</strong>.
-      </p>
-      {% if document_review_name_changed %}
-        <p class="form-notice">
-          The current profile name, <strong>{{ fields.get('display_name', 'Nurse profile') }}</strong>,
-          differs from the name reviewed. The current name is self-declared and
-          was not matched during that review.
-        </p>
-      {% endif %}
-      <p>
-        This is <strong>not source confirmation</strong>. Nurse.ng does not
-        check the registration against NMCN's records, does not prove the
-        documents are authentic, and does not assess clinical competence.
-      </p>
-      <p>Reviewed on {{ document_reviewed_on }} by a Nurse.ng reviewer.</p>
-    </section>
-  {% endif %}
-
-  {% if fields.get('professional_status') or fields.get('location') %}
-    <dl class="profile-meta">
-      {% if fields.get('professional_status') %}
-        <dt>Professional status</dt>
-        <dd>
-          {{ fields.get('professional_status') }}
-          <span class="optional">(self-declared)</span>
-        </dd>
-      {% endif %}
-      {% if fields.get('location') %}
-        <dt>Location</dt>
-        <dd>{{ fields.get('location') }}</dd>
-      {% endif %}
-    </dl>
-  {% endif %}
-
-
-  {% if fields.get('qualification') or fields.get('years_experience') %}
+  <p class="lede">{{ fields.get('headline') }}</p>
+  {% endif %} {% if document_reviewed_on %}
+  <section class="verification-panel">
+    <p class="verification-badge">
+      Document reviewed · {{ document_reviewed_on }}
+    </p>
+    <h2>What “document reviewed” means</h2>
+    <p>
+      A Nurse.ng reviewer inspected an uploaded NMCN (Nursing and Midwifery
+      Council of Nigeria) licence or certificate and a government-issued photo
+      ID, and matched the name on them to
+      <strong
+        >{{ document_reviewed_name or fields.get('display_name', 'the submitted profile') }}</strong
+      >.
+    </p>
+    {% if document_review_name_changed %}
+    <p class="form-notice">
+      The current profile name,
+      <strong>{{ fields.get('display_name', 'Nurse profile') }}</strong>,
+      differs from the name reviewed. The current name is self-declared and was
+      not matched during that review.
+    </p>
+    {% endif %}
+    <p>
+      This is <strong>not source confirmation</strong>. Nurse.ng does not check
+      the registration against NMCN's records, does not prove the documents are
+      authentic, and does not assess clinical competence.
+    </p>
+    <p>Reviewed on {{ document_reviewed_on }} by a Nurse.ng reviewer.</p>
+  </section>
+  {% endif %} {% if fields.get('professional_status') or fields.get('location')
+  %}
   <dl class="profile-meta">
-    {% if fields.get('qualification') %}<dt>Qualification</dt>
-    <dd>{{ fields.get('qualification') }} <span class="optional">(self-declared)</span></dd>{% endif %}
-    {% if fields.get('years_experience') %}<dt>Experience</dt>
-    <dd>{{ fields.get('years_experience') }} years</dd>{% endif %}
+    {% if fields.get('professional_status') %}
+    <dt>Professional status</dt>
+    <dd>
+      {{ fields.get('professional_status') }}
+      <span class="optional">(self-declared)</span>
+    </dd>
+    {% endif %} {% if fields.get('location') %}
+    <dt>Location</dt>
+    <dd>{{ fields.get('location') }}</dd>
+    {% endif %}
   </dl>
-  {% endif %}
-  {% if fields.get('skills') %}
-  <div class="chips" style="margin-top:20px">
-    {% for skill in fields.get('skills').split(',') %}<span class="chip">{{ skill.strip() }}</span>{% endfor %}
+  {% endif %} {% if fields.get('qualification') or
+  fields.get('years_experience') %}
+  <dl class="profile-meta">
+    {% if fields.get('qualification') %}
+    <dt>Qualification</dt>
+    <dd>
+      {{ fields.get('qualification') }}
+      <span class="optional">(self-declared)</span>
+    </dd>
+    {% endif %} {% if fields.get('years_experience') %}
+    <dt>Experience</dt>
+    <dd>{{ fields.get('years_experience') }} years</dd>
+    {% endif %}
+  </dl>
+  {% endif %} {% if fields.get('skills') %}
+  <div class="chips" style="margin-top: 20px">
+    {% for skill in fields.get('skills').split(',') %}<span class="chip"
+      >{{ skill.strip() }}</span
+    >{% endfor %}
   </div>
-  {% endif %}
-  
-
-  {% if fields.get('bio') %}
-    <div class="profile-bio">{{ fields.get('bio') }}</div>
-  {% endif %}
-
-  {% if fields.get('interests') %}
-  <section class="public-interests"><h2>Professional interests</h2><div class="interest-tags">
-    {% for interest in fields.get('interests').split(', ') %}<span>{{ interest }}</span>{% endfor %}
-  </div></section>
-  {% endif %}
-
-  {% if not fields %}
-    <p class="lede">This profile is active but shares no details yet.</p>
-  {% endif %}
-
-  {% if can_connect %}
-    <section class="profile-social-actions">
-      <h2>Connect</h2>
-      <div class="button-row">
-        {% if is_following %}
-          <form method="post" action="/nurses/{{ profile_public_id }}/unfollow">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            <button class="button-secondary">Unfollow</button>
-          </form>
-        {% else %}
-          <form method="post" action="/nurses/{{ profile_public_id }}/follow">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            <button class="button-primary">Follow</button>
-          </form>
-        {% endif %}
-
-        {% if not connection %}
-          <form method="post" action="/nurses/{{ profile_public_id }}/connect">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            <button class="button-secondary">Connect</button>
-          </form>
-        {% elif connection_status == 'pending' %}
-          {% if connection.recipient_user_id == user.id %}
-            <a class="button-secondary" href="/network">Respond to request</a>
-          {% else %}
-            <span class="field-hint">Connection request pending</span>
-          {% endif %}
-        {% elif connection_status == 'accepted' %}
-          <span class="status-badge status-approved">Connected</span>
-        {% elif connection_status == 'declined' %}
-          <form method="post" action="/nurses/{{ profile_public_id }}/connect">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            <button class="button-secondary">Connect again</button>
-          </form>
-        {% endif %}
-      </div>
-    </section>
+  {% endif %} {% if fields.get('bio') %}
+  <div class="profile-bio">{{ fields.get('bio') }}</div>
+  {% endif %} {% if fields.get('interests') %}
+  <section class="public-interests">
+    <h2>Professional interests</h2>
+    <div class="interest-tags">
+      {% for interest in fields.get('interests').split(', ') %}<span
+        >{{ interest }}</span
+      >{% endfor %}
+    </div>
+  </section>
+  {% endif %} {% if not fields %}
+  <p class="lede">This profile is active but shares no details yet.</p>
+  {% endif %} {% if can_connect %}
+  <section class="profile-social-actions">
+    <h2>Connect</h2>
+    <div class="button-row">
+      {% if is_following %}
+      <form method="post" action="/nurses/{{ profile_public_id }}/unfollow">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <button class="button-secondary">Unfollow</button>
+      </form>
+      {% else %}
+      <form method="post" action="/nurses/{{ profile_public_id }}/follow">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <button class="button-primary">Follow</button>
+      </form>
+      {% endif %} {% if not connection %}
+      <form method="post" action="/nurses/{{ profile_public_id }}/connect">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <button class="button-secondary">Connect</button>
+      </form>
+      {% elif connection_status == 'pending' %} {% if
+      connection.recipient_user_id == user.id %}
+      <a class="button-secondary" href="/network">Respond to request</a>
+      {% else %}
+      <span class="field-hint">Connection request pending</span>
+      {% endif %} {% elif connection_status == 'accepted' %}
+      <span class="status-badge status-approved">Connected</span>
+      {% elif connection_status == 'declined' %}
+      <form method="post" action="/nurses/{{ profile_public_id }}/connect">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <button class="button-secondary">Connect again</button>
+      </form>
+      {% endif %}
+    </div>
+  </section>
   {% endif %}
 
   <p class="form-alt">
-    {% if document_reviewed_on %}
-      Shared by its owner. Documents for {{ document_reviewed_name or 'the submitted name' }}
-      were reviewed by Nurse.ng; the registration was not confirmed with NMCN.
-    {% else %}
-      Shared by its owner. Nurse.ng has not reviewed or verified these details.
-    {% endif %}
+    {% if document_reviewed_on %} Shared by its owner. Documents for {{
+    document_reviewed_name or 'the submitted name' }} were reviewed by Nurse.ng;
+    the registration was not confirmed with NMCN. {% else %} Shared by its
+    owner. Nurse.ng has not reviewed or verified these details. {% endif %}
   </p>
 </section>
 {% endblock %}

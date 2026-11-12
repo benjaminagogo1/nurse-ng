@@ -213,7 +213,6 @@ def open_job_condition():
                             and_(
                                 RecruitmentSource.permission_status == "limited",
                                 RecruitmentSource.reuse_basis == "factual_index",
-                                RecruitmentSource.approval_mode == "automatic",
                                 RecruitmentSource.collection_adapter == "factual_index",
                                 RecruitmentSource.allow_snapshot_retention.is_(False),
                                 RecruitmentSource.allow_republication.is_(False),
@@ -221,10 +220,28 @@ def open_job_condition():
                                 == "factual_index",
                                 RecruitmentSource.activation_review["evidence"]["scope"].as_string()
                                 == RecruitmentSource.reuse_url_prefix,
-                                RecruitmentSource.activation_review["evidence"][
-                                    "recruitment_page"
-                                ].as_string()
-                                == RecruitmentSource.observed_url,
+                                or_(
+                                    and_(
+                                        RecruitmentSource.approval_mode == "automatic",
+                                        RecruitmentSource.activation_review["evidence"][
+                                            "recruitment_page"
+                                        ].as_string() == RecruitmentSource.observed_url,
+                                    ),
+                                    and_(
+                                        RecruitmentSource.approval_mode == "staff",
+                                        RecruitmentSource.activation_review["status"].as_string()
+                                        == "staff_approved",
+                                        RecruitmentSource.activation_review["evidence"][
+                                            "identity_basis"
+                                        ].as_string() == "staff_selection",
+                                        RecruitmentSource.activation_review["evidence"][
+                                            "staff_id"
+                                        ].as_string() != "",
+                                        RecruitmentSource.activation_review["evidence"][
+                                            "collection_url"
+                                        ].as_string() == RecruitmentSource.observed_url,
+                                    ),
+                                ),
                                 RecruitmentSource.activation_review["evidence"][
                                     "requested_url"
                                 ].as_string()
@@ -281,15 +298,17 @@ def salary_label(job: Job) -> str:
             amount = "from " + number("minValue")
         else:
             amount = "up to " + number("maxValue")
-        return f"{data['currency']} {amount}/{data['unit'].lower()}"
+        period = f" per {data['unit'].lower()}" if data.get("unit") else " (pay period not stated)"
+        basis = f" · {data['basis']}" if data.get("basis") in {"gross", "net"} else ""
+        return f"{data['currency']} {amount}{period}{basis}"
     low, high = job.salary_min, job.salary_max
     if low is None and high is None:
         return "Salary not stated"
     if low is not None and high is not None:
-        return f"₦{low:,} - ₦{high:,}/month"
+        return f"₦{low:,} - ₦{high:,} per month"
     if low is not None:
-        return f"From ₦{low:,}/month"
-    return f"Up to ₦{high:,}/month"
+        return f"From ₦{low:,} per month"
+    return f"Up to ₦{high:,} per month"
 
 
 def posted_label(job: Job) -> str:

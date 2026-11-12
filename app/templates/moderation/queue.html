@@ -1,50 +1,81 @@
-{% extends "base.html" %}
-
-{% block title %}Community moderation — Nurse.ng{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Community moderation — Nurse.ng{%
+endblock %} {% block content %}
 <section class="form-page">
   <p class="eyebrow">Staff</p>
   <h1>Community moderation</h1>
   <p class="lede">Create discussion topics and review member reports.</p>
 
-  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+  {% if error %}
+  <p class="form-error" role="alert">{{ error }}</p>
+  {% endif %}
 
   <h2>Open reports</h2>
   <div class="moderation-list">
     {% for report in reports %}
-      <article class="moderation-card">
-        <p><strong>{{ reason_labels.get(report.reason, report.reason) }}</strong> · {{ report.created_at.strftime('%d %b %Y, %H:%M') }}</p>
-        {% if report.details %}<p>{{ report.details }}</p>{% endif %}
-        <blockquote>
-          {% if report.post %}{{ report.post.body or '[Media/link post]' }}{% elif report.reply %}{{ report.reply.body }}{% endif %}
-        </blockquote>
-        <form method="post" action="/moderation/reports/{{ report.id }}" class="compact-form">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <label>Staff note
-            <textarea name="note" rows="3" maxlength="1000" required></textarea>
-          </label>
-          <div class="button-row">
-            <button name="action" value="remove" class="button-primary">Remove content</button>
-            <button name="action" value="dismiss" class="button-secondary">Dismiss report</button>
-          </div>
-        </form>
-      </article>
+    <article class="moderation-card">
+      <p>
+        <strong>{{ reason_labels.get(report.reason, report.reason) }}</strong> ·
+        {{ report.created_at.strftime('%d %b %Y, %H:%M') }}
+      </p>
+      {% if report.details %}
+      <p>{{ report.details }}</p>
+      {% endif %}
+      <blockquote>
+        {% if report.post %}{{ report.post.body or '[Media/link post]' }}{% elif
+        report.reply %}{{ report.reply.body }}{% endif %}
+      </blockquote>
+      <form
+        method="post"
+        action="/moderation/reports/{{ report.id }}"
+        class="compact-form"
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <label
+          >Staff note
+          <textarea name="note" rows="3" maxlength="1000" required></textarea>
+        </label>
+        <div class="button-row">
+          <button name="action" value="remove" class="button-primary">
+            Remove content
+          </button>
+          <button name="action" value="dismiss" class="button-secondary">
+            Dismiss report
+          </button>
+        </div>
+      </form>
+    </article>
     {% else %}
-      <p class="field-hint">No reports need review. Reports from members will appear here with the content and reason.</p>
+    <p class="field-hint">
+      No reports need review. Reports from members will appear here with the
+      content and reason.
+    </p>
     {% endfor %}
   </div>
 
   <h2>Topics</h2>
   <ul class="plain-list">
-    {% for topic in topics %}<li>{{ topic.name }}{% if not topic.is_active %} · Inactive{% endif %}</li>{% else %}<li>No topics yet. Use the form below to create a place for members to start conversations.</li>{% endfor %}
+    {% for topic in topics %}
+    <li>{{ topic.name }}{% if not topic.is_active %} · Inactive{% endif %}</li>
+    {% else %}
+    <li>
+      No topics yet. Use the form below to create a place for members to start
+      conversations.
+    </li>
+    {% endfor %}
   </ul>
   <form method="post" action="/moderation/topics" class="stacked-form">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <label for="topic-name">Topic name</label>
-    <input id="topic-name" name="name" maxlength="80" required>
-    <label for="topic-description">Description <span class="optional">(optional)</span></label>
-    <textarea id="topic-description" name="description" maxlength="500" rows="3"></textarea>
+    <input id="topic-name" name="name" maxlength="80" required />
+    <label for="topic-description"
+      >Description <span class="optional">(optional)</span></label
+    >
+    <textarea
+      id="topic-description"
+      name="description"
+      maxlength="500"
+      rows="3"
+    ></textarea>
     <button type="submit">Create topic</button>
   </form>
 </section>

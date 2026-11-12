@@ -13,8 +13,8 @@ access audit when the reviewer opens evidence (DECISIONS L49).
 """
 
 import argparse
+import json
 import sys
-import time
 from collections.abc import Sequence
 
 from sqlalchemy import select
@@ -78,55 +78,49 @@ def main(argv: Sequence[str] | None = None) -> int:
     notices.add_argument("--once", action="store_true", help="Drain ready emails, then exit.")
     notices.add_argument("--max-tasks", type=int, default=20)
 
+    supervised = subparsers.add_parser("workers", help="Supervise and restart background workers.")
+    supervised.add_argument("--roles", default=settings.required_workers or "recruitment,reels")
+    health = subparsers.add_parser("worker-status", help="Check database and worker progress.")
+    health.add_argument("--json", action="store_true")
+    quality = subparsers.add_parser(
+        "reconcile-vacancies", help="Clean duplicate/non-vacancy review work."
+    )
+    quality.add_argument("--dry-run", action="store_true")
+
     args = parser.parse_args(argv)
-    if args.command == "notification-worker":
-        from app.services.account_mail import mail_available
-        from app.services.notification_worker import run_next
-        from app.services.opportunity_watch import generate_alerts
+    if args.command == "workers":
+        from app.services.worker_runtime import run_supervisor
+
+        try:
+            return run_supervisor(args.roles)
+        except ValueError as exc:
+            parser.error(str(exc))
+    if args.command == "worker-status":
+        from sqlalchemy.exc import SQLAlchemyError
+
+        from app.services.worker_health import readiness, snapshot
+
+        try:
+            with SessionLocal() as db:
+                result = {"ready": readiness(db), "workers": snapshot(db)}
+        except SQLAlchemyError:
+            result = {"ready": False, "database": "unavailable", "workers": []}
+        print(json.dumps(result, default=str, indent=2))
+        return 0 if result["ready"] else 1
+    if args.command == "reconcile-vacancies":
+        from app.services.vacancies import reconcile_pending_quality
+
+        with SessionLocal() as db:
+            result = reconcile_pending_quality(db, dry_run=args.dry_run)
+        print(json.dumps({"dry_run": args.dry_run, **result}))
+        return 0
+    if args.command in {"recruitment-worker", "reels-worker", "notification-worker"}:
+        from app.services.worker_runtime import COMMANDS, run_worker
 
         if not 1 <= args.max_tasks <= 100:
             parser.error("--max-tasks must be between 1 and 100")
-        if not mail_available():
-            print("Email is unavailable; in-app opportunity alerts remain active.", flush=True)
-        print("Notification worker started; checking queued email alerts.", flush=True)
-        completed = 0
-        try:
-            while True:
-                with SessionLocal() as db:
-                    generate_alerts(db)
-                    result = run_next(db) if mail_available() else None
-                if result:
-                    print(f"notification={result[0]} state={result[1]}", flush=True)
-                    completed += 1
-                if args.once and (result is None or completed >= args.max_tasks):
-                    break
-                if result is None:
-                    time.sleep(5)
-        except KeyboardInterrupt:
-            print("Notification worker stopped; unfinished leases will be recovered.")
-        return 0
-    if args.command == "reels-worker":
-        from app.services.reel_worker import ffmpeg_binary, run_next
-
-        if not 1 <= args.max_tasks <= 100:
-            parser.error("--max-tasks must be between 1 and 100")
-        ffmpeg_binary()
-        print("Reels worker started; checking queued uploads.", flush=True)
-        completed = 0
-        try:
-            while True:
-                with SessionLocal() as db:
-                    result = run_next(db)
-                if result:
-                    print(f"reel={result[0]} state={result[1]}", flush=True)
-                    completed += 1
-                if args.once and (result is None or completed >= args.max_tasks):
-                    break
-                if result is None:
-                    time.sleep(3)
-        except KeyboardInterrupt:
-            print("Reels worker stopped; unfinished leases will be recovered.")
-        return 0
+        name = next(name for name, command in COMMANDS.items() if command == args.command)
+        return run_worker(name, once=args.once, max_tasks=args.max_tasks)
     if args.command == "cleanup-account-files":
         from app.services.accounts import cleanup_account_files
 
@@ -151,41 +145,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         with SessionLocal() as db:
             result = initialize_discovery(db)
         print(f"Created {result['schedules']} schedules and {result['sources']} pending sources.")
-        return 0
-    if args.command == "recruitment-worker":
-        from app.services.recruitment import ensure_search_schedule
-        from app.services.recruitment_search import search_available
-        from app.services.recruitment_worker import enqueue_due, run_next
-
-        if not 1 <= args.max_tasks <= 100:
-            parser.error("--max-tasks must be between 1 and 100")
-        completed = 0
-        with SessionLocal() as db:
-            ensure_search_schedule(db)
-        if not search_available():
-            print(
-                "General web search is not configured; directory and source checks remain active.",
-                flush=True,
-            )
-        try:
-            while True:
-                with SessionLocal() as db:
-                    enqueue_due(db)
-                    task = run_next(db)
-                    if task is not None:
-                        print(
-                            f"{task.kind}: {task.status}; {task.result_count} new sources; "
-                            f"{task.outcome}; task={task.id}; source={task.source_id}; "
-                            f"{task.message}",
-                            flush=True,
-                        )
-                        completed += 1
-                if args.once and (task is None or completed >= args.max_tasks):
-                    break
-                if task is None:
-                    time.sleep(5)
-        except KeyboardInterrupt:
-            print("Discovery worker stopped; unfinished leases can be recovered.")
         return 0
     with SessionLocal() as db:
         result = reconcile_community_media(db, dry_run=args.dry_run)

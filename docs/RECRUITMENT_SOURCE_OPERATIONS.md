@@ -2,6 +2,37 @@
 
 The system discovers institutions, automatically activates sources that pass reproducible checks, and sends uncertain cases to staff review. Configured approved sources can supply structured vacancies to the shared jobs interface. It does not claim regulatory or individual-vacancy verification and does not run AI models. Direct employer submissions retain their existing consented application flow.
 
+## Approve and start collection — 10 November 2026
+
+Staff can open a source and use **Approve and start vacancy collection** to approve
+the source and enable factual collection in one action. Review the website scope,
+set the approval expiry, record the reason, and select **Approve and start collection**.
+The next worker check collects job titles, employers, locations, dates and original
+announcement links. Valid records publish to `/jobs`; incomplete records remain in
+`/recruitment/vacancies`. Approval uses the existing staff, CSRF and revision checks.
+
+This path records the staff member's source selection. It does not assert that an
+independent registry or licensing authority has verified the publisher. The prior
+automatic assessment remains in the decision history. It enables factual collection
+with limited permissions and leaves full-page retention and full-description
+republication disabled. The older evidence form remains available for permitted
+full-content collection.
+
+The submitted URL stays unchanged. Collection uses HTTPS, including a conventional
+www redirect within the approved path. Another publisher or a path outside that
+scope is blocked before fetching. Shared recruitment portals retain their submitted
+tenant/path boundary. Unknown organisation countries stay unknown; each vacancy
+still needs its own location and deadline evidence. Failed checks, expiry, pauses
+and revocation continue to stop affected public listings.
+
+Successful collections are scheduled every six hours. A running recruitment worker
+is required; approving a source does not start an operating-system process. For 120
+sources, four daily passes require about 480 attempts before retries and discovery.
+The local instance now uses `NURSE_NG_RECRUITMENT_DAILY_TASK_LIMIT=600`, retaining the
+existing global lease, request limits, per-site waits and retry backoff. Access
+failures, login-only sites and unsupported page formats remain visible in source
+health and worker activity.
+
 ## Local setup
 
 Run from the repository root with the existing development `.env`:
@@ -19,6 +50,10 @@ In a second terminal, run the worker:
 ```
 
 Keep both processes running. The worker polls the durable queue every five seconds when idle. It runs separately from Uvicorn, so reloads do not start duplicate discovery loops. Ctrl+C stops it; interrupted leases recover on the next worker run. Deployments should supervise this command with their existing process manager; no worker service is installed by these commands.
+
+For continuous operation, use the supplied [supervisor and service instructions](WORKER_OPERATIONS.md)
+instead of leaving a manual worker in a terminal. These also cover `/readyz`,
+worker progress, and cleanup of existing duplicate or unrelated vacancy reviews.
 
 `recruitment-init` is repeatable: it creates a daily Nigerian ROR healthcare schedule and a weekly worldwide schedule. Rerunning setup upgrades the original built-in worldwide 24-hour interval to 168 hours, retaining its pause state and page cursor; custom schedules/intervals are retained. It seeds pending starting points for LSHSC (preserving the exact user URL), the Federal Ministry of Health, National Health Fellows, Nigeria Jubilee Fellows, and Iwosan Lagoon Hospitals careers. These are examples across government, youth programmes and private healthcare, not an exclusive source list. Setup makes no network requests and approves or publishes nothing. Directory jobs discover further institutions; later inspection jobs identify recruitment/programme links. Each directory run processes up to 20 records and advances its cursor.
 

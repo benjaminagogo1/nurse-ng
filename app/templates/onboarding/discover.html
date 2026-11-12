@@ -1,20 +1,73 @@
-{% extends "base.html" %}
-{% from "_icons.html" import icon %}
-{% from "_empty_state.html" import empty_state %}
-{% block title %}Suggestions for you — Nurse.ng{% endblock %}
-{% block content %}
+{% extends "base.html" %} {% from "_icons.html" import icon %} {% from
+"_empty_state.html" import empty_state %} {% block title %}Suggestions for you —
+Nurse.ng{% endblock %} {% block content %}
 <section class="discovery-page welcome-discover">
-
-  <div class="discovery-heading"><div><p class="eyebrow">Explore your community · Step 2 of 2</p><h1>Suggestions for you</h1><p class="lede">Discover colleagues and opportunities for your next step.</p></div><a class="btn btn-secondary" href="/welcome">Edit my interests</a></div>
-  <section aria-labelledby="suggested-people"><div class="discovery-results"><h2 id="suggested-people">Suggested colleagues</h2>{% if cards %}<a href="/nurses">Find colleagues {{ icon('arrow', 15) }}</a>{% endif %}</div><p class="field-hint">Shared public interests and locations help us suggest colleagues. Open a profile to follow or connect.</p>
-    {% if cards %}<div class="profile-card-grid people-grid">{% for card in cards %}{% include "community/_person.html" %}{% endfor %}</div>
+  <div class="discovery-heading">
+    <div>
+      <p class="eyebrow">Explore your community · Step 2 of 2</p>
+      <h1>Suggestions for you</h1>
+      <p class="lede">
+        Discover colleagues and opportunities for your next step.
+      </p>
+    </div>
+    <a class="btn btn-secondary" href="/welcome">Edit my interests</a>
+  </div>
+  <section aria-labelledby="suggested-people">
+    <div class="discovery-results">
+      <h2 id="suggested-people">Suggested colleagues</h2>
+      {% if cards %}<a href="/nurses">Find colleagues {{ icon('arrow', 15) }}</a
+      >{% endif %}
+    </div>
+    <p class="field-hint">
+      Shared public interests and locations help us suggest colleagues. Open a
+      profile to follow or connect.
+    </p>
+    {% if cards %}
+    <div class="profile-card-grid people-grid">
+      {% for card in cards %}{% include "community/_person.html" %}{% endfor %}
+    </div>
     {% else %}{{ empty_state('No suggestions yet', 'Colleagues with published profiles will appear here. You can search the directory for someone you know.', '/nurses', 'Find colleagues', level=3) }}{% endif %}
   </section>
-  <section class="discovery-opportunities" aria-labelledby="suggested-jobs"><div class="discovery-results"><h2 id="suggested-jobs">Opportunities to explore</h2><a href="/jobs">View all {{ icon('arrow', 15) }}</a></div>
-    <p class="field-hint">{% if personalised_jobs %}Based on your interests or location, with Nigerian opportunities first.{% else %}Explore current openings, with Nigerian opportunities first. More relevant suggestions will appear as opportunities arrive.{% endif %}</p>
-    {% for job in jobs %}{% include "jobs/_card.html" %}{% else %}<div class="empty-state"><h3>New opportunities are on their way</h3><p>You can choose your opportunity alerts while we look for more openings.</p></div>{% endfor %}
-    <p><a href="/jobs/preferences">Choose opportunity alerts</a> <span class="field-hint">· Alerts have separate preferences.</span></p>
+  <section class="discovery-opportunities" aria-labelledby="suggested-jobs">
+    <div class="discovery-results">
+      <h2 id="suggested-jobs">Opportunities to explore</h2>
+      <a href="/jobs">View all {{ icon('arrow', 15) }}</a>
+    </div>
+    <p class="field-hint">
+      {% if personalised_jobs %}Based on your interests or location, with
+      Nigerian opportunities first.{% else %}Explore current openings, with
+      Nigerian opportunities first. More relevant suggestions will appear as
+      opportunities arrive.{% endif %}
+    </p>
+    {% for job in jobs %}{% include "jobs/_card.html" %}{% else %}
+    <div class="empty-state">
+      <h3>New opportunities are on their way</h3>
+      <p>
+        You can choose your opportunity alerts while we look for more openings.
+      </p>
+    </div>
+    {% endfor %}
+    <p>
+      <a href="/jobs/preferences">Choose opportunity alerts</a>
+      <span class="field-hint">· Alerts have separate preferences.</span>
+    </p>
   </section>
-  <aside class="discovery-next"><div><h2>You control how people see you</h2><p>{% if profile and profile.discoverable %}Review your public profile and change what you share anytime.{% else %}Your profile is private. Add a name and professional details, then choose what to share when you're ready.{% endif %}</p><a href="/profile" class="text-link">Review my profile {{ icon('arrow', 15) }}</a></div><a href="/auth/dashboard" class="btn btn-primary">Go to my dashboard {{ icon('arrow', 17) }}</a></aside>
+  <aside class="discovery-next">
+    <div>
+      <h2>You control how people see you</h2>
+      <p>
+        {% if profile and profile.discoverable %}Review your public profile and
+        change what you share anytime.{% else %}Your profile is private. Add a
+        name and professional details, then choose what to share when you're
+        ready.{% endif %}
+      </p>
+      <a href="/profile" class="text-link"
+        >Review my profile {{ icon('arrow', 15) }}</a
+      >
+    </div>
+    <a href="/auth/dashboard" class="btn btn-primary"
+      >Go to my dashboard {{ icon('arrow', 17) }}</a
+    >
+  </aside>
 </section>
 {% endblock %}

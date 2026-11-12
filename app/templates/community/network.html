@@ -1,92 +1,124 @@
-{% extends "base.html" %}
-{% from "_empty_state.html" import empty_state %}
-
-{% block title %}Your network — Nurse.ng{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% from "_empty_state.html" import empty_state %} {%
+block title %}Your network — Nurse.ng{% endblock %} {% block content %}
 <section class="community-page network-page">
   <p class="eyebrow">Community</p>
   <h1>Your network</h1>
-  <p class="lede">Manage your connections, requests and the colleagues you follow.</p>
+  <p class="lede">
+    Manage your connections, requests and the colleagues you follow.
+  </p>
 
   <div class="network-layout">
-  <div class="network-column">
-  <section class="network-panel" aria-labelledby="network-connections">
-  <h2 id="network-connections">Connections <span class="section-count">{{ connections|length }}</span></h2>
-  <div class="network-list">
-    {% for item in connections %}
-      {% set other_id = item.recipient_user_id if item.requester_user_id == user.id else item.requester_user_id %}
-      {% set other = users.get(other_id) %}
-      <article class="network-row">
-        <span>
-          {% if profile_ids.get(other_id) %}<a href="/p/{{ profile_ids.get(other_id) }}">{% endif %}
-          {{ other.community_name if other and other.community_name else 'Nurse.ng member' }}
-          {% if profile_ids.get(other_id) %}</a>{% endif %}
-        </span>
-        <div class="button-row">
-        {% if other and other.is_active and other.status == 'active' %}
-        <a class="button-primary" href="/messages/{{ other_id }}">Message</a>
-        {% endif %}
-        <form method="post" action="/connections/{{ item.id }}/remove">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button class="button-secondary">Remove</button>
-        </form>
+    <div class="network-column">
+      <section class="network-panel" aria-labelledby="network-connections">
+        <h2 id="network-connections">
+          Connections
+          <span class="section-count">{{ connections|length }}</span>
+        </h2>
+        <div class="network-list">
+          {% for item in connections %} {% set other_id = item.recipient_user_id
+          if item.requester_user_id == user.id else item.requester_user_id %} {%
+          set other = users.get(other_id) %}
+          <article class="network-row">
+            <span>
+              {% if profile_ids.get(other_id) %}<a
+                href="/p/{{ profile_ids.get(other_id) }}"
+                >{% endif %} {{ other.community_name if other and
+                other.community_name else 'Nurse.ng member' }} {% if
+                profile_ids.get(other_id) %}</a
+              >{% endif %}
+            </span>
+            <div class="button-row">
+              {% if other and other.is_active and other.status == 'active' %}
+              <a class="button-primary" href="/messages/{{ other_id }}"
+                >Message</a
+              >
+              {% endif %}
+              <form method="post" action="/connections/{{ item.id }}/remove">
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token }}"
+                />
+                <button class="button-secondary">Remove</button>
+              </form>
+            </div>
+          </article>
+          {% else %} {{ empty_state('Build your professional circle', 'Connect with colleagues to exchange ideas and message each other. Your connections appear here once a request is accepted.', '/nurses', 'Find colleagues', compact=true, level=3, primary=true) }} {% endfor %}
         </div>
-      </article>
-    {% else %}
-      {{ empty_state('Build your professional circle', 'Connect with colleagues to exchange ideas and message each other. Your connections appear here once a request is accepted.', '/nurses', 'Find colleagues', compact=true, level=3, primary=true) }}
-    {% endfor %}
-  </div>
-  </section>
+      </section>
 
-  <section class="network-panel" aria-labelledby="network-following">
-  <h2 id="network-following">Following <span class="section-count">{{ following|length }}</span></h2>
-  {% if following %}<div class="profile-card-grid">
-    {% for profile in following %}
-      <article class="profile-card"><a href="/p/{{ profile.public_id }}">{{ profile.display_name }}</a></article>
-    {% endfor %}
-  </div>{% else %}
-    {{ empty_state(none, 'Follow colleagues from their public profiles to see their conversations in Community. Following does not need approval.', '/nurses' if connections else none, 'Find colleagues', compact=true) }}
-  {% endif %}
-  </section>
-  </div>
+      <section class="network-panel" aria-labelledby="network-following">
+        <h2 id="network-following">
+          Following <span class="section-count">{{ following|length }}</span>
+        </h2>
+        {% if following %}
+        <div class="profile-card-grid">
+          {% for profile in following %}
+          <article class="profile-card">
+            <a href="/p/{{ profile.public_id }}">{{ profile.display_name }}</a>
+          </article>
+          {% endfor %}
+        </div>
+        {% else %} {{ empty_state(none, 'Follow colleagues from their public profiles to see their conversations in Community. Following does not need approval.', '/nurses' if connections else none, 'Find colleagues',
+        compact=true) }} {% endif %}
+      </section>
+    </div>
 
-  <div class="network-column">
-  <section class="network-panel" aria-labelledby="network-requests">
-  <h2 id="network-requests">Connection requests <span class="section-count">{{ received|length }}</span></h2>
-  <div class="network-list">
-    {% for item in received %}
-      {% set requester = users.get(item.requester_user_id) %}
-      <article class="network-row">
-        <span>
-          {% if profile_ids.get(item.requester_user_id) %}<a href="/p/{{ profile_ids.get(item.requester_user_id) }}">{% endif %}
-          {{ requester.community_name if requester and requester.community_name else 'Nurse.ng member' }}
-          {% if profile_ids.get(item.requester_user_id) %}</a>{% endif %}
-        </span>
-        <form method="post" action="/connections/{{ item.id }}/respond" class="button-row">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button name="action" value="accept" class="button-primary">Accept</button>
-          <button name="action" value="decline" class="button-secondary">Decline</button>
-        </form>
-      </article>
-    {% else %}
-      {{ empty_state(none, 'No requests to review. Invitations from colleagues will appear here for you to accept or decline.', compact=true) }}
-    {% endfor %}
-  </div>
-  </section>
+    <div class="network-column">
+      <section class="network-panel" aria-labelledby="network-requests">
+        <h2 id="network-requests">
+          Connection requests
+          <span class="section-count">{{ received|length }}</span>
+        </h2>
+        <div class="network-list">
+          {% for item in received %} {% set requester =
+          users.get(item.requester_user_id) %}
+          <article class="network-row">
+            <span>
+              {% if profile_ids.get(item.requester_user_id) %}<a
+                href="/p/{{ profile_ids.get(item.requester_user_id) }}"
+                >{% endif %} {{ requester.community_name if requester and
+                requester.community_name else 'Nurse.ng member' }} {% if
+                profile_ids.get(item.requester_user_id) %}</a
+              >{% endif %}
+            </span>
+            <form
+              method="post"
+              action="/connections/{{ item.id }}/respond"
+              class="button-row"
+            >
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+              <button name="action" value="accept" class="button-primary">
+                Accept
+              </button>
+              <button name="action" value="decline" class="button-secondary">
+                Decline
+              </button>
+            </form>
+          </article>
+          {% else %} {{ empty_state(none, 'No requests to review. Invitations from colleagues will appear here for you to accept or decline.',
+          compact=true) }} {% endfor %}
+        </div>
+      </section>
 
-  <section class="network-panel" aria-labelledby="network-sent">
-  <h2 id="network-sent">Sent requests <span class="section-count">{{ sent|length }}</span></h2>
-  {% if sent %}<ul class="plain-list">
-    {% for item in sent %}
-      {% set person = users.get(item.recipient_user_id) %}
-      <li>{{ person.community_name if person and person.community_name else 'Nurse.ng member' }} <span class="follow-status">· Pending</span></li>
-    {% endfor %}
-  </ul>{% else %}
-    {{ empty_state(none, 'No requests awaiting a reply. To send one, open a colleague’s profile and choose Connect.', compact=true) }}
-  {% endif %}
-  </section>
-  </div>
+      <section class="network-panel" aria-labelledby="network-sent">
+        <h2 id="network-sent">
+          Sent requests <span class="section-count">{{ sent|length }}</span>
+        </h2>
+        {% if sent %}
+        <ul class="plain-list">
+          {% for item in sent %} {% set person =
+          users.get(item.recipient_user_id) %}
+          <li>
+            {{ person.community_name if person and person.community_name else
+            'Nurse.ng member' }} <span class="follow-status">· Pending</span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %} {{ empty_state(none, 'No requests awaiting a reply. To send one, open a colleague’s profile and choose Connect.', compact=true) }}
+        {% endif %}
+      </section>
+    </div>
   </div>
 </section>
 {% endblock %}

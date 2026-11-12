@@ -1,76 +1,266 @@
-{% extends "base.html" %}
-{% from "_icons.html" import icon %}
-{% set page = 'jobs' %}
-{% block title %}{{ job.title }} — Nurse.ng{% endblock %}
-{% block content %}
+{% extends "base.html" %} {% from "_icons.html" import icon %} {% set page =
+'jobs' %} {% block title %}{{ job.title }} — Nurse.ng{% endblock %} {% block
+content %}
 <section class="jobs-page jobs-detail-page">
-  <a class="jobs-back-link" href="/jobs">{{ icon('chevron', 15) }} Back to job opportunities</a>
+  <a class="jobs-back-link" href="/jobs"
+    >{{ icon('chevron', 15) }} Back to job opportunities</a
+  >
   <header class="jobs-detail-hero">
-    <div class="jobs-detail-identity"><span class="opportunity-logo">{{ icon('building', 30) }}</span><div><p class="jobs-detail-organisation">{{ job.organization }}</p><h1>{{ job.title }}</h1><p class="jobs-detail-location">{{ icon('pin', 16) }} {{ job.location or 'Location not specified' }}</p></div></div>
-    <div class="jobs-detail-footer"><div class="jobs-detail-tags"><span>{{ job.type }}</span><span>{{ job.mode }}</span><span>{{ job.status|replace('_', ' ')|capitalize }}</span></div><p>{{ job.date_label }} {{ job.posted|lower }}</p></div>
+    <div class="jobs-detail-identity">
+      <span class="opportunity-logo">{{ icon('building', 30) }}</span>
+      <div>
+        <p class="jobs-detail-organisation">{{ job.organization }}</p>
+        <h1>{{ job.title }}</h1>
+        <p class="jobs-detail-location">
+          {{ icon('pin', 16) }} {{ job.location or 'Location not specified' }}
+        </p>
+      </div>
+    </div>
+    <div class="jobs-detail-footer">
+      <div class="jobs-detail-tags">
+        <span>{{ job.type }}</span><span>{{ job.mode }}</span
+        ><span>{{ job.status|replace('_', ' ')|capitalize }}</span>
+      </div>
+      <p>{{ job.date_label }} {{ job.posted|lower }}</p>
+    </div>
   </header>
   <div class="jobs-detail-layout">
-      <section class="jobs-panel jobs-description-panel" aria-labelledby="job-about-heading">
-        <h2 id="job-about-heading">About this opportunity</h2>
-        {% if job.factual_index %}<p class="jobs-caption">A factual listing from the verified publisher. Full details are available through the original announcement below.</p>{% endif %}
-        <div class="job-description">{{ job.description or 'The employer has not added a detailed description for this role. You can introduce yourself with a note when applying.' }}</div>
-        {% for label, value in job.requirements.items() %}<h2>{{ label }}</h2><div class="job-description">{{ value }}</div>{% endfor %}
-        {% if job.licence %}<p class="jobs-caption">Adapted from <a href="{{ job.licence.source_url }}">{{ job.licence.attribution }}</a> under <a href="{{ job.licence.url }}">{{ job.licence.name }}</a>. Text and formatting have been normalized; the original announcement remains the reference.</p>{% endif %}
-      </section>
-    <aside class="jobs-detail-sidebar" aria-label="Opportunity summary">
-      <section class="jobs-panel"><h2>At a glance</h2><dl class="jobs-facts">
-        <div><dt>Salary</dt><dd>{{ job.salary }}</dd></div>
-        <div><dt>Opportunity type</dt><dd>{{ job.type }}</dd></div>
-        <div><dt>Work arrangement</dt><dd>{{ job.mode }}</dd></div>
-        {% if job.country %}<div><dt>Country code</dt><dd>{{ job.country }}</dd></div>{% endif %}
-        <div><dt>Closing date</dt><dd>{{ job.closing_date or 'Not stated' }}{% if job.closing_date|length == 10 %}<small>{{ job.deadline_timezone }}</small>{% endif %}</dd></div>
-      </dl>
-      <a class="btn btn-primary jobs-application-link" href="#job-apply">{{ 'View application status' if application else ('Application details' if job.external else 'View application') }} {{ icon('arrow', 16) }}</a>
-      {% if user %}
-      <div class="opportunity-save">
-        {% if saved_opportunity %}<p>{{ icon('check', 17) }} Saved to your opportunities</p><a class="btn btn-secondary" href="/jobs/saved">Manage saved opportunities</a>
-        {% elif job.status in ['open', 'closing_soon', 'upcoming'] %}<form method="post" action="/jobs/{{ job.id }}/save"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">{% if job.closing_date %}<label class="consent-choice"><input type="checkbox" name="remind" value="true" checked><span>Remind me when the confirmed deadline is within 48 hours.</span></label>{% endif %}<button class="btn btn-secondary" type="submit">{{ icon('bookmark', 17) }} Save opportunity</button></form>{% endif %}
-      </div>
+    <section
+      class="jobs-panel jobs-description-panel"
+      aria-labelledby="job-about-heading"
+    >
+      <h2 id="job-about-heading">About this opportunity</h2>
+      {% if job.factual_index %}
+      <p class="jobs-caption">
+        A factual listing from the verified publisher. Full details are
+        available through the original announcement below.
+      </p>
       {% endif %}
+      <div class="job-description">
+        {{ job.description or 'The employer has not added a detailed description for this role. You can introduce yourself with a note when applying.' }}
+      </div>
+      {% for label, value in job.requirements.items() %}
+      <h2>{{ label }}</h2>
+      <div class="job-description">{{ value }}</div>
+      {% endfor %} {% if job.licence %}
+      <p class="jobs-caption">
+        Adapted from
+        <a href="{{ job.licence.source_url }}">{{ job.licence.attribution }}</a>
+        under <a href="{{ job.licence.url }}">{{ job.licence.name }}</a>. Text
+        and formatting have been normalized; the original announcement remains
+        the reference.
+      </p>
+      {% endif %}
+    </section>
+    <aside class="jobs-detail-sidebar" aria-label="Opportunity summary">
+      <section class="jobs-panel">
+        <h2>At a glance</h2>
+        <dl class="jobs-facts">
+          <div>
+            <dt>Salary</dt>
+            <dd>{{ job.salary }}</dd>
+          </div>
+          <div>
+            <dt>Opportunity type</dt>
+            <dd>{{ job.type }}</dd>
+          </div>
+          <div>
+            <dt>Work arrangement</dt>
+            <dd>{{ job.mode }}</dd>
+          </div>
+          {% if job.country %}
+          <div>
+            <dt>Country code</dt>
+            <dd>{{ job.country }}</dd>
+          </div>
+          {% endif %}
+          <div>
+            <dt>Closing date</dt>
+            <dd>
+              {{ job.closing_date or 'Not stated' }}{% if
+              job.closing_date|length == 10 %}<small
+                >{{ job.deadline_timezone }}</small
+              >{% endif %}
+            </dd>
+          </div>
+        </dl>
+        <a class="btn btn-primary jobs-application-link" href="#job-apply"
+          >{{ 'View application status' if application else ('Application details' if job.external else 'View application') }} {{ icon('arrow',
+          16) }}</a
+        >
+        {% if user %}
+        <div class="opportunity-save">
+          {% if saved_opportunity %}
+          <p>{{ icon('check', 17) }} Saved to your opportunities</p>
+          <a class="btn btn-secondary" href="/jobs/saved"
+            >Manage saved opportunities</a
+          >
+          {% elif job.status in ['open', 'closing_soon', 'upcoming'] %}
+          <form method="post" action="/jobs/{{ job.id }}/save">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />{%
+            if job.closing_date %}<label class="consent-choice"
+              ><input type="checkbox" name="remind" value="true" checked /><span
+                >Remind me when the confirmed deadline is within 48 hours.</span
+              ></label
+            >{% endif %}<button class="btn btn-secondary" type="submit">
+              {{ icon('bookmark', 17) }} Save opportunity
+            </button>
+          </form>
+          {% endif %}
+        </div>
+        {% endif %}
       </section>
-      <section class="jobs-panel jobs-source-panel"><span class="jobs-support-icon">{{ icon('globe' if job.external else 'building', 22) }}</span><h2>{{ 'From a verified publisher' if job.external else 'Posted by an employer' }}</h2>
+      <section class="jobs-panel jobs-source-panel">
+        <span class="jobs-support-icon"
+          >{{ icon('globe' if job.external else 'building', 22) }}</span
+        >
+        <h2>
+          {{ 'From a verified publisher' if job.external else 'Posted by an employer' }}
+        </h2>
         {% if job.external %}
-        <p>Source: <a href="{{ job.source_url }}" target="_blank" rel="noopener noreferrer">{{ job.source_name }}</a> · Verified publisher</p>
-        <p>Confirm eligibility and application requirements in the original announcement.</p>
-        <p class="jobs-caption">Last confirmed: {{ job.confirmed_at.strftime('%Y-%m-%d %H:%M') if job.confirmed_at else 'Not confirmed' }} UTC{% if job.clarified %}. Some fields were clarified by Nurse.ng following staff review.{% endif %}</p>
-        {% if not job.closing_date %}<p class="jobs-caption">No closing date stated — check the original announcement.</p>{% endif %}
-        {% else %}<p>This opportunity was submitted by {{ job.organization }}. Review the role and introduce yourself when you’re ready.</p>{% endif %}
+        <p>
+          Source:
+          <a
+            href="{{ job.source_url }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            >{{ job.source_name }}</a
+          >
+          · Verified publisher
+        </p>
+        <p>
+          Confirm eligibility and application requirements in the original
+          announcement.
+        </p>
+        <p class="jobs-caption">
+          Last confirmed: {{ job.confirmed_at.strftime('%Y-%m-%d %H:%M') if
+          job.confirmed_at else 'Not confirmed' }} UTC{% if job.clarified %}.
+          Some fields were clarified by Nurse.ng following staff review.{% endif
+          %}
+        </p>
+        {% if not job.closing_date %}
+        <p class="jobs-caption">
+          No closing date stated — check the original announcement.
+        </p>
+        {% endif %} {% else %}
+        <p>
+          This opportunity was submitted by {{ job.organization }}. Review the
+          role and introduce yourself when you’re ready.
+        </p>
+        {% endif %}
       </section>
     </aside>
-    <section class="jobs-panel job-apply" id="job-apply" aria-label="Application">
-      {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
-      {% if job.external %}
+    <section
+      class="jobs-panel job-apply"
+      id="job-apply"
+      aria-label="Application"
+    >
+      {% if error %}
+      <p class="form-error" role="alert">{{ error }}</p>
+      {% endif %} {% if job.external %}
       <h2>External application</h2>
       {% if job.status in ['open', 'closing_soon', 'upcoming'] %}
-      <p>Read the original vacancy for the institution's application instructions. Nurse.ng does not submit an application or share your contact details when you open this link.</p>
-      <a class="btn btn-primary" href="{{ job.announcement_url }}" target="_blank" rel="noopener noreferrer">Open original vacancy {{ icon('arrow', 17) }}</a>
-      {% elif job.status == 'closed' %}<p>The recorded deadline has passed.</p>
-      {% else %}<p>We cannot currently confirm that this vacancy is open. It has been removed from current opportunities.</p>{% endif %}
-      {% elif job.status == 'closed' %}<p>The application deadline has passed.</p>
-      {% elif is_owner %}
-      <h2>Find your next team member</h2><p class="lede">Applications for your roles are available in your workspace.</p><a class="btn btn-primary" href="/applications">View applications {{ icon('arrow', 17) }}</a>
-      {% elif application %}
-      <p class="form-notice" role="status">You've applied for this role. Status: <strong>{{ application.status|replace('_', ' ')|capitalize }}</strong>.</p><a class="btn btn-secondary" href="/applications">Track my applications {{ icon('arrow', 17) }}</a>
-      {% elif not user %}
-      <h2>Ready for your next chapter?</h2><p class="lede">Sign in to introduce yourself to {{ job.organization }}.</p><div class="button-row"><a class="btn btn-primary" href="/auth/login">Sign in to apply {{ icon('arrow', 17) }}</a><a class="btn btn-secondary" href="/auth/register">Create an account</a></div>
-      {% elif user.account_type != 'nurse' %}
-      <p class="field-hint">Job applications are available to nurse accounts.</p>
-      {% elif not user.full_name %}
-      <h2>Complete your contact details</h2><p class="lede">Add your full name so the employer knows how to address you.</p><a class="btn btn-primary" href="/settings">Update account details</a>
+      <p>
+        Read the original vacancy for the institution's application
+        instructions. Nurse.ng does not submit an application or share your
+        contact details when you open this link.
+      </p>
+      <a
+        class="btn btn-primary"
+        href="{{ job.announcement_url }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Open original vacancy {{ icon('arrow', 17) }}</a
+      >
+      {% elif job.status == 'closed' %}
+      <p>The recorded deadline has passed.</p>
       {% else %}
-      <h2>Introduce yourself</h2><p class="field-hint">A thoughtful introduction helps the employer get to know you.</p>
-      <form action="/jobs/{{ job.id }}/apply" method="post" class="stacked-form">
-        <script type="application/json" data-offline-contact>{{ {'name': user.full_name, 'phone': user.phone, 'email': user.email or ''}|tojson }}</script>
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <label for="cover_note">Your note <span class="optional">(optional)</span></label><textarea id="cover_note" name="cover_note" rows="5" maxlength="3000" placeholder="Tell the team about your experience and why this opportunity interests you…">{{ cover_note }}</textarea>
-        <div class="application-contact"><strong>Contact details shared with this application</strong><p>{{ user.full_name }} · {{ user.phone }}{% if user.email %} · {{ user.email }}{% endif %}</p><a href="/settings">Edit details</a></div>
-        <label class="consent-choice"><input type="checkbox" name="consent" value="on" required><span>I agree to share these contact details and my note with {{ job.organization }} for this application. My private profile fields stay private.</span></label>
-        <button type="submit" class="btn btn-primary">Submit application {{ icon('arrow', 17) }}</button>
+      <p>
+        We cannot currently confirm that this vacancy is open. It has been
+        removed from current opportunities.
+      </p>
+      {% endif %} {% elif job.status == 'closed' %}
+      <p>The application deadline has passed.</p>
+      {% elif is_owner %}
+      <h2>Find your next team member</h2>
+      <p class="lede">
+        Applications for your roles are available in your workspace.
+      </p>
+      <a class="btn btn-primary" href="/applications"
+        >View applications {{ icon('arrow', 17) }}</a
+      >
+      {% elif application %}
+      <p class="form-notice" role="status">
+        You've applied for this role. Status:
+        <strong>{{ application.status|replace('_', ' ')|capitalize }}</strong>.
+      </p>
+      <a class="btn btn-secondary" href="/applications"
+        >Track my applications {{ icon('arrow', 17) }}</a
+      >
+      {% elif not user %}
+      <h2>Ready for your next chapter?</h2>
+      <p class="lede">
+        Sign in to introduce yourself to {{ job.organization }}.
+      </p>
+      <div class="button-row">
+        <a class="btn btn-primary" href="/auth/login"
+          >Sign in to apply {{ icon('arrow', 17) }}</a
+        ><a class="btn btn-secondary" href="/auth/register"
+          >Create an account</a
+        >
+      </div>
+      {% elif user.account_type != 'nurse' %}
+      <p class="field-hint">
+        Job applications are available to nurse accounts.
+      </p>
+      {% elif not user.full_name %}
+      <h2>Complete your contact details</h2>
+      <p class="lede">
+        Add your full name so the employer knows how to address you.
+      </p>
+      <a class="btn btn-primary" href="/settings">Update account details</a>
+      {% else %}
+      <h2>Introduce yourself</h2>
+      <p class="field-hint">
+        A thoughtful introduction helps the employer get to know you.
+      </p>
+      <form
+        action="/jobs/{{ job.id }}/apply"
+        method="post"
+        class="stacked-form"
+      >
+        <script type="application/json" data-offline-contact>
+          {{ {'name': user.full_name, 'phone': user.phone, 'email': user.email or ''}|tojson }}
+        </script>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <label for="cover_note"
+          >Your note <span class="optional">(optional)</span></label
+        ><textarea
+          id="cover_note"
+          name="cover_note"
+          rows="5"
+          maxlength="3000"
+          placeholder="Tell the team about your experience and why this opportunity interests you…"
+        >
+{{ cover_note }}</textarea>
+        <div class="application-contact">
+          <strong>Contact details shared with this application</strong>
+          <p>
+            {{ user.full_name }} · {{ user.phone }}{% if user.email %} · {{
+            user.email }}{% endif %}
+          </p>
+          <a href="/settings">Edit details</a>
+        </div>
+        <label class="consent-choice"
+          ><input type="checkbox" name="consent" value="on" required /><span
+            >I agree to share these contact details and my note with {{
+            job.organization }} for this application. My private profile fields
+            stay private.</span
+          ></label
+        >
+        <button type="submit" class="btn btn-primary">
+          Submit application {{ icon('arrow', 17) }}
+        </button>
       </form>
       {% endif %}
     </section>

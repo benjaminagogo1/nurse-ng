@@ -1,60 +1,213 @@
-{% extends "base.html" %}
-{% from "_icons.html" import icon %}
-{% set page = 'jobs' %}
-{% set filtered = q or job_type or country or scope or location %}
-{% block title %}Job opportunities — Nurse.ng{% endblock %}
-{% block content %}
+{% extends "base.html" %} {% from "_icons.html" import icon %} {% set page =
+'jobs' %} {% set filtered = q or job_type or country or scope or location %} {%
+block title %}Job opportunities — Nurse.ng{% endblock %} {% block content %}
 <section class="jobs-page">
   <header class="jobs-heading">
-    <div><p class="eyebrow">Your next chapter</p><h1>Job opportunities</h1><p>Find a role where your skills make a difference. Explore nursing careers, fellowships and graduate programmes.</p></div>
-    {% if is_employer %}<a class="btn btn-primary" href="/jobs/new">{{ icon('plus', 17) }} Post a job</a>{% else %}<a class="jobs-hiring-link" href="/employers">Looking to hire? {{ icon('arrow', 16) }}</a>{% endif %}
+    <div>
+      <p class="eyebrow">Your next chapter</p>
+      <h1>Job opportunities</h1>
+      <p>
+        Find a role where your skills make a difference. Explore nursing
+        careers, fellowships and graduate programmes.
+      </p>
+    </div>
+    {% if is_employer %}<a class="btn btn-primary" href="/jobs/new"
+      >{{ icon('plus', 17) }} Post a job</a
+    >{% else %}<a class="jobs-hiring-link" href="/employers"
+      >Looking to hire? {{ icon('arrow', 16) }}</a
+    >{% endif %}
   </header>
-  {% if user %}<nav class="jobs-navigation" aria-label="My opportunities">
-    <a href="/jobs" aria-current="page">{{ icon('briefcase', 17) }} Explore jobs</a>
+  {% if user %}
+  <nav class="jobs-navigation" aria-label="My opportunities">
+    <a href="/jobs" aria-current="page"
+      >{{ icon('briefcase', 17) }} Explore jobs</a
+    >
     <a href="/jobs/matches">{{ icon('sparkle', 17) }} For you</a>
     <a href="/jobs/saved">{{ icon('bookmark', 17) }} Saved opportunities</a>
     <a href="/jobs/preferences">{{ icon('bell', 17) }} Opportunity alerts</a>
-  </nav>{% endif %}
-  <form id="jobs-search-form" class="jobs-search-panel" action="/jobs" method="get" role="search" data-tour="jobs">
+  </nav>
+  {% endif %}
+  <form
+    id="jobs-search-form"
+    class="jobs-search-panel"
+    action="/jobs"
+    method="get"
+    role="search"
+    data-tour="jobs"
+  >
     <label for="jobs-q">Find your next opportunity</label>
-    <div class="jobs-search-line"><div class="jobs-keyword">{{ icon('search', 20) }}<input id="jobs-q" name="q" type="search" value="{{ q }}" maxlength="120" placeholder="Job title, organisation or keyword"></div><button class="btn btn-primary" type="submit">Search jobs {{ icon('arrow', 17) }}</button></div>
-    {% if scope %}<input type="hidden" name="scope" value="{{ scope }}">{% endif %}
+    <div class="jobs-search-line">
+      <div class="jobs-keyword">
+        {{ icon('search', 20) }}<input
+          id="jobs-q"
+          name="q"
+          type="search"
+          value="{{ q }}"
+          maxlength="120"
+          placeholder="Job title, organisation or keyword"
+        />
+      </div>
+      <button class="btn btn-primary" type="submit">
+        Search jobs {{ icon('arrow', 17) }}
+      </button>
+    </div>
+    {% if scope %}<input type="hidden" name="scope" value="{{ scope }}" />{%
+    endif %}
     <p>Nigerian opportunities first, with international roles to explore.</p>
   </form>
 
   <div class="jobs-workspace">
     <aside class="jobs-filter-column" aria-label="Search filters">
       <details class="jobs-filter-panel" open>
-        <summary>{{ icon('filter', 19) }} Refine your search {{ icon('chevron-down', 17) }}</summary>
+        <summary>
+          {{ icon('filter', 19) }} Refine your search {{ icon('chevron-down',
+          17) }}
+        </summary>
         <div class="jobs-filter-fields">
-          <div class="jobs-filter-field"><label for="jobs-type">Opportunity type</label><select id="jobs-type" name="type" form="jobs-search-form"><option value="">All opportunities</option>{% for value, label in job_types %}<option value="{{ value }}"{% if job_type == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
-          <div class="jobs-filter-field"><label for="jobs-location">State or city</label><input id="jobs-location" name="location" form="jobs-search-form" value="{{ location }}" maxlength="100" placeholder="e.g. Lagos"></div>
-          <div class="jobs-filter-field"><label for="jobs-country">Country code <span class="optional">(optional)</span></label><input id="jobs-country" name="country" form="jobs-search-form" value="{{ country }}" maxlength="2" placeholder="e.g. NG" aria-describedby="jobs-country-hint"><p id="jobs-country-hint">Use a two-letter code, such as NG for Nigeria or GB for the UK.</p></div>
-          <button class="btn btn-primary" type="submit" form="jobs-search-form">Apply filters</button>
-          {% if filtered %}<a class="jobs-reset-link" href="/jobs">Clear all filters</a>{% endif %}
+          <div class="jobs-filter-field">
+            <label for="jobs-type">Opportunity type</label
+            ><select id="jobs-type" name="type" form="jobs-search-form">
+              <option value="">All opportunities</option>
+              {% for value, label in job_types %}
+              <option
+                value="{{ value }}"
+                {% if job_type == value %}
+                selected{%
+                endif
+                %}
+              >
+                {{ label }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="jobs-filter-field">
+            <label for="jobs-location">State or city</label
+            ><input
+              id="jobs-location"
+              name="location"
+              form="jobs-search-form"
+              value="{{ location }}"
+              maxlength="100"
+              placeholder="e.g. Lagos"
+            />
+          </div>
+          <div class="jobs-filter-field">
+            <label for="jobs-country"
+              >Country code <span class="optional">(optional)</span></label
+            ><input
+              id="jobs-country"
+              name="country"
+              form="jobs-search-form"
+              value="{{ country }}"
+              maxlength="2"
+              placeholder="e.g. NG"
+              aria-describedby="jobs-country-hint"
+            />
+            <p id="jobs-country-hint">
+              Use a two-letter code, such as NG for Nigeria or GB for the UK.
+            </p>
+          </div>
+          <button class="btn btn-primary" type="submit" form="jobs-search-form">
+            Apply filters
+          </button>
+          {% if filtered %}<a class="jobs-reset-link" href="/jobs"
+            >Clear all filters</a
+          >{% endif %}
         </div>
       </details>
-      <div class="jobs-alert-card"><span class="jobs-support-icon">{{ icon('bell', 22) }}</span><h2>Let opportunities come to you</h2><p>Choose your interests and get notified about new matches.</p><a href="{{ '/jobs/preferences' if user else '/auth/login' }}">{{ 'Set up opportunity alerts' if user else 'Sign in to set up alerts' }} {{ icon('arrow', 16) }}</a></div>
+      <div class="jobs-alert-card">
+        <span class="jobs-support-icon">{{ icon('bell', 22) }}</span>
+        <h2>Let opportunities come to you</h2>
+        <p>Choose your interests and get notified about new matches.</p>
+        <a href="{{ '/jobs/preferences' if user else '/auth/login' }}"
+          >{{ 'Set up opportunity alerts' if user else 'Sign in to set up alerts' }} {{ icon('arrow', 16) }}</a
+        >
+      </div>
     </aside>
     <div class="jobs-results">
       <nav class="jobs-region-tabs" aria-label="Opportunity location">
-        <a href="/jobs?location={{ location|urlencode }}&amp;type={{ job_type }}&amp;q={{ q|urlencode }}"{% if not country and not scope %} aria-current="page"{% endif %}>All locations</a>
-        <a href="/jobs?location={{ location|urlencode }}&amp;country=NG&amp;type={{ job_type }}&amp;q={{ q|urlencode }}"{% if country == 'NG' and not scope %} aria-current="page"{% endif %}>Nigeria only</a>
-        <a href="/jobs?location={{ location|urlencode }}&amp;scope=international&amp;type={{ job_type }}&amp;q={{ q|urlencode }}"{% if scope == 'international' %} aria-current="page"{% endif %}>International</a>
+        <a
+          href="/jobs?location={{ location|urlencode }}&amp;type={{ job_type }}&amp;q={{ q|urlencode }}"
+          {%
+          if
+          not
+          country
+          and
+          not
+          scope
+          %}
+          aria-current="page"
+          {%
+          endif
+          %}
+          >All locations</a
+        >
+        <a
+          href="/jobs?location={{ location|urlencode }}&amp;country=NG&amp;type={{ job_type }}&amp;q={{ q|urlencode }}"
+          {% if country == 'NG' and not scope %}
+          aria-current="page"
+          {%
+          endif
+          %}
+          >Nigeria only</a
+        >
+        <a
+          href="/jobs?location={{ location|urlencode }}&amp;scope=international&amp;type={{ job_type }}&amp;q={{ q|urlencode }}"
+          {% if scope == 'international' %}
+          aria-current="page"
+          {%
+          endif
+          %}
+          >International</a
+        >
       </nav>
-      <div class="jobs-results-heading"><h2>{{ jobs|length }} opportunit{{ 'y' if jobs|length == 1 else 'ies' }}{% if jobs|length >= 50 %} shown{% endif %}</h2><span>{{ 'International roles' if scope == 'international' else ('Nigeria' if country == 'NG' else 'Explore your options') }}</span></div>
-      {% if filtered %}<div class="jobs-active-filters"><p>{% if q %}Results for <strong>“{{ q }}”</strong>{% else %}Filtered results{% endif %}{% if location %} · {{ location }}{% endif %}{% if country %} · {{ country }}{% endif %}{% for value, label in job_types if value == job_type %} · {{ label }}{% endfor %}</p><a href="/jobs">Clear filters</a></div>{% endif %}
+      <div class="jobs-results-heading">
+        <h2>
+          {{ jobs|length }} opportunit{{ 'y' if jobs|length == 1 else 'ies' }}{%
+          if jobs|length >= 50 %} shown{% endif %}
+        </h2>
+        <span
+          >{{ 'International roles' if scope == 'international' else ('Nigeria'
+          if country == 'NG' else 'Explore your options') }}</span
+        >
+      </div>
+      {% if filtered %}
+      <div class="jobs-active-filters">
+        <p>
+          {% if q %}Results for <strong>“{{ q }}”</strong>{% else %}Filtered
+          results{% endif %}{% if location %} · {{ location }}{% endif %}{% if
+          country %} · {{ country }}{% endif %}{% for value, label in job_types
+          if value == job_type %} · {{ label }}{% endfor %}
+        </p>
+        <a href="/jobs">Clear filters</a>
+      </div>
+      {% endif %}
       <div class="job-list jobs-list">
         {% for job in jobs %}{% include "jobs/_card.html" %}{% else %}
-        <div class="jobs-empty"><span class="jobs-support-icon">{{ icon('search', 28) }}</span><h2>{{ 'No opportunities found' if filtered else 'Your next opportunity is on its way' }}</h2><p>{{ 'Try a broader keyword, another location or a different opportunity type.' if filtered else 'New roles appear here from employer submissions and approved recruitment sources.' }}</p><a class="btn btn-secondary" href="{{ '/jobs' if filtered else ('/jobs/preferences' if user else '/auth/login') }}">{{ 'Clear filters' if filtered else 'Set up opportunity alerts' }}</a></div>
+        <div class="jobs-empty">
+          <span class="jobs-support-icon">{{ icon('search', 28) }}</span>
+          <h2>
+            {{ 'No opportunities found' if filtered else 'Your next opportunity is on its way' }}
+          </h2>
+          <p>
+            {{ 'Try a broader keyword, another location or a different opportunity type.' if filtered else 'New roles appear here from employer submissions and approved recruitment sources.' }}
+          </p>
+          <a
+            class="btn btn-secondary"
+            href="{{ '/jobs' if filtered else ('/jobs/preferences' if user else '/auth/login') }}"
+            >{{ 'Clear filters' if filtered else 'Set up opportunity alerts'
+            }}</a
+          >
+        </div>
         {% endfor %}
       </div>
     </div>
   </div>
 </section>
 <script>
-  if (window.matchMedia('(max-width: 900px)').matches) {
-    document.querySelector('.jobs-filter-panel').removeAttribute('open');
+  if (window.matchMedia("(max-width: 900px)").matches) {
+    document.querySelector(".jobs-filter-panel").removeAttribute("open");
   }
 </script>
 {% endblock %}

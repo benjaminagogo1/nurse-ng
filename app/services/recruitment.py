@@ -294,18 +294,76 @@ def review_source(
     expires_at: datetime | None = None,
     licensing_applicability: str = "required",
     reuse: dict | None = None,
+    index_scope: str = "",
 ) -> None:
     require_operator(db, actor)
     note = clean(note, "Decision note", 3000)
     values: dict = {"revision": revision + 1}
     details: dict = {"note": note, "previous_status": source.verification_status}
-    if action == "approve":
+    if action == "approve_index":
+        from app.services.recruitment_activation import COUNTRY_TIMEZONES
+        from app.services.recruitment_indexing import configuration
+
+        if not expires_at or not now() < utc(expires_at) <= now() + timedelta(days=366):
+            raise RecruitmentError("Choose a future review expiry within the next year.")
+        try:
+            collection_url, scope = configuration(source, scope=index_scope)
+        except ValueError as exc:
+            raise RecruitmentError(str(exc)) from None
+        evidence = {
+            "mode": "factual_index",
+            "identity_basis": "staff_selection",
+            "staff_id": str(actor.id),
+            "organisation": source.organization.name,
+            "country": source.organization.country_code,
+            "requested_url": source.original_url,
+            "collection_url": collection_url,
+            "scope": scope,
+            "timezone": COUNTRY_TIMEZONES.get(source.organization.country_code, "UTC"),
+            "employer_fallback_allowed": source.organization.category != "unconfirmed",
+        }
+        values.update(
+            approval_mode="staff",
+            verification_status="approved",
+            permission_status="limited",
+            collection_method="html",
+            collection_adapter="factual_index",
+            reuse_basis="factual_index",
+            reuse_url_prefix=scope,
+            vacancy_url_prefix=scope,
+            deadline_timezone=evidence["timezone"],
+            allow_collection=True,
+            allow_snapshot_retention=False,
+            allow_republication=False,
+            automation_status="monitoring",
+            approval_expires_at=utc(expires_at),
+            next_check_at=now(),
+            access_notes="Staff approved factual listings with original announcement links.",
+            activation_review={
+                "status": "staff_approved",
+                "checked_at": now().isoformat(),
+                "evidence": evidence,
+                "note": note,
+            },
+        )
+        details.update(
+            evidence=evidence,
+            previous_assessment=source.activation_review,
+            expires_at=utc(expires_at).isoformat(),
+            mode="factual_index",
+            notice="Staff source selection; independent and licensing checks remain separate.",
+        )
+    elif action == "approve":
         if not source.organization.country_code or source.organization.category == "unconfirmed":
             raise RecruitmentError(
                 "Confirm the organisation's country and category before approval."
             )
         if method not in METHODS or method == "unconfirmed":
-            raise RecruitmentError("Select the permitted collection method.")
+            raise RecruitmentError(
+                "Choose an option in 'Permitted collection method'. "
+                "For a recruitment webpage, select 'Permitted website collection' "
+                "if your evidence allows it."
+            )
         if not expires_at or not now() < utc(expires_at) <= now() + timedelta(days=366):
             raise RecruitmentError("Choose a future review expiry within the next year.")
         if licensing_applicability not in {"required", "not_applicable"}:

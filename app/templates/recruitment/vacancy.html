@@ -8,6 +8,7 @@
   <p>Source: <a href="/recruitment/sources/{{ record.source_id }}">{{ record.source.organization.name }}</a></p>
   {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
   {% if record.issues %}<ul>{% for issue in record.issues %}<li>{{ issue }}</li>{% endfor %}</ul>{% endif %}
+  {% if record.state == 'duplicate' and record.normalized.get('_duplicate_of') %}<p>This announcement is also recorded from another source. <a href="/recruitment/vacancies/{{ record.normalized['_duplicate_of'] }}">Open the record to review</a>. Both original source records are retained.</p>{% endif %}
   <p class="field-hint">Last observed {{ record.last_seen_at.strftime('%Y-%m-%d %H:%M') }} UTC. A published processing state does not guarantee current availability: source approval, health, freshness and deadlines also govern public visibility.</p>
   {% if record.job_id %}<p><a href="/jobs/{{ record.job_id }}">View public vacancy</a> (may be unavailable when its source is no longer approved).</p>{% endif %}
   <p><a href="/recruitment/vacancies/{{ record.id }}/original">Download original source snapshot as text</a></p>

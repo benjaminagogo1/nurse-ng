@@ -166,7 +166,6 @@ Remaining work:
 3. Continue expanding Nigerian opportunity coverage and improving experience quality.
 4. Use a supported pilot to validate the full journey and decide which improvements matter most.
 
-
 This sequence is a recommendation, not a claim that the remaining items are completed.
 Some older build-plan tracker entries predate the account and Reels work; update their
 status against implementation evidence rather than treating completed features as missing.

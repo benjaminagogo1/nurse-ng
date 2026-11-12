@@ -28,18 +28,18 @@ The tour respects light/dark themes, text size, contrast and reduced motion.
 
 ## Available steps
 
-| Step | Page and highlighted control | Accounts |
-| --- | --- | --- |
-| Dashboard | /auth/dashboard — activity shortcuts | All |
-| Professional profile | /profile/edit — display-name field | All |
-| Job opportunities | /jobs — search and location controls | All |
-| Networking | /nurses — published-profile search | All |
-| Reels | /reels — heading and creation controls | All |
-| Learning | /learning — first learning-resource card | All |
-| Notifications | /notifications — heading and preferences | All |
-| Messages | /messages — connections/conversation list | All |
-| Employer tools | /employers — posting and candidate controls | Employer |
-| User analytics | /staff/users — overview and refresh controls | Staff |
+| Step                 | Page and highlighted control                 | Accounts |
+| -------------------- | -------------------------------------------- | -------- |
+| Dashboard            | /auth/dashboard — activity shortcuts         | All      |
+| Professional profile | /profile/edit — display-name field           | All      |
+| Job opportunities    | /jobs — search and location controls         | All      |
+| Networking           | /nurses — published-profile search           | All      |
+| Reels                | /reels — heading and creation controls       | All      |
+| Learning             | /learning — first learning-resource card     | All      |
+| Notifications        | /notifications — heading and preferences     | All      |
+| Messages             | /messages — connections/conversation list    | All      |
+| Employer tools       | /employers — posting and candidate controls  | Employer |
+| User analytics       | /staff/users — overview and refresh controls | Staff    |
 
 Nurse and partner accounts have eight steps. Employer accounts have nine.
 Staff access is independent of account type: a staff nurse has nine, and a staff
@@ -107,13 +107,13 @@ Role eligibility is reevaluated on requests.
 Back up the existing database, then run the additive migration before starting
 application workers with the new code:
 
-~~~sh
+```sh
 venv/bin/python -m alembic upgrade head
 venv/bin/python -m alembic check
 venv/bin/python -m pytest tests/test_tours.py tests/test_tour_migration.py
 node --check app/static/js/tour.js
 venv/bin/python tests/browser/tour.py
-~~~
+```
 
 The browser script uses a temporary migrated SQLite database, test accounts,
 an isolated Chrome profile and temporary localhost ports. It saves screenshots

@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import select
 
 from app.models.profile import NurseProfile, ProfileStatus
-from tests.helpers import csrf_from, register_and_sign_in
+from tests.helpers import csrf_from, has_element, register_and_sign_in
 
 PROFILE = {
     "display_name": "Ada Obi",
@@ -67,7 +67,7 @@ def test_profile_setup_returns_to_verification_without_affecting_ordinary_edits(
 ):
     register_and_sign_in(client)
     page = client.get("/profile/edit?return_to=verification")
-    assert 'name="return_to" value="verification"' in page.text
+    assert has_element(page, 'input', name='return_to', value='verification')
     assert "Save and continue to verification" in page.text
     # Opening setup must not change the destination of an ordinary edit in another tab.
     assert 'name="return_to"' not in client.get("/profile/edit").text
@@ -95,7 +95,7 @@ def test_profile_validation_keeps_verification_continuation_and_entered_values(c
     register_and_sign_in(client)
     response = save_profile(client, display_name="", return_to="verification")
     assert response.status_code == 400
-    assert 'name="return_to" value="verification"' in response.text
+    assert has_element(response, 'input', name='return_to', value='verification')
     assert 'value="Lagos"' in response.text
     assert "Save and continue to verification" in response.text
     response = save_profile(client, token=csrf_from(response), return_to="verification")

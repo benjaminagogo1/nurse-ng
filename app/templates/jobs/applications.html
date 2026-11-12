@@ -1,33 +1,88 @@
-{% extends "base.html" %}
-{% from "_icons.html" import icon %}
-{% from "_empty_state.html" import empty_state %}
-{% block title %}Applications — Nurse.ng{% endblock %}
-{% block content %}
+{% extends "base.html" %} {% from "_icons.html" import icon %} {% from
+"_empty_state.html" import empty_state %} {% block title %}Applications —
+Nurse.ng{% endblock %} {% block content %}
 <section class="jb">
-  <p class="eyebrow">Your next step</p><div class="page-heading-row"><div><h1>{% if is_employer %}Candidate applications{% else %}My applications{% endif %}</h1><p class="lede">{% if is_employer %}Review applications and keep candidates updated.{% else %}Keep track of the roles you have applied for and their status.{% endif %}</p></div>{% if applications or is_employer %}<a class="btn btn-secondary btn-sm" href="/jobs">Browse jobs {{ icon('arrow', 16) }}</a>{% endif %}</div>
+  <p class="eyebrow">Your next step</p>
+  <div class="page-heading-row">
+    <div>
+      <h1>
+        {% if is_employer %}Candidate applications{% else %}My applications{%
+        endif %}
+      </h1>
+      <p class="lede">
+        {% if is_employer %}Review applications and keep candidates updated.{%
+        else %}Keep track of the roles you have applied for and their status.{%
+        endif %}
+      </p>
+    </div>
+    {% if applications or is_employer %}<a
+      class="btn btn-secondary btn-sm"
+      href="/jobs"
+      >Browse jobs {{ icon('arrow', 16) }}</a
+    >{% endif %}
+  </div>
   <div class="application-list">
     {% for application in applications %}
     <article class="application-card">
-      <div class="db-card-head"><a class="job-title" href="/jobs/{{ application.job.id }}">{{ application.job.title }}</a><span class="status-badge status-{{ application.status }}">{{ status_labels.get(application.status, application.status) }}</span></div>
-      <p class="job-org">{{ application.job.organization }} · Applied {{ application.created_at.strftime('%d %b %Y') }}</p>
+      <div class="db-card-head">
+        <a class="job-title" href="/jobs/{{ application.job.id }}"
+          >{{ application.job.title }}</a
+        ><span class="status-badge status-{{ application.status }}"
+          >{{ status_labels.get(application.status, application.status) }}</span
+        >
+      </div>
+      <p class="job-org">
+        {{ application.job.organization }} · Applied {{
+        application.created_at.strftime('%d %b %Y') }}
+      </p>
       {% if is_employer %}
-      <div class="application-contact"><strong>{{ application.candidate_name }}</strong><p>{{ application.candidate_phone }}{% if application.candidate_email %} · {{ application.candidate_email }}{% endif %}</p></div>
-      {% endif %}
-      {% if application.cover_note %}<p class="application-note">{{ application.cover_note }}</p>{% endif %}
-      {% if application.status != 'withdrawn' %}
-      <form method="post" action="/applications/{{ application.id }}/status" class="application-actions">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="application-contact">
+        <strong>{{ application.candidate_name }}</strong>
+        <p>
+          {{ application.candidate_phone }}{% if application.candidate_email %}
+          · {{ application.candidate_email }}{% endif %}
+        </p>
+      </div>
+      {% endif %} {% if application.cover_note %}
+      <p class="application-note">{{ application.cover_note }}</p>
+      {% endif %} {% if application.status != 'withdrawn' %}
+      <form
+        method="post"
+        action="/applications/{{ application.id }}/status"
+        class="application-actions"
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         {% if is_employer %}
-        <label class="sr-only" for="status-{{ application.id }}">Application status for {{ application.candidate_name }}</label><select id="status-{{ application.id }}" name="new_status">{% for value in ['reviewing', 'shortlisted', 'rejected'] %}<option value="{{ value }}"{% if application.status == value %} selected{% endif %}>{{ status_labels[value] }}</option>{% endfor %}</select><button type="submit" class="btn btn-secondary btn-sm">Update status</button>
+        <label class="sr-only" for="status-{{ application.id }}"
+          >Application status for {{ application.candidate_name }}</label
+        ><select id="status-{{ application.id }}" name="new_status">
+          {% for value in ['reviewing', 'shortlisted', 'rejected'] %}
+          <option
+            value="{{ value }}"
+            {% if application.status == value %}
+            selected{%
+            endif
+            %}
+          >
+            {{ status_labels[value] }}
+          </option>
+          {% endfor %}</select
+        ><button type="submit" class="btn btn-secondary btn-sm">
+          Update status
+        </button>
         {% else %}
-        <input type="hidden" name="new_status" value="withdrawn"><button type="submit" class="btn btn-ghost btn-sm">Withdraw application</button>
+        <input type="hidden" name="new_status" value="withdrawn" /><button
+          type="submit"
+          class="btn btn-ghost btn-sm"
+        >
+          Withdraw application
+        </button>
         {% endif %}
       </form>
       {% endif %}
     </article>
-    {% else %}
-    {{ empty_state('No applications yet', 'Publish a role to start receiving applications from nurses.' if is_employer else 'Browse open roles and apply from a job page. Applications submitted on Nurse.ng will appear here.', '/jobs/new' if is_employer else '/jobs', 'Post a job' if is_employer else 'Browse jobs', 'file', primary=true) }}
-    {% endfor %}
+    {% else %} {{ empty_state('No applications yet', 'Publish a role to start receiving applications from nurses.' if is_employer else 'Browse open roles and apply from a job page. Applications submitted on Nurse.ng will appear here.', '/jobs/new' if is_employer else '/jobs', 'Post a job' if is_employer
+    else 'Browse jobs', 'file', primary=true) }} {% endfor %}
   </div>
 </section>
 {% endblock %}

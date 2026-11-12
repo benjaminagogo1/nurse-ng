@@ -327,7 +327,7 @@ def test_international_salary_country_and_original_application_display(db_sessio
     )
     collect(db_session, source, [raw])
     job = db_session.scalar(select(Job))
-    assert job_card(job)["salary"] == "NZD 70,000 – 85,000/year"
+    assert job_card(job)["salary"] == "NZD 70,000 – 85,000 per year"
     assert len(list_open_jobs(db_session, country_code="NZ")) == 1
     assert list_open_jobs(db_session, country_code="NG") == []
     detail = client.get(f"/jobs/{job.id}")
@@ -373,11 +373,11 @@ def test_reversed_salary_range_is_held_with_original_evidence(db_session, source
 @pytest.mark.parametrize(
     "values,expected",
     [
-        ({"minValue": "9.50", "maxValue": "10.00"}, "NGN 9.50 – 10.00/month"),
-        ({"minValue": 0, "maxValue": 0}, "NGN 0 – 0/month"),
-        ({"minValue": 10000}, "NGN from 10,000/month"),
-        ({"maxValue": 100000}, "NGN up to 100,000/month"),
-        ({"value": 50000}, "NGN 50,000/month"),
+        ({"minValue": "9.50", "maxValue": "10.00"}, "NGN 9.50 – 10.00 per month"),
+        ({"minValue": 0, "maxValue": 0}, "NGN 0 – 0 per month"),
+        ({"minValue": 10000}, "NGN from 10,000 per month"),
+        ({"maxValue": 100000}, "NGN up to 100,000 per month"),
+        ({"value": 50000}, "NGN 50,000 per month"),
     ],
 )
 def test_valid_salary_amounts_still_publish(db_session, source, values, expected):

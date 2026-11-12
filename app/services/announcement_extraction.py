@@ -8,6 +8,7 @@ from urllib.parse import urljoin, urlsplit
 from app.services.opportunities import relevant_opportunity
 from app.services.recruitment_fetch import in_scope, public_url, url_key
 from app.services.vacancy_extraction import normalize
+from app.services.vacancy_quality import announcement_intent, non_vacancy_reason
 
 
 class AnnouncementHTML(HTMLParser):
@@ -112,6 +113,8 @@ def extract_announcements(body: bytes, url: str) -> list[dict]:
     if len(headings) != 1:
         return []
     title, text = headings[0], parsed.text
+    if non_vacancy_reason(title, url) or not announcement_intent(title, text, url):
+        return []
     if not relevant_opportunity({"title": title, "country": "NG"}):
         return []
     if not re.search(r"\b(apply|applications?|recruit(?:ing|ment)?|vacanc(?:y|ies))\b", text, re.I):
@@ -161,12 +164,23 @@ def announcement_links(body: bytes, url: str, prefix: str, *, include_channels=F
         all_links.feed(body.decode("utf-8", errors="replace"))
         links = all_links.links
     for href, label in links:
-        if not relevant_opportunity({"title": label, "country": "NG"}) and not (
-            include_channels and CAREER_WORDS.search(label + " " + href.replace("-", " "))
+        target = urljoin(url, href)
+        excluded = non_vacancy_reason(label, target)
+        # Category pages may lead to real adverts; admissions and service links do not.
+        if excluded and (not include_channels or not excluded.startswith("category:")):
+            continue
+        individual = relevant_opportunity({"title": label, "country": "NG"}) and (
+            announcement_intent(label, url=target)
+        )
+        if not individual and not (
+            include_channels and (
+                excluded.startswith("category:")
+                or CAREER_WORDS.search(label + " " + href.replace("-", " "))
+            )
         ):
             continue
         try:
-            target = public_url(urljoin(url, href))
+            target = public_url(target)
         except ValueError:
             continue
         if (
@@ -179,5 +193,7 @@ def announcement_links(body: bytes, url: str, prefix: str, *, include_channels=F
             continue
         seen.add(url_key(target))
         result.append(target)
-        priority[target] = 0 if relevant_opportunity({"title": label, "country": "NG"}) else 1
+        priority[target] = (
+            2 if excluded else 0 if individual else 1
+        )
     return sorted(result, key=priority.get) if include_channels else result

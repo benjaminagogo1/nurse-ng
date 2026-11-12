@@ -1,8 +1,27 @@
 """Shared helpers for the web tests."""
 
 import re
+from html.parser import HTMLParser
 
-CSRF_RE = re.compile(r'name="csrf_token" value="([^"]+)"')
+CSRF_RE = re.compile(r'name="csrf_token"\s+value="([^"]+)"')
+
+
+def has_element(response, tag, **expected):
+    """Check rendered attributes without depending on template indentation."""
+    found = []
+
+    class Elements(HTMLParser):
+        def handle_starttag(self, name, pairs):
+            attributes = dict(pairs)
+            if name == tag and all(
+                (key in attributes if value is True else key not in attributes)
+                if isinstance(value, bool) else attributes.get(key) == value
+                for key, value in expected.items()
+            ):
+                found.append(attributes)
+
+    Elements().feed(response.text)
+    return bool(found)
 
 
 def csrf_from(response) -> str:

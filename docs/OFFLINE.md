@@ -30,16 +30,16 @@ library; expand a saved item to read its full details. The sync button shows
 **Reconnect to sync** while offline. Storage information and **Clear offline data**
 are under **About offline storage**.
 
-| Capability | Supported behavior |
-| --- | --- |
-| Opening the app | A neutral offline workspace after a successful service-worker installation. |
-| Own professional profile | Selected fields can be read and edited; independent changes merge, overlapping changes require review. |
-| Public profiles | Only currently public fields are downloaded. Connection requests recheck visibility when sent. |
-| Opportunities | Downloaded details and bookmarks can be read and searched. Saving/removal rechecks current state. |
-| Notifications | A bounded snapshot; refreshing removes records whose source is no longer visible. |
-| Learning | Explicit download of Nurse.ng's original application checklist. External resources require internet. |
-| Contributions | Prepared messages, internal application notes, text/link posts and text replies can be saved and queued. |
-| Reels | Explicit video/caption draft saving, reviewed publication intent, resumable upload and the existing scanning/processing checks. |
+| Capability               | Supported behavior                                                                                                              |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| Opening the app          | A neutral offline workspace after a successful service-worker installation.                                                     |
+| Own professional profile | Selected fields can be read and edited; independent changes merge, overlapping changes require review.                          |
+| Public profiles          | Only currently public fields are downloaded. Connection requests recheck visibility when sent.                                  |
+| Opportunities            | Downloaded details and bookmarks can be read and searched. Saving/removal rechecks current state.                               |
+| Notifications            | A bounded snapshot; refreshing removes records whose source is no longer visible.                                               |
+| Learning                 | Explicit download of Nurse.ng's original application checklist. External resources require internet.                            |
+| Contributions            | Prepared messages, internal application notes, text/link posts and text replies can be saved and queued.                        |
+| Reels                    | Explicit video/caption draft saving, reviewed publication intent, resumable upload and the existing scanning/processing checks. |
 
 Events, verification documents, account/security changes, staff decisions, community
 attachments and external application destinations require a connection. Offline

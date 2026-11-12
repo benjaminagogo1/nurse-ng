@@ -1,10 +1,19 @@
-{% from "_icons.html" import icon %}
-{# A single next step; compact states sit inside an already-labelled section. #}
-{% macro empty_state(title, description, href=none, label=none, symbol=none, compact=false, level=2, primary=false) -%}
+{% from "_icons.html" import icon %} {# A single next step; compact states sit
+inside an already-labelled section. #} {% macro empty_state(title, description,
+href=none, label=none, symbol=none, compact=false, level=2, primary=false) -%}
 <div class="empty-state{% if compact %} compact-empty{% endif %}">
-  {% if symbol %}<span class="empty-icon" aria-hidden="true">{{ icon(symbol, 28) }}</span>{% endif %}
-  {% if title %}{% if level == 3 %}<h3>{{ title }}</h3>{% else %}<h2>{{ title }}</h2>{% endif %}{% endif %}
+  {% if symbol %}<span class="empty-icon" aria-hidden="true"
+    >{{ icon(symbol, 28) }}</span
+  >{% endif %} {% if title %}{% if level == 3 %}
+  <h3>{{ title }}</h3>
+  {% else %}
+  <h2>{{ title }}</h2>
+  {% endif %}{% endif %}
   <p>{{ description }}</p>
-  {% if href and label %}<a class="btn btn-{{ 'primary' if primary else 'secondary' }}{% if compact %} btn-sm{% endif %}" href="{{ href }}">{{ label }} {{ icon('arrow', 16) }}</a>{% endif %}
+  {% if href and label %}<a
+    class="btn btn-{{ 'primary' if primary else 'secondary' }}{% if compact %} btn-sm{% endif %}"
+    href="{{ href }}"
+    >{{ label }} {{ icon('arrow', 16) }}</a
+  >{% endif %}
 </div>
 {%- endmacro %}

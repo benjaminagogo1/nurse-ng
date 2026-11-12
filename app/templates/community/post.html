@@ -1,120 +1,253 @@
-{% extends "base.html" %}
-{% from "_avatar.html" import avatar with context %}
-
-{% block title %}{{ title }} — Nurse.ng{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% from "_avatar.html" import avatar with context %}
+{% block title %}{{ title }} — Nurse.ng{% endblock %} {% block content %}
 <section class="community-page conversation-space">
   <a class="text-link" href="/feed">← Back to conversations</a>
   <div class="page-heading-row conversation-heading">
-    <div><p class="eyebrow">{{ post.topic.name }}</p><h1>Join the conversation</h1></div>
-    {% if user %}
-      {% set following = summaries[post.id].following %}
-      <form method="post" action="/posts/{{ post.id }}/{{ 'unfollow' if following else 'follow' }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <button class="btn btn-secondary" type="submit">{{ 'Unfollow discussion' if following else 'Follow discussion' }}</button>
-      </form>
+    <div>
+      <p class="eyebrow">{{ post.topic.name }}</p>
+      <h1>Join the conversation</h1>
+    </div>
+    {% if user %} {% set following = summaries[post.id].following %}
+    <form
+      method="post"
+      action="/posts/{{ post.id }}/{{ 'unfollow' if following else 'follow' }}"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <button class="btn btn-secondary" type="submit">
+        {{ 'Unfollow discussion' if following else 'Follow discussion' }}
+      </button>
+    </form>
     {% endif %}
   </div>
-  {% if user %}<p class="field-hint">{% if summaries[post.id].following %}You’re following this discussion. Find new replies in <a href="/feed/discussions">Following discussions</a>.{% else %}Follow this discussion to find it again and see new replies.{% endif %}</p>{% endif %}
-  {% include "community/_post_card.html" %}
-
-  {% if user and user.id != post.author_id %}
-    <details class="report-panel" id="report">
-      <summary>Report this post</summary>
-      <form method="post" action="/posts/{{ post.id }}/report" class="compact-form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <label>Reason
-          <select name="reason" required>
-            <option value="">Choose</option>
-            {% for value, label in report_reasons %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-          </select>
-        </label>
-        <label>Details <span class="optional">(required for Other)</span>
-          <textarea name="details" rows="3" maxlength="1000"></textarea>
-        </label>
-        <button type="submit" class="button-secondary">Submit report</button>
-      </form>
-    </details>
+  {% if user %}
+  <p class="field-hint">
+    {% if summaries[post.id].following %}You’re following this discussion. Find
+    new replies in <a href="/feed/discussions">Following discussions</a>.{% else
+    %}Follow this discussion to find it again and see new replies.{% endif %}
+  </p>
+  {% endif %} {% include "community/_post_card.html" %} {% if user and user.id
+  != post.author_id %}
+  <details class="report-panel" id="report">
+    <summary>Report this post</summary>
+    <form
+      method="post"
+      action="/posts/{{ post.id }}/report"
+      class="compact-form"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <label
+        >Reason
+        <select name="reason" required>
+          <option value="">Choose</option>
+          {% for value, label in report_reasons %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label
+        >Details <span class="optional">(required for Other)</span>
+        <textarea name="details" rows="3" maxlength="1000"></textarea>
+      </label>
+      <button type="submit" class="button-secondary">Submit report</button>
+    </form>
+  </details>
   {% endif %}
 
   <section class="reply-section" id="replies">
-    <h2>{{ reply_page.total_replies }} {{ 'reply' if reply_page.total_replies == 1 else 'replies' }}</h2>
+    <h2>
+      {{ reply_page.total_replies }} {{ 'reply' if reply_page.total_replies == 1
+      else 'replies' }}
+    </h2>
     {% if reply_page.first_unread_id %}
-    <p class="reply-updates"><a class="btn btn-secondary" href="{% if reply_page.first_unread_id in reply_page.unread_ids %}#reply-{{ reply_page.first_unread_id }}{% else %}/posts/{{ post.id }}/unread{% endif %}">First unread reply ↓</a></p>
-    {% endif %}
-    {% include "community/_reply_pagination.html" %}
+    <p class="reply-updates">
+      <a
+        class="btn btn-secondary"
+        href="{% if reply_page.first_unread_id in reply_page.unread_ids %}#reply-{{ reply_page.first_unread_id }}{% else %}/posts/{{ post.id }}/unread{% endif %}"
+        >First unread reply ↓</a
+      >
+    </p>
+    {% endif %} {% include "community/_reply_pagination.html" %}
     <div class="reply-list">
       {% for reply in reply_page.replies %}
-        <article class="reply-card" id="reply-{{ reply.id }}">
-          {{ avatar(reply.author, reply.author.community_name) }}
-          <p class="post-byline">
-            {% if profile_ids.get(reply.author_id) %}
-              <a href="/p/{{ profile_ids.get(reply.author_id) }}">{{ reply.author.community_name }}</a>
-            {% else %}
-              {{ reply.author.community_name or 'Nurse.ng member' }}
-            {% endif %}
-            · <time datetime="{{ reply.created_at.isoformat() }}">{{ reply.created_at.strftime('%d %b %Y, %H:%M') }} UTC</time>
-            {% if reply.author_id == post.author_id %}<span class="conversation-author">Original poster</span>{% endif %}
-            {% if reply.id in reply_page.unread_ids %}<span class="conversation-update">New reply</span>{% endif %}
-          </p>
-          {% if reply.in_reply_to_id %}
-            {% set reference = reply_references.get(reply.in_reply_to_id) %}
-            <aside class="reply-reference" aria-label="Response being answered">
-              {% if reference %}<a href="{{ reference.url }}">In reply to {{ reference.author }}</a><p>{{ reference.excerpt }}</p>
-              {% else %}<p>The original response is no longer available.</p>{% endif %}
-            </aside>
+      <article class="reply-card" id="reply-{{ reply.id }}">
+        {{ avatar(reply.author, reply.author.community_name) }}
+        <p class="post-byline">
+          {% if profile_ids.get(reply.author_id) %}
+          <a href="/p/{{ profile_ids.get(reply.author_id) }}"
+            >{{ reply.author.community_name }}</a
+          >
+          {% else %} {{ reply.author.community_name or 'Nurse.ng member' }} {%
+          endif %} ·
+          <time datetime="{{ reply.created_at.isoformat() }}"
+            >{{ reply.created_at.strftime('%d %b %Y, %H:%M') }} UTC</time
+          >
+          {% if reply.author_id == post.author_id %}<span
+            class="conversation-author"
+            >Original poster</span
+          >{% endif %} {% if reply.id in reply_page.unread_ids %}<span
+            class="conversation-update"
+            >New reply</span
+          >{% endif %}
+        </p>
+        {% if reply.in_reply_to_id %} {% set reference =
+        reply_references.get(reply.in_reply_to_id) %}
+        <aside class="reply-reference" aria-label="Response being answered">
+          {% if reference %}<a href="{{ reference.url }}"
+            >In reply to {{ reference.author }}</a
+          >
+          <p>{{ reference.excerpt }}</p>
+          {% else %}
+          <p>The original response is no longer available.</p>
           {% endif %}
-          <div class="post-body">{{ reply.body }}</div>
-          <div class="reply-actions">
-            {% if user %}<a class="text-link" href="/posts/{{ post.id }}?page={{ reply_page.number }}&amp;reply_to={{ reply.id }}#reply-form" data-reply-to="{{ reply.id }}" aria-label="Reply to {{ reply.author.community_name or 'Nurse.ng member' }}">Reply</a>{% endif %}
-            <a class="text-link reply-permalink" href="/posts/{{ post.id }}/replies/{{ reply.id }}">Link to this reply</a>
-          </div>
-          {% if user and user.id != reply.author_id %}
-            <details class="report-panel compact">
-              <summary>Report reply</summary>
-              <form method="post" action="/replies/{{ reply.id }}/report" class="compact-form">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                <select name="reason" required aria-label="Report reason">
-                  <option value="">Choose a reason</option>
-                  {% for value, label in report_reasons %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-                </select>
-                <label>Details <span class="optional">(required for Other)</span><textarea name="details" rows="2" maxlength="1000"></textarea></label>
-                <button type="submit" class="button-secondary">Submit report</button>
-              </form>
-            </details>
-          {% endif %}
-        </article>
-      {% else %}<p class="field-hint">No replies yet. Have some information or a similar experience? Add it below.</p>{% endfor %}
+        </aside>
+        {% endif %}
+        <div class="post-body">{{ reply.body }}</div>
+        <div class="reply-actions">
+          {% if user %}<a
+            class="text-link"
+            href="/posts/{{ post.id }}?page={{ reply_page.number }}&amp;reply_to={{ reply.id }}#reply-form"
+            data-reply-to="{{ reply.id }}"
+            aria-label="Reply to {{ reply.author.community_name or 'Nurse.ng member' }}"
+            >Reply</a
+          >{% endif %}
+          <a
+            class="text-link reply-permalink"
+            href="/posts/{{ post.id }}/replies/{{ reply.id }}"
+            >Link to this reply</a
+          >
+        </div>
+        {% if user and user.id != reply.author_id %}
+        <details class="report-panel compact">
+          <summary>Report reply</summary>
+          <form
+            method="post"
+            action="/replies/{{ reply.id }}/report"
+            class="compact-form"
+          >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <select name="reason" required aria-label="Report reason">
+              <option value="">Choose a reason</option>
+              {% for value, label in report_reasons %}
+              <option value="{{ value }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+            <label
+              >Details <span class="optional">(required for Other)</span
+              ><textarea name="details" rows="2" maxlength="1000"></textarea>
+            </label>
+            <button type="submit" class="button-secondary">
+              Submit report
+            </button>
+          </form>
+        </details>
+        {% endif %}
+      </article>
+      {% else %}
+      <p class="field-hint">
+        No replies yet. Have some information or a similar experience? Add it
+        below.
+      </p>
+      {% endfor %}
     </div>
     {% include "community/_reply_pagination.html" %}
     <div class="conversation-reply-form" id="reply-form">
       {% if user %}
       <h2>Add your reply</h2>
-      {% if reply_error %}<p class="form-error" role="alert">{{ reply_error }}</p>{% endif %}
-      <form method="post" action="/posts/{{ post.id }}/replies" class="stacked-form" data-community-draft="reply:{{ post.id }}" data-draft-error="{{ 'true' if reply_error else 'false' }}" data-reply-target-explicit="{{ 'true' if reply_target_explicit else 'false' }}" data-reply-context-base="/posts/{{ post.id }}/reply-context/">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      {% if reply_error %}
+      <p class="form-error" role="alert">{{ reply_error }}</p>
+      {% endif %}
+      <form
+        method="post"
+        action="/posts/{{ post.id }}/replies"
+        class="stacked-form"
+        data-community-draft="reply:{{ post.id }}"
+        data-draft-error="{{ 'true' if reply_error else 'false' }}"
+        data-reply-target-explicit="{{ 'true' if reply_target_explicit else 'false' }}"
+        data-reply-context-base="/posts/{{ post.id }}/reply-context/"
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         {% include "community/_draft_controls.html" %}
-        <input type="hidden" name="page" value="{{ reply_page.number }}">
-        <input type="hidden" name="in_reply_to_id" value="{{ reply_target_id }}">
-        <div class="reply-reference reply-context-picker" data-reply-context {% if not reply_target_id %}hidden{% endif %}>
+        <input type="hidden" name="page" value="{{ reply_page.number }}" />
+        <input
+          type="hidden"
+          name="in_reply_to_id"
+          value="{{ reply_target_id }}"
+        />
+        <div
+          class="reply-reference reply-context-picker"
+          data-reply-context
+          {%
+          if
+          not
+          reply_target_id
+          %}hidden{%
+          endif
+          %}
+        >
           <div data-reply-context-content role="status" aria-live="polite">
-            {% if reply_target %}<a href="{{ reply_target.url }}">Replying to {{ reply_target.author }}</a><p>{{ reply_target.excerpt }}</p>
-            {% elif reply_target_id %}<p>The selected response is no longer available. Choose another response or reply to the conversation instead.</p>{% endif %}
+            {% if reply_target %}<a href="{{ reply_target.url }}"
+              >Replying to {{ reply_target.author }}</a
+            >
+            <p>{{ reply_target.excerpt }}</p>
+            {% elif reply_target_id %}
+            <p>
+              The selected response is no longer available. Choose another
+              response or reply to the conversation instead.
+            </p>
+            {% endif %}
           </div>
-          <a class="text-link" href="/posts/{{ post.id }}?page={{ reply_page.number }}&amp;reply_to=#reply-form" data-clear-reply-target>Reply to conversation instead</a>
+          <a
+            class="text-link"
+            href="/posts/{{ post.id }}?page={{ reply_page.number }}&amp;reply_to=#reply-form"
+            data-clear-reply-target
+            >Reply to conversation instead</a
+          >
         </div>
         {% if not user.community_name %}
         <label for="reply-name">Your public community name</label>
-        <input id="reply-name" name="community_name" maxlength="80" minlength="2" required value="{{ reply_name or '' }}" aria-describedby="reply-name-hint">
-        <p class="field-hint" id="reply-name-hint">This name appears with your reply and stays fixed after your first contribution. Your private profile stays private.</p>
-        {% else %}<p class="field-hint">Replying as <strong>{{ user.community_name }}</strong></p>{% endif %}
+        <input
+          id="reply-name"
+          name="community_name"
+          maxlength="80"
+          minlength="2"
+          required
+          value="{{ reply_name or '' }}"
+          aria-describedby="reply-name-hint"
+        />
+        <p class="field-hint" id="reply-name-hint">
+          This name appears with your reply and stays fixed after your first
+          contribution. Your private profile stays private.
+        </p>
+        {% else %}
+        <p class="field-hint">
+          Replying as <strong>{{ user.community_name }}</strong>
+        </p>
+        {% endif %}
         <label for="reply-body">Your reply</label>
-        <textarea id="reply-body" name="body" rows="4" maxlength="2000" required placeholder="Share what you know, ask a follow-up question, or offer some help." aria-describedby="reply-hint">{{ reply_body or '' }}</textarea>
-        <p class="field-hint" id="reply-hint">Replies are public. A source or date can help others judge whether information is current.</p>
+        <textarea
+          id="reply-body"
+          name="body"
+          rows="4"
+          maxlength="2000"
+          required
+          placeholder="Share what you know, ask a follow-up question, or offer some help."
+          aria-describedby="reply-hint"
+        >
+{{ reply_body or '' }}</textarea>
+        <p class="field-hint" id="reply-hint">
+          Replies are public. A source or date can help others judge whether
+          information is current.
+        </p>
         <button type="submit">Post reply</button>
       </form>
-      {% else %}<h2>Have something to add?</h2><p><a href="/auth/login">Sign in</a> or <a href="/auth/register">create an account</a> to reply and follow this discussion.</p>{% endif %}
+      {% else %}
+      <h2>Have something to add?</h2>
+      <p>
+        <a href="/auth/login">Sign in</a> or
+        <a href="/auth/register">create an account</a> to reply and follow this
+        discussion.
+      </p>
+      {% endif %}
     </div>
   </section>
 </section>

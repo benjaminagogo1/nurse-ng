@@ -63,16 +63,16 @@ These checks require actual devices and assistive technologies. Record tester,
 date, app version/commit, device model, OS/browser version, assistive technology,
 connection conditions, result, artifact and follow-up issue for every row.
 
-| Journey | Android Chrome + TalkBack | iPhone Safari + VoiceOver | Keyboard + 200% text |
-| --- | --- | --- | --- |
-| Register, phone sign-in, Google/LinkedIn sign-in, sign-out | Pending | Pending | Local checks only |
-| Recover password, verify email, upload photo, change settings | Pending | Pending | Local checks only |
-| Complete onboarding, find a member, edit/share profile | Pending | Pending | Local checks only |
-| Find/save opportunity, apply, employer updates status | Pending | Pending | Local checks only |
-| Publish/reply/report, follow/connect, send/retry message | Pending | Pending | Local checks only |
-| Upload/process/play Reel, captions, data saver, report | Pending | Pending | Earlier local checks only |
-| Find event, RSVP/cancel, download/open calendar | Pending | Pending | Local checks only |
-| Staff document review, moderation, source administration | Pending | Pending | Local checks only |
+| Journey                                                       | Android Chrome + TalkBack | iPhone Safari + VoiceOver | Keyboard + 200% text      |
+| ------------------------------------------------------------- | ------------------------- | ------------------------- | ------------------------- |
+| Register, phone sign-in, Google/LinkedIn sign-in, sign-out    | Pending                   | Pending                   | Local checks only         |
+| Recover password, verify email, upload photo, change settings | Pending                   | Pending                   | Local checks only         |
+| Complete onboarding, find a member, edit/share profile        | Pending                   | Pending                   | Local checks only         |
+| Find/save opportunity, apply, employer updates status         | Pending                   | Pending                   | Local checks only         |
+| Publish/reply/report, follow/connect, send/retry message      | Pending                   | Pending                   | Local checks only         |
+| Upload/process/play Reel, captions, data saver, report        | Pending                   | Pending                   | Earlier local checks only |
+| Find event, RSVP/cancel, download/open calendar               | Pending                   | Pending                   | Local checks only         |
+| Staff document review, moderation, source administration      | Pending                   | Pending                   | Local checks only         |
 
 For each journey:
 

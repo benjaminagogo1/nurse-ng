@@ -75,6 +75,20 @@ Use the half-circle **Display and accessibility** button in the header (also ava
 
 Recruitment-source discovery and staff review are now implemented. Open `/recruitment` with a staff account to manage pending sources, evidence, approvals and discovery schedules. ROR finds Nigerian and international institutions without a supplied list of hospital URLs; general search uses configured self-hosted SearXNG instances without API keys, with optional Brave API fallback. The exact LSHSC source is retained. Configured approved HTML sources can now supply structured JobPosting vacancies to `/jobs`; exceptions go to `/recruitment/vacancies`. Sources that pass automatic evidence checks activate and configure their collectors without staff approval; uncertain cases show reasons for review. Staff decisions remain authoritative. AI remains pending. See the [capability tracker](docs/AUTOMATED_RECRUITMENT_SOURCE_DISCOVERY.md#implementation-progress--7-november-2026) and [operating instructions](docs/RECRUITMENT_SOURCE_OPERATIONS.md).
 
+Staff can also use **Approve and start vacancy collection** on a source page to
+enable factual listings and original announcement links in one step. The decision
+records staff source selection; full-description reuse remains a separate approval.
+Keep the recruitment worker running so collection, validation and publication can
+complete. See [the combined approval workflow](docs/RECRUITMENT_SOURCE_OPERATIONS.md#approve-and-start-collection--10-november-2026).
+
+Use the [worker supervisor and readiness checks](docs/WORKER_OPERATIONS.md) for
+continuous collection and Reels processing. Run `venv/bin/alembic upgrade head`
+before starting the supervisor; revision `e6480d3fb942` records worker progress.
+The recruitment dashboard links directly to pending vacancy reviews and shows
+worker health separately from historical task failures. Factual collection now
+captures explicitly stated remuneration and holds repeated announcements as one
+review; existing review queues can be reconciled with an audited cleanup command.
+
 Nigerian opportunities take priority in the jobs feed, source registry and worker queue. Coverage includes government/private health roles and Nigerian youth fellowships, internships and graduate programmes across sectors; international opportunities remain accessible. Repeat `recruitment-init` to add pending local starter sites and update the original worldwide directory schedule from daily to weekly. Source registration does not establish a current opening; structured vacancy and source evidence checks still apply.
 
 Previous verification on 7 November 2026: **298 tests pass**, plus isolated Chrome checks of source review and vacancy publication. Reuse scope is enforced before collection; reapproval requires collector reconfiguration. LSHSC remains pending.
@@ -99,12 +113,9 @@ python3.12 -m venv venv
 
 Start the development server from the repository root after configuring `.env`:
 
-
 ```bash
 ./venv/bin/python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
-
-
 
 Open <http://127.0.0.1:8000>, or <http://127.0.0.1:8000/feed> for community. Keep the terminal open; press Ctrl+C to stop. If startup reports an invalid signing key, check the `.env` setup above; without that file or explicit environment variables, the application defaults to production configuration.
 
@@ -143,7 +154,6 @@ Document-review evidence is stored under `evidence/` by default (ignored by Git)
 ```bash
 ./venv/bin/python -m app.cli set-staff +2348012345678
 ```
-
 
 Members can save opportunities, set matching interests and choose deadline reminders from the Jobs page. The notification worker generates these alerts; email remains optional. Source operators can select the ordinary-announcement collector and inspect `/recruitment/coverage`. See [Nigerian opportunity operations](docs/NIGERIAN_OPPORTUNITIES.md) for setup and live-coverage limits.
 

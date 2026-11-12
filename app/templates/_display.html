@@ -1,32 +1,94 @@
-{% from "_icons.html" import icon %}
-{% macro display_button() -%}
-<button type="button" class="icon-button display-trigger" data-display-open aria-label="Display and accessibility" aria-haspopup="dialog" aria-controls="display-preferences" title="Display and accessibility" hidden>{{ icon('appearance', 21) }}</button>
-{%- endmacro %}
-
-{% macro display_dialog() -%}
-<dialog id="display-preferences" class="display-dialog" aria-labelledby="display-title" aria-describedby="display-description">
+{% from "_icons.html" import icon %} {% macro display_button() -%}
+<button
+  type="button"
+  class="icon-button display-trigger"
+  data-display-open
+  aria-label="Display and accessibility"
+  aria-haspopup="dialog"
+  aria-controls="display-preferences"
+  title="Display and accessibility"
+  hidden
+>
+  {{ icon('appearance', 21) }}
+</button>
+{%- endmacro %} {% macro display_dialog() -%}
+<dialog
+  id="display-preferences"
+  class="display-dialog"
+  aria-labelledby="display-title"
+  aria-describedby="display-description"
+>
   <div class="display-heading">
-    <div><p class="eyebrow">Make yourself comfortable</p><h2 id="display-title">Display &amp; accessibility</h2></div>
-    <button type="button" class="icon-button" data-display-close aria-label="Close display preferences" autofocus>{{ icon('close', 22) }}</button>
+    <div>
+      <p class="eyebrow">Make yourself comfortable</p>
+      <h2 id="display-title">Display &amp; accessibility</h2>
+    </div>
+    <button
+      type="button"
+      class="icon-button"
+      data-display-close
+      aria-label="Close display preferences"
+      autofocus
+    >
+      {{ icon('close', 22) }}
+    </button>
   </div>
-  <p id="display-description" class="field-hint">Changes apply immediately and are saved in this browser.</p>
+  <p id="display-description" class="field-hint">
+    Changes apply immediately and are saved in this browser.
+  </p>
   <form id="display-form">
     <fieldset class="theme-options">
       <legend>Appearance</legend>
       <div class="theme-choices">
-        <label><input type="radio" name="theme" value="system" checked><span>{{ icon('monitor', 22) }}System</span></label>
-        <label><input type="radio" name="theme" value="light"><span>{{ icon('sun', 22) }}Light</span></label>
-        <label><input type="radio" name="theme" value="dark"><span>{{ icon('moon', 22) }}Dark</span></label>
+        <label
+          ><input type="radio" name="theme" value="system" checked /><span
+            >{{ icon('monitor', 22) }}System</span
+          ></label
+        >
+        <label
+          ><input type="radio" name="theme" value="light" /><span
+            >{{ icon('sun', 22) }}Light</span
+          ></label
+        >
+        <label
+          ><input type="radio" name="theme" value="dark" /><span
+            >{{ icon('moon', 22) }}Dark</span
+          ></label
+        >
       </div>
     </fieldset>
     <fieldset class="reading-options">
       <legend>Reading &amp; motion</legend>
-      <label class="preference-option"><span><strong>Larger text</strong><small>Increase text size throughout the site.</small></span><input type="checkbox" name="largeText"></label>
-      <label class="preference-option"><span><strong>Higher contrast</strong><small>Make text and control borders stand out.</small></span><input type="checkbox" name="highContrast"></label>
-      <label class="preference-option"><span><strong>Reduce motion</strong><small>Limit transitions and smooth scrolling. Your device preference is always respected.</small></span><input type="checkbox" name="reduceMotion"></label>
+      <label class="preference-option"
+        ><span
+          ><strong>Larger text</strong
+          ><small>Increase text size throughout the site.</small></span
+        ><input type="checkbox" name="largeText"
+      /></label>
+      <label class="preference-option"
+        ><span
+          ><strong>Higher contrast</strong
+          ><small>Make text and control borders stand out.</small></span
+        ><input type="checkbox" name="highContrast"
+      /></label>
+      <label class="preference-option"
+        ><span
+          ><strong>Reduce motion</strong
+          ><small
+            >Limit transitions and smooth scrolling. Your device preference is
+            always respected.</small
+          ></span
+        ><input type="checkbox" name="reduceMotion"
+      /></label>
     </fieldset>
     <p class="field-hint" id="display-save-status" role="status"></p>
-    <div class="display-actions"><button type="button" class="btn btn-secondary" data-display-reset>Reset preferences</button><button type="button" class="btn btn-primary" data-display-close>Done</button></div>
+    <div class="display-actions">
+      <button type="button" class="btn btn-secondary" data-display-reset>
+        Reset preferences</button
+      ><button type="button" class="btn btn-primary" data-display-close>
+        Done
+      </button>
+    </div>
   </form>
 </dialog>
 {%- endmacro %}

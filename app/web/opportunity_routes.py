@@ -52,7 +52,8 @@ def update_preferences(
     keyword: str = Form(""),
     location: str = Form(""),
     job_type: str = Form(""),
-    country_code: str = Form("NG"),
+    # An empty selection means all countries; keep it when FastAPI applies defaults.
+    country_code: str = Form(""),
     enabled: bool = Form(False),
     user: User = Depends(require_user),
     _: None = Depends(verify_csrf),

@@ -1,36 +1,93 @@
-{% extends "base.html" %}
-{% from "_icons.html" import icon %}
-{% block title %}{{ title }} — Nurse.ng{% endblock %}
-{% block content %}
+{% extends "base.html" %} {% from "_icons.html" import icon %} {% block title
+%}{{ title }} — Nurse.ng{% endblock %} {% block content %}
 <section class="community-page conversation-space">
   <p class="eyebrow">Nurse.ng community</p>
   <div class="page-heading-row">
     <div>
-      <h1>{% if feed_view == 'discussions' %}Discussions you follow{% elif feed_view == 'people' %}From colleagues you follow{% else %}Conversations with other nurses{% endif %}</h1>
-      <p class="lede">{% if feed_view == 'discussions' %}Return to your conversations. New replies from others are highlighted here.{% else %}Ask for help, share what you know, and talk about life in nursing.{% endif %}</p>
+      <h1>
+        {% if feed_view == 'discussions' %}Discussions you follow{% elif
+        feed_view == 'people' %}From colleagues you follow{% else
+        %}Conversations with other nurses{% endif %}
+      </h1>
+      <p class="lede">
+        {% if feed_view == 'discussions' %}Return to your conversations. New
+        replies from others are highlighted here.{% else %}Ask for help, share
+        what you know, and talk about life in nursing.{% endif %}
+      </p>
     </div>
-    {% if posts or search_query or page_number > 1 or feed_view != 'all' %}<a class="btn btn-primary" href="{% if user %}/posts/new{% else %}/auth/register{% endif %}">{{ icon('plus', 17) }} Ask or share</a>{% endif %}
+    {% if posts or search_query or page_number > 1 or feed_view != 'all' %}<a
+      class="btn btn-primary"
+      href="{% if user %}/posts/new{% else %}/auth/register{% endif %}"
+      >{{ icon('plus', 17) }} Ask or share</a
+    >{% endif %}
   </div>
   <nav class="section-tabs conversation-tabs" aria-label="Conversation views">
-    <a href="/feed" {% if feed_view == 'all' %}aria-current="page"{% endif %}>All conversations</a>
+    <a href="/feed" {% if feed_view == 'all' %}aria-current="page" {% endif %}
+      >All conversations</a
+    >
     {% if user %}
-    <a href="/feed/discussions" {% if feed_view == 'discussions' %}aria-current="page"{% endif %}>Following discussions</a>
-    <a href="/feed/following" {% if feed_view == 'people' %}aria-current="page"{% endif %}>Colleagues I follow</a>
+    <a
+      href="/feed/discussions"
+      {% if feed_view == 'discussions' %}aria-current="page"
+      {%
+      endif
+      %}
+      >Following discussions</a
+    >
+    <a
+      href="/feed/following"
+      {% if feed_view == 'people' %}aria-current="page"
+      {%
+      endif
+      %}
+      >Colleagues I follow</a
+    >
     {% endif %}
     <a href="/topics">Browse topics</a>
     <a href="/reels">Reels</a>
   </nav>
-  {% include "community/_search.html" %}
-  {% if not user %}<p class="field-hint">Anyone can read. <a href="/auth/register">Create an account</a> or <a href="/auth/login">sign in</a> to ask, reply, and follow discussions.</p>{% endif %}
+  {% include "community/_search.html" %} {% if not user %}
+  <p class="field-hint">
+    Anyone can read. <a href="/auth/register">Create an account</a> or
+    <a href="/auth/login">sign in</a> to ask, reply, and follow discussions.
+  </p>
+  {% endif %}
   <div class="community-list">
-    {% for post in posts %}{% include "community/_post_card.html" %}
-    {% else %}
+    {% for post in posts %}{% include "community/_post_card.html" %} {% else %}
     <div class="empty-state">
-      {% if search_query %}<h2>No conversations found</h2><p>Try a hospital name, location, or fewer words. Search includes replies too.</p>
-      {% elif page_number > 1 %}<h2>No more conversations here</h2><p>Go back to the previous page to continue reading.</p>
-      {% elif feed_view == 'discussions' %}<h2>Keep a conversation close</h2><p>Open a conversation and choose “Follow discussion” to find it here and see new replies.</p><a class="btn btn-secondary" href="/feed">Explore conversations</a>
-      {% elif feed_view == 'people' %}<h2>No conversations from your network yet</h2><p>Follow colleagues from their public profiles to see their conversations here.</p><a class="btn btn-secondary" href="/nurses">Find colleagues</a>
-      {% else %}<h2>What would you like to ask?</h2><p>A question about internship placements, a useful contact, or an everyday experience can start a conversation.</p><a class="btn btn-primary" href="{% if user %}/posts/new{% else %}/auth/register{% endif %}">Start a conversation</a>{% endif %}
+      {% if search_query %}
+      <h2>No conversations found</h2>
+      <p>
+        Try a hospital name, location, or fewer words. Search includes replies
+        too.
+      </p>
+      {% elif page_number > 1 %}
+      <h2>No more conversations here</h2>
+      <p>Go back to the previous page to continue reading.</p>
+      {% elif feed_view == 'discussions' %}
+      <h2>Keep a conversation close</h2>
+      <p>
+        Open a conversation and choose “Follow discussion” to find it here and
+        see new replies.
+      </p>
+      <a class="btn btn-secondary" href="/feed">Explore conversations</a> {%
+      elif feed_view == 'people' %}
+      <h2>No conversations from your network yet</h2>
+      <p>
+        Follow colleagues from their public profiles to see their conversations
+        here.
+      </p>
+      <a class="btn btn-secondary" href="/nurses">Find colleagues</a> {% else %}
+      <h2>What would you like to ask?</h2>
+      <p>
+        A question about internship placements, a useful contact, or an everyday
+        experience can start a conversation.
+      </p>
+      <a
+        class="btn btn-primary"
+        href="{% if user %}/posts/new{% else %}/auth/register{% endif %}"
+        >Start a conversation</a
+      >{% endif %}
     </div>
     {% endfor %}
   </div>

@@ -19,7 +19,7 @@ def scope(response):
 
 
 def confirmation(response):
-    match = re.search(r'id="published-draft">(.*?)</script>', response.text)
+    match = re.search(r'id="published-draft"\s*>(.*?)</script>', response.text, re.S)
     return json.loads(match.group(1)) if match else None
 
 

@@ -1,58 +1,316 @@
 {% from "_icons.html" import icon %}
-<div class="analytics-context"><p>{{ account_types[account_type] }} <span>·</span> {{ 'Staff included' if include_staff else 'Staff excluded' }}</p><p>As of <time data-analytics-as-of>{{ report.as_of }}</time></p></div>
+<div class="analytics-context">
+  <p>
+    {{ account_types[account_type] }} <span>·</span> {{ 'Staff included' if
+    include_staff else 'Staff excluded' }}
+  </p>
+  <p>As of <time data-analytics-as-of>{{ report.as_of }}</time></p>
+</div>
 
 <div class="analytics-topline">
-  <a href="{{ metric_urls.today }}" class="analytics-featured" aria-label="{{ report.today }} accounts active today; view users">
-    <div class="analytics-featured-top"><span class="analytics-kicker">YOUR COMMUNITY TODAY</span><span class="analytics-metric-icon">{{ icon('users', 23) }}</span></div>
-    <div class="analytics-featured-value"><strong data-metric="today">{{ report.today }}</strong><span>active today</span></div>
-    <p>Distinct {{ 'nurse ' if account_type == 'nurse' else '' }}accounts · {{ report.date.strftime('%d %B %Y') }}</p>
-    <div class="analytics-participation"><span>{{ report.participation }}% of {{ report.total }} accounts</span><span>Explore users {{ icon('arrow', 16) }}</span></div>
-    <div class="analytics-progress" aria-hidden="true"><span style="width: {{ report.participation }}%"></span></div>
+  <a
+    href="{{ metric_urls.today }}"
+    class="analytics-featured"
+    aria-label="{{ report.today }} accounts active today; view users"
+  >
+    <div class="analytics-featured-top">
+      <span class="analytics-kicker">YOUR COMMUNITY TODAY</span
+      ><span class="analytics-metric-icon">{{ icon('users', 23) }}</span>
+    </div>
+    <div class="analytics-featured-value">
+      <strong data-metric="today">{{ report.today }}</strong
+      ><span>active today</span>
+    </div>
+    <p>
+      Distinct {{ 'nurse ' if account_type == 'nurse' else '' }}accounts · {{
+      report.date.strftime('%d %B %Y') }}
+    </p>
+    <div class="analytics-participation">
+      <span>{{ report.participation }}% of {{ report.total }} accounts</span
+      ><span>Explore users {{ icon('arrow', 16) }}</span>
+    </div>
+    <div class="analytics-progress" aria-hidden="true">
+      <span style="width: {{ report.participation }}%"></span>
+    </div>
   </a>
   <div class="analytics-metrics">
-    <a href="{{ metric_urls.all }}" class="analytics-metric"><div><span>Total accounts</span>{{ icon('users', 19) }}</div><strong data-metric="total">{{ report.total }}</strong><p>{{ report.enabled }} enabled <span>·</span> {{ report.total - report.enabled }} suspended or deactivated</p></a>
-    <a href="{{ metric_urls.recent }}" class="analytics-metric"><div><span>Recently active</span><i class="analytics-presence-dot" aria-hidden="true"></i></div><strong data-metric="recent">{{ report.recent }}</strong><p>Recorded in the last 5 minutes</p></a>
-    <a href="{{ metric_urls.week }}" class="analytics-metric"><div><span>Active in 7 days</span>{{ icon('calendar', 19) }}</div><strong data-metric="week">{{ report.week }}</strong><p>Unique accounts, including today</p></a>
-    <a href="{{ metric_urls.month }}" class="analytics-metric"><div><span>Active in 30 days</span>{{ icon('globe', 19) }}</div><strong data-metric="month">{{ report.month }}</strong><p>Unique accounts, including today</p></a>
+    <a href="{{ metric_urls.all }}" class="analytics-metric"
+      ><div><span>Total accounts</span>{{ icon('users', 19) }}</div>
+      <strong data-metric="total">{{ report.total }}</strong>
+      <p>
+        {{ report.enabled }} enabled <span>·</span> {{ report.total -
+        report.enabled }} suspended or deactivated
+      </p></a
+    >
+    <a href="{{ metric_urls.recent }}" class="analytics-metric"
+      ><div>
+        <span>Recently active</span
+        ><i class="analytics-presence-dot" aria-hidden="true"></i>
+      </div>
+      <strong data-metric="recent">{{ report.recent }}</strong>
+      <p>Recorded in the last 5 minutes</p></a
+    >
+    <a href="{{ metric_urls.week }}" class="analytics-metric"
+      ><div><span>Active in 7 days</span>{{ icon('calendar', 19) }}</div>
+      <strong data-metric="week">{{ report.week }}</strong>
+      <p>Unique accounts, including today</p></a
+    >
+    <a href="{{ metric_urls.month }}" class="analytics-metric"
+      ><div><span>Active in 30 days</span>{{ icon('globe', 19) }}</div>
+      <strong data-metric="month">{{ report.month }}</strong>
+      <p>Unique accounts, including today</p></a
+    >
   </div>
 </div>
 
 <section class="analytics-chart-panel" aria-labelledby="activity-chart-heading">
-  <div class="analytics-panel-heading"><div><p class="analytics-kicker">ENGAGEMENT OVER TIME</p><h2 id="activity-chart-heading">Daily activity</h2><p>Active accounts, counted once each day.</p></div><nav class="analytics-ranges" aria-label="Activity chart period">{% for number, url in range_urls.items() %}<a href="{{ url }}" {% if number == days %}aria-current="true"{% endif %}>{{ number }} days</a>{% endfor %}</nav></div>
-  {% if chart.points %}
-  <div class="analytics-chart-summary"><span class="analytics-chart-legend"><i aria-hidden="true"></i> Active accounts</span><div class="analytics-chart-selection"><span data-chart-label>{{ report.date.strftime('%d %b') }}</span><strong data-chart-value>{{ report.today }}</strong></div></div>
-  <div class="analytics-chart-frame">
-  <div class="analytics-chart-y" aria-hidden="true">{% for tick in chart.ticks %}<span style="top: {{ tick.y / 2 }}%">{{ tick.count }}</span>{% endfor %}</div>
-  <svg class="analytics-chart" viewBox="0 0 720 200" preserveAspectRatio="none" role="group" aria-label="Daily activity chart. Focus a point to hear its date and count.">
-    <defs><linearGradient id="activity-chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="currentColor" stop-opacity=".22"/><stop offset="100%" stop-color="currentColor" stop-opacity=".01"/></linearGradient></defs>
-    {% for tick in chart.ticks %}<line class="analytics-gridline" x1="44" x2="686" y1="{{ tick.y }}" y2="{{ tick.y }}"/>{% endfor %}
-    {% if chart.area %}<path d="{{ chart.area }}" fill="url(#activity-chart-fill)"/>{% endif %}
-    <path class="analytics-chart-line" d="{{ chart.line }}"/>
-    {% for point in chart.points %}<g class="analytics-chart-point" tabindex="0" role="img" aria-label="{{ point.date.strftime('%d %B %Y') }}: {{ point.count }} active accounts" data-chart-point data-date="{{ point.date.strftime('%d %b') }}" data-count="{{ point.count }}"><title>{{ point.date.strftime('%d %b') }} · {{ point.count }} active accounts</title><circle class="analytics-chart-hit" cx="{{ point.x }}" cy="{{ point.y }}" r="13"/><circle class="analytics-chart-dot" cx="{{ point.x }}" cy="{{ point.y }}" r="{{ 5 if loop.last else 3.5 }}"/></g>{% endfor %}
-  </svg>
+  <div class="analytics-panel-heading">
+    <div>
+      <p class="analytics-kicker">ENGAGEMENT OVER TIME</p>
+      <h2 id="activity-chart-heading">Daily activity</h2>
+      <p>Active accounts, counted once each day.</p>
+    </div>
+    <nav class="analytics-ranges" aria-label="Activity chart period">
+      {% for number, url in range_urls.items() %}<a
+        href="{{ url }}"
+        {% if number == days %}aria-current="true"
+        {%
+        endif
+        %}
+        >{{ number }} days</a
+      >{% endfor %}
+    </nav>
   </div>
-  <div class="analytics-chart-x" aria-hidden="true">{% for point in chart.points %}{% if loop.first or loop.last or (loop.index0 == chart.points|length // 2 and chart.points|length > 4) %}<span>{{ point.date.strftime('%d %b') }}</span>{% endif %}{% endfor %}</div>
-  <div class="analytics-chart-footnote"><span>Available records since {{ report.first_record }}</span><details><summary>View daily counts</summary><table class="analytics-history"><caption class="sr-only">Daily active {{ account_types[account_type]|lower }}</caption><thead><tr><th scope="col">Date (Nigeria time)</th><th scope="col">Active accounts</th></tr></thead><tbody>{% for day in report.history %}<tr><th scope="row">{{ day.date.strftime('%d %b %Y') }}</th><td>{{ day.count }}</td></tr>{% endfor %}</tbody></table></details></div>
+  {% if chart.points %}
+  <div class="analytics-chart-summary">
+    <span class="analytics-chart-legend"
+      ><i aria-hidden="true"></i> Active accounts</span
+    >
+    <div class="analytics-chart-selection">
+      <span data-chart-label>{{ report.date.strftime('%d %b') }}</span
+      ><strong data-chart-value>{{ report.today }}</strong>
+    </div>
+  </div>
+  <div class="analytics-chart-frame">
+    <div class="analytics-chart-y" aria-hidden="true">
+      {% for tick in chart.ticks %}<span style="top: {{ tick.y / 2 }}%"
+        >{{ tick.count }}</span
+      >{% endfor %}
+    </div>
+    <svg
+      class="analytics-chart"
+      viewBox="0 0 720 200"
+      preserveAspectRatio="none"
+      role="group"
+      aria-label="Daily activity chart. Focus a point to hear its date and count."
+    >
+      <defs>
+        <linearGradient id="activity-chart-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="currentColor" stop-opacity=".22" />
+          <stop offset="100%" stop-color="currentColor" stop-opacity=".01" />
+        </linearGradient>
+      </defs>
+      {% for tick in chart.ticks %}
+      <line
+        class="analytics-gridline"
+        x1="44"
+        x2="686"
+        y1="{{ tick.y }}"
+        y2="{{ tick.y }}"
+      />
+      {% endfor %} {% if chart.area %}
+      <path d="{{ chart.area }}" fill="url(#activity-chart-fill)" />
+      {% endif %}
+      <path class="analytics-chart-line" d="{{ chart.line }}" />
+      {% for point in chart.points %}
+      <g
+        class="analytics-chart-point"
+        tabindex="0"
+        role="img"
+        aria-label="{{ point.date.strftime('%d %B %Y') }}: {{ point.count }} active accounts"
+        data-chart-point
+        data-date="{{ point.date.strftime('%d %b') }}"
+        data-count="{{ point.count }}"
+      >
+        <title>
+          {{ point.date.strftime('%d %b') }} · {{ point.count }} active accounts
+        </title>
+        <circle
+          class="analytics-chart-hit"
+          cx="{{ point.x }}"
+          cy="{{ point.y }}"
+          r="13"
+        />
+        <circle
+          class="analytics-chart-dot"
+          cx="{{ point.x }}"
+          cy="{{ point.y }}"
+          r="{{ 5 if loop.last else 3.5 }}"
+        />
+      </g>
+      {% endfor %}
+    </svg>
+  </div>
+  <div class="analytics-chart-x" aria-hidden="true">
+    {% for point in chart.points %}{% if loop.first or loop.last or (loop.index0
+    == chart.points|length // 2 and chart.points|length > 4) %}<span
+      >{{ point.date.strftime('%d %b') }}</span
+    >{% endif %}{% endfor %}
+  </div>
+  <div class="analytics-chart-footnote">
+    <span>Available records since {{ report.first_record }}</span>
+    <details>
+      <summary>View daily counts</summary>
+      <table class="analytics-history">
+        <caption class="sr-only">
+          Daily active {{ account_types[account_type]|lower }}
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Date (Nigeria time)</th>
+            <th scope="col">Active accounts</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for day in report.history %}
+          <tr>
+            <th scope="row">{{ day.date.strftime('%d %b %Y') }}</th>
+            <td>{{ day.count }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </details>
+  </div>
   {% else %}
-  <div class="analytics-empty-chart">{{ icon('globe', 34) }}<h3>Your community’s story starts here.</h3><p>Daily activity will appear as users use Nurse.ng. Earlier visits haven’t been tracked.</p></div>
+  <div class="analytics-empty-chart">
+    {{ icon('globe', 34) }}
+    <h3>Your community’s story starts here.</h3>
+    <p>
+      Daily activity will appear as users use Nurse.ng. Earlier visits haven’t
+      been tracked.
+    </p>
+  </div>
   {% endif %}
 </section>
 
 <section class="analytics-members" aria-labelledby="analytics-members-heading">
-  <div class="analytics-panel-heading"><div><p class="analytics-kicker">THE PEOPLE BEHIND THE NUMBERS</p><h2 id="analytics-members-heading">User directory <span class="analytics-count">{{ members.total }}</span></h2><p>Account IDs, recent activity and participation at a glance.</p></div>{% if query or activity != 'all' %}<a class="btn btn-secondary btn-sm" href="{{ reset_url }}">Clear user filters</a>{% endif %}</div>
+  <div class="analytics-panel-heading">
+    <div>
+      <p class="analytics-kicker">THE PEOPLE BEHIND THE NUMBERS</p>
+      <h2 id="analytics-members-heading">
+        User directory <span class="analytics-count">{{ members.total }}</span>
+      </h2>
+      <p>Account IDs, recent activity and participation at a glance.</p>
+    </div>
+    {% if query or activity != 'all' %}<a
+      class="btn btn-secondary btn-sm"
+      href="{{ reset_url }}"
+      >Clear user filters</a
+    >{% endif %}
+  </div>
   <p role="status" class="analytics-copy-status" data-copy-status></p>
   {% if members.cards %}
-  <div class="analytics-table-wrap"><table class="analytics-table"><caption class="sr-only">{{ account_types[account_type] }} matching your user filters</caption><thead><tr><th scope="col">User / unique ID</th><th scope="col">Account</th><th scope="col">Activity</th><th scope="col">Last recorded visit</th><th scope="col">Days active <span>Past 30 days</span></th></tr></thead><tbody>
-  {% for card in members.cards %}
-    <tr data-member-id="{{ card.user.id }}">
-      <td class="analytics-member"><div class="analytics-member-heading"><span class="analytics-initial" aria-hidden="true">{{ card.name[:1]|upper }}</span><div><strong>{{ card.name }}</strong><span>{{ card.user.account_type|capitalize }}{% if card.user.is_staff %} · Staff{% endif %}</span></div></div><div class="account-identifier"><code id="member-id-{{ card.user.id }}">{{ card.user.id }}</code><button type="button" class="identifier-copy" data-copy-id="member-id-{{ card.user.id }}" aria-label="Copy user ID for {{ card.name }}" hidden>{{ icon('copy', 15) }}</button></div></td>
-      <td data-label="Account"><span class="analytics-account-state">{{ card.account_status }}</span></td>
-      <td data-label="Activity"><span class="analytics-activity-state{% if card.recent %} is-recent{% endif %}">{% if card.recent %}<i aria-hidden="true"></i>{% endif %}{{ card.activity_label }}</span></td>
-      <td data-label="Last recorded visit">{% if card.last_seen %}<time datetime="{{ card.last_seen.isoformat() }}">{{ card.last_seen_label }}</time>{% else %}<span class="analytics-not-recorded">Not yet recorded</span>{% endif %}</td>
-      <td data-label="Days active (30 days)"><span class="analytics-active-days">{{ card.days_active }} <span>/ 30</span></span></td>
-    </tr>
-  {% endfor %}
-  </tbody></table></div>
-  <nav class="analytics-pagination" aria-label="User pages"><span>Page {{ members.page }} of {{ members.pages }} <span>·</span> {{ members.total }} accounts</span><div>{% if previous_page %}<a class="btn btn-secondary btn-sm" href="{{ previous_page }}" rel="prev">Previous</a>{% endif %}{% if next_page %}<a class="btn btn-secondary btn-sm" href="{{ next_page }}" rel="next">Next {{ icon('arrow', 15) }}</a>{% endif %}</div></nav>
-  {% else %}<div class="analytics-empty-members">{{ icon('search', 29) }}<h3>No users in this view.</h3><p>Try another account type or clear the user filters.</p><a class="text-link" href="{{ reset_url }}">Show all activity {{ icon('arrow', 15) }}</a></div>{% endif %}
+  <div class="analytics-table-wrap">
+    <table class="analytics-table">
+      <caption class="sr-only">
+        {{ account_types[account_type] }} matching your user filters
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">User / unique ID</th>
+          <th scope="col">Account</th>
+          <th scope="col">Activity</th>
+          <th scope="col">Last recorded visit</th>
+          <th scope="col">Days active <span>Past 30 days</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for card in members.cards %}
+        <tr data-member-id="{{ card.user.id }}">
+          <td class="analytics-member">
+            <div class="analytics-member-heading">
+              <span class="analytics-initial" aria-hidden="true"
+                >{{ card.name[:1]|upper }}</span
+              >
+              <div>
+                <strong>{{ card.name }}</strong
+                ><span
+                  >{{ card.user.account_type|capitalize }}{% if
+                  card.user.is_staff %} · Staff{% endif %}</span
+                >
+              </div>
+            </div>
+            <div class="account-identifier">
+              <code id="member-id-{{ card.user.id }}">{{ card.user.id }}</code
+              ><button
+                type="button"
+                class="identifier-copy"
+                data-copy-id="member-id-{{ card.user.id }}"
+                aria-label="Copy user ID for {{ card.name }}"
+                hidden
+              >
+                {{ icon('copy', 15) }}
+              </button>
+            </div>
+          </td>
+          <td data-label="Account">
+            <span class="analytics-account-state"
+              >{{ card.account_status }}</span
+            >
+          </td>
+          <td data-label="Activity">
+            <span
+              class="analytics-activity-state{% if card.recent %} is-recent{% endif %}"
+              >{% if card.recent %}<i aria-hidden="true"></i>{% endif %}{{
+              card.activity_label }}</span
+            >
+          </td>
+          <td data-label="Last recorded visit">
+            {% if card.last_seen %}<time
+              datetime="{{ card.last_seen.isoformat() }}"
+              >{{ card.last_seen_label }}</time
+            >{% else %}<span class="analytics-not-recorded"
+              >Not yet recorded</span
+            >{% endif %}
+          </td>
+          <td data-label="Days active (30 days)">
+            <span class="analytics-active-days"
+              >{{ card.days_active }} <span>/ 30</span></span
+            >
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <nav class="analytics-pagination" aria-label="User pages">
+    <span
+      >Page {{ members.page }} of {{ members.pages }} <span>·</span> {{
+      members.total }} accounts</span
+    >
+    <div>
+      {% if previous_page %}<a
+        class="btn btn-secondary btn-sm"
+        href="{{ previous_page }}"
+        rel="prev"
+        >Previous</a
+      >{% endif %}{% if next_page %}<a
+        class="btn btn-secondary btn-sm"
+        href="{{ next_page }}"
+        rel="next"
+        >Next {{ icon('arrow', 15) }}</a
+      >{% endif %}
+    </div>
+  </nav>
+  {% else %}
+  <div class="analytics-empty-members">
+    {{ icon('search', 29) }}
+    <h3>No users in this view.</h3>
+    <p>Try another account type or clear the user filters.</p>
+    <a class="text-link" href="{{ reset_url }}"
+      >Show all activity {{ icon('arrow', 15) }}</a
+    >
+  </div>
+  {% endif %}
 </section>

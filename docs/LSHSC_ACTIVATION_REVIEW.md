@@ -26,7 +26,6 @@ Local research capture: `/tmp/nurse-lshsc-activation-browser.html`. This tempora
 
 No permission request has been sent, no rights holder has been contacted, and no staff approval has been impersonated. Discovery of other potential sources continues independently.
 
-
 ## TLS compatibility update — 8 November 2026
 
 The server presented only its leaf certificate (CN `lshsc.ng`, valid 30 October 2026 through 16 May 2027), omitting the Sectigo Public Server Authentication CA DV R36 intermediate. A normal verified handshake failed with `unable to get local issuer certificate`.
@@ -36,7 +35,6 @@ The missing public intermediate was retrieved from the issuer URL advertised in 
 The installed production transport was exercised through `PublicFetcher.get('https://lshsc.ng/recruitment')` without monkeypatches. It completed robots checks and followed the website's redirect to `https://www.lshsc.ng/recruitment/`, returning HTTP **200**, **39,032 bytes**, and **zero structured JobPosting records**. The original registered URL is unchanged. An earlier temporary-context probe produced the same result.
 
 This resolves the diagnosed certificate-chain failure on Nurse.ng's side without contacting the website administrator. It does not enable collection/publication by itself: source/redirect association, applicable reuse evidence and an actual supported vacancy remain separate requirements. The exact-origin restriction for automatic activation still requires review of the redirected source. No live source approval, vacancy publication or local registry health rewrite was performed by these read-only transport probes; a running worker records its own current outcome.
-
 
 ## Live background-worker verification — 8 November 2026
 

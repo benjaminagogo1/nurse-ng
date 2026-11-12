@@ -476,6 +476,8 @@ def apply_result(db: Session, task_id, token: str, payload: dict, result: dict) 
                 _, created = register_candidate(db, **candidate, task_id=task.id)
                 task.result_count += int(created)
         if source:
+            from app.services.recruitment_indexing import accept_collection_address
+
             previous = source.observed_url or source.original_url
             source.last_attempt_at = timestamp
             source.last_success_at = timestamp
@@ -486,6 +488,11 @@ def apply_result(db: Session, task_id, token: str, payload: dict, result: dict) 
                 source.last_changed_at = timestamp
             source.content_hash = observed_hash
             source.observed_url = checked_url(result["observed_url"])
+            accepted_index_address = bool(
+                payload.get("collect_vacancies")
+                and source.collection_adapter == "factual_index"
+                and accept_collection_address(source, source.observed_url)
+            )
             source.canonical_hint = (
                 checked_url(result["canonical_hint"]) if result.get("canonical_hint") else ""
             )
@@ -493,6 +500,7 @@ def apply_result(db: Session, task_id, token: str, payload: dict, result: dict) 
                 previous
                 and origin(previous) != origin(source.observed_url)
                 and source.verification_status == "approved"
+                and not accepted_index_address
             ):
                 source.verification_status = "pending"
                 source.permission_status = "unknown"
@@ -660,6 +668,11 @@ def run_next(db: Session, *, executor=None) -> DiscoveryTask | None:
                 "collection_adapter": source.collection_adapter,
                 "page_offset": max(0, source.revision - 1) * 4,
             }
+            if payload["collect_vacancies"] and source.collection_adapter == "factual_index":
+                payload["index_evidence"] = dict(source.activation_review.get("evidence", {}))
+                payload["url"] = payload["index_evidence"].get(
+                    "collection_url", source.original_url
+                )
             if eligible(source):
                 payload["automatic_activation"] = context(source, db)
                 # Recheck independent identity and current reuse evidence on every collection.

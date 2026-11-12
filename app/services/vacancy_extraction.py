@@ -152,12 +152,18 @@ def normalize(raw: dict) -> dict:
     country = address.get("addressCountry", "")
     if isinstance(country, dict):
         country = country.get("identifier", country.get("name", ""))
+    if isinstance(country, str):
+        country = {"nigeria": "NG", "united kingdom": "GB", "united states": "US",
+                   "united states of america": "US", "canada": "CA", "ghana": "GH",
+                   "kenya": "KE", "south africa": "ZA", "australia": "AU"}.get(
+                       country.strip().casefold(), country.strip()
+                   )
     employment = raw.get("employmentType", "")
     if isinstance(employment, list):
         employment = employment[0] if len(employment) == 1 else ""
     result = {
         "title": plain(raw.get("title")),
-        "employer": plain(employer.get("name")) if isinstance(employer, dict) else "",
+        "employer": plain(employer.get("name")) if isinstance(employer, dict) else plain(employer),
         "description": plain(raw.get("description")),
         "country": country.upper()
         if isinstance(country, str) and re.fullmatch("[A-Za-z]{2}", country)
@@ -173,7 +179,7 @@ def normalize(raw: dict) -> dict:
         else "",
         "opening_date": "",
         "job_type": programme_type(plain(raw.get("title")))
-        or (TYPE_MAP.get(employment, "") if isinstance(employment, str) else ""),
+        or (TYPE_MAP.get(employment.upper(), "") if isinstance(employment, str) else ""),
         "employment_type_text": _text(raw.get("employmentType")),
         "work_mode": "remote" if raw.get("jobLocationType") == "TELECOMMUTE" else "",
         "responsibilities": _text(raw.get("responsibilities")),
@@ -193,14 +199,17 @@ def normalize(raw: dict) -> dict:
     }
     # A JobPosting URL is an announcement, not proof of a dedicated application endpoint.
     salary = raw.get("baseSalary")
-    if isinstance(salary, dict) and isinstance(salary.get("value"), dict):
-        value = salary["value"]
+    if isinstance(salary, dict) and isinstance(salary.get("value"), (dict, str, int, float)):
+        value = salary["value"] if isinstance(salary["value"], dict) else {"value": salary["value"]}
         currency = salary.get("currency", "")
         unit = value.get("unitText", "")
+        currency = currency.strip().upper() if isinstance(currency, str) else currency
+        unit = unit.strip().upper() if isinstance(unit, str) else unit
         if (
             isinstance(currency, str)
             and re.fullmatch("[A-Z]{3}", currency)
-            and unit in {"HOUR", "DAY", "WEEK", "MONTH", "YEAR"}
+            and isinstance(unit, str)
+            and unit in {"", "HOUR", "DAY", "WEEK", "MONTH", "YEAR"}
         ):
             try:
                 numbers = {
@@ -212,6 +221,8 @@ def normalize(raw: dict) -> dict:
                     Decimal(n).is_finite() and 0 <= Decimal(n) <= 10**12 for n in numbers.values()
                 ):
                     result["salary"] = {"currency": currency, "unit": unit, **numbers}
+                    if raw.get("_salary_basis") in {"gross", "net"}:
+                        result["salary"]["basis"] = raw["_salary_basis"]
             except InvalidOperation:
                 pass
     return result
@@ -220,7 +231,12 @@ def normalize(raw: dict) -> dict:
 def validation_issues(
     data: dict, source, *, employer_confirmed=False, nursing_confirmed=False
 ) -> list[str]:
+    from app.services.vacancy_quality import non_vacancy_reason
+
     issues = []
+    excluded = non_vacancy_reason(data.get("title", ""), data.get("announcement_url", ""))
+    if excluded:
+        issues.append(excluded)
     for field, limit in [("title", 250), ("employer", 250), ("description", 30000)]:
         if not data.get(field) or len(data[field]) > limit:
             issues.append(f"{field}: required, at most {limit} characters")
@@ -278,6 +294,29 @@ def collect_page(payload: dict, fetcher) -> dict:
     prefix = payload.get("reuse_url_prefix", "")
     if not prefix or not in_scope(payload["url"], prefix):
         raise FetchError("scope_blocked", "The page has no matching approved reuse scope.")
+    if payload.get("collection_adapter") == "factual_index":
+        from app.services.factual_opportunities import collect_index
+        from app.services.recruitment_indexing import matching_scope, scope_aliases
+
+        evidence = payload.get("index_evidence", {})
+        if evidence.get("mode") != "factual_index" or evidence.get("scope") != prefix:
+            raise FetchError(
+                "scope_blocked", "Factual collection needs its approved source settings."
+            )
+        page = fetcher.get(payload["url"], allowed_url_prefixes=scope_aliases(prefix))
+        resolved_scope = matching_scope(page.url, prefix)
+        if not resolved_scope:
+            raise FetchError(
+                "scope_blocked", "The returned page is outside the approved publisher."
+            )
+        collected = collect_index(payload, page, fetcher, {**evidence, "scope": resolved_scope})
+        return {
+            "ok": True,
+            "outcome": "vacancies_collected",
+            "canonical_hint": "",
+            "message": "Collected factual vacancies and original announcement links.",
+            **collected,
+        }
     page = fetcher.get(
         payload["url"], allowed_origin=origin(payload["url"]), allowed_url_prefix=prefix
     )

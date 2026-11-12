@@ -276,10 +276,17 @@ class PublicFetcher:
         robots: bool = True,
         allowed_origin: str | None = None,
         allowed_url_prefix: str | None = None,
+        allowed_url_prefixes: tuple[str, ...] | None = None,
         headers: dict[str, str] | None = None,
     ) -> FetchedPage:
         current = public_url(url)
         for _ in range(4):
+            if allowed_url_prefixes is not None and not any(
+                in_scope(current, prefix) for prefix in allowed_url_prefixes
+            ):
+                raise FetchError(
+                    "scope_blocked", "The endpoint is outside the approved publisher scope."
+                )
             if allowed_url_prefix and not in_scope(current, allowed_url_prefix):
                 raise FetchError(
                     "scope_blocked", "The endpoint is outside the approved reuse scope."

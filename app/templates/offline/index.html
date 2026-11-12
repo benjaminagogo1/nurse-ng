@@ -1,60 +1,202 @@
-{% extends 'base.html' %}
-{% from '_icons.html' import icon %}
-{% block title %}Offline & sync — Nurse.ng{% endblock %}
-{% block content %}
+{% extends 'base.html' %} {% from '_icons.html' import icon %} {% block title
+%}Offline & sync — Nurse.ng{% endblock %} {% block content %}
 <div class="offline-workspace" data-offline-workspace>
   <header class="offline-heading">
-    <div><p class="eyebrow">Your workspace</p><h1>Offline &amp; sync</h1><p class="lede">Your work stays with you, even when the connection doesn’t.</p></div>
-    <button type="button" class="btn btn-primary offline-sync-button" data-offline-sync>{{ icon('refresh', 18) }}<span>Sync now</span></button>
+    <div>
+      <p class="eyebrow">Your workspace</p>
+      <h1>Offline &amp; sync</h1>
+      <p class="lede">
+        Your work stays with you, even when the connection doesn’t.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="btn btn-primary offline-sync-button"
+      data-offline-sync
+    >
+      {{ icon('refresh', 18) }}<span>Sync now</span>
+    </button>
   </header>
 
   <section class="offline-overview" aria-label="Connection and saved work">
     <div class="offline-connection">
-      <span class="offline-connection-icon" aria-hidden="true">{{ icon('monitor', 24) }}</span>
-      <div class="offline-connection-copy"><span class="offline-status" data-connectivity role="status" aria-live="polite">Checking connection</span><p data-offline-intro>Preparing your saved information…</p></div>
-      <span class="offline-device-label">{{ icon('lock', 15) }} Only in this browser</span>
+      <span class="offline-connection-icon" aria-hidden="true"
+        >{{ icon('monitor', 24) }}</span
+      >
+      <div class="offline-connection-copy">
+        <span
+          class="offline-status"
+          data-connectivity
+          role="status"
+          aria-live="polite"
+          >Checking connection</span
+        >
+        <p data-offline-intro>Preparing your saved information…</p>
+      </div>
+      <span class="offline-device-label"
+        >{{ icon('lock', 15) }} Only in this browser</span
+      >
     </div>
     <nav class="offline-summary" aria-label="Saved work overview">
-      <a href="#offline-drafts"><span class="offline-summary-icon">{{ icon('edit', 19) }}</span><span><strong data-offline-count="drafts">—</strong><span>Local drafts</span></span>{{ icon('chevron', 16) }}</a>
-      <a href="#offline-activity"><span class="offline-summary-icon is-blue">{{ icon('refresh', 19) }}</span><span><strong data-offline-count="pending">—</strong><span>Waiting to sync</span></span>{{ icon('chevron', 16) }}</a>
-      <a href="#offline-library"><span class="offline-summary-icon is-violet">{{ icon('folder', 19) }}</span><span><strong data-offline-count="records">—</strong><span>Saved items</span></span>{{ icon('chevron', 16) }}</a>
+      <a href="#offline-drafts"
+        ><span class="offline-summary-icon">{{ icon('edit', 19) }}</span
+        ><span
+          ><strong data-offline-count="drafts">—</strong
+          ><span>Local drafts</span></span
+        >{{ icon('chevron', 16) }}</a
+      >
+      <a href="#offline-activity"
+        ><span class="offline-summary-icon is-blue"
+          >{{ icon('refresh', 19) }}</span
+        ><span
+          ><strong data-offline-count="pending">—</strong
+          ><span>Waiting to sync</span></span
+        >{{ icon('chevron', 16) }}</a
+      >
+      <a href="#offline-library"
+        ><span class="offline-summary-icon is-violet"
+          >{{ icon('folder', 19) }}</span
+        ><span
+          ><strong data-offline-count="records">—</strong
+          ><span>Saved items</span></span
+        >{{ icon('chevron', 16) }}</a
+      >
     </nav>
   </section>
 
-  <section class="offline-editor" aria-label="Edit saved work" data-offline-editor hidden></section>
+  <section
+    class="offline-editor"
+    aria-label="Edit saved work"
+    data-offline-editor
+    hidden
+  ></section>
   <div class="offline-layout">
     <div class="offline-main-column">
-      <section class="offline-panel" id="offline-drafts" aria-labelledby="offline-drafts-title">
-        <header class="offline-panel-heading"><div><h2 id="offline-drafts-title">Local drafts</h2><p>Pick up where you left off.</p></div><span class="offline-panel-symbol">{{ icon('edit', 20) }}</span></header>
-        <div class="offline-list" data-offline-drafts><p class="offline-loading">Preparing your drafts…</p></div>
+      <section
+        class="offline-panel"
+        id="offline-drafts"
+        aria-labelledby="offline-drafts-title"
+      >
+        <header class="offline-panel-heading">
+          <div>
+            <h2 id="offline-drafts-title">Local drafts</h2>
+            <p>Pick up where you left off.</p>
+          </div>
+          <span class="offline-panel-symbol">{{ icon('edit', 20) }}</span>
+        </header>
+        <div class="offline-list" data-offline-drafts>
+          <p class="offline-loading">Preparing your drafts…</p>
+        </div>
       </section>
-      <section class="offline-panel" id="offline-library" aria-labelledby="offline-records-title">
-        <header class="offline-panel-heading"><div><h2 id="offline-records-title">Saved library</h2><p>Information available in this browser.</p></div><span class="offline-panel-symbol">{{ icon('folder', 20) }}</span></header>
-        <div class="offline-library-search"><label class="sr-only" for="offline-search">Search saved information</label><div>{{ icon('search', 18) }}<input class="offline-search" id="offline-search" type="search" maxlength="120" placeholder="Search saved information"></div></div>
-        <div class="offline-list" data-offline-records><p class="offline-loading">Preparing your saved information…</p></div>
+      <section
+        class="offline-panel"
+        id="offline-library"
+        aria-labelledby="offline-records-title"
+      >
+        <header class="offline-panel-heading">
+          <div>
+            <h2 id="offline-records-title">Saved library</h2>
+            <p>Information available in this browser.</p>
+          </div>
+          <span class="offline-panel-symbol">{{ icon('folder', 20) }}</span>
+        </header>
+        <div class="offline-library-search">
+          <label class="sr-only" for="offline-search"
+            >Search saved information</label
+          >
+          <div>
+            {{ icon('search', 18) }}<input
+              class="offline-search"
+              id="offline-search"
+              type="search"
+              maxlength="120"
+              placeholder="Search saved information"
+            />
+          </div>
+        </div>
+        <div class="offline-list" data-offline-records>
+          <p class="offline-loading">Preparing your saved information…</p>
+        </div>
       </section>
     </div>
     <div class="offline-side-column">
-      <section class="offline-panel" id="offline-activity" aria-labelledby="offline-pending-title">
-        <header class="offline-panel-heading"><div><h2 id="offline-pending-title">Sync activity</h2><p>Follow your changes from saved to sent.</p></div><span class="offline-panel-symbol">{{ icon('refresh', 20) }}</span></header>
-        <div class="offline-list" data-offline-operations><p class="offline-loading">Checking your changes…</p></div>
+      <section
+        class="offline-panel"
+        id="offline-activity"
+        aria-labelledby="offline-pending-title"
+      >
+        <header class="offline-panel-heading">
+          <div>
+            <h2 id="offline-pending-title">Sync activity</h2>
+            <p>Follow your changes from saved to sent.</p>
+          </div>
+          <span class="offline-panel-symbol">{{ icon('refresh', 20) }}</span>
+        </header>
+        <div class="offline-list" data-offline-operations>
+          <p class="offline-loading">Checking your changes…</p>
+        </div>
       </section>
       <aside class="offline-storage" aria-labelledby="offline-storage-title">
-        <span class="offline-storage-icon">{{ icon('shield', 22) }}</span><h2 id="offline-storage-title">Saved here. Kept private.</h2>
-        <p>Your offline work is encrypted in this browser. Reopen Nurse.ng and reconnect to send queued changes.</p>
-        <details><summary>About offline storage {{ icon('chevron-down', 15) }}</summary><p>Saved pages can expire. Drafts and queued changes have their own time limits. Signing out, clearing site data or using private browsing can remove your saved work.</p><p>Clearing offline data also removes unsent drafts and queued changes from this browser.</p><button type="button" class="btn btn-secondary offline-clear-button" data-offline-clear>Clear offline data</button></details>
-        <a class="offline-home-link" href="/">Return home {{ icon('arrow', 16) }}</a>
+        <span class="offline-storage-icon">{{ icon('shield', 22) }}</span>
+        <h2 id="offline-storage-title">Saved here. Kept private.</h2>
+        <p>
+          Your offline work is encrypted in this browser. Reopen Nurse.ng and
+          reconnect to send queued changes.
+        </p>
+        <details>
+          <summary>
+            About offline storage {{ icon('chevron-down', 15) }}
+          </summary>
+          <p>
+            Saved pages can expire. Drafts and queued changes have their own
+            time limits. Signing out, clearing site data or using private
+            browsing can remove your saved work.
+          </p>
+          <p>
+            Clearing offline data also removes unsent drafts and queued changes
+            from this browser.
+          </p>
+          <button
+            type="button"
+            class="btn btn-secondary offline-clear-button"
+            data-offline-clear
+          >
+            Clear offline data
+          </button>
+        </details>
+        <a class="offline-home-link" href="/"
+          >Return home {{ icon('arrow', 16) }}</a
+        >
       </aside>
     </div>
   </div>
-  {% for kind, symbol in [('drafts', 'edit'), ('changes', 'check'), ('records', 'folder')] %}
-  <template id="offline-empty-{{ kind }}"><div class="offline-empty"><span class="offline-empty-icon">{{ icon(symbol, 25) }}</span><h3></h3><p></p></div></template>
+  {% for kind, symbol in [('drafts', 'edit'), ('changes', 'check'), ('records',
+  'folder')] %}
+  <template id="offline-empty-{{ kind }}"
+    ><div class="offline-empty">
+      <span class="offline-empty-icon">{{ icon(symbol, 25) }}</span>
+      <h3></h3>
+      <p></p></div
+  ></template>
   {% endfor %}
-  <template id="offline-profile-template"><form class="stacked-form" data-offline-profile-form>
-    <h2>Edit your saved profile</h2><p>Changes to public fields become visible after synchronization. Sharing and verification controls require a connection.</p>
-    {% include "profile/_fields.html" %}
-    <button type="submit" class="btn btn-primary">Save locally for synchronization</button>
-  </form></template>
-  <noscript><p>Offline storage and synchronization need JavaScript. Ordinary Nurse.ng pages remain available when connected.</p></noscript>
+  <template id="offline-profile-template"
+    ><form class="stacked-form" data-offline-profile-form>
+      <h2>Edit your saved profile</h2>
+      <p>
+        Changes to public fields become visible after synchronization. Sharing
+        and verification controls require a connection.
+      </p>
+      {% include "profile/_fields.html" %}
+      <button type="submit" class="btn btn-primary">
+        Save locally for synchronization
+      </button>
+    </form></template
+  >
+  <noscript
+    ><p>
+      Offline storage and synchronization need JavaScript. Ordinary Nurse.ng
+      pages remain available when connected.
+    </p></noscript
+  >
 </div>
 {% endblock %}

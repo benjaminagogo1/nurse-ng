@@ -1,41 +1,152 @@
-{% extends "base.html" %}
-{% from "_icons.html" import icon %}
-{% from "_display.html" import display_button %}
-{% block title %}Create your account — Nurse.ng{% endblock %}
-{% block header %}
-<header class="site-header auth-header"><div class="site-header-inner"><a class="brand" href="/">{{ icon('logo', 31) }}<span>Nurse.ng</span></a><p class="header-hint">Already have an account? <a href="/auth/login">Sign in {{ icon('arrow', 15) }}</a></p>{{ display_button() }}</div></header>
-{% endblock %}
-{% block content %}
-{% set chosen = role or 'nurse' %}
+{% extends "base.html" %} {% from "_icons.html" import icon %} {% from
+"_display.html" import display_button %} {% block title %}Create your account —
+Nurse.ng{% endblock %} {% block header %}
+<header class="site-header auth-header">
+  <div class="site-header-inner">
+    <a class="brand" href="/">{{ icon('logo', 31) }}<span>Nurse.ng</span></a>
+    <p class="header-hint">
+      Already have an account?
+      <a href="/auth/login">Sign in {{ icon('arrow', 15) }}</a>
+    </p>
+    {{ display_button() }}
+  </div>
+</header>
+{% endblock %} {% block content %} {% set chosen = role or 'nurse' %}
 <section class="auth-split">
   <aside class="auth-panel">
-    <div class="auth-panel-copy"><p class="hero-eyebrow"><span></span> You belong here</p><h2>Join a community<br>that supports<br>your journey.</h2><p>Whether you're a nurse, an employer, or a partner, find the people and possibilities that move you forward.</p><ul class="checklist"><li>Professional profiles you control</li><li>Job opportunities, near and far</li><li>Meaningful connections &amp; collaboration</li><li>Learning &amp; career development</li></ul></div>
-    <div class="auth-photo"><img src="{{ url_for('static', path='/img/healthcare-team.jpg') }}" alt="Nurses and healthcare colleagues standing together in a hospital" width="1200" height="800"><div><strong>Better, together.</strong><span>For every nurse. At every stage.</span></div></div>
-  </aside>
-  <div class="auth-form-wrap"><div class="auth-card">
-    <p class="eyebrow">A new beginning</p><h1>Create your account</h1><p class="lede">Your next opportunity starts here.</p>
-    {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
-    <form method="post" action="/auth/register" class="stacked-form" id="register-form">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-      <div class="role-tabs" role="radiogroup" aria-label="I am joining as">
-        {% for value, label in [('nurse', "I'm a Nurse"), ('employer', "I'm an Employer"), ('partner', "I'm a Partner")] %}
-        <label><input type="radio" name="role" value="{{ value }}"{% if chosen == value %} checked{% endif %}><span>{{ label }}</span></label>
-        {% endfor %}
+    <div class="auth-panel-copy">
+      <p class="hero-eyebrow"><span></span> You belong here</p>
+      <h2>Join a community<br />that supports<br />your journey.</h2>
+      <p>
+        Whether you're a nurse, an employer, or a partner, find the people and
+        possibilities that move you forward.
+      </p>
+      <ul class="checklist">
+        <li>Professional profiles you control</li>
+        <li>Job opportunities, near and far</li>
+        <li>Meaningful connections &amp; collaboration</li>
+        <li>Learning &amp; career development</li>
+      </ul>
+    </div>
+    <div class="auth-photo">
+      <img
+        src="{{ url_for('static', path='/img/nigerian-midwives.webp') }}"
+        alt="Midwifery students and their instructor during practical training in Jigawa, Nigeria"
+        width="1800"
+        height="1200"
+      />
+      <div>
+        <strong>Better, together.</strong
+        ><span>For every nurse. At every stage.</span>
       </div>
-      <label for="full_name">Full name</label>
-      <input id="full_name" name="full_name" type="text" maxlength="120" autocomplete="name" value="{{ full_name or '' }}" placeholder="Enter your full name" required>
-      <label for="email">Email address <span class="optional">(optional)</span></label>
-      <input id="email" name="email" type="email" maxlength="254" autocomplete="email" value="{{ email or '' }}" placeholder="you@example.com">
-      <label for="phone">Phone number</label>
-      <div class="input-affix"><span class="affix-left"><span class="flag-ng" aria-hidden="true"></span></span><input class="has-left" id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" value="{{ phone or '' }}" placeholder="+234 801 234 5678" required></div>
-      <label for="password">Password</label>
-      <div class="input-affix"><input class="has-right" id="password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="Create a strong password" aria-describedby="password-hint" required><button class="affix-right" type="button" data-toggle-password="password" aria-label="Show password" aria-pressed="false">{{ icon('eye', 18) }}</button></div>
-      <p class="field-hint" id="password-hint">Use at least 8 characters.</p>
-      <button type="submit" class="btn btn-primary btn-block">Create account {{ icon('arrow', 17) }}</button>
-    </form>
-    <p class="auth-privacy">{{ icon('lock', 14) }} Your profile starts private. You choose what to share.</p>
-    {% include 'auth/_social_buttons.html' %}
-    <p class="form-alt">Already part of the community? <a href="/auth/login">Sign in</a></p>
-  </div></div>
+    </div>
+  </aside>
+  <div class="auth-form-wrap">
+    <div class="auth-card">
+      <p class="eyebrow">A new beginning</p>
+      <h1>Create your account</h1>
+      <p class="lede">Your next opportunity starts here.</p>
+      {% if error %}
+      <p class="form-error" role="alert">{{ error }}</p>
+      {% endif %}
+      <form
+        method="post"
+        action="/auth/register"
+        class="stacked-form"
+        id="register-form"
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <div class="role-tabs" role="radiogroup" aria-label="I am joining as">
+          {% for value, label in [('nurse', "I'm a Nurse"), ('employer', "I'm an Employer"), ('partner', "I'm a Partner")] %}
+          <label
+            ><input
+              type="radio"
+              name="role"
+              value="{{ value }}"
+              {% if chosen == value %}
+              checked{%
+              endif
+              %}
+            /><span>{{ label }}</span></label
+          >
+          {% endfor %}
+        </div>
+        <label for="full_name">Full name</label>
+        <input
+          id="full_name"
+          name="full_name"
+          type="text"
+          maxlength="120"
+          autocomplete="name"
+          value="{{ full_name or '' }}"
+          placeholder="Enter your full name"
+          required
+        />
+        <label for="email"
+          >Email address <span class="optional">(optional)</span></label
+        >
+        <input
+          id="email"
+          name="email"
+          type="email"
+          maxlength="254"
+          autocomplete="email"
+          value="{{ email or '' }}"
+          placeholder="you@example.com"
+        />
+        <label for="phone">Phone number</label>
+        <div class="input-affix">
+          <span class="affix-left"
+            ><span class="flag-ng" aria-hidden="true"></span></span
+          ><input
+            class="has-left"
+            id="phone"
+            name="phone"
+            type="tel"
+            inputmode="tel"
+            autocomplete="tel"
+            value="{{ phone or '' }}"
+            placeholder="+234 801 234 5678"
+            required
+          />
+        </div>
+        <label for="password">Password</label>
+        <div class="input-affix">
+          <input
+            class="has-right"
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="new-password"
+            minlength="8"
+            maxlength="128"
+            placeholder="Create a strong password"
+            aria-describedby="password-hint"
+            required
+          /><button
+            class="affix-right"
+            type="button"
+            data-toggle-password="password"
+            aria-label="Show password"
+            aria-pressed="false"
+          >
+            {{ icon('eye', 18) }}
+          </button>
+        </div>
+        <p class="field-hint" id="password-hint">Use at least 8 characters.</p>
+        <button type="submit" class="btn btn-primary btn-block">
+          Create account {{ icon('arrow', 17) }}
+        </button>
+      </form>
+      <p class="auth-privacy">
+        {{ icon('lock', 14) }} Your profile starts private. You choose what to
+        share.
+      </p>
+      {% include 'auth/_social_buttons.html' %}
+      <p class="form-alt">
+        Already part of the community? <a href="/auth/login">Sign in</a>
+      </p>
+    </div>
+  </div>
 </section>
 {% endblock %}

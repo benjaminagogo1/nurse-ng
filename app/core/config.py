@@ -116,9 +116,15 @@ class Settings(BaseSettings):
     recruitment_search_timeout_seconds: int = Field(default=10, ge=2, le=12)
     recruitment_daily_task_limit: int = Field(default=100, ge=1, le=1000)
     recruitment_pending_task_limit: int = Field(default=500, ge=20, le=5000)
+    # Readiness requires these worker roles to have a fresh progress report.
+    required_workers: str = ""
 
     @model_validator(mode="after")
     def validate_security_settings(self) -> Self:
+        roles = [role.strip() for role in self.required_workers.split(",") if role.strip()]
+        if set(roles) - {"recruitment", "reels", "notifications"}:
+            raise ValueError("Required workers must be recruitment, reels, or notifications.")
+        self.required_workers = ",".join(dict.fromkeys(roles))
         production = self.environment == "production"
         if not self.secret_key and not production:
             self.secret_key = secrets.token_urlsafe(32)

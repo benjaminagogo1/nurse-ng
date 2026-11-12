@@ -1,5 +1,6 @@
 """Nigerian priority in the feed and queue, with wider early-career coverage."""
 
+import re
 from datetime import timedelta
 from urllib.parse import parse_qs, urlsplit
 
@@ -90,9 +91,11 @@ def test_feed_ranks_nigeria_before_newer_foreign_jobs_and_preserves_filters(
         "country": ["NG"], "type": ["fellowship"], "q": ["Fellowship"],
     }
     assert 'name="type" form="jobs-search-form"' in page.text
-    assert '<option value="fellowship" selected>' in page.text
-    assert '<option value="internship">Internship</option>' in page.text
-    assert 'name="scope" value="international"' in page.text
+    from tests.helpers import has_element
+
+    assert has_element(page, 'option', value='fellowship', selected=True)
+    assert re.search(r'<option\b[^>]*value="internship"[^>]*>\s*Internship\s*</option>', page.text)
+    assert has_element(page, 'input', name='scope', value='international')
     assert "Overseas Fellowship" not in client.get("/jobs?country=NG").text
 
 

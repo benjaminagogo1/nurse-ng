@@ -1,33 +1,170 @@
-{% extends "base.html" %}
-{% from "_avatar.html" import avatar with context %}
-{% from "_icons.html" import icon %}
-{% from "_empty_state.html" import empty_state %}
-{% block title %}Messages — Nurse.ng{% endblock %}
-{% block content %}
+{% extends "base.html" %} {% from "_avatar.html" import avatar with context %}
+{% from "_icons.html" import icon %} {% from "_empty_state.html" import
+empty_state %} {% block title %}Messages — Nurse.ng{% endblock %} {% block
+content %}
 <section class="community-page">
-  <p class="eyebrow">A conversation can change everything</p><div class="page-heading-row"><div><h1>Messages</h1><p class="lede">Keep in touch with your professional connections.</p></div><a class="text-link hide-xs" href="/network">My network {{ icon('arrow', 16) }}</a></div>
-  <div class="inbox{% if recipient %} has-thread{% elif not contacts %} inbox-unconnected{% endif %}"{% if not contacts and not recipient %} data-tour="messages"{% endif %}>
-    {% if contacts or recipient %}<aside class="inbox-contacts" aria-label="Conversations"{% if not recipient %} data-tour="messages"{% endif %}><h2>Your connections</h2>{% for contact in contacts %}<a class="contact-row" href="/messages/{{ contact.id }}"{% if recipient and recipient.id == contact.id %} aria-current="page"{% endif %}>{{ avatar(contact, contact.community_name, 'avatar') }}<span><strong>{{ contact.community_name or 'Nurse' }}</strong><small>Connected on Nurse.ng</small></span>{{ icon('chevron', 15) }}</a>{% else %}<p class="field-hint">Your accepted connections appear here.</p>{% endfor %}</aside>{% endif %}
-    <div class="inbox-thread"{% if recipient %} data-conversation="/messages/{{ recipient.id }}"{% endif %}>
+  <p class="eyebrow">A conversation can change everything</p>
+  <div class="page-heading-row">
+    <div>
+      <h1>Messages</h1>
+      <p class="lede">Keep in touch with your professional connections.</p>
+    </div>
+    <a class="text-link hide-xs" href="/network"
+      >My network {{ icon('arrow', 16) }}</a
+    >
+  </div>
+  <div
+    class="inbox{% if recipient %} has-thread{% elif not contacts %} inbox-unconnected{% endif %}"
+    {%
+    if
+    not
+    contacts
+    and
+    not
+    recipient
+    %}
+    data-tour="messages"
+    {%
+    endif
+    %}
+  >
+    {% if contacts or recipient %}
+    <aside
+      class="inbox-contacts"
+      aria-label="Conversations"
+      {%
+      if
+      not
+      recipient
+      %}
+      data-tour="messages"
+      {%
+      endif
+      %}
+    >
+      <h2>Your connections</h2>
+      {% for contact in contacts %}<a
+        class="contact-row"
+        href="/messages/{{ contact.id }}"
+        {% if recipient and recipient.id == contact.id %}
+        aria-current="page"
+        {%
+        endif
+        %}
+        >{{ avatar(contact, contact.community_name, 'avatar') }}<span
+          ><strong>{{ contact.community_name or 'Nurse' }}</strong
+          ><small>Connected on Nurse.ng</small></span
+        >{{ icon('chevron', 15) }}</a
+      >{% else %}
+      <p class="field-hint">Your accepted connections appear here.</p>
+      {% endfor %}
+    </aside>
+    {% endif %}
+    <div
+      class="inbox-thread"
+      {%
+      if
+      recipient
+      %}
+      data-conversation="/messages/{{ recipient.id }}"
+      {%
+      endif
+      %}
+    >
       {% if recipient %}
       <a class="thread-back text-link" href="/messages">← All connections</a>
-      <div class="thread-header">{{ avatar(recipient, recipient.community_name, 'avatar') }}<div><h2>{{ recipient.community_name or 'Nurse' }}</h2><small>Your professional connection</small></div></div>
+      <div class="thread-header">
+        {{ avatar(recipient, recipient.community_name, 'avatar') }}
+        <div>
+          <h2>{{ recipient.community_name or 'Nurse' }}</h2>
+          <small>Your professional connection</small>
+        </div>
+      </div>
       <div class="thread-messages" tabindex="0" aria-label="Message history">
-        {% if history %}<a class="text-link" href="/messages/{{ recipient.id }}#latest">Return to latest messages</a>{% endif %}
-        <a class="thread-history btn btn-secondary btn-sm" data-older="{{ older or '' }}" href="/messages/{{ recipient.id }}?before={{ older }}" {% if not older %}hidden{% endif %}>Load older messages</a>
-        {% for message in messages %}<div data-message-id="{{ message.id }}" data-created-at="{{ message.created_at.isoformat() }}" class="message-bubble{% if message.sender_id == user.id %} is-mine{% endif %}"><p>{{ message.body }}</p><time datetime="{{ message.created_at.isoformat() }}">{{ message.created_at.strftime('%d %b · %H:%M') }} UTC</time></div>{% else %}<div class="empty-state compact-empty"><span class="empty-icon">{{ icon('chat', 28) }}</span><h3>Start with a hello.</h3><p>A thoughtful conversation is the beginning of a stronger connection.</p></div>{% endfor %}
+        {% if history %}<a
+          class="text-link"
+          href="/messages/{{ recipient.id }}#latest"
+          >Return to latest messages</a
+        >{% endif %}
+        <a
+          class="thread-history btn btn-secondary btn-sm"
+          data-older="{{ older or '' }}"
+          href="/messages/{{ recipient.id }}?before={{ older }}"
+          {%
+          if
+          not
+          older
+          %}hidden{%
+          endif
+          %}
+          >Load older messages</a
+        >
+        {% for message in messages %}
+        <div
+          data-message-id="{{ message.id }}"
+          data-created-at="{{ message.created_at.isoformat() }}"
+          class="message-bubble{% if message.sender_id == user.id %} is-mine{% endif %}"
+        >
+          <p>{{ message.body }}</p>
+          <time datetime="{{ message.created_at.isoformat() }}"
+            >{{ message.created_at.strftime('%d %b · %H:%M') }} UTC</time
+          >
+        </div>
+        {% else %}
+        <div class="empty-state compact-empty">
+          <span class="empty-icon">{{ icon('chat', 28) }}</span>
+          <h3>Start with a hello.</h3>
+          <p>
+            A thoughtful conversation is the beginning of a stronger connection.
+          </p>
+        </div>
+        {% endfor %}
         <span id="latest"></span>
       </div>
-      <button class="thread-new btn btn-secondary btn-sm" type="button" hidden>New messages ↓</button>
-      <p class="thread-status{% if error %} is-error{% endif %}" role="status" aria-live="polite">{{ error or 'Your conversation is private between you and this connection.' }}</p>
-      <form class="message-compose" method="post" action="/messages/{{ recipient.id }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="client_key" value="{{ client_key }}"><label class="sr-only" for="message-body">Your message</label><textarea id="message-body" name="body" rows="2" maxlength="3000" placeholder="Write a message…" required>{{ body }}</textarea><button type="submit" class="btn btn-primary">Send {{ icon('arrow', 17) }}</button></form>
-      {% else %}
-      {% if contacts %}<div class="empty-state inbox-empty"><span class="empty-icon">{{ icon('chat', 30) }}</span><h2>Choose a connection to start</h2><p>Say hello, share an idea or ask a colleague for advice.</p></div>
-      {% else %}{{ empty_state('Start a conversation with a colleague', 'Find colleagues and send a connection request. Once it is accepted, you can message each other here.', '/nurses', 'Find colleagues', 'chat', primary=true) }}{% endif %}
-      {% endif %}
+      <button class="thread-new btn btn-secondary btn-sm" type="button" hidden>
+        New messages ↓
+      </button>
+      <p
+        class="thread-status{% if error %} is-error{% endif %}"
+        role="status"
+        aria-live="polite"
+      >
+        {{ error or 'Your conversation is private between you and this connection.' }}
+      </p>
+      <form
+        class="message-compose"
+        method="post"
+        action="/messages/{{ recipient.id }}"
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" /><input
+          type="hidden"
+          name="client_key"
+          value="{{ client_key }}"
+        /><label class="sr-only" for="message-body">Your message</label
+        ><textarea
+          id="message-body"
+          name="body"
+          rows="2"
+          maxlength="3000"
+          placeholder="Write a message…"
+          required
+        >
+{{ body }}</textarea
+        ><button type="submit" class="btn btn-primary">
+          Send {{ icon('arrow', 17) }}
+        </button>
+      </form>
+      {% else %} {% if contacts %}
+      <div class="empty-state inbox-empty">
+        <span class="empty-icon">{{ icon('chat', 30) }}</span>
+        <h2>Choose a connection to start</h2>
+        <p>Say hello, share an idea or ask a colleague for advice.</p>
+      </div>
+      {% else %}{{ empty_state('Start a conversation with a colleague', 'Find colleagues and send a connection request. Once it is accepted, you can message each other here.', '/nurses', 'Find colleagues', 'chat',
+      primary=true) }}{% endif %} {% endif %}
     </div>
   </div>
 </section>
+{% endblock %} {% block scripts %}
+<script src="{{ url_for('static', path='/js/messages.js') }}" defer></script>
 {% endblock %}
-
-{% block scripts %}<script src="{{ url_for('static', path='/js/messages.js') }}" defer></script>{% endblock %}

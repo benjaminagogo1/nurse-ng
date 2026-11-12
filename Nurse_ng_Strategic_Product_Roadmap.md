@@ -1,4 +1,5 @@
 # Strategic Product Proposal: Nurse.ng
+
 ## Verified Professional Infrastructure for Nurses in Nigeria and Beyond
 
 **Document type:** Engineering and product strategy proposal  
@@ -34,15 +35,19 @@ The long-term vision is to become professional infrastructure for nurses: identi
 ## 2. Product Vision, Mission, and Positioning
 
 ### Vision
+
 A trusted professional digital home where nurses can present their verified credentials, grow their careers, and connect to legitimate opportunities.
 
 ### Mission
+
 Reduce friction and uncertainty in professional discovery and career progression for nurses by providing trustworthy profiles, transparent verification, relevant opportunities, and useful professional services.
 
 ### Positioning statement
+
 Nurse.ng is a nurse-focused professional platform that helps nurses present their credentials and connect with legitimate employers and professional opportunities. Official licensing remains the responsibility of the relevant regulator.
 
 ### What Nurse.ng is
+
 - A professional profile and discovery platform.
 - A credential-verification workflow where lawful source access and human review support it.
 - A jobs and career opportunity marketplace, once employer quality controls exist.
@@ -50,6 +55,7 @@ Nurse.ng is a nurse-focused professional platform that helps nurses present thei
 - A potential bridge to international career information and recruitment pathways, subject to destination-country requirements.
 
 ### What Nurse.ng is not
+
 - Not the NMCN or a substitute for its register.
 - Not a guarantee of employment, competence, immigration eligibility, or licence transfer.
 - Not an unmoderated repository for sensitive patient information.
@@ -62,6 +68,7 @@ Nurse.ng is a nurse-focused professional platform that helps nurses present thei
 ## 3. Problem Statement and Hypotheses
 
 ### Problems to investigate
+
 1. Nurses may lack a well-organized, portable professional profile that can be shared with employers.
 2. Employers may spend time checking identity, qualifications, registration status, experience, and references across fragmented channels.
 3. Legitimate job opportunities may be difficult to distinguish from misleading, fraudulent, or exploitative offers.
@@ -72,6 +79,7 @@ Nurse.ng is a nurse-focused professional platform that helps nurses present thei
 These are **problem hypotheses**, not proven market facts. They must be validated through interviews and workflow observation before significant implementation spending.
 
 ### Primary hypotheses
+
 - Nurses will create and maintain profiles if the platform gives them tangible value and does not expose unnecessary personal data.
 - Employers will pay for reliable candidate discovery or workflow tools if they reduce recruitment time or verification effort.
 - Nurses will trust the service only if verification claims are precise, transparent, and appealable.
@@ -79,6 +87,7 @@ These are **problem hypotheses**, not proven market facts. They must be validate
 - Professional learning and community features can improve retention, but should not distract from the core trust-and-career workflow.
 
 ### Discovery questions
+
 - How do nurses currently prove registration and qualifications to employers?
 - What are the most time-consuming steps in hiring nurses?
 - Which sources can be lawfully and reliably used to verify professional status?
@@ -93,12 +102,14 @@ These are **problem hypotheses**, not proven market facts. They must be validate
 ## 4. Users, Customers, and Stakeholders
 
 ### Primary users
+
 - Student nurses and newly qualified nurses (with status clearly distinguished from registered professionals).
 - Registered nurses seeking employment or career progression.
 - Experienced nurses seeking leadership, specialization, mentorship, or international opportunities.
 - Nurse educators and professional mentors.
 
 ### Customers and payers
+
 - Hospitals and clinics.
 - Home-care providers and other legitimate healthcare employers.
 - Recruitment firms that pass platform vetting.
@@ -108,6 +119,7 @@ These are **problem hypotheses**, not proven market facts. They must be validate
 Users and payers are not always the same. Nurses should not be forced to pay merely to make a basic professional profile discoverable if the business model can be supported by employer-side services.
 
 ### Stakeholders
+
 - NMCN and other relevant professional bodies, as applicable.
 - Employers and human-resource teams.
 - Nursing schools and training institutions.
@@ -122,6 +134,7 @@ Users and payers are not always the same. Nurses should not be forced to pay mer
 ## 5. Value Proposition and Differentiation
 
 ### For nurses
+
 - A reusable professional profile.
 - Clear distinction between self-declared information and verified information.
 - Control over profile visibility and employer contact.
@@ -129,6 +142,7 @@ Users and payers are not always the same. Nurses should not be forced to pay mer
 - Reporting, appeal, and account-support mechanisms.
 
 ### For employers
+
 - Searchable profiles with explicit verification labels and dates.
 - Candidate contact workflows with consent and abuse controls.
 - Employer accounts with organization checks and accountable users.
@@ -136,6 +150,7 @@ Users and payers are not always the same. Nurses should not be forced to pay mer
 - Reduced administrative friction, without promising that a profile alone proves clinical competence.
 
 ### Potential differentiation
+
 - Nurse-specific workflows and terminology.
 - Transparent evidence labels: self-declared, document reviewed, source-confirmed, expired, disputed, or not verified.
 - Nigerian context and low-bandwidth usability.
@@ -166,6 +181,7 @@ Differentiation must be tested against existing directories, professional networ
 ## 7. Scope: MVP, Later Releases, and Explicit Exclusions
 
 ### MVP: prove trust and professional discovery
+
 - Account creation and secure sign-in.
 - Nurse profile with structured professional history.
 - Explicit professional status categories (for example, student, newly qualified, registered, specialist where recognized).
@@ -180,6 +196,7 @@ Differentiation must be tested against existing directories, professional networ
 - Basic analytics that avoid exposing sensitive individual data.
 
 ### Release 2: jobs marketplace
+
 - Employer job creation and review.
 - Job categories, location, qualifications, work type, and closing date.
 - Candidate applications or controlled contact requests.
@@ -188,6 +205,7 @@ Differentiation must be tested against existing directories, professional networ
 - Clear terms on fees and no guarantee of employment.
 
 ### Release 3: professional development and community
+
 - CPD and course directory.
 - Mentorship discovery and professional groups.
 - Events and announcements.
@@ -195,6 +213,7 @@ Differentiation must be tested against existing directories, professional networ
 - Partner integrations only after due diligence.
 
 ### Release 4: international mobility support
+
 - Country-specific information pages reviewed by qualified partners.
 - Destination regulator links and checklists.
 - Distinguish information from legal, immigration, or licensing advice.
@@ -202,6 +221,7 @@ Differentiation must be tested against existing directories, professional networ
 - No “guaranteed relocation” claims.
 
 ### Explicitly out of scope for early releases
+
 - Issuing licences, certificates, or regulator-equivalent credentials.
 - Storing patient records.
 - Automated final judgments about a nurse's competence.
@@ -215,6 +235,7 @@ Differentiation must be tested against existing directories, professional networ
 ## 8. Core User Journeys
 
 ### Journey A: Nurse onboarding
+
 1. User selects a clear status category.
 2. User creates an account and verifies control of their contact method.
 3. User completes a profile with only required fields.
@@ -227,6 +248,7 @@ Differentiation must be tested against existing directories, professional networ
 10. Profile displays only fields permitted by the nurse and platform policy.
 
 ### Journey B: Employer onboarding
+
 1. Organization representative creates an employer account.
 2. Platform verifies organization identity and the representative's authority.
 3. High-risk or suspicious organizations enter manual review.
@@ -236,6 +258,7 @@ Differentiation must be tested against existing directories, professional networ
 7. Reports trigger review and possible suspension.
 
 ### Journey C: Candidate discovery
+
 1. Employer searches by appropriate professional criteria.
 2. Search returns only profiles that are discoverable under their settings.
 3. Verification label and date are visible with limitations.
@@ -244,6 +267,7 @@ Differentiation must be tested against existing directories, professional networ
 6. Platform monitors suspicious bulk access and scraping.
 
 ### Journey D: Job listing
+
 1. Employer submits a structured vacancy.
 2. Platform validates required fields and reviews the listing.
 3. Listing becomes visible only after checks pass.
@@ -259,6 +283,7 @@ Differentiation must be tested against existing directories, professional networ
 Verification is the product's highest-risk promise. The team must publish a precise verification taxonomy.
 
 ### Suggested labels
+
 - **Self-declared:** supplied by the user and not independently checked.
 - **Document reviewed:** a reviewer inspected a submitted document; this does not necessarily prove it is authentic.
 - **Source-confirmed:** checked against an identified, lawfully accessible authoritative source.
@@ -268,6 +293,7 @@ Verification is the product's highest-risk promise. The team must publish a prec
 - **Revoked / invalidated:** use only when a reliable source and lawful process support the status; never infer revocation from silence.
 
 ### Required controls
+
 - Record who reviewed a claim and when.
 - Store the minimum evidence needed and restrict access.
 - Define retention periods and deletion rules.
@@ -278,6 +304,7 @@ Verification is the product's highest-risk promise. The team must publish a prec
 - Clearly distinguish NMCN registration from foreign licensing, specialty recognition, or employment eligibility.
 
 ### Failure scenarios
+
 - Official source is unavailable.
 - Names differ across documents.
 - Document is altered or stolen.
@@ -295,6 +322,7 @@ The platform must fail transparently: show “unable to verify” rather than in
 ## 10. Functional Requirements
 
 ### Identity and access
+
 - Secure account registration and recovery.
 - Multi-factor authentication for administrators and privileged reviewers.
 - Role-based access control for nurse, employer user, reviewer, moderator, and administrator.
@@ -302,6 +330,7 @@ The platform must fail transparently: show “unable to verify” rather than in
 - Rate limits for authentication and high-risk actions.
 
 ### Profiles
+
 - Structured fields with provenance (user-provided vs reviewed).
 - Field-level visibility settings.
 - Change history for material credential claims.
@@ -309,6 +338,7 @@ The platform must fail transparently: show “unable to verify” rather than in
 - Export and correction pathways.
 
 ### Verification
+
 - Evidence upload with type and size limits.
 - Malware scanning and safe file handling.
 - Reviewer queue, assignment, decision, reason, and audit history.
@@ -316,6 +346,7 @@ The platform must fail transparently: show “unable to verify” rather than in
 - Appeals and dispute resolution.
 
 ### Search and recruitment
+
 - Permission-aware search.
 - Anti-scraping and rate limiting.
 - Candidate contact requests with consent.
@@ -324,12 +355,14 @@ The platform must fail transparently: show “unable to verify” rather than in
 - Audit trail for bulk access and exports.
 
 ### Administration and support
+
 - Case management for reports, appeals, suspected fraud, and data requests.
 - Moderation decisions with reason codes.
 - Account suspension and reinstatement workflows.
 - Support escalation and incident management.
 
 ### Non-functional requirements
+
 - Mobile-first and usable on low-bandwidth connections.
 - Accessibility aligned with WCAG 2.2 AA as a target.
 - Clear availability and recovery objectives set before production.
@@ -345,6 +378,7 @@ The platform must fail transparently: show “unable to verify” rather than in
 The team should select technologies after documenting constraints, team skills, cost, hosting options, and expected scale. The architecture below is logical, not a mandate to adopt a particular framework.
 
 ### Logical components
+
 1. **Web client:** responsive nurse and employer experiences.
 2. **API layer:** validated endpoints, authentication, authorization, rate limits, versioning.
 3. **Identity and access module:** accounts, sessions, roles, organization membership.
@@ -360,6 +394,7 @@ The team should select technologies after documenting constraints, team skills, 
 13. **Background jobs:** scanning, notifications, expiry checks, moderation signals.
 
 ### Architecture principles
+
 - Keep business rules out of UI components.
 - Enforce authorization on the server, not only in the interface.
 - Use database constraints for invariants that must always hold.
@@ -373,6 +408,7 @@ The team should select technologies after documenting constraints, team skills, 
 - Keep the ability to split components later where scaling or organizational boundaries justify it.
 
 ### Illustrative core entities
+
 - User
 - NurseProfile
 - CredentialClaim
@@ -414,6 +450,7 @@ Use stable internal identifiers. Avoid making national identity numbers or profe
 The platform may process identity information, professional records, contact details, employment history, and sensitive documents. Nigerian legal obligations and any destination-country obligations must be assessed by qualified counsel and privacy professionals before launch.
 
 ### Minimum readiness work
+
 - Map all personal data and purposes.
 - Identify the data controller/processor roles and relevant legal bases.
 - Publish understandable privacy notices and terms.
@@ -427,6 +464,7 @@ The platform may process identity information, professional records, contact det
 - Obtain legal advice before offering cross-border recruitment or immigration-related services.
 
 ### Security baseline
+
 - TLS in transit and encryption at rest where supported.
 - Strong password hashing using a maintained password-hashing algorithm.
 - Multi-factor authentication for privileged roles.
@@ -447,6 +485,7 @@ Do not claim “fully compliant” merely because a checklist exists. Compliance
 Threats include fake nurses, fake employers, credential fraud, recruitment scams, profile scraping, harassment, discriminatory filtering, doxxing, insider misuse, account takeover, and false accusations.
 
 Controls:
+
 - Employer verification and ongoing re-review.
 - Nurse-controlled visibility and contact permissions.
 - Reporting, blocking, appeals, and documented enforcement.
@@ -464,6 +503,7 @@ Controls:
 ## 15. Business Model and Unit Economics
 
 Potential models to test:
+
 1. **Employer subscription:** candidate search, team seats, shortlist tools, and recruitment workflow.
 2. **Paid job listings:** transparent pricing with fraud screening; payment never influences verification.
 3. **Institutional plans:** nursing schools, hospitals, or associations use profile or career-support tools.
@@ -471,9 +511,11 @@ Potential models to test:
 5. **Premium optional services for nurses:** only if they add genuine value and do not gate basic access to their own profile or exploit job-seeking urgency.
 
 ### Do not assume willingness to pay
+
 Conduct pricing interviews and small paid pilots. Measure the full cost of verification review, support, moderation, storage, messaging, fraud investigation, and customer acquisition.
 
 ### Unit economics to measure
+
 - Cost per verified profile.
 - Minutes and labor cost per review.
 - Employer acquisition cost.
@@ -491,9 +533,11 @@ Do not scale paid acquisition until there is evidence of retention and a repeata
 ## 16. Go-to-Market and Adoption
 
 ### Initial segment
+
 Select one segment where trust and workflow pain can be tested with direct access—for example, a defined group of nurses and a small set of hospitals or home-care employers. Do not launch to every nurse and every employer simultaneously.
 
 ### Pilot design
+
 - Recruit a small, diverse group of nurses.
 - Secure written participation from a limited number of employers.
 - Test onboarding, profile completion, verification, search, and contact requests.
@@ -503,6 +547,7 @@ Select one segment where trust and workflow pain can be tested with direct acces
 - Publish no unsupported claims about coverage or accuracy.
 
 ### Adoption channels to evaluate
+
 - Nursing communities and professional associations.
 - Nursing schools and alumni networks.
 - Employer HR teams.
@@ -510,6 +555,7 @@ Select one segment where trust and workflow pain can be tested with direct acces
 - Referral incentives only if they do not encourage fake accounts or low-quality recruitment.
 
 ### Trust before growth
+
 A small verified community with legitimate employers is more valuable than a large directory full of unverified profiles and stale vacancies.
 
 ---
@@ -517,34 +563,41 @@ A small verified community with legitimate employers is more valuable than a lar
 ## 17. Phased Roadmap and Exit Gates
 
 ### Phase 0 — Discovery and governance (Weeks 1–4; indicative)
+
 **Work:** interviews, workflow observation, competitor review, legal/privacy assessment, source-verification feasibility, initial pricing tests, threat modelling.  
 **Deliverables:** problem brief, user journeys, data map, verification policy draft, product requirements, risk register, pilot partner list.  
 **Exit gate:** a clearly defined urgent workflow, an attainable verification method, and evidence that nurses and employers will participate.
 
 ### Phase 1 — Product and system design (Weeks 5–8; indicative)
+
 **Work:** domain model, permissions matrix, UX prototype, API contracts, data classification, audit design, threat model, operational procedures.  
 **Deliverables:** architecture decision records, prototype, schema, API specification, test strategy, privacy notice draft, support/moderation playbooks.  
 **Exit gate:** engineering and domain stakeholders approve the scope and security model.
 
 ### Phase 2 — Trust-first MVP (Weeks 9–16; indicative)
+
 **Work:** accounts, profiles, verification workflow, employer onboarding, controlled search/contact, reporting, admin tools, observability, deployment automation.  
 **Deliverables:** tested MVP, runbooks, backup/restore proof, security findings report, synthetic test dataset.  
 **Exit gate:** no unresolved critical/high security issues; access-control tests pass; manual review operations are feasible.
 
 ### Phase 3 — Closed pilot (Weeks 17–22; indicative)
+
 **Work:** onboard pilot nurses/employers, support workflows, measure verification time and successful connections, respond to abuse.  
 **Deliverables:** pilot report, user feedback, operational cost estimates, prioritized defect list.  
 **Exit gate:** evidence of repeat use, user trust, acceptable verification accuracy, and a plausible paying customer.
 
 ### Phase 4 — Jobs marketplace (after pilot gate)
+
 **Work:** job listings, application/contact workflows, moderation and fraud response, employer billing if validated.  
 **Exit gate:** sufficient employer demand and reliable abuse-handling capacity.
 
 ### Phase 5 — Professional development/community
+
 **Work:** CPD discovery, mentorship, groups, events, moderation tools.  
 **Exit gate:** core product retention supports expansion and moderation resources are funded.
 
 ### Phase 6 — International mobility
+
 **Work:** destination-specific content and partnerships, carefully scoped recruiter workflows, legal review.  
 **Exit gate:** expert-reviewed content, clear limits, compliance readiness, and validated demand in a specific corridor.
 
@@ -555,6 +608,7 @@ Dates are planning estimates, not promises. A phase should not advance simply be
 ## 18. Quality Assurance and Release Criteria
 
 Test categories:
+
 - Unit tests for domain rules.
 - Integration tests for database, file storage, notifications, and verification workflows.
 - API contract tests.
@@ -569,6 +623,7 @@ Test categories:
 - Pilot acceptance tests based on actual user tasks.
 
 Release must be blocked by:
+
 - Unauthorized profile/evidence access.
 - Exposure of private evidence or secrets.
 - Unreliable or misleading verification labels.
@@ -582,9 +637,11 @@ Release must be blocked by:
 ## 19. Success Metrics
 
 ### North-star outcome
+
 **Legitimate, consent-based professional connections that result in useful career outcomes**, not raw registrations.
 
 ### Trust metrics
+
 - Percentage of profiles with clearly stated verification status.
 - Verification turnaround time and review cost.
 - Appeal rate and reversal rate.
@@ -592,6 +649,7 @@ Release must be blocked by:
 - Employer legitimacy and job-listing quality.
 
 ### Product metrics
+
 - Profile completion and update rate.
 - Search-to-contact conversion.
 - Nurse response rate.
@@ -600,6 +658,7 @@ Release must be blocked by:
 - Monthly active nurses and employers, interpreted alongside quality.
 
 ### Safety metrics
+
 - Reports per 1,000 active users.
 - Time to acknowledge and resolve serious reports.
 - Unauthorized access incidents.
@@ -608,6 +667,7 @@ Release must be blocked by:
 - Data deletion and access requests completed within policy.
 
 ### Business metrics
+
 - Paying employers and renewal.
 - Revenue per employer.
 - Cost per verification.
@@ -619,6 +679,7 @@ Release must be blocked by:
 ## 20. Team and Operating Model
 
 Suggested responsibilities (roles can be combined early, but accountability must remain clear):
+
 - Product lead: scope, discovery, prioritization, metrics.
 - Nursing/domain lead: workflows, terminology, stakeholder engagement.
 - Technical lead/architect: system boundaries, technical decisions, reliability.
@@ -636,24 +697,25 @@ Every high-risk workflow must have a named owner. Do not treat verification and 
 
 ## 21. Risk Register
 
-| Risk | Likelihood / impact | Mitigation | Owner |
-|---|---|---|---|
-| Verification claims are inaccurate | High / High | Precise labels, evidence provenance, review, appeals, re-check policy | Verification lead |
-| Fake employers or job scams | High / High | Organization checks, listing moderation, reporting, takedown process | Trust & safety |
-| Official-source access is unavailable | Medium–High / High | Validate before build; use transparent manual process only where lawful | Product/legal |
-| Low willingness to pay | Medium / High | Pricing interviews, paid pilot, narrow employer segment | Business lead |
-| Nurses do not maintain profiles | Medium / High | User research, useful updates, low-friction mobile UX | Product |
-| Sensitive data exposure | Medium / Critical | Data minimization, least privilege, encryption, security tests, incident plan | Security lead |
-| Platform mistaken for regulator | Medium / High | Clear branding, disclaimers, legal review, precise status labels | Legal/product |
-| Recruiter exploitation/discrimination | Medium / High | Rules, auditability, complaint channels, enforcement | Trust & safety |
-| Moderation costs exceed revenue | Medium / High | Measure operational cost; limit launch scale; automate triage carefully | Operations |
-| International requirements misrepresented | Medium / High | Destination-specific expert review and scope limits | Partnerships/legal |
+| Risk                                      | Likelihood / impact | Mitigation                                                                    | Owner              |
+| ----------------------------------------- | ------------------- | ----------------------------------------------------------------------------- | ------------------ |
+| Verification claims are inaccurate        | High / High         | Precise labels, evidence provenance, review, appeals, re-check policy         | Verification lead  |
+| Fake employers or job scams               | High / High         | Organization checks, listing moderation, reporting, takedown process          | Trust & safety     |
+| Official-source access is unavailable     | Medium–High / High  | Validate before build; use transparent manual process only where lawful       | Product/legal      |
+| Low willingness to pay                    | Medium / High       | Pricing interviews, paid pilot, narrow employer segment                       | Business lead      |
+| Nurses do not maintain profiles           | Medium / High       | User research, useful updates, low-friction mobile UX                         | Product            |
+| Sensitive data exposure                   | Medium / Critical   | Data minimization, least privilege, encryption, security tests, incident plan | Security lead      |
+| Platform mistaken for regulator           | Medium / High       | Clear branding, disclaimers, legal review, precise status labels              | Legal/product      |
+| Recruiter exploitation/discrimination     | Medium / High       | Rules, auditability, complaint channels, enforcement                          | Trust & safety     |
+| Moderation costs exceed revenue           | Medium / High       | Measure operational cost; limit launch scale; automate triage carefully       | Operations         |
+| International requirements misrepresented | Medium / High       | Destination-specific expert review and scope limits                           | Partnerships/legal |
 
 ---
 
 ## 22. Key Decisions Required from the Team
 
 Before implementation begins, the team should explicitly decide:
+
 1. Which exact nurse segment and employer segment will be served first?
 2. What evidence can be verified lawfully and reliably at launch?
 3. What does each verification label mean, and what does it not mean?
@@ -677,6 +739,7 @@ Before implementation begins, the team should explicitly decide:
 **Week 4:** approve architecture and threat model, define pilot success criteria, secure pilot commitments, and produce a go/no-go decision.
 
 ### Deliverables by day 30
+
 - Evidence-backed problem statement.
 - Interview synthesis and unmet-needs map.
 - Defined first user/customer segment.

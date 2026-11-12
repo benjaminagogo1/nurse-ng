@@ -1,17 +1,24 @@
-{% extends "base.html" %}
-{% from "_icons.html" import icon %}
-
-{% block title %}Community — Nurse.ng{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% from "_icons.html" import icon %} {% block title
+%}Community — Nurse.ng{% endblock %} {% block content %}
 <section class="community-page">
   <div class="banner conversation-banner">
     <p class="eyebrow">Your people. Your community.</p>
     <h1>Find your conversation.</h1>
-    <p>Ask questions, exchange useful information, and talk about everyday life in nursing.</p>
+    <p>
+      Ask questions, exchange useful information, and talk about everyday life
+      in nursing.
+    </p>
     <div class="hero-actions">
-      <a class="btn btn-primary" href="{% if user %}/posts/new{% else %}/auth/register{% endif %}">Ask or share</a>
-      {% if user and user.is_staff %}<a class="btn btn-outline-light" href="/moderation">Create a topic</a>{% endif %}
+      <a
+        class="btn btn-primary"
+        href="{% if user %}/posts/new{% else %}/auth/register{% endif %}"
+        >Ask or share</a
+      >
+      {% if user and user.is_staff %}<a
+        class="btn btn-outline-light"
+        href="/moderation"
+        >Create a topic</a
+      >{% endif %}
     </div>
   </div>
 
@@ -24,18 +31,26 @@
   <div class="group-list" id="groups">
     {% for topic in topics %}
     <div class="group-row">
-      <span class="group-avatar" aria-hidden="true">{{ topic.name[:1]|upper }}</span>
+      <span class="group-avatar" aria-hidden="true"
+        >{{ topic.name[:1]|upper }}</span
+      >
       <div class="group-main">
         <strong><a href="/topics/{{ topic.slug }}">{{ topic.name }}</a></strong>
-        {% if topic.description %}<small>{{ topic.description }}</small>{% endif %}
+        {% if topic.description %}<small>{{ topic.description }}</small>{% endif
+        %}
       </div>
       <a class="chip-link" href="/topics/{{ topic.slug }}">Explore</a>
     </div>
     {% else %}
-    <div class="empty-state" style="border:0">
+    <div class="empty-state" style="border: 0">
       <h2>No topics available</h2>
-      <p>This space is getting started. Explore the public feed and help shape the conversation.</p>
-      <a class="btn btn-secondary btn-sm" href="/feed">Explore discussions {{ icon('arrow', 15) }}</a>
+      <p>
+        This space is getting started. Explore the public feed and help shape
+        the conversation.
+      </p>
+      <a class="btn btn-secondary btn-sm" href="/feed"
+        >Explore discussions {{ icon('arrow', 15) }}</a
+      >
     </div>
     {% endfor %}
   </div>

@@ -1,9 +1,15 @@
-{% extends 'base.html' %}
-{% block title %}{{ material.title }} — Nurse.ng{% endblock %}
-{% block content %}
-<section class="form-page"><a href="/learning">← Learning</a><h1>{{ material.title }}</h1>
-<p>An original Nurse.ng guide. Save it for reading in this browser when disconnected.</p>
-<div class="event-description">{{ material.text }}</div>
-<button type="button" data-offline-download>Download for offline reading</button>
+{% extends 'base.html' %} {% block title %}{{ material.title }} — Nurse.ng{%
+endblock %} {% block content %}
+<section class="form-page">
+  <a href="/learning">← Learning</a>
+  <h1>{{ material.title }}</h1>
+  <p>
+    An original Nurse.ng guide. Save it for reading in this browser when
+    disconnected.
+  </p>
+  <div class="event-description">{{ material.text }}</div>
+  <button type="button" data-offline-download>
+    Download for offline reading
+  </button>
 </section>
 {% endblock %}

@@ -1,66 +1,105 @@
-{% extends "base.html" %}
-{% from "_avatar.html" import avatar with context %}
-{% from "_icons.html" import icon %}
-
-{% block title %}For Employers — Nurse.ng{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% from "_avatar.html" import avatar with context %}
+{% from "_icons.html" import icon %} {% block title %}For Employers — Nurse.ng{%
+endblock %} {% block content %}
 <section class="community-page">
-      <div class="banner banner--employer">
-            <p class="eyebrow">For healthcare employers</p>
-            <h1>Find the right talent.<br>Build stronger teams.</h1>
-            <p>Access a pool of skilled nurses ready to make an impact in your organization.</p>
-            <div class="hero-actions"{% if is_employer %} data-tour="employers"{% endif %}>
-                  <a class="btn btn-primary"
-                        href="{% if is_employer %}/jobs/new{% elif user %}/jobs{% else %}/auth/register?role=employer{% endif %}">{% if user and not is_employer %}Explore jobs{% else %}Post a job{% endif %} {{ icon('arrow', 16) }}</a>
-                  <a class="btn btn-outline-light" href="/nurses">Browse Candidates</a>
-            </div>
-      </div>
+  <div class="banner banner--employer">
+    <p class="eyebrow">For healthcare employers</p>
+    <h1>Find the right talent.<br />Build stronger teams.</h1>
+    <p>
+      Access a pool of skilled nurses ready to make an impact in your
+      organization.
+    </p>
+    <div
+      class="hero-actions"
+      {%
+      if
+      is_employer
+      %}
+      data-tour="employers"
+      {%
+      endif
+      %}
+    >
+      <a
+        class="btn btn-primary"
+        href="{% if is_employer %}/jobs/new{% elif user %}/jobs{% else %}/auth/register?role=employer{% endif %}"
+        >{% if user and not is_employer %}Explore jobs{% else %}Post a job{%
+        endif %} {{ icon('arrow', 16) }}</a
+      >
+      <a class="btn btn-outline-light" href="/nurses">Browse Candidates</a>
+    </div>
+  </div>
 
-      <h2 style="margin-top:36px">Why Recruit with Nurse.ng?</h2>
-      <ul class="rec-grid">
-            <li><span class="lp-icon">{{ icon('shield', 24) }}</span><strong>Reviewed Profiles</strong><span
-                        class="rec-sub">See which nurses have had their documents reviewed.</span></li>
-            <li><span class="lp-icon">{{ icon('users', 24) }}</span><strong>Qualified Talent</strong><span
-                        class="rec-sub">Nurses choose exactly what to share.</span></li>
-            <li><span class="lp-icon">{{ icon('calendar', 24) }}</span><strong>Faster Hiring</strong><span
-                        class="rec-sub">Save time and reduce recruitment costs.</span></li>
-            <li><span class="lp-icon">{{ icon('heart', 24) }}</span><strong>Dedicated Support</strong><span
-                        class="rec-sub">We're with you at every step.</span></li>
-      </ul>
+  <h2 style="margin-top: 36px">Why Recruit with Nurse.ng?</h2>
+  <ul class="rec-grid">
+    <li>
+      <span class="lp-icon">{{ icon('shield', 24) }}</span
+      ><strong>Reviewed Profiles</strong
+      ><span class="rec-sub"
+        >See which nurses have had their documents reviewed.</span
+      >
+    </li>
+    <li>
+      <span class="lp-icon">{{ icon('users', 24) }}</span
+      ><strong>Qualified Talent</strong
+      ><span class="rec-sub">Nurses choose exactly what to share.</span>
+    </li>
+    <li>
+      <span class="lp-icon">{{ icon('calendar', 24) }}</span
+      ><strong>Faster Hiring</strong
+      ><span class="rec-sub">Save time and reduce recruitment costs.</span>
+    </li>
+    <li>
+      <span class="lp-icon">{{ icon('heart', 24) }}</span
+      ><strong>Dedicated Support</strong
+      ><span class="rec-sub">We're with you at every step.</span>
+    </li>
+  </ul>
 
-      <div class="db-card-head" style="margin-top:36px">
-            <h2 style="margin:0">Featured Candidates</h2>
-            <a href="/nurses">View all</a>
-      </div>
+  <div class="db-card-head" style="margin-top: 36px">
+    <h2 style="margin: 0">Featured Candidates</h2>
+    <a href="/nurses">View all</a>
+  </div>
 
-      <div class="community-list" style="max-width:none;margin-top:12px">
-            {% for card in cards %}
-            <div class="cand">
-                  {{ avatar(card.profile.user, card.fields.get('display_name'), 'group-avatar') }}
-                  <div class="cand-main">
-                        <strong>{{ card.fields.get('display_name', 'Nurse profile') }}</strong>
-                        <small>
-                              {{ card.fields.get('professional_status', '') }}
-                              {% if card.fields.get('years_experience') %} · {{ card.fields.get('years_experience') }}
-                              years experience{% endif %}
-                        </small>
-                        {% if card.fields.get('skills') %}
-                        <div class="chips">
-                              {% for skill in card.fields.get('skills').split(',') %}<span class="chip">{{ skill.strip()
-                                    }}</span>{% endfor %}
-                        </div>
-                        {% endif %}
-                        {% if card.profile.document_reviewed_at %}<span class="verification-badge"
-                              style="margin-top:8px">Document reviewed</span>{% endif %}
-                  </div>
-                  <a class="btn btn-secondary btn-sm" href="/p/{{ card.profile.public_id }}">View Profile</a>
-            </div>
-            {% else %}
-            <div class="empty-state">
-                  <span class="empty-icon">{{ icon('users', 28) }}</span><h3>A growing community of nursing professionals</h3><p>Public profiles appear here when nurses choose to share them. Publish a role to help your next teammate find you.</p>
-            </div>
-            {% endfor %}
+  <div class="community-list" style="max-width: none; margin-top: 12px">
+    {% for card in cards %}
+    <div class="cand">
+      {{ avatar(card.profile.user, card.fields.get('display_name'),
+      'group-avatar') }}
+      <div class="cand-main">
+        <strong>{{ card.fields.get('display_name', 'Nurse profile') }}</strong>
+        <small>
+          {{ card.fields.get('professional_status', '') }} {% if
+          card.fields.get('years_experience') %} · {{
+          card.fields.get('years_experience') }} years experience{% endif %}
+        </small>
+        {% if card.fields.get('skills') %}
+        <div class="chips">
+          {% for skill in card.fields.get('skills').split(',') %}<span
+            class="chip"
+            >{{ skill.strip() }}</span
+          >{% endfor %}
+        </div>
+        {% endif %} {% if card.profile.document_reviewed_at %}<span
+          class="verification-badge"
+          style="margin-top: 8px"
+          >Document reviewed</span
+        >{% endif %}
       </div>
+      <a class="btn btn-secondary btn-sm" href="/p/{{ card.profile.public_id }}"
+        >View Profile</a
+      >
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <span class="empty-icon">{{ icon('users', 28) }}</span>
+      <h3>A growing community of nursing professionals</h3>
+      <p>
+        Public profiles appear here when nurses choose to share them. Publish a
+        role to help your next teammate find you.
+      </p>
+    </div>
+    {% endfor %}
+  </div>
 </section>
 {% endblock %}

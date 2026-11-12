@@ -2,6 +2,7 @@
 
 import pytest
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.models.profile import NurseProfile
@@ -14,7 +15,7 @@ from app.models.verification import (
 )
 from app.services.auth import register_user
 from app.services.profiles import save_profile as save_profile_service
-from app.services.verification import EvidenceUpload, VerificationError, submit_case
+from app.services.verification import EvidenceUpload, VerificationError, decide_case, submit_case
 from tests.helpers import csrf_from, register_and_sign_in
 from tests.test_profile_pages import save_profile
 from tests.test_profile_sharing import activate, save_sharing
@@ -135,7 +136,7 @@ def test_missing_profile_keeps_verification_as_its_own_page(client, db_session):
 
     assert page.status_code == 200
     assert '<h1>Verification</h1>' in page.text
-    assert 'href="/profile/verification" aria-current="page"' in page.text
+    assert 'href="/profile/verification" aria-current="page"' in " ".join(page.text.split())
     assert "Create your profile to start document review" in page.text
     assert 'href="/profile/edit?return_to=verification"' in page.text
     assert 'type="file"' not in page.text
@@ -416,3 +417,35 @@ def test_the_service_refuses_a_case_for_another_users_profile(db_session):
             licence=EvidenceUpload(data=JPEG, filename="licence.jpg"),
             government_id=EvidenceUpload(data=PNG, filename="id.png"),
         )
+
+
+@pytest.mark.parametrize("first_approves", [True, False])
+def test_stale_reviewer_cannot_overwrite_decision_or_public_label(
+    client, db_session, first_approves,
+):
+    register_and_sign_in(client, phone=NURSE_PHONE, password=PASSWORD)
+    save_profile(client)
+    case = create_case(db_session)
+    first = register_user(db_session, phone=STAFF_PHONE, password=PASSWORD)
+    second = register_user(db_session, phone=OTHER_PHONE, password=PASSWORD)
+    first.is_staff = second.is_staff = True
+    db_session.commit()
+    case_id, first_id, second_id, profile_id = case.id, first.id, second.id, case.profile_id
+    with Session(db_session.get_bind()) as one, Session(db_session.get_bind()) as two:
+        loaded_one = one.get(VerificationCase, case_id)
+        loaded_two = two.get(VerificationCase, case_id)
+        assert loaded_one.status == loaded_two.status == CaseStatus.PENDING
+        decide_case(one, case=loaded_one, reviewer=one.get(User, first_id),
+                    approve=first_approves, note="First completed review")
+        with pytest.raises(VerificationError, match="already been decided"):
+            decide_case(two, case=loaded_two, reviewer=two.get(User, second_id),
+                        approve=not first_approves, note="Stale conflicting review")
+        # The error page can now display the winning decision, not the stale object.
+        assert loaded_two.decision_note == "First completed review"
+    db_session.expire_all()
+    completed = db_session.get(VerificationCase, case_id)
+    assert completed.status == (CaseStatus.APPROVED if first_approves else CaseStatus.REJECTED)
+    assert completed.decided_by_user_id == first_id
+    assert completed.decision_note == "First completed review"
+    reviewed_profile = db_session.get(NurseProfile, profile_id)
+    assert (reviewed_profile.document_reviewed_at is not None) == first_approves

@@ -31,7 +31,7 @@ from app.services.community import (
     mark_discussion_read,
 )
 from app.web.community_routes import _reply_limiter
-from tests.helpers import csrf_from
+from tests.helpers import csrf_from, has_element
 
 
 @pytest.fixture
@@ -94,7 +94,7 @@ def test_member_can_choose_identity_while_asking_without_publishing_profile(
     as_member(client, member)
     form = client.get(f"/posts/new?topic={topic.id}")
     assert 'name="community_name"' in form.text
-    assert f'value="{topic.id}" selected' in form.text
+    assert has_element(form, 'option', value=str(topic.id), selected=True)
     question = "Has the recruitment exercise started in Abuja?"
     response = client.post(
         "/posts",

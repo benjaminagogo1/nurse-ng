@@ -53,21 +53,21 @@ Everything else — labels, pricing, employer demand, growth — depends on that
 
 ## 2. Decision ledger
 
-| # | Decision | Choice | Why | Revisit when |
-|---|---|---|---|---|
-| 1 | Architecture | Modular monolith: one Django project, Celery worker, Celery Beat | Team size, transactional invariants, simple audit model | Beyond ~10 engineers or independent scaling needs |
-| 2 | Backend | Python, Django 5.2 LTS | Server-rendered pages, mature auth and admin, strong security defaults, Python hiring pool | A committed need for async-first services or a different runtime |
-| 3 | Frontend | Django templates, HTMX, vanilla JavaScript, Tailwind CSS | Low JS payload, progressive enhancement, one deployable, no SPA build | A reviewer console or employer experience genuinely demands a SPA |
-| 4 | Database | Managed PostgreSQL | Relational invariants, full-text search, JSONB, proven operations | Search outgrows Postgres FTS |
-| 5 | ORM / migrations | Django ORM and migrations | Built-in, reviewable migrations, admin integration | Complex SQL or performance forces raw SQL or another ORM |
-| 6 | Evidence storage | Cloudflare R2 via django-storages and boto3; private bucket, signed URLs | Cheap egress, S3 API, no public object path | Residency or procurement requires another provider |
-| 7 | Background jobs | Celery + Redis; Celery Beat for expiry and rechecks | Retries, scheduling, broad ecosystem | Operational overhead too high: use RQ or Django-Q2 |
-| 8 | Authentication | Django auth, custom user model, django-otp, phone OTP | Control, auditability, MFA for privileged roles | Social login is needed (django-allauth) or a managed provider saves more than four weeks |
-| 9 | Search | Django `contrib.postgres` SearchVector and TrigramSimilarity, permission-aware querysets | No separate search cluster; adequate at pilot scale | Over ~100k profiles or ranking requirements grow |
-| 10 | API | Server-rendered first; DRF `/api/v1` deferred until a mobile or partner client is committed | Avoids duplicating every workflow; the service layer keeps the API possible | Release 2 or a signed mobile/partner commitment |
-| 11 | Hosting | Fly.io (`jnb` / `cpt`) behind Cloudflare; Gunicorn or Uvicorn, WhiteNoise | Low latency to Nigeria, cheap, Docker-portable | Compliance or procurement requires a specific region |
-| 12 | Payments | Paystack (Release 2 only) | Nigerian market fit | Expansion corridors require local processors |
-| 13 | SMS | Termii primary, Twilio fallback | Nigerian deliverability and sender IDs | Delivery data favours another provider |
+| #   | Decision         | Choice                                                                                      | Why                                                                                        | Revisit when                                                                             |
+| --- | ---------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| 1   | Architecture     | Modular monolith: one Django project, Celery worker, Celery Beat                            | Team size, transactional invariants, simple audit model                                    | Beyond ~10 engineers or independent scaling needs                                        |
+| 2   | Backend          | Python, Django 5.2 LTS                                                                      | Server-rendered pages, mature auth and admin, strong security defaults, Python hiring pool | A committed need for async-first services or a different runtime                         |
+| 3   | Frontend         | Django templates, HTMX, vanilla JavaScript, Tailwind CSS                                    | Low JS payload, progressive enhancement, one deployable, no SPA build                      | A reviewer console or employer experience genuinely demands a SPA                        |
+| 4   | Database         | Managed PostgreSQL                                                                          | Relational invariants, full-text search, JSONB, proven operations                          | Search outgrows Postgres FTS                                                             |
+| 5   | ORM / migrations | Django ORM and migrations                                                                   | Built-in, reviewable migrations, admin integration                                         | Complex SQL or performance forces raw SQL or another ORM                                 |
+| 6   | Evidence storage | Cloudflare R2 via django-storages and boto3; private bucket, signed URLs                    | Cheap egress, S3 API, no public object path                                                | Residency or procurement requires another provider                                       |
+| 7   | Background jobs  | Celery + Redis; Celery Beat for expiry and rechecks                                         | Retries, scheduling, broad ecosystem                                                       | Operational overhead too high: use RQ or Django-Q2                                       |
+| 8   | Authentication   | Django auth, custom user model, django-otp, phone OTP                                       | Control, auditability, MFA for privileged roles                                            | Social login is needed (django-allauth) or a managed provider saves more than four weeks |
+| 9   | Search           | Django `contrib.postgres` SearchVector and TrigramSimilarity, permission-aware querysets    | No separate search cluster; adequate at pilot scale                                        | Over ~100k profiles or ranking requirements grow                                         |
+| 10  | API              | Server-rendered first; DRF `/api/v1` deferred until a mobile or partner client is committed | Avoids duplicating every workflow; the service layer keeps the API possible                | Release 2 or a signed mobile/partner commitment                                          |
+| 11  | Hosting          | Fly.io (`jnb` / `cpt`) behind Cloudflare; Gunicorn or Uvicorn, WhiteNoise                   | Low latency to Nigeria, cheap, Docker-portable                                             | Compliance or procurement requires a specific region                                     |
+| 12  | Payments         | Paystack (Release 2 only)                                                                   | Nigerian market fit                                                                        | Expansion corridors require local processors                                             |
+| 13  | SMS              | Termii primary, Twilio fallback                                                             | Nigerian deliverability and sender IDs                                                     | Delivery data favours another provider                                                   |
 
 **Frontend boundary.** HTMX handles partial updates and form submissions. Vanilla JavaScript modules handle uploads, visibility controls, and small interactions. No React or Vue in the MVP. If a console later needs a SPA, the Django service layer and a versioned API are the boundary; do not start there.
 
@@ -191,20 +191,20 @@ nurse-ng/
 
 Use a custom user model (`identity.User`) from the first migration. Changing it after data exists is painful, and Django's built-in `auth.User` is not suitable for phone-first accounts or role assignment.
 
-| Entity | Key fields | Invariant |
-|---|---|---|
-| `User` | id, contact, password_hash, mfa, status | Custom user model; one active contact per account; sessions are revocable |
-| `NurseProfile` | user_id, public_id, status, discoverable | One profile per user; public reads use a projection |
-| `CredentialClaim` | profile_id, type, value, status | A claim never becomes verified without a decision row |
-| `VerificationCase` | claim_id, state, assignee, sla_due_at | At most one open case per claim |
-| `EvidenceObject` | case_id, storage_key, sha256, mime, scan_status | Never public; keys are opaque; every read audited |
-| `VerificationDecision` | case_id, reviewer_id, outcome, source, rationale, decided_at | Append-only; current status is a projection |
-| `EmployerOrganization` | name, cac_number, status, verified_at | Only verified organisations can contact nurses |
-| `EmployerMembership` | org_id, user_id, role, scopes | Permissions are scoped per organisation |
-| `ContactRequest` | employer_user_id, nurse_id, purpose, status | Requires consent; nurse can block or report |
-| `ReportCase` / `AppealCase` | subject, state, assignee, sla_due_at | SLA tracked; decisions recorded with reason codes |
-| `AuditEvent` | actor, action, resource, before/after, ts | Append-only; no sensitive payloads |
-| `NotificationDelivery` | channel, template, status | No sensitive content in messages |
+| Entity                      | Key fields                                                   | Invariant                                                                 |
+| --------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| `User`                      | id, contact, password_hash, mfa, status                      | Custom user model; one active contact per account; sessions are revocable |
+| `NurseProfile`              | user_id, public_id, status, discoverable                     | One profile per user; public reads use a projection                       |
+| `CredentialClaim`           | profile_id, type, value, status                              | A claim never becomes verified without a decision row                     |
+| `VerificationCase`          | claim_id, state, assignee, sla_due_at                        | At most one open case per claim                                           |
+| `EvidenceObject`            | case_id, storage_key, sha256, mime, scan_status              | Never public; keys are opaque; every read audited                         |
+| `VerificationDecision`      | case_id, reviewer_id, outcome, source, rationale, decided_at | Append-only; current status is a projection                               |
+| `EmployerOrganization`      | name, cac_number, status, verified_at                        | Only verified organisations can contact nurses                            |
+| `EmployerMembership`        | org_id, user_id, role, scopes                                | Permissions are scoped per organisation                                   |
+| `ContactRequest`            | employer_user_id, nurse_id, purpose, status                  | Requires consent; nurse can block or report                               |
+| `ReportCase` / `AppealCase` | subject, state, assignee, sla_due_at                         | SLA tracked; decisions recorded with reason codes                         |
+| `AuditEvent`                | actor, action, resource, before/after, ts                    | Append-only; no sensitive payloads                                        |
+| `NotificationDelivery`      | channel, template, status                                    | No sensitive content in messages                                          |
 
 ### Core invariants
 
@@ -234,33 +234,33 @@ Use a custom user model (`identity.User`) from the first migration. Changing it 
 
 ### Phases and sprints
 
-| Sprint | Weeks | Focus | Key output | Gate |
-|---|---|---|---|---|
-| S0 | 1–2 | Discovery and spikes | Interview notes, verification-source memo, competitor baseline, four technical spikes | A lawful verification route is identified, or the fallback is accepted |
-| S1 | 3–4 | Synthesis and design | Data map, threat model, schema draft, numeric gates, pilot commitments | Phase 0 go/no-go |
-| S2 | 5–6 | Foundation | Django project, custom user, auth, RBAC, audit primitive, Tailwind/HTMX pipeline, storage | Authz matrix v0 green |
-| S3 | 7–8 | Trust core | Profiles, field visibility, claims, evidence upload, reviewer queue | Phase 1 gate |
-| S4 | 9–10 | Review operations | Reviewer console, decisions, notifications, SLAs, verification receipt | Ten cases end to end |
-| S5 | 11–12 | Employer side | Organisation onboarding, verification, scoped seats, shortlists | Three employers onboarded |
-| S6 | 13–14 | Discovery and contact | Permission-aware search, contact requests, consent, block and report | Abuse paths tested |
-| S7 | 15–16 | Hardening | Appeals, admin case management, rate limits, pen test, load test, restore drill | Phase 2 gate |
-| S8 | 17–18 | Pilot launch | Cohort onboarding, support tooling, dashboards | 20 nurses / 3 employers active |
-| S9 | 19–20 | Pilot run | Weekly operations review, defect fixes, cost measurement | SLAs met |
-| S10 | 21–22 | Evaluation | Pilot report, unit economics, Release 2 recommendation | Go/no-go for jobs marketplace |
+| Sprint | Weeks | Focus                 | Key output                                                                                | Gate                                                                   |
+| ------ | ----- | --------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| S0     | 1–2   | Discovery and spikes  | Interview notes, verification-source memo, competitor baseline, four technical spikes     | A lawful verification route is identified, or the fallback is accepted |
+| S1     | 3–4   | Synthesis and design  | Data map, threat model, schema draft, numeric gates, pilot commitments                    | Phase 0 go/no-go                                                       |
+| S2     | 5–6   | Foundation            | Django project, custom user, auth, RBAC, audit primitive, Tailwind/HTMX pipeline, storage | Authz matrix v0 green                                                  |
+| S3     | 7–8   | Trust core            | Profiles, field visibility, claims, evidence upload, reviewer queue                       | Phase 1 gate                                                           |
+| S4     | 9–10  | Review operations     | Reviewer console, decisions, notifications, SLAs, verification receipt                    | Ten cases end to end                                                   |
+| S5     | 11–12 | Employer side         | Organisation onboarding, verification, scoped seats, shortlists                           | Three employers onboarded                                              |
+| S6     | 13–14 | Discovery and contact | Permission-aware search, contact requests, consent, block and report                      | Abuse paths tested                                                     |
+| S7     | 15–16 | Hardening             | Appeals, admin case management, rate limits, pen test, load test, restore drill           | Phase 2 gate                                                           |
+| S8     | 17–18 | Pilot launch          | Cohort onboarding, support tooling, dashboards                                            | 20 nurses / 3 employers active                                         |
+| S9     | 19–20 | Pilot run             | Weekly operations review, defect fixes, cost measurement                                  | SLAs met                                                               |
+| S10    | 21–22 | Evaluation            | Pilot report, unit economics, Release 2 recommendation                                    | Go/no-go for jobs marketplace                                          |
 
 ### Epic estimates
 
-| Epic | Sprints | Engineer-days |
-|---|---|---|
-| Foundation: Django project, custom user, auth, audit, storage, observability, Tailwind/HTMX | S2 | 30 |
-| Profiles and field-level visibility | S3 | 16 |
-| Verification queue, reviewer console, and decisions | S4 | 18 |
-| Employer onboarding and organisation verification | S5 | 8 |
-| Search and contact requests | S6 | 14 |
-| Moderation, appeals, admin case management | S7 | 10 |
-| Data export, deletion, retention jobs | S7 | 6 |
-| Hardening, performance, security fixes | S7 | 10 |
-| Pilot tooling and instrumentation | S8–S10 | 25 |
+| Epic                                                                                        | Sprints | Engineer-days |
+| ------------------------------------------------------------------------------------------- | ------- | ------------- |
+| Foundation: Django project, custom user, auth, audit, storage, observability, Tailwind/HTMX | S2      | 30            |
+| Profiles and field-level visibility                                                         | S3      | 16            |
+| Verification queue, reviewer console, and decisions                                         | S4      | 18            |
+| Employer onboarding and organisation verification                                           | S5      | 8             |
+| Search and contact requests                                                                 | S6      | 14            |
+| Moderation, appeals, admin case management                                                  | S7      | 10            |
+| Data export, deletion, retention jobs                                                       | S7      | 6             |
+| Hardening, performance, security fixes                                                      | S7      | 10            |
+| Pilot tooling and instrumentation                                                           | S8–S10  | 25            |
 
 **Capacity check:** the six build sprints (S2–S7) total 112 engineer-days; pilot tooling adds 25 more during weeks 17–22. Three engineers × 12 build weeks = 180 person-days, leaving roughly 38% for review, defects, and coordination. Two engineers would have 120 days, or roughly 7% buffer, which is effectively none. Staff three engineers or cut scope to a single employer segment and a manual verification spreadsheet.
 
@@ -278,12 +278,14 @@ Use a custom user model (`identity.User`) from the first migration. Changing it 
 ### Exit gates (proposed thresholds, to be agreed in Phase 0)
 
 **Phase 0**
+
 - Verification route documented, with a named fallback and legal sign-off.
 - 15 nurse and 5 employer interviews completed.
 - Pilot commitments from at least 3 employers.
 - Numeric pilot gates agreed.
 
 **Phase 1**
+
 - Authorization matrix 100% green.
 - Threat model signed off.
 - Storage test proves no public read path.
@@ -291,6 +293,7 @@ Use a custom user model (`identity.User`) from the first migration. Changing it 
 - CI green; restore drill passed.
 
 **Phase 2**
+
 - Zero unresolved critical or high security findings.
 - p95 candidate search under 800 ms at pilot scale.
 - Public profile LCP under 3 seconds on simulated 3G; initial JS under 100 KB gzipped.
@@ -299,6 +302,7 @@ Use a custom user model (`identity.User`) from the first migration. Changing it 
 - Runbooks exercised by someone other than their author.
 
 **Phase 3**
+
 - 40+ nurses onboarded, 5+ employers active.
 - Median verification decision within 3 business days.
 - 20+ consent-based contacts; 25%+ nurse response rate.
@@ -308,15 +312,15 @@ Use a custom user model (`identity.User`) from the first migration. Changing it 
 
 ### Service levels (pilot stage)
 
-| Workflow | Target |
-|---|---|
-| Verification first response | 1 business day |
-| Verification decision | 3 business days median |
-| Serious abuse report acknowledged | 4 hours |
-| Abuse action taken | 24 hours |
-| Appeal decision | 5 business days |
-| Data rights request | 30 days (confirm statutory period with counsel) |
-| Incident acknowledged internally | 1 hour |
+| Workflow                          | Target                                          |
+| --------------------------------- | ----------------------------------------------- |
+| Verification first response       | 1 business day                                  |
+| Verification decision             | 3 business days median                          |
+| Serious abuse report acknowledged | 4 hours                                         |
+| Abuse action taken                | 24 hours                                        |
+| Appeal decision                   | 5 business days                                 |
+| Data rights request               | 30 days (confirm statutory period with counsel) |
+| Incident acknowledged internally  | 1 hour                                          |
 
 ### Performance budget
 
@@ -366,37 +370,37 @@ Use a custom user model (`identity.User`) from the first migration. Changing it 
 
 ## Appendix: tools
 
-| Area | Choice | Note |
-|---|---|---|
-| Language | Python (current stable), Django 5.2 LTS | Server-rendered, batteries included |
-| Templates | Django templates | HTML-first; no separate frontend build |
-| Interactivity | HTMX, vanilla JavaScript modules | Partial updates and small interactions |
-| CSS | Tailwind CSS (standalone CLI), design tokens | Utility CSS without a Node dependency |
-| Database | Managed PostgreSQL 16+ | Neon, Supabase, or RDS |
-| ORM | Django ORM and migrations | Built-in |
-| Auth | Django auth, custom user model, django-otp | Phone OTP via Termii/Twilio |
-| Validation | Django forms, DRF serializers, shared validators | Adapters over domain rules |
-| API | Django REST Framework + drf-spectacular (deferred) | When a mobile or partner client is committed |
-| Evidence storage | Cloudflare R2 via django-storages and boto3 | Private bucket, presigned URLs |
-| Malware scanning | ClamAV via a Celery task | Quarantine then clean |
-| Jobs | Celery + Redis; Celery Beat | Scan, notify, expire, detect |
-| Email | django-anymail with Resend or Postmark | Django templates for email |
-| SMS | Termii primary, Twilio fallback | |
-| Search | Django `contrib.postgres` SearchVector, TrigramSimilarity | Permission-aware querysets |
-| Errors | Sentry SDK with PII scrubbing | |
-| Logs / metrics | structlog, OpenTelemetry, Grafana Cloud or Better Stack | Structured and redacted |
-| Product analytics | PostHog, EU or self-hosted | No sensitive fields |
-| Tests | pytest, pytest-django, factory_boy, Playwright, axe-core, Locust | |
-| CI security | Ruff, mypy with django-stubs, Bandit, pip-audit, Gitleaks, CodeQL | |
-| Dependencies | uv with `pyproject.toml` | |
-| Hosting | Fly.io + Cloudflare; Gunicorn or Uvicorn, WhiteNoise | `jnb` / `cpt` regions |
-| Local dev | Docker Compose: Postgres, Redis, MinIO, Mailpit, ClamAV | |
-| Payments | Paystack (Release 2) | |
-| Docs | Markdown + ADRs, PDF generated in CI | |
+| Area              | Choice                                                            | Note                                         |
+| ----------------- | ----------------------------------------------------------------- | -------------------------------------------- |
+| Language          | Python (current stable), Django 5.2 LTS                           | Server-rendered, batteries included          |
+| Templates         | Django templates                                                  | HTML-first; no separate frontend build       |
+| Interactivity     | HTMX, vanilla JavaScript modules                                  | Partial updates and small interactions       |
+| CSS               | Tailwind CSS (standalone CLI), design tokens                      | Utility CSS without a Node dependency        |
+| Database          | Managed PostgreSQL 16+                                            | Neon, Supabase, or RDS                       |
+| ORM               | Django ORM and migrations                                         | Built-in                                     |
+| Auth              | Django auth, custom user model, django-otp                        | Phone OTP via Termii/Twilio                  |
+| Validation        | Django forms, DRF serializers, shared validators                  | Adapters over domain rules                   |
+| API               | Django REST Framework + drf-spectacular (deferred)                | When a mobile or partner client is committed |
+| Evidence storage  | Cloudflare R2 via django-storages and boto3                       | Private bucket, presigned URLs               |
+| Malware scanning  | ClamAV via a Celery task                                          | Quarantine then clean                        |
+| Jobs              | Celery + Redis; Celery Beat                                       | Scan, notify, expire, detect                 |
+| Email             | django-anymail with Resend or Postmark                            | Django templates for email                   |
+| SMS               | Termii primary, Twilio fallback                                   |                                              |
+| Search            | Django `contrib.postgres` SearchVector, TrigramSimilarity         | Permission-aware querysets                   |
+| Errors            | Sentry SDK with PII scrubbing                                     |                                              |
+| Logs / metrics    | structlog, OpenTelemetry, Grafana Cloud or Better Stack           | Structured and redacted                      |
+| Product analytics | PostHog, EU or self-hosted                                        | No sensitive fields                          |
+| Tests             | pytest, pytest-django, factory_boy, Playwright, axe-core, Locust  |                                              |
+| CI security       | Ruff, mypy with django-stubs, Bandit, pip-audit, Gitleaks, CodeQL |                                              |
+| Dependencies      | uv with `pyproject.toml`                                          |                                              |
+| Hosting           | Fly.io + Cloudflare; Gunicorn or Uvicorn, WhiteNoise              | `jnb` / `cpt` regions                        |
+| Local dev         | Docker Compose: Postgres, Redis, MinIO, Mailpit, ClamAV           |                                              |
+| Payments          | Paystack (Release 2)                                              |                                              |
+| Docs              | Markdown + ADRs, PDF generated in CI                              |                                              |
 
 ---
 
-*Legal and regulatory points are for qualified Nigerian counsel to confirm. Timeline, staffing, and cost figures are planning estimates, not commitments.*
+_Legal and regulatory points are for qualified Nigerian counsel to confirm. Timeline, staffing, and cost figures are planning estimates, not commitments._
 
 ---
 
@@ -410,14 +414,14 @@ The progress is substantial: profiles, applications, messaging, community, docum
 
 Here is my assessment:
 
-| Area | Current position | What would raise the standard |
-|---|---|---|
-| User experience | Coherent design, responsive pages, useful accessibility controls | Usability testing with nurses on real phones and unreliable connections |
-| Architecture | FastAPI, clear domain models, services, routes, and migrations | More consistent business-rule enforcement and concurrency testing |
-| Privacy | Private profiles, explicit sharing, application consent, restricted evidence access | Complete retention, deletion, recovery, and audit procedures |
-| Trust | Document-review labels distinguish review from source confirmation | Employer checks, job legitimacy controls, appeals, and transparent review standards |
-| Reliability | Automated tests and migration checks | Monitored deployments, tested restores, rollback procedures, and load testing |
-| Product value | Several useful workflows exist | Evidence that nurses return and employers produce meaningful outcomes |
+| Area            | Current position                                                                    | What would raise the standard                                                       |
+| --------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| User experience | Coherent design, responsive pages, useful accessibility controls                    | Usability testing with nurses on real phones and unreliable connections             |
+| Architecture    | FastAPI, clear domain models, services, routes, and migrations                      | More consistent business-rule enforcement and concurrency testing                   |
+| Privacy         | Private profiles, explicit sharing, application consent, restricted evidence access | Complete retention, deletion, recovery, and audit procedures                        |
+| Trust           | Document-review labels distinguish review from source confirmation                  | Employer checks, job legitimacy controls, appeals, and transparent review standards |
+| Reliability     | Automated tests and migration checks                                                | Monitored deployments, tested restores, rollback procedures, and load testing       |
+| Product value   | Several useful workflows exist                                                      | Evidence that nurses return and employers produce meaningful outcomes               |
 
 What would make it world-class, in my judgment, is the following work—in this order.
 
@@ -446,7 +450,6 @@ What would make it world-class, in my judgment, is the following work—in this 
    Private evidence currently uses local storage, and community malware scanning can allow uploads when scanning is unavailable. Both are documented pilot choices. Before public operation, I would implement protected storage, explicit retention rules, and a scanning process that prevents unchecked files from being published.
 
 4. **Finish the journeys that produce value.**
-
 
    My recommended first journey is:
 
@@ -492,15 +495,15 @@ For the seven priorities discussed after the account and Reels work, see [Seven 
 
 Checks performed during the assessment:
 
-| Check | Result on 6 November 2026 |
-|---|---|
-| `venv/bin/python -m pytest` | **115 passed in 183.99 seconds** |
-| `venv/bin/ruff check .` | Passed |
-| `venv/bin/python -m pip check` | No broken requirements found |
-| `node --check app/static/js/app.js` and `node --check app/static/js/display.js` | Passed |
-| `venv/bin/alembic heads` | One head: `b2c3d4e5f6a7` |
-| `venv/bin/alembic check` | No schema drift detected in the local SQLite database |
-| Isolated assessment probes | Confirmed the unsafe-default session, unenforced host restriction, stale review decision, and suspended-profile findings below |
+| Check                                                                           | Result on 6 November 2026                                                                                                      |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `venv/bin/python -m pytest`                                                     | **115 passed in 183.99 seconds**                                                                                               |
+| `venv/bin/ruff check .`                                                         | Passed                                                                                                                         |
+| `venv/bin/python -m pip check`                                                  | No broken requirements found                                                                                                   |
+| `node --check app/static/js/app.js` and `node --check app/static/js/display.js` | Passed                                                                                                                         |
+| `venv/bin/alembic heads`                                                        | One head: `b2c3d4e5f6a7`                                                                                                       |
+| `venv/bin/alembic check`                                                        | No schema drift detected in the local SQLite database                                                                          |
+| Isolated assessment probes                                                      | Confirmed the unsafe-default session, unenforced host restriction, stale review decision, and suspended-profile findings below |
 
 Passing the existing suite did not establish the absence of these defects. The probe runner was temporary (`/tmp/nurse-ng-assessment-probes.py`), not a committed regression test; the reproduction descriptions below are retained so future verification does not depend on that file. The sandbox blocked the probe test client's thread communication; the successful run used the approved execution outside the sandbox and only fixture data in memory.
 
@@ -535,44 +538,44 @@ The criteria below make the recommendations reviewable; they describe proposed o
 
 **Current progress:** 0 of 4 priority findings and 0 of 13 total items verified complete. Nine items are open, A01 is in progress, and A02, A04, and A12 are deferred. A01's implementation is locally verified; the actual deployment configuration and HTTPS/proxy checks remain outstanding. The user has prioritized community delivery and deferred A02/A04 under [L74](DECISIONS.md#l74--community-is-the-immediate-delivery-priority-within-the-wider-platform). **Last tracker update: 6 November 2026.** Update current counts together with the rows; preserve the baseline.
 
-| ID | Area / priority | Status | Evidence required to close |
-|---|---|---|---|
-| A01 | Unsafe production configuration — critical if defaults are deployed | In progress | Production startup rejects missing or known development signing keys and unsafe cookie settings. Host restrictions are enforced. Automated checks reject a cookie signed with the old development key, reject unlisted hosts, and verify Secure cookies in production configuration. Record the deployed configuration check without recording secrets. |
-| A02 | Review decision consistency — high | Deferred | Independent concurrent reviewers cannot overwrite a decided case. Exactly one transition succeeds; the losing attempt receives a clear conflict. Decision history is preserved and the public badge agrees with the recorded decision. Commit regression coverage using separate database sessions and verify on the intended production database. |
-| A03 | Employer legitimacy — high | Open | A self-selected employer role cannot publish a job or receive applicant details before organization approval. Record the approval/revocation procedure and accountable representative. Test unapproved, approved, revoked, and unrelated employers, while retaining application consent and employer isolation. |
-| A04 | Suspended profiles — medium | Deferred | Suspended and deactivated accounts are excluded from public discovery and public profile access. Regression checks cover direct profile URLs and listings, while active accounts retain their intended visibility. |
-| A05 | Recovery, password changes, and verified phone ownership — readiness | Open | Users can verify phone ownership, change passwords with appropriate authentication, and recover access through a verified channel. Test successful flows, wrong/expired/reused recovery credentials, abuse limits, and prevention of cross-account changes. Record a support procedure for failed recovery. |
-| A06 | Session revocation — readiness | Open | Users can invalidate an individual session and all sessions. Previously copied cookies cease granting access after revocation; password recovery and account suspension follow a documented invalidation policy. Regression checks demonstrate server-side rejection of revoked cookies. |
-| A07 | Staff MFA — readiness | Open | Staff must complete a second factor before accessing review or moderation functions. Enrollment, recovery, and removal have documented controls. Tests demonstrate that a password-only session cannot bypass the requirement. |
-| A08 | Sensitive evidence storage and lifecycle — readiness | Open | Document and verify production storage access protection, encryption, scanning/quarantine, retention periods, and deletion behavior. Unchecked or rejected evidence cannot be opened by reviewers. Exercise scanner failure, unauthorized reads, and scheduled deletion with fixture files; preserve the intended access audit. |
-| A09 | CI and deployment automation — readiness | Open | Commit a reproducible pipeline that runs required checks and controls migrations and deployment. Record a successful staging deployment, a failed-check gate, and a demonstrated recovery or rollback procedure. |
-| A10 | PostgreSQL verification — readiness | Open | Run migrations and relevant authentication, privacy, application, messaging, and review-concurrency checks against the intended PostgreSQL version. Record fresh-install and existing-data upgrade results and confirm no schema drift. SQLite results alone do not close this item. |
-| A11 | Backup restoration — readiness | Open | Restore both database and private evidence from backups into an isolated environment. Verify account access, application records, evidence links, and permissions after restoration. Record backup age, restore duration, retention, and the repeatable restore procedure against agreed recovery targets. |
-| A12 | Verification source and review economics — product decision | Deferred | Resolve O1 with sourced evidence and an explicit decision: source-confirmed, defensible document-only operation, or stop. Record permitted claims, applicable legal input, and observed review costs. Match public labels to the chosen model. Research remains deferred until resumed by the user; a document-reviewed implementation alone does not close O1. |
-| A13 | Nurse-to-employer value — product validation | Open | Observe the full profile → legitimate job → application → employer response journey with real participants. Set pilot targets and a measurement window before evaluating results. Record completion/drop-off, response times, interviews, support effort, and whether those targets were met; document the resulting product decision. |
+| ID  | Area / priority                                                      | Status      | Evidence required to close                                                                                                                                                                                                                                                                                                                                      |
+| --- | -------------------------------------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A01 | Unsafe production configuration — critical if defaults are deployed  | In progress | Production startup rejects missing or known development signing keys and unsafe cookie settings. Host restrictions are enforced. Automated checks reject a cookie signed with the old development key, reject unlisted hosts, and verify Secure cookies in production configuration. Record the deployed configuration check without recording secrets.         |
+| A02 | Review decision consistency — high                                   | Deferred    | Independent concurrent reviewers cannot overwrite a decided case. Exactly one transition succeeds; the losing attempt receives a clear conflict. Decision history is preserved and the public badge agrees with the recorded decision. Commit regression coverage using separate database sessions and verify on the intended production database.              |
+| A03 | Employer legitimacy — high                                           | Open        | A self-selected employer role cannot publish a job or receive applicant details before organization approval. Record the approval/revocation procedure and accountable representative. Test unapproved, approved, revoked, and unrelated employers, while retaining application consent and employer isolation.                                                 |
+| A04 | Suspended profiles — medium                                          | Deferred    | Suspended and deactivated accounts are excluded from public discovery and public profile access. Regression checks cover direct profile URLs and listings, while active accounts retain their intended visibility.                                                                                                                                              |
+| A05 | Recovery, password changes, and verified phone ownership — readiness | Open        | Users can verify phone ownership, change passwords with appropriate authentication, and recover access through a verified channel. Test successful flows, wrong/expired/reused recovery credentials, abuse limits, and prevention of cross-account changes. Record a support procedure for failed recovery.                                                     |
+| A06 | Session revocation — readiness                                       | Open        | Users can invalidate an individual session and all sessions. Previously copied cookies cease granting access after revocation; password recovery and account suspension follow a documented invalidation policy. Regression checks demonstrate server-side rejection of revoked cookies.                                                                        |
+| A07 | Staff MFA — readiness                                                | Open        | Staff must complete a second factor before accessing review or moderation functions. Enrollment, recovery, and removal have documented controls. Tests demonstrate that a password-only session cannot bypass the requirement.                                                                                                                                  |
+| A08 | Sensitive evidence storage and lifecycle — readiness                 | Open        | Document and verify production storage access protection, encryption, scanning/quarantine, retention periods, and deletion behavior. Unchecked or rejected evidence cannot be opened by reviewers. Exercise scanner failure, unauthorized reads, and scheduled deletion with fixture files; preserve the intended access audit.                                 |
+| A09 | CI and deployment automation — readiness                             | Open        | Commit a reproducible pipeline that runs required checks and controls migrations and deployment. Record a successful staging deployment, a failed-check gate, and a demonstrated recovery or rollback procedure.                                                                                                                                                |
+| A10 | PostgreSQL verification — readiness                                  | Open        | Run migrations and relevant authentication, privacy, application, messaging, and review-concurrency checks against the intended PostgreSQL version. Record fresh-install and existing-data upgrade results and confirm no schema drift. SQLite results alone do not close this item.                                                                            |
+| A11 | Backup restoration — readiness                                       | Open        | Restore both database and private evidence from backups into an isolated environment. Verify account access, application records, evidence links, and permissions after restoration. Record backup age, restore duration, retention, and the repeatable restore procedure against agreed recovery targets.                                                      |
+| A12 | Verification source and review economics — product decision          | Deferred    | Resolve O1 with sourced evidence and an explicit decision: source-confirmed, defensible document-only operation, or stop. Record permitted claims, applicable legal input, and observed review costs. Match public labels to the chosen model. Research remains deferred until resumed by the user; a document-reviewed implementation alone does not close O1. |
+| A13 | Nurse-to-employer value — product validation                         | Open        | Observe the full profile → legitimate job → application → employer response journey with real participants. Set pilot targets and a measurement window before evaluating results. Record completion/drop-off, response times, interviews, support effort, and whether those targets were met; document the resulting product decision.                          |
 
 ### Completion evidence log
 
 Append a row for each status change or verification. Keep earlier results, including failures and deferrals. Link durable repository or operational records; do not rely solely on files under `/tmp`.
 
-| Date | Item | Status change / result | Implementation or decision reference | Verification evidence / remaining work |
-|---|---|---|---|---|
-| 2026-11-06 | A01–A13 | Baseline recorded; no items closed | This assessment; [work log](WORK_LOG.md#session-2026-11-06--assessment-and-completion-baseline) | 115 existing tests passed; isolated probes confirmed A01, A02, and A04. A03 was established by registration/posting code and existing workflow coverage. A12 remains deferred under the recorded project direction. No fixes were made during the assessment. |
-| 2026-11-06 | A01 | Open → In progress; implementation locally verified | [L73](DECISIONS.md#l73--enforce-safe-configuration-before-application-startup-a01), [configuration](../app/core/config.py), [middleware](../app/main.py), [operator check](../app/cli.py), [regression tests](../tests/test_configuration.py) | 37 focused checks passed, including fresh-process production startup, rejection of both old signing keys, host restrictions, IPv6 development access, HTTPS login/logout cookies, and a configuration check that neither displays secrets nor connects to the database. Full-suite results are recorded in the work log. Closure still requires running `python -m app.cli check-config` and verifying HTTPS cookies/host rejection in the actual deployment environment; no deployment was performed. |
-| 2026-11-06 | A02, A04 | Open → Deferred | [L74](DECISIONS.md#l74--community-is-the-immediate-delivery-priority-within-the-wider-platform) | The user explicitly postponed these fixes and prioritized the described community experience. Their closure criteria remain unchanged; neither item is implemented or counted as complete by this increment. |
+| Date       | Item     | Status change / result                              | Implementation or decision reference                                                                                                                                                                                                          | Verification evidence / remaining work                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ---------- | -------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-11-06 | A01–A13  | Baseline recorded; no items closed                  | This assessment; [work log](WORK_LOG.md#session-2026-11-06--assessment-and-completion-baseline)                                                                                                                                               | 115 existing tests passed; isolated probes confirmed A01, A02, and A04. A03 was established by registration/posting code and existing workflow coverage. A12 remains deferred under the recorded project direction. No fixes were made during the assessment.                                                                                                                                                                                                                                          |
+| 2026-11-06 | A01      | Open → In progress; implementation locally verified | [L73](DECISIONS.md#l73--enforce-safe-configuration-before-application-startup-a01), [configuration](../app/core/config.py), [middleware](../app/main.py), [operator check](../app/cli.py), [regression tests](../tests/test_configuration.py) | 37 focused checks passed, including fresh-process production startup, rejection of both old signing keys, host restrictions, IPv6 development access, HTTPS login/logout cookies, and a configuration check that neither displays secrets nor connects to the database. Full-suite results are recorded in the work log. Closure still requires running `python -m app.cli check-config` and verifying HTTPS cookies/host rejection in the actual deployment environment; no deployment was performed. |
+| 2026-11-06 | A02, A04 | Open → Deferred                                     | [L74](DECISIONS.md#l74--community-is-the-immediate-delivery-priority-within-the-wider-platform)                                                                                                                                               | The user explicitly postponed these fixes and prioritized the described community experience. Their closure criteria remain unchanged; neither item is implemented or counted as complete by this increment.                                                                                                                                                                                                                                                                                           |
 
 ### Community delivery progress — 6 November 2026
 
 The immediate journey is **ask or share → receive replies → follow the discussion → return to new replies or find earlier information**. This implements [L74/L75](DECISIONS.md#l74--community-is-the-immediate-delivery-priority-within-the-wider-platform) within the broader professional platform. The delivery checks below are separate from the fixed assessment baseline above; they measure this increment's behavior, not the completeness of Nurse.ng or outcomes with real nurses.
 
-| ID | Delivered behavior | Verification |
-|---|---|---|
-| C01 | Text-first asking/sharing, optional media, and choosing a first community name in the composer without publishing a private professional profile | Automated identity/privacy cases and actual browser submission passed. |
-| C02 | A working reply composer, preserved text on validation/throttling errors, reply counts, and a link to the submitted reply | Automated permission, escaping, validation, and throttle checks; browser reply submission passed. |
-| C03 | Search public conversations, topics, and published reply text; page through results while retaining the query and topic | Automated search, hidden-content exclusion, wildcard, and pagination cases; browser reply-only search and pagination passed. |
-| C04 | Explicitly follow/unfollow discussions and return through `/feed/discussions`; new replies from others are marked until read | Automated CSRF, privacy, uniqueness, unread/read, removal, and read-marker checks; browser follow → new reply → read flow passed. Indicators refresh on page load. |
-| C05 | Upgrade safely with a follow table and activity index; initialize one empty General nursing category only when no topics exist | Migration upgrade/downgrade and existing-inactive-topic checks passed. Local upgrade preserved existing records across 17 tables; one schema head, `c3d4e5f6a7b8`, with no drift. |
-| C06 | Usable conversation screens on mobile and desktop, using existing display preferences | Targeted Chrome checks at 320, 390, and 1440 pixels passed with no application script exceptions or failed HTTP responses. This was not a fresh full accessibility audit. |
+| ID  | Delivered behavior                                                                                                                               | Verification                                                                                                                                                                      |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| C01 | Text-first asking/sharing, optional media, and choosing a first community name in the composer without publishing a private professional profile | Automated identity/privacy cases and actual browser submission passed.                                                                                                            |
+| C02 | A working reply composer, preserved text on validation/throttling errors, reply counts, and a link to the submitted reply                        | Automated permission, escaping, validation, and throttle checks; browser reply submission passed.                                                                                 |
+| C03 | Search public conversations, topics, and published reply text; page through results while retaining the query and topic                          | Automated search, hidden-content exclusion, wildcard, and pagination cases; browser reply-only search and pagination passed.                                                      |
+| C04 | Explicitly follow/unfollow discussions and return through `/feed/discussions`; new replies from others are marked until read                     | Automated CSRF, privacy, uniqueness, unread/read, removal, and read-marker checks; browser follow → new reply → read flow passed. Indicators refresh on page load.                |
+| C05 | Upgrade safely with a follow table and activity index; initialize one empty General nursing category only when no topics exist                   | Migration upgrade/downgrade and existing-inactive-topic checks passed. Local upgrade preserved existing records across 17 tables; one schema head, `c3d4e5f6a7b8`, with no drift. |
+| C06 | Usable conversation screens on mobile and desktop, using existing display preferences                                                            | Targeted Chrome checks at 320, 390, and 1440 pixels passed with no application script exceptions or failed HTTP responses. This was not a fresh full accessibility audit.         |
 
 **Evidence:** [discussion regression tests](../tests/test_discussions.py), [migration tests](../tests/test_migrations.py), and the [community work log](WORK_LOG.md#session-2026-11-06--community-conversations). Full regression suite: **165 passed in 77.57 seconds**. The local database was backed up and upgraded; other environments require `alembic upgrade head` before running this code.
 
@@ -582,11 +585,11 @@ The immediate journey is **ask or share → receive replies → follow the discu
 
 Implemented under [L76](DECISIONS.md#l76--page-through-replies-without-clearing-unopened-information), following the user's instruction to start this increment. C01–C06 above retain the evidence from the initial delivery; this follow-up refines reading and returning to conversations.
 
-| ID | Delivered behavior | Verification |
-|---|---|---|
-| C07 | At most 20 published replies per page, stable timestamp/ID ordering, earlier/later controls, and a composer that retains the current page on validation or throttle errors | Database-query bounds, tied timestamps, removed replies, invalid/stale/empty pages, and successful/error submissions covered in regression tests. Mobile/desktop browser reflow passed. |
-| C08 | New-reply indicators open the first unread reply; the target is highlighted. Reading pages out of order clears only the replies on those pages | Tests and browser checks opened the final page first, returned to the earliest unread reply, and confirmed intermediate replies stayed new. Repeated reads, private member isolation, replies arriving after page load, failed rendering, and deletion of read records on unfollow are covered. |
-| C09 | Permanent reply links resolve their current page, including after earlier replies are removed. Existing follow history survives the schema upgrade | Regression cases cover changed page positions, wrong-discussion/removed targets, existing follow cutoffs, fresh installation, and downgrade/upgrade. A trial and actual local upgrade preserved all existing records across 18 tables. |
+| ID  | Delivered behavior                                                                                                                                                         | Verification                                                                                                                                                                                                                                                                                    |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| C07 | At most 20 published replies per page, stable timestamp/ID ordering, earlier/later controls, and a composer that retains the current page on validation or throttle errors | Database-query bounds, tied timestamps, removed replies, invalid/stale/empty pages, and successful/error submissions covered in regression tests. Mobile/desktop browser reflow passed.                                                                                                         |
+| C08 | New-reply indicators open the first unread reply; the target is highlighted. Reading pages out of order clears only the replies on those pages                             | Tests and browser checks opened the final page first, returned to the earliest unread reply, and confirmed intermediate replies stayed new. Repeated reads, private member isolation, replies arriving after page load, failed rendering, and deletion of read records on unfollow are covered. |
+| C09 | Permanent reply links resolve their current page, including after earlier replies are removed. Existing follow history survives the schema upgrade                         | Regression cases cover changed page positions, wrong-discussion/removed targets, existing follow cutoffs, fresh installation, and downgrade/upgrade. A trial and actual local upgrade preserved all existing records across 18 tables.                                                          |
 
 **Latest evidence:** **177 tests passed in 109.05 seconds**, Ruff and whitespace checks passed, and targeted Chrome journeys passed at 320/390/1440 pixels. Sources: [discussion tests](../tests/test_discussions.py), [migration tests](../tests/test_migrations.py), [read-record migration](../migrations/versions/d4e5f6a7b8c9_add_discussion_reply_reads.py), and [work log](WORK_LOG.md#session-2026-11-06--reply-pagination-and-unread-navigation). Local schema head: `d4e5f6a7b8c9`; no drift.
 
@@ -596,11 +599,11 @@ Read state is private and means included in a rendered page, not proof of attent
 
 Implemented under [L77](DECISIONS.md#l77--recover-community-drafts-within-the-signed-in-browser-tab) after the user's instruction to start draft recovery. The earlier delivery records and assessment baseline remain intact.
 
-| ID | Delivered behavior | Verification |
-|---|---|---|
-| C10 | Save question/reply text, selected topic, optional video link, and first community name; restore in the same tab and composer. Separate reply drafts by discussion; provide explicit discard and a 24-hour lifetime | Chrome checks passed for return/refresh, separate tabs and discussions, topic/link/name restoration, discard, expired/malformed storage, and file reselection. Draft content stays in session storage rather than the database or signed session cookie. |
-| C11 | Clear only the version acknowledged after successful publication; retain text on failure or unknown network outcome; prevent Back from restoring published/discarded text | Server regression cases cover successful/failed post and reply publication, malformed version IDs, CSRF rejection, and one-time confirmation. Browser checks cover validation, offline submission, successful post/reply publication, a different draft in another tab, and history restoration. |
-| C12 | Separate drafts by sign-in session, clear on logout/account change, and stop stale tabs re-saving signed-out drafts. Keep ordinary forms usable when storage is blocked | Automated session-boundary cases and real-browser logout across two tabs passed. Browser checks confirm old text is cleared, stale-tab input cannot save, another account starts empty, display preferences remain, and blocked storage still permits normal posting. |
+| ID  | Delivered behavior                                                                                                                                                                                                  | Verification                                                                                                                                                                                                                                                                                     |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| C10 | Save question/reply text, selected topic, optional video link, and first community name; restore in the same tab and composer. Separate reply drafts by discussion; provide explicit discard and a 24-hour lifetime | Chrome checks passed for return/refresh, separate tabs and discussions, topic/link/name restoration, discard, expired/malformed storage, and file reselection. Draft content stays in session storage rather than the database or signed session cookie.                                         |
+| C11 | Clear only the version acknowledged after successful publication; retain text on failure or unknown network outcome; prevent Back from restoring published/discarded text                                           | Server regression cases cover successful/failed post and reply publication, malformed version IDs, CSRF rejection, and one-time confirmation. Browser checks cover validation, offline submission, successful post/reply publication, a different draft in another tab, and history restoration. |
+| C12 | Separate drafts by sign-in session, clear on logout/account change, and stop stale tabs re-saving signed-out drafts. Keep ordinary forms usable when storage is blocked                                             | Automated session-boundary cases and real-browser logout across two tabs passed. Browser checks confirm old text is cleared, stale-tab input cannot save, another account starts empty, display preferences remain, and blocked storage still permits normal posting.                            |
 
 **Evidence:** **182 automated tests passed in 128.92 seconds**; Ruff, JavaScript syntax, and whitespace checks passed. The checked-in [browser runner](../tests/browser/community_drafts.py) passed at 320/390/1440 pixels, including simulated network failure. See [server regression tests](../tests/test_draft_recovery.py) and the [work log](WORK_LOG.md#session-2026-11-07--community-draft-recovery). No new schema or runtime dependency was introduced.
 
@@ -610,11 +613,11 @@ Implemented under [L77](DECISIONS.md#l77--recover-community-drafts-within-the-si
 
 Implemented under [L78](DECISIONS.md#l78--link-a-response-to-the-reply-it-answers) after the user authorized the next community increment.
 
-| ID | Delivered behavior | Verification |
-|---|---|---|
-| C13 | Reply to an individual response, show a short author/excerpt reference with a link back, and retain the chronological/paginated layout | Server cases cover selection links, native navigation without JavaScript, publication across pages, reference lookup, and ensuring an off-page excerpt does not mark the original reply read. |
-| C14 | Preserve the selected response alongside draft text; explicit new selections take precedence; changing/removing the target keeps typed text | The browser runner covers selecting a response, changing pages, restoring the draft, choosing another response, clearing context, discarding, publishing, and following the reference back. |
-| C15 | Reject unavailable or cross-discussion targets; removal hides quoted text; upgrade without losing replies, reports, or read records | Tests cover malformed/missing/removed/foreign targets, service validation, authentication/CSRF, escaping, restricted public metadata, soft removal, and hard deletion. Migration cases preserve historical replies/reports/read records through upgrade and downgrade/upgrade. A backup, trial, and actual local upgrade preserved original values across 19 tables and passed foreign-key checks. |
+| ID  | Delivered behavior                                                                                                                          | Verification                                                                                                                                                                                                                                                                                                                                                                                       |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| C13 | Reply to an individual response, show a short author/excerpt reference with a link back, and retain the chronological/paginated layout      | Server cases cover selection links, native navigation without JavaScript, publication across pages, reference lookup, and ensuring an off-page excerpt does not mark the original reply read.                                                                                                                                                                                                      |
+| C14 | Preserve the selected response alongside draft text; explicit new selections take precedence; changing/removing the target keeps typed text | The browser runner covers selecting a response, changing pages, restoring the draft, choosing another response, clearing context, discarding, publishing, and following the reference back.                                                                                                                                                                                                        |
+| C15 | Reject unavailable or cross-discussion targets; removal hides quoted text; upgrade without losing replies, reports, or read records         | Tests cover malformed/missing/removed/foreign targets, service validation, authentication/CSRF, escaping, restricted public metadata, soft removal, and hard deletion. Migration cases preserve historical replies/reports/read records through upgrade and downgrade/upgrade. A backup, trial, and actual local upgrade preserved original values across 19 tables and passed foreign-key checks. |
 
 **Evidence:** **192 automated tests passed in 138.46 seconds**. Ruff, both community-script syntax checks, and whitespace checks passed. Sources: [reply-context cases](../tests/test_reply_context.py), [migration tests](../tests/test_migrations.py), [browser runner](../tests/browser/community_drafts.py), and [migration](../migrations/versions/e5f6a7b8c9d0_add_reply_context.py). Current local schema: `e5f6a7b8c9d0`; no drift.
 
@@ -626,13 +629,13 @@ Only immediate public references are loaded. Drafts store a response ID, not a c
 
 Implemented under [L79](DECISIONS.md#l79--independent-recruitment-source-discovery-with-evidence-based-staff-approval) after the user authorised starting the saved recruitment design.
 
-| ID | Delivered capability | Evidence and limits |
-| --- | --- | --- |
-| R01 | Central organisation/source registry and manual registration, exact original URL, separate observed/canonical fields | Migration `a3310f4d2d7b`; idempotency, exact LSHSC URL and redirect tests |
+| ID  | Delivered capability                                                                                                                 | Evidence and limits                                                                                                                                                                                                             |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R01 | Central organisation/source registry and manual registration, exact original URL, separate observed/canonical fields                 | Migration `a3310f4d2d7b`; idempotency, exact LSHSC URL and redirect tests                                                                                                                                                       |
 | R02 | Independent directory discovery for Nigeria and worldwide; recruitment-page links and bounded sitemap inspection; pending candidates | Live implemented ROR adapter: 18 usable Nigerian institution candidates from 20 records. Unseen NG/NZ fixture institutions proceed to recruitment-page candidates without a supplied hospital list. ROR coverage is incomplete. |
-| R03 | Optional search adapter with configurable queries and Nigerian state/category rotation | Credential and storage-rights gates tested. Provider account/rights activation and live paid search validation remain open. |
-| R04 | Staff evidence review, approval expiry, pause/revoke/reopen, health and event history | Service and HTTP tests cover separate evidence requirements, staff/CSRF, stale decisions, redirects and interrupted work. Browser forms verified. |
-| R05 | Scheduled persistent queue, single network lease, hard deadline, retries, bounded requests and daily/queue budgets | Duplicate queue, lease fencing/recovery, cancellation, malformed results, rate-limit cooldown and SSRF/robots/redirect/size tests. Production PostgreSQL/deployment validation remains open. |
+| R03 | Optional search adapter with configurable queries and Nigerian state/category rotation                                               | Credential and storage-rights gates tested. Provider account/rights activation and live paid search validation remain open.                                                                                                     |
+| R04 | Staff evidence review, approval expiry, pause/revoke/reopen, health and event history                                                | Service and HTTP tests cover separate evidence requirements, staff/CSRF, stale decisions, redirects and interrupted work. Browser forms verified.                                                                               |
+| R05 | Scheduled persistent queue, single network lease, hard deadline, retries, bounded requests and daily/queue budgets                   | Duplicate queue, lease fencing/recovery, cancellation, malformed results, rate-limit cooldown and SSRF/robots/redirect/size tests. Production PostgreSQL/deployment validation remains open.                                    |
 
 The full suite passed at **246 tests** before two additional special-address cases; the final recruitment suites passed **56 tests**, covering all changed recruitment logic. Current collection totals **248 tests**. Ruff and whitespace checks passed. Browser checks exercised staff login, source listing/detail on mobile and desktop, evidence submission and exact URL retention in an isolated database. A live read-only ROR request verified the adapter contract; no sources were automatically approved.
 
@@ -644,12 +647,12 @@ The local database was backed up, trial-migrated, and upgraded to `a3310f4d2d7b`
 
 Implemented under [L80](DECISIONS.md#l80--shared-vacancies-with-original-source-evidence-and-guarded-publication).
 
-| ID | Delivered increment | Evidence and limits |
-| --- | --- | --- |
-| R06 | Approved-source JobPosting collection, original page snapshots and extracted/normalized records | Malformed structured pages retained without publication. One HTML page, up to 50 records; other formats require adapters. |
-| R07 | Automatic ordinary publication, URL deduplication, staff exceptions and history | Missing dates/locations, unsafe URLs, employer mismatches, conflicts, stale forms, correction expiry and rejected-record persistence tested. No live source approval granted. |
-| R08 | Shared `/jobs`, country/type filters, disclosed currencies/pay periods and external applications | Existing employer flows retained; imported jobs never collect contacts through the platform apply endpoint. Browser checks use isolated NG/NZ examples. |
-| R09 | Deadline/freshness gates, approval expiry/revocation, missing-record and failure handling | Read gates work without a worker, using a 48-hour confirmation window. Explicit withdrawal signals and independent application-link monitoring remain open. |
+| ID  | Delivered increment                                                                              | Evidence and limits                                                                                                                                                           |
+| --- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R06 | Approved-source JobPosting collection, original page snapshots and extracted/normalized records  | Malformed structured pages retained without publication. One HTML page, up to 50 records; other formats require adapters.                                                     |
+| R07 | Automatic ordinary publication, URL deduplication, staff exceptions and history                  | Missing dates/locations, unsafe URLs, employer mismatches, conflicts, stale forms, correction expiry and rejected-record persistence tested. No live source approval granted. |
+| R08 | Shared `/jobs`, country/type filters, disclosed currencies/pay periods and external applications | Existing employer flows retained; imported jobs never collect contacts through the platform apply endpoint. Browser checks use isolated NG/NZ examples.                       |
+| R09 | Deadline/freshness gates, approval expiry/revocation, missing-record and failure handling        | Read gates work without a worker, using a 48-hour confirmation window. Explicit withdrawal signals and independent application-link monitoring remain open.                   |
 
 **Verification:** **280 tests passed in 175.04 seconds**; Ruff and whitespace checks passed. Migration checks preserve historical employer jobs/applications through upgrade and an empty-vacancy downgrade/upgrade. The browser journey passed collector setup, automatic publication, international salary display, external application presentation, exception approval and mobile/desktop reflow. Visual review improved mobile search and job-card attribution placement, followed by another successful browser pass.
 
@@ -661,11 +664,11 @@ The inspected saved exact LSHSC page contains zero JobPosting records. Actual so
 
 Implemented under L81. A separate licence is not mandatory: staff can record the applicable legal basis for reuse, published terms or written authorization.
 
-| ID | Delivered increment | Evidence and limits |
-| --- | --- | --- |
-| R10 | Explicit reuse basis, collection/retention/republication findings and URL scope | Staff evidence remains required; government ownership is not automatically converted into unrestricted rights. Existing records are preserved without inferred grants. |
-| R11 | Scope enforcement in collector configuration and redirects; reapproval clears old configuration | Checked alongside stale-result cancellation, expiry, public-read restrictions and migration preservation. Live TLS checks remain separate. |
-| R12 | Staff activation status and exact LSHSC review | Browser checks passed. [LSHSC remains pending](LSHSC_ACTIVATION_REVIEW.md); no structured vacancy was found and worker certificate validation fails. |
+| ID  | Delivered increment                                                                             | Evidence and limits                                                                                                                                                    |
+| --- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R10 | Explicit reuse basis, collection/retention/republication findings and URL scope                 | Staff evidence remains required; government ownership is not automatically converted into unrestricted rights. Existing records are preserved without inferred grants. |
+| R11 | Scope enforcement in collector configuration and redirects; reapproval clears old configuration | Checked alongside stale-result cancellation, expiry, public-read restrictions and migration preservation. Live TLS checks remain separate.                             |
+| R12 | Staff activation status and exact LSHSC review                                                  | Browser checks passed. [LSHSC remains pending](LSHSC_ACTIVATION_REVIEW.md); no structured vacancy was found and worker certificate validation fails.                   |
 
 The local database is upgraded to `49b37f820e16`, with all original values across 27 tables preserved and no schema drift. Backup: `/tmp/nurse-vacancy-migration-6vpftetr/before.db`. This does not close production/PostgreSQL readiness or establish any source's legal rights.
 

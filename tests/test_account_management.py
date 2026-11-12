@@ -24,7 +24,7 @@ from app.models.verification import EvidenceDocument, VerificationCase
 from app.services import accounts
 from app.services.account_mail import send_account_mail
 from app.services.auth import AuthError, register_user, save_account_details
-from tests.helpers import csrf_from
+from tests.helpers import csrf_from, has_element
 
 PASSWORD = "original-password"
 NEW_PASSWORD = "my-new-secure-password"
@@ -193,7 +193,7 @@ def test_reset_confirmation_survives_session_revocation_without_query_flags(
     assert response.json() == {"redirect": "/auth/login"}
     page = client.get("/auth/login")
     assert "Password updated" in page.text and "previous sign-in sessions have ended" in page.text
-    assert 'name="password" type="password"' in page.text
+    assert has_element(page, 'input', name='password', type='password')
     assert NEW_PASSWORD not in page.text and token not in page.text
     assert "Password updated" not in client.get("/auth/login").text
     assert client.get("/settings", follow_redirects=False).status_code == 303

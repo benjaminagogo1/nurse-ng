@@ -7,7 +7,7 @@ from datetime import timedelta
 from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.orm import Session
 
 from app.models.jobs import Job
@@ -32,6 +32,7 @@ from app.services.vacancy_extraction import (
     parse_date,
     validation_issues,
 )
+from app.services.vacancy_quality import canonical_vacancy_url, non_vacancy_reason
 
 FRESHNESS = timedelta(hours=48)
 COLLECTORS = {
@@ -58,7 +59,10 @@ def digest(value) -> str:
 
 
 def data_hash(value) -> str:
-    return digest({key: data for key, data in value.items() if not key.startswith("_")})
+    data = {key: data for key, data in value.items() if not key.startswith("_")}
+    if data.get("announcement_url"):
+        data["announcement_url"] = canonical_vacancy_url(data["announcement_url"])
+    return digest(data)
 
 
 def collector_authorized(source) -> bool:
@@ -113,8 +117,11 @@ def configure_collector(
     if adapter not in COLLECTORS:
         raise RecruitmentError("Choose a supported collection format.")
     if enabled:
-        if adapter == "factual_index":
-            raise RecruitmentError("Factual indexing is configured by automatic publisher checks.")
+        if adapter == "factual_index" or source.reuse_basis == "factual_index":
+            raise RecruitmentError(
+                "Use 'Approve and start collection' to configure factual listings. "
+                "Full-description collection requires recorded reuse permission."
+            )
         if not collection_authorized(source) or source.collection_method != "html":
             raise RecruitmentError("Approve this source for permitted website collection first.")
         url_prefix = checked_url(url_prefix)
@@ -203,8 +210,38 @@ def _record_key(raw):
         return digest({"identifier": str(identifier)})
     url = raw.get("url")
     if isinstance(url, str) and url:
-        return digest({"url": url})
+        return digest({"url": canonical_vacancy_url(url)})
     return digest(raw)
+
+
+def _hold_duplicate(db, record) -> bool:
+    """Keep independent source evidence while asking staff to review identical facts once."""
+    url = record.normalized.get("announcement_url")
+    if not url or record.normalized.get("_review"):
+        return False
+    candidates = db.scalars(
+        select(VacancyRecord).where(
+            VacancyRecord.id != record.id,
+            VacancyRecord.state.in_(["pending", "published"]),
+            or_(
+                VacancyRecord.normalized["announcement_url"].as_string() == url,
+                VacancyRecord.normalized["_announcement_key"].as_string()
+                == digest({"url": canonical_vacancy_url(url)}),
+            ),
+        ).order_by(VacancyRecord.first_seen_at, VacancyRecord.id)
+    )
+    for other in candidates:
+        if other.state == "pending" and (
+            utc(other.first_seen_at), other.id.hex
+        ) > (utc(record.first_seen_at), record.id.hex):
+            continue
+        if data_hash(other.normalized) != data_hash(record.normalized):
+            continue
+        record.state = "duplicate"
+        record.normalized = {**record.normalized, "_duplicate_of": str(other.id)}
+        record.issues = ["duplicate: the same announcement and facts already have a review record"]
+        return True
+    return False
 
 
 def _publish(db, record, timestamp):
@@ -212,8 +249,20 @@ def _publish(db, record, timestamp):
     from app.services.recruitment_fetch import url_key
 
     data, source = record.normalized, record.source
-    key = url_key(data["announcement_url"])
+    canonical = canonical_vacancy_url(data["announcement_url"])
+    key = url_key(canonical)
     job = db.scalar(select(Job).where(Job.external_key == key).with_for_update(of=Job))
+    if job is None:
+        # Upgrade identities from earlier collections without replacing saved job links.
+        candidates = db.scalars(select(Job).where(
+            Job.source_id.is_not(None),
+            or_(Job.id == record.job_id, Job.title == data["title"]),
+        ).with_for_update(of=Job))
+        job = next((item for item in candidates if canonical_vacancy_url(
+            item.normalized_data.get("announcement_url", "")
+        ) == canonical), None)
+        if job is not None:
+            job.external_key = key
     if job:
         competitors = list(
             db.scalars(
@@ -319,7 +368,11 @@ def ingest_page(db: Session, source, result: dict, timestamp):
         )
         return {"records": 0, "published": 0, "pending": 0, "error": str(exc)}
     keys = [_record_key(raw) for raw in rows]
-    duplicated = {key for key in keys if keys.count(key) > 1}
+    # The same JSON-LD object may be embedded twice. Only differing copies conflict.
+    versions = {}
+    for raw, key in zip(rows, keys, strict=True):
+        versions.setdefault(key, set()).add(digest(raw))
+    duplicated = {key for key, hashes in versions.items() if len(hashes) > 1}
     seen, published, pending = set(), 0, 0
     for raw, key in zip(rows, keys, strict=True):
         if key in seen:
@@ -330,8 +383,19 @@ def ingest_page(db: Session, source, result: dict, timestamp):
                 VacancyRecord.source_id == source.id, VacancyRecord.record_key == key
             )
         )
+        if record is None and not raw.get("identifier") and raw.get("url"):
+            candidates = db.scalars(select(VacancyRecord).where(
+                VacancyRecord.source_id == source.id
+            ).order_by(VacancyRecord.first_seen_at, VacancyRecord.id))
+            record = next((item for item in candidates
+                           if not item.raw_record.get("identifier") and canonical_vacancy_url(
+                               item.raw_record.get("url", "")
+                           ) == canonical_vacancy_url(raw["url"])), None)
+            if record is not None:
+                record.record_key = key
         raw_hash = digest(raw)
         previous_state = record.state if record else None
+        previous_normalized = record.normalized if record else {}
         changed = record is None or record.content_hash != raw_hash
         if record is None:
             record = VacancyRecord(
@@ -344,12 +408,27 @@ def ingest_page(db: Session, source, result: dict, timestamp):
             db.add(record)
         record.snapshot_id, record.last_seen_at = snapshot.id, timestamp
         if changed:
-            record.raw_record, record.content_hash, record.normalized = (
-                raw,
-                raw_hash,
-                normalize(raw),
-            )
+            record.raw_record, record.content_hash = raw, raw_hash
+        # Reapply extraction fixes even when the publisher's raw facts did not change.
+        # Staff clarifications survive only while their original evidence is unchanged.
+        refreshed = normalize(raw)
+        if not changed:
+            refreshed.update({key: value for key, value in previous_normalized.items()
+                              if key.startswith("_")})
+            refreshed.update({key: value for key, value in
+                              refreshed.get("_review", {}).get("changes", {}).items()
+                              if key in EDITABLE})
+        normalized_changed = data_hash(previous_normalized) != data_hash(refreshed)
+        record.normalized = refreshed
         data = record.normalized
+        if "_duplicate_of" in data:
+            data = {key: value for key, value in data.items() if key != "_duplicate_of"}
+            record.normalized = data
+        if data.get("announcement_url"):
+            data = {**data, "_announcement_key": digest({
+                "url": canonical_vacancy_url(data["announcement_url"]),
+            })}
+            record.normalized = data
         if source.collection_adapter == "factual_index":
             data = {**data, "_index": raw["_index"]}
             record.normalized = data
@@ -380,14 +459,19 @@ def ingest_page(db: Session, source, result: dict, timestamp):
         record.state = "rejected" if previous_state == "rejected" else "pending"
         record.revision = (record.revision or 0) + 1
         db.flush()
-        if record.state != "rejected" and not record.issues:
+        if record.state == "pending" and record.issues:
+            _hold_duplicate(db, record)
+        if record.state != "rejected" and record.state != "duplicate" and not record.issues:
             _publish(db, record, timestamp)
         elif record.job_id:
             job = db.get(Job, record.job_id)
             if job and job.source_id == source.id:
                 job.status = "unconfirmed"
-        if changed or record.state != previous_state:
-            record_event(db, record, "collected", details={"state": record.state})
+        if changed or normalized_changed or record.state != previous_state:
+            record_event(db, record, "collected", details={
+                "state": record.state,
+                "normalization_changed": normalized_changed and not changed,
+            })
         published += record.state == "published"
         pending += record.state == "pending"
         db.flush()
@@ -398,7 +482,9 @@ def ingest_page(db: Session, source, result: dict, timestamp):
             VacancySnapshot.observed_url == result["observed_url"]
         )
     for record in db.scalars(missing_query):
-        if record.record_key not in seen and record.state not in {"rejected", "unconfirmed"}:
+        if record.record_key not in seen and record.state not in {
+            "rejected", "unconfirmed", "duplicate",
+        }:
             record.state = "unconfirmed"
             record.issues = ["missing: not present in the latest successful collection"]
             record.revision += 1
@@ -515,9 +601,47 @@ def review_record(
     db.commit()
 
 
+def reconcile_pending_quality(db, *, dry_run=False):
+    """Auditably remove obvious non-vacancies and duplicate pending work; retain evidence."""
+    records = list(db.scalars(
+        select(VacancyRecord).where(VacancyRecord.state == "pending")
+        .order_by(VacancyRecord.first_seen_at, VacancyRecord.id)
+    ))
+    result = {"excluded": 0, "duplicates": 0}
+    for record in records:
+        if record.normalized.get("announcement_url"):
+            record.normalized = {**record.normalized, "_announcement_key": digest({
+                "url": canonical_vacancy_url(record.normalized["announcement_url"]),
+            })}
+    db.flush()
+    for record in records:
+        if record.normalized.get("_review"):
+            continue
+        reason = non_vacancy_reason(record.normalized.get("title", ""),
+                                    record.normalized.get("announcement_url", ""))
+        if reason:
+            record.state = "rejected"
+            record.issues = [reason]
+            result["excluded"] += 1
+            action = "quality_excluded"
+        elif _hold_duplicate(db, record):
+            result["duplicates"] += 1
+            action = "duplicate_held"
+        else:
+            continue
+        record.revision += 1
+        record_event(db, record, action, details={"issues": record.issues})
+        db.flush()
+    if dry_run:
+        db.rollback()
+    else:
+        db.commit()
+    return result
+
+
 def record_list(db, *, state="", source_id=None, page=1):
     query = select(VacancyRecord)
-    if state in {"pending", "published", "rejected", "unconfirmed"}:
+    if state in {"pending", "published", "rejected", "unconfirmed", "duplicate"}:
         query = query.where(VacancyRecord.state == state)
     if source_id:
         query = query.where(VacancyRecord.source_id == source_id)

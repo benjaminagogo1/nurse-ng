@@ -1,18 +1,76 @@
-{% extends 'base.html' %}
-{% block title %}{{ 'Edit' if event else 'Publish' }} an event — Nurse.ng{% endblock %}
-{% block content %}
+{% extends 'base.html' %} {% block title %}{{ 'Edit' if event else 'Publish' }}
+an event — Nurse.ng{% endblock %} {% block content %}
 <section class="form-page">
-  <a href="/events">← Community events</a><h1>{{ 'Edit' if event else 'Publish' }} an event</h1>
-  <p>Event details are public. Enter dates and times in Nigeria time (WAT, UTC+1).</p>
-  <form method="post" action="{{ '/events/' ~ event.id ~ '/edit' if event else '/events' }}" class="stacked-form" data-pending-label="Saving event…">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <label for="event-title">Event title</label><input id="event-title" name="title" required maxlength="160" value="{{ values.title }}">
-    <label for="event-description">Description and joining instructions</label><textarea id="event-description" name="description" required maxlength="5000" rows="6">{{ values.description }}</textarea>
-    <label for="event-location">Location or online venue</label><input id="event-location" name="location" required maxlength="240" value="{{ values.location }}">
-    <label for="event-start">Starts (WAT)</label><input id="event-start" name="starts_at" type="datetime-local" required value="{{ values.starts_at }}">
-    <label for="event-end">Ends (WAT)</label><input id="event-end" name="ends_at" type="datetime-local" required value="{{ values.ends_at }}">
-    <label for="event-url">External registration link (optional)</label><input id="event-url" name="registration_url" type="url" maxlength="2048" value="{{ values.registration_url }}" aria-describedby="event-url-hint"><p id="event-url-hint" class="field-hint">Use an HTTPS link. Explain any registration requirements in the description.</p>
-    <button type="submit">{{ 'Save changes' if event else 'Publish event' }}</button>
+  <a href="/events">← Community events</a>
+  <h1>{{ 'Edit' if event else 'Publish' }} an event</h1>
+  <p>
+    Event details are public. Enter dates and times in Nigeria time (WAT,
+    UTC+1).
+  </p>
+  <form
+    method="post"
+    action="{{ '/events/' ~ event.id ~ '/edit' if event else '/events' }}"
+    class="stacked-form"
+    data-pending-label="Saving event…"
+  >
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <label for="event-title">Event title</label
+    ><input
+      id="event-title"
+      name="title"
+      required
+      maxlength="160"
+      value="{{ values.title }}"
+    />
+    <label for="event-description">Description and joining instructions</label
+    ><textarea
+      id="event-description"
+      name="description"
+      required
+      maxlength="5000"
+      rows="6"
+    >
+{{ values.description }}</textarea>
+    <label for="event-location">Location or online venue</label
+    ><input
+      id="event-location"
+      name="location"
+      required
+      maxlength="240"
+      value="{{ values.location }}"
+    />
+    <label for="event-start">Starts (WAT)</label
+    ><input
+      id="event-start"
+      name="starts_at"
+      type="datetime-local"
+      required
+      value="{{ values.starts_at }}"
+    />
+    <label for="event-end">Ends (WAT)</label
+    ><input
+      id="event-end"
+      name="ends_at"
+      type="datetime-local"
+      required
+      value="{{ values.ends_at }}"
+    />
+    <label for="event-url">External registration link (optional)</label
+    ><input
+      id="event-url"
+      name="registration_url"
+      type="url"
+      maxlength="2048"
+      value="{{ values.registration_url }}"
+      aria-describedby="event-url-hint"
+    />
+    <p id="event-url-hint" class="field-hint">
+      Use an HTTPS link. Explain any registration requirements in the
+      description.
+    </p>
+    <button type="submit">
+      {{ 'Save changes' if event else 'Publish event' }}
+    </button>
   </form>
 </section>
 {% endblock %}

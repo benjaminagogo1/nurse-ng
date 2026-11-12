@@ -4,14 +4,15 @@ from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
-from sqlalchemy import select
+from sqlalchemy import func, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.db.session import get_db
 from app.models.recruitment import DiscoverySchedule, DiscoveryTask, RecruitmentSource, SourceEvent
 from app.models.user import User
-from app.models.vacancies import VacancySnapshot
+from app.models.vacancies import VacancyRecord, VacancySnapshot
 from app.services import recruitment as registry
 from app.services.vacancies import activation_blockers, configure_collector
 from app.web.deps import require_staff, verify_csrf
@@ -41,6 +42,22 @@ def _dashboard(
         country_code=country,
         page=page,
     )
+    from app.models.jobs import Job
+    from app.services.jobs import open_job_condition
+    from app.services.worker_health import snapshot, worker_names
+
+    try:
+        with db.begin_nested():
+            workers = snapshot(db, worker_names(settings.required_workers) or ("recruitment",))
+    except SQLAlchemyError:
+        workers = []
+    pending_records = db.scalar(select(func.count()).select_from(VacancyRecord).where(
+        VacancyRecord.state == "pending"
+    ))
+    public_jobs = db.scalar(select(func.count()).select_from(Job).where(open_job_condition()))
+    oldest_waiting = db.scalar(select(func.min(DiscoveryTask.created_at)).where(
+        DiscoveryTask.status == "queued"
+    ))
     return render(
         request,
         "recruitment/index.html",
@@ -60,6 +77,10 @@ def _dashboard(
                 )
             ),
             "counts": registry.task_counts(db),
+            "workers": workers,
+            "pending_records": pending_records,
+            "public_jobs": public_jobs,
+            "oldest_waiting": oldest_waiting,
             "error": error,
             "values": values or {},
             "query": query,
@@ -88,6 +109,12 @@ def _dashboard(
 
 
 def _detail(request, db, user, source, *, error=None, values=None, history_page=1):
+    from app.services.recruitment_indexing import configuration
+
+    try:
+        _, index_scope = configuration(source)
+    except ValueError:
+        index_scope = ""
     history = list(
         db.scalars(
             select(SourceEvent)
@@ -122,6 +149,7 @@ def _detail(request, db, user, source, *, error=None, values=None, history_page=
             "has_more": len(history) > 25,
             "current_approval": registry.approval_current(source),
             "default_expiry": (registry.now() + timedelta(days=90)).date().isoformat(),
+            "default_index_scope": index_scope,
             "error": error,
             "values": values or {},
         },
@@ -270,6 +298,7 @@ async def review(
     action: str = Form(""),
     note: str = Form(""),
     method: str = Form("unconfirmed"),
+    index_scope: str = Form(""),
     expires_at: str = Form(""),
     licensing_applicability: str = Form("required"),
     user: User = Depends(require_staff),
@@ -281,7 +310,7 @@ async def review(
     values = {key: value for key, value in form.items() if isinstance(value, str)}
     try:
         expiry = None
-        if action == "approve":
+        if action in {"approve", "approve_index"}:
             try:
                 expiry = datetime.strptime(expires_at, "%Y-%m-%d").replace(tzinfo=UTC)
             except ValueError:
@@ -294,6 +323,7 @@ async def review(
             action=action,
             note=note,
             method=method,
+            index_scope=index_scope,
             expires_at=expiry,
             licensing_applicability=licensing_applicability,
             checks={
@@ -312,8 +342,10 @@ async def review(
     return redirect_feedback(
         request, f"/recruitment/sources/{source.id}",
         message(
-            'Source review saved',
-            'Your decision has been recorded.',
+            'Source approved and collection enabled'
+            if action == 'approve_index' else 'Source review saved',
+            'The worker will check this source and publish valid vacancies.'
+            if action == 'approve_index' else 'Your decision has been recorded.',
         ),
     )
 

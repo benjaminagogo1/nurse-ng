@@ -1,50 +1,60 @@
-{% extends "base.html" %}
-
-{% block title %}Sharing controls — Nurse.ng{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Sharing controls — Nurse.ng{%
+endblock %} {% block content %}
 <section class="form-page">
   <p class="eyebrow">Sharing controls</p>
   <h1>Choose what a shared link shows</h1>
   <p class="lede">
-    Only fields set to Public appear on your share link. Everything else stays private.
+    Only fields set to Public appear on your share link. Everything else stays
+    private.
   </p>
 
   {% if not is_active %}
-    <p class="field-hint">
-      Your profile is a draft. Save these settings, then activate the profile to turn the share link on.
-    </p>
-  {% endif %}
-
-  {% if error %}
-    <p class="form-error" role="alert">{{ error }}</p>
+  <p class="field-hint">
+    Your profile is a draft. Save these settings, then activate the profile to
+    turn the share link on.
+  </p>
+  {% endif %} {% if error %}
+  <p class="form-error" role="alert">{{ error }}</p>
   {% endif %}
 
   <form method="post" action="/profile/sharing" class="stacked-form">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
 
     {% for item in items %}
-      <fieldset class="sharing-field">
-        <legend>{{ item.label }}</legend>
-        {% if item.preview %}
-          <p class="field-hint">{{ item.preview|truncate(80) }}</p>
-        {% endif %}
-        <label class="inline-choice">
-          <input type="radio" name="visibility_{{ item.name }}" value="private"
-                 {% if item.visibility == 'private' %}checked{% endif %}>
-          Private
-        </label>
-        <label class="inline-choice">
-          <input type="radio" name="visibility_{{ item.name }}" value="public"
-                 {% if item.visibility == 'public' %}checked{% endif %}>
-          Public
-        </label>
-      </fieldset>
+    <fieldset class="sharing-field">
+      <legend>{{ item.label }}</legend>
+      {% if item.preview %}
+      <p class="field-hint">{{ item.preview|truncate(80) }}</p>
+      {% endif %}
+      <label class="inline-choice">
+        <input
+          type="radio"
+          name="visibility_{{ item.name }}"
+          value="private"
+          {% if item.visibility == 'private' %}checked{%
+          endif
+          %}
+        />
+        Private
+      </label>
+      <label class="inline-choice">
+        <input
+          type="radio"
+          name="visibility_{{ item.name }}"
+          value="public"
+          {% if item.visibility == 'public' %}checked{%
+          endif
+          %}
+        />
+        Public
+      </label>
+    </fieldset>
     {% endfor %}
 
     <p class="field-hint">
-      If your display name is private, the shared page shows "Nurse profile" instead of your name.
-      Employer-only visibility will arrive with employer accounts.
+      If your display name is private, the shared page shows "Nurse profile"
+      instead of your name. Employer-only visibility will arrive with employer
+      accounts.
     </p>
 
     <button type="submit">Save sharing settings</button>

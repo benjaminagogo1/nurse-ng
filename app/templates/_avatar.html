@@ -1,3 +1,11 @@
 {% macro avatar(account, name='', classes='avatar avatar-sm') -%}
-<span class="{{ classes }}" aria-hidden="true">{% if account.photo_storage_name and (account.photo_public or (user and user.id == account.id)) %}<img src="/account/photos/{{ account.photo_storage_name }}" alt="" width="96" height="96">{% else %}{{ (name or 'N')[:1]|upper }}{% endif %}</span>
+<span class="{{ classes }}" aria-hidden="true"
+  >{% if account.photo_storage_name and (account.photo_public or (user and
+  user.id == account.id)) %}<img
+    src="/account/photos/{{ account.photo_storage_name }}"
+    alt=""
+    width="96"
+    height="96"
+  />{% else %}{{ (name or 'N')[:1]|upper }}{% endif %}</span
+>
 {%- endmacro %}

@@ -1,18 +1,96 @@
-{% extends 'base.html' %}
-{% block title %}{{ event.title }} — Nurse.ng{% endblock %}
-{% block content %}
+{% extends 'base.html' %} {% block title %}{{ event.title }} — Nurse.ng{%
+endblock %} {% block content %}
 <section class="form-page event-detail">
-  <a href="/events">← Community events</a><h1>{{ event.title }}</h1>
-  {% if event.status == 'cancelled' %}<p class="form-notice" role="status">This event has been cancelled.</p>{% elif ended %}<p class="form-notice">This event has ended.</p>{% endif %}
-  <p><strong>{{ local_time(event.starts_at).strftime('%d %B %Y, %H:%M') }} – {{ local_time(event.ends_at).strftime('%d %B %Y, %H:%M') }} WAT</strong></p>
-  <p>{{ event.location }}</p><div class="event-description">{{ event.description }}</div>
-  <p>{{ count }} member{{ '' if count == 1 else 's' }} planning to attend. Individual attendance choices are private.</p>
-  {% if event.status == 'scheduled' and not ended %}
-    {% if event.registration_url %}<p><a class="btn btn-primary" href="{{ event.registration_url }}" target="_blank" rel="noopener noreferrer">Register with the organiser <span class="sr-only">(opens in a new tab)</span></a></p><p class="field-hint">An RSVP here does not replace registration with the organiser.</p>{% endif %}
-    {% if user %}<form method="post" action="/events/{{ event.id }}/rsvp" data-pending-label="Saving RSVP…"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="attending" value="{{ 'false' if attending else 'true' }}"><p role="status">{{ 'You are planning to attend.' if attending else 'Let the organiser know you are interested in attending.' }}</p><button type="submit">{{ 'Cancel my RSVP' if attending else 'RSVP: I plan to attend' }}</button></form>{% else %}<p><a href="/auth/login">Sign in to RSVP</a></p>{% endif %}
-  {% elif user and attending %}<form method="post" action="/events/{{ event.id }}/rsvp"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="attending" value="false"><button type="submit">Remove my RSVP</button></form>{% endif %}
-  <p><a class="text-link" href="/events/{{ event.id }}/calendar.ics">Download calendar event (.ics)</a></p>
-  <p class="field-hint">Downloaded calendars do not update automatically. Check this page for changes before attending.</p>
-  {% if user and user.is_staff and event.status == 'scheduled' %}<hr><a class="btn btn-secondary" href="/events/{{ event.id }}/edit">Edit event</a><details><summary>Cancel this event</summary><p>This closes RSVPs and marks the event cancelled for everyone.</p><form method="post" action="/events/{{ event.id }}/cancel" data-pending-label="Cancelling event…"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit">Confirm cancellation</button></form></details>{% endif %}
+  <a href="/events">← Community events</a>
+  <h1>{{ event.title }}</h1>
+  {% if event.status == 'cancelled' %}
+  <p class="form-notice" role="status">This event has been cancelled.</p>
+  {% elif ended %}
+  <p class="form-notice">This event has ended.</p>
+  {% endif %}
+  <p>
+    <strong
+      >{{ local_time(event.starts_at).strftime('%d %B %Y, %H:%M') }} – {{
+      local_time(event.ends_at).strftime('%d %B %Y, %H:%M') }} WAT</strong
+    >
+  </p>
+  <p>{{ event.location }}</p>
+  <div class="event-description">{{ event.description }}</div>
+  <p>
+    {{ count }} member{{ '' if count == 1 else 's' }} planning to attend.
+    Individual attendance choices are private.
+  </p>
+  {% if event.status == 'scheduled' and not ended %} {% if
+  event.registration_url %}
+  <p>
+    <a
+      class="btn btn-primary"
+      href="{{ event.registration_url }}"
+      target="_blank"
+      rel="noopener noreferrer"
+      >Register with the organiser
+      <span class="sr-only">(opens in a new tab)</span></a
+    >
+  </p>
+  <p class="field-hint">
+    An RSVP here does not replace registration with the organiser.
+  </p>
+  {% endif %} {% if user %}
+  <form
+    method="post"
+    action="/events/{{ event.id }}/rsvp"
+    data-pending-label="Saving RSVP…"
+  >
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" /><input
+      type="hidden"
+      name="attending"
+      value="{{ 'false' if attending else 'true' }}"
+    />
+    <p role="status">
+      {{ 'You are planning to attend.' if attending else 'Let the organiser know you are interested in attending.' }}
+    </p>
+    <button type="submit">
+      {{ 'Cancel my RSVP' if attending else 'RSVP: I plan to attend' }}
+    </button>
+  </form>
+  {% else %}
+  <p><a href="/auth/login">Sign in to RSVP</a></p>
+  {% endif %} {% elif user and attending %}
+  <form method="post" action="/events/{{ event.id }}/rsvp">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" /><input
+      type="hidden"
+      name="attending"
+      value="false"
+    /><button type="submit">Remove my RSVP</button>
+  </form>
+  {% endif %}
+  <p>
+    <a class="text-link" href="/events/{{ event.id }}/calendar.ics"
+      >Download calendar event (.ics)</a
+    >
+  </p>
+  <p class="field-hint">
+    Downloaded calendars do not update automatically. Check this page for
+    changes before attending.
+  </p>
+  {% if user and user.is_staff and event.status == 'scheduled' %}
+  <hr />
+  <a class="btn btn-secondary" href="/events/{{ event.id }}/edit">Edit event</a>
+  <details>
+    <summary>Cancel this event</summary>
+    <p>This closes RSVPs and marks the event cancelled for everyone.</p>
+    <form
+      method="post"
+      action="/events/{{ event.id }}/cancel"
+      data-pending-label="Cancelling event…"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" /><button
+        type="submit"
+      >
+        Confirm cancellation
+      </button>
+    </form>
+  </details>
+  {% endif %}
 </section>
 {% endblock %}

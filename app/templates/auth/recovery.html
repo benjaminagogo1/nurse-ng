@@ -1,45 +1,153 @@
-{% extends "base.html" %}
-{% from "_icons.html" import icon %}
-{% block title %}Account recovery — Nurse.ng{% endblock %}
-{% block content %}
+{% extends "base.html" %} {% from "_icons.html" import icon %} {% block title
+%}Account recovery — Nurse.ng{% endblock %} {% block content %}
 <section class="form-page account-recovery">
-  <span class="recovery-symbol">{{ icon('mail' if mode in ['forgot', 'sent'] else 'lock' if mode == 'reset' else 'shield', 30) }}</span>
+  <span class="recovery-symbol"
+    >{{ icon('mail' if mode in ['forgot', 'sent'] else 'lock' if mode == 'reset'
+    else 'shield', 30) }}</span
+  >
   <p class="eyebrow">Account security</p>
   {% if mode == 'forgot' %}
   <h1>Forgot your password?</h1>
-  <p class="lede">Let’s get you back in. Enter the phone number you use to sign in.</p>
+  <p class="lede">
+    Let’s get you back in. Enter the phone number you use to sign in.
+  </p>
 
   {% if mail_available %}
-  <form class="stacked-form" method="post" action="/auth/forgot-password" data-feedback-form data-pending-label="Requesting reset link…">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <label for="recovery-phone">Phone number</label><input id="recovery-phone" name="phone" type="tel" autocomplete="tel" maxlength="32" required placeholder="+234 801 234 5678">
-    <button class="btn btn-primary" type="submit">Send reset link {{ icon('arrow', 17) }}</button>
+  <form
+    class="stacked-form"
+    method="post"
+    action="/auth/forgot-password"
+    data-feedback-form
+    data-pending-label="Requesting reset link…"
+  >
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <label for="recovery-phone">Phone number</label
+    ><input
+      id="recovery-phone"
+      name="phone"
+      type="tel"
+      autocomplete="tel"
+      maxlength="32"
+      required
+      placeholder="+234 801 234 5678"
+    />
+    <button class="btn btn-primary" type="submit">
+      Send reset link {{ icon('arrow', 17) }}
+    </button>
   </form>
-  {% else %}<div class="account-security-note">{{ icon('info', 22) }}<p>Email delivery is currently unavailable. Please try again later.</p></div>{% endif %}
-  <p class="field-hint">We’ll send a link to your verified email address. Recovery requires an email address verified in Account settings.</p>
+  {% else %}
+  <div class="account-security-note">
+    {{ icon('info', 22) }}
+    <p>Email delivery is currently unavailable. Please try again later.</p>
+  </div>
+  {% endif %}
+  <p class="field-hint">
+    We’ll send a link to your verified email address. Recovery requires an email
+    address verified in Account settings.
+  </p>
   {% elif mode == 'sent' %}
   <h1>Check your email</h1>
 
-  <div class="account-security-note">{{ icon('clock', 22) }}<div><strong>Your next step</strong><p>Open the latest reset link and choose a new password. Keep this window open while you check your inbox.</p></div></div>
-  <p class="field-hint">Didn’t see it? Check Spam, then wait a minute before requesting another link.</p>
-  <a class="btn btn-secondary" href="/auth/forgot-password">Request another link</a>
+  <div class="account-security-note">
+    {{ icon('clock', 22) }}
+    <div>
+      <strong>Your next step</strong>
+      <p>
+        Open the latest reset link and choose a new password. Keep this window
+        open while you check your inbox.
+      </p>
+    </div>
+  </div>
+  <p class="field-hint">
+    Didn’t see it? Check Spam, then wait a minute before requesting another
+    link.
+  </p>
+  <a class="btn btn-secondary" href="/auth/forgot-password"
+    >Request another link</a
+  >
   {% else %}
-  <h1>{{ 'Choose a new password' if mode == 'reset' else 'Verify your email' }}</h1>
-  <p class="lede">{{ 'A fresh password keeps your account secure.' if mode == 'reset' else 'One last step to protect access to your account.' }}</p>
+  <h1>
+    {{ 'Choose a new password' if mode == 'reset' else 'Verify your email' }}
+  </h1>
+  <p class="lede">
+    {{ 'A fresh password keeps your account secure.' if mode == 'reset' else
+    'One last step to protect access to your account.' }}
+  </p>
 
-  <form class="stacked-form" method="post" action="/auth/{{ 'reset-password' if mode == 'reset' else 'verify-email' }}" data-feedback-form data-pending-label="{{ 'Updating password…' if mode == 'reset' else 'Verifying email…' }}">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <div data-token-field><label for="account-token">Code from your email</label><input id="account-token" name="token" type="text" value="{{ token or '' }}" maxlength="100" autocomplete="off" autocapitalize="none" spellcheck="false" required data-account-token></div>
+  <form
+    class="stacked-form"
+    method="post"
+    action="/auth/{{ 'reset-password' if mode == 'reset' else 'verify-email' }}"
+    data-feedback-form
+    data-pending-label="{{ 'Updating password…' if mode == 'reset' else 'Verifying email…' }}"
+  >
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <div data-token-field>
+      <label for="account-token">Code from your email</label
+      ><input
+        id="account-token"
+        name="token"
+        type="text"
+        value="{{ token or '' }}"
+        maxlength="100"
+        autocomplete="off"
+        autocapitalize="none"
+        spellcheck="false"
+        required
+        data-account-token
+      />
+    </div>
     {% if mode == 'reset' %}
-    <label for="new-password">New password</label><input id="new-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required aria-describedby="password-guidance">
-    <p class="field-hint" id="password-guidance">Use at least 8 characters. Choose a password you don’t use elsewhere.</p>
-    <label for="confirm-password">Confirm new password</label><input id="confirm-password" name="confirm_password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required data-match="new-password">
-    {% else %}<p class="field-hint">Confirm that you own the email address that received this link.</p>{% endif %}
-    <button class="btn btn-primary" type="submit">{{ icon('lock' if mode == 'reset' else 'shield', 18) }} {{ 'Update password' if mode == 'reset' else 'Verify email' }}</button>
+    <label for="new-password">New password</label
+    ><input
+      id="new-password"
+      name="password"
+      type="password"
+      autocomplete="new-password"
+      minlength="8"
+      maxlength="128"
+      required
+      aria-describedby="password-guidance"
+    />
+    <p class="field-hint" id="password-guidance">
+      Use at least 8 characters. Choose a password you don’t use elsewhere.
+    </p>
+    <label for="confirm-password">Confirm new password</label
+    ><input
+      id="confirm-password"
+      name="confirm_password"
+      type="password"
+      autocomplete="new-password"
+      minlength="8"
+      maxlength="128"
+      required
+      data-match="new-password"
+    />
+    {% else %}
+    <p class="field-hint">
+      Confirm that you own the email address that received this link.
+    </p>
+    {% endif %}
+    <button class="btn btn-primary" type="submit">
+      {{ icon('lock' if mode == 'reset' else 'shield', 18) }} {{ 'Update password' if mode == 'reset' else 'Verify email' }}
+    </button>
   </form>
-  {% if mode == 'reset' %}<div class="account-security-note">{{ icon('shield', 22) }}<p>After your password is updated, you’ll sign in again on your devices.</p></div><p><a href="/auth/forgot-password">Request a new reset link</a></p>{% else %}<p><a href="/settings">Return to settings to request a new verification email</a></p>{% endif %}
-  {% endif %}
-  <p class="form-alt"><a href="/auth/login">{{ icon('arrow', 15) }} Back to sign in</a></p>
+  {% if mode == 'reset' %}
+  <div class="account-security-note">
+    {{ icon('shield', 22) }}
+    <p>After your password is updated, you’ll sign in again on your devices.</p>
+  </div>
+  <p><a href="/auth/forgot-password">Request a new reset link</a></p>
+  {% else %}
+  <p>
+    <a href="/settings"
+      >Return to settings to request a new verification email</a
+    >
+  </p>
+  {% endif %} {% endif %}
+  <p class="form-alt">
+    <a href="/auth/login">{{ icon('arrow', 15) }} Back to sign in</a>
+  </p>
 </section>
 <script src="{{ url_for('static', path='/js/account.js') }}" defer></script>
 {% endblock %}

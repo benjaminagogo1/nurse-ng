@@ -86,6 +86,29 @@ def test_nonpublic_or_unavailable_members_are_excluded(db_session, state):
     assert suggested_people(db_session, viewer.user) == []
 
 
+@pytest.mark.parametrize("state", ["suspended", "deactivated", "inactive"])
+def test_unavailable_account_loses_public_link_and_regains_it_on_reactivation(
+    client, db_session, state,
+):
+    profile = person(db_session, 1, headline="Published headline", fields=("headline",))
+    path = f"/p/{profile.public_id}"
+    assert client.get(path).status_code == 200
+    if state == "inactive":
+        profile.user.is_active = False
+    else:
+        profile.user.status = state
+    db_session.commit()
+    response = client.get(path)
+    assert response.status_code == 404
+    assert "Published headline" not in response.text
+    assert list_discoverable_profiles(db_session) == []
+    profile.user.status = "active"
+    profile.user.is_active = True
+    db_session.commit()
+    assert client.get(path).status_code == 200
+    assert list_discoverable_profiles(db_session) == [profile]
+
+
 def test_combined_filters_literal_search_and_stable_pagination(client, db_session):
     for number in range(1, 15):
         person(
@@ -192,8 +215,8 @@ def test_onboarding_saves_private_profile_and_shows_feedback(client, db_session)
     assert 'id="feedback-title">Your interests are saved' in page.text
     assert "Your profile is private." in page.text
     assert "Personalise my experience" not in client.get("/auth/dashboard").text
-    assert 'value="Digital health" checked' in client.get("/welcome").text
-    assert 'value="Digital health" checked' in client.get("/profile/edit").text
+    assert 'value="Digital health" checked' in " ".join(client.get("/welcome").text.split())
+    assert 'value="Digital health" checked' in " ".join(client.get("/profile/edit").text.split())
     assert client.get(f"/p/{profile.public_id}").status_code == 404
 
 
@@ -260,7 +283,7 @@ def test_onboarding_preserves_existing_sharing_photo_and_alert_choices(client, d
     )
     before = preferences(db_session, user).active_since
     page = client.get("/welcome")
-    assert "Interests are <strong>public</strong>" in page.text
+    assert "Interests are <strong>public</strong>" in " ".join(page.text.split())
     assert welcome_save(client, interests=["Public health"], location="Lagos").status_code == 303
     assert profile.discoverable and user.photo_public and profile.headline == "Keep this"
     assert get_visibility_map(db_session, profile)["interests"] == "public"

@@ -328,7 +328,7 @@ def get_active_profile_by_public_id(
     return db.scalar(
         select(NurseProfile).where(
             NurseProfile.public_id == public_id,
-            NurseProfile.status == ProfileStatus.ACTIVE,
+            active_profile_condition(),
         )
     )
 
@@ -377,11 +377,10 @@ def public_field_condition(field: str):
     )
 
 
-def discoverable_condition():
+def active_profile_condition():
+    """Public links and directory results must respect the owner's account status."""
     return and_(
         NurseProfile.status == ProfileStatus.ACTIVE,
-        NurseProfile.discoverable.is_(True),
-        public_field_condition("display_name"),
         select(User.id)
         .where(
             User.id == NurseProfile.user_id,
@@ -389,6 +388,14 @@ def discoverable_condition():
             User.status == UserStatus.ACTIVE,
         )
         .exists(),
+    )
+
+
+def discoverable_condition():
+    return and_(
+        active_profile_condition(),
+        NurseProfile.discoverable.is_(True),
+        public_field_condition("display_name"),
     )
 
 

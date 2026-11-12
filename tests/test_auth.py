@@ -1,17 +1,8 @@
-import re
-
 from sqlalchemy import select
 
 from app.models.user import User
 from app.services.auth import register_user
-
-CSRF_RE = re.compile(r'name="csrf_token" value="([^"]+)"')
-
-
-def csrf_from(response) -> str:
-    match = CSRF_RE.search(response.text)
-    assert match is not None, "page did not render a CSRF token"
-    return match.group(1)
+from tests.helpers import csrf_from
 
 
 def register_payload(

@@ -1,23 +1,91 @@
-{% extends "base.html" %}
-{% from "_icons.html" import icon %}
-{% block content %}
+{% extends "base.html" %} {% from "_icons.html" import icon %} {% block content
+%}
 <section class="jb">
-  <p class="eyebrow">Make your next move</p><h1>{{ 'Opportunities for you' if matching else 'Saved opportunities' }}</h1>
-  <p class="lede">{{ 'Based on your chosen interests, with Nigerian opportunities first.' if matching else 'Your shortlist, with reminders for deadlines you choose to follow.' }}</p>
+  <p class="eyebrow">Make your next move</p>
+  <h1>{{ 'Opportunities for you' if matching else 'Saved opportunities' }}</h1>
+  <p class="lede">
+    {{ 'Based on your chosen interests, with Nigerian opportunities first.' if
+    matching else 'Your shortlist, with reminders for deadlines you choose to follow.' }}
+  </p>
 
-  <nav class="opportunity-nav" aria-label="My opportunities"><a href="/jobs">All opportunities</a><a href="/jobs/matches" {% if matching %}aria-current="page"{% endif %}>For you</a><a href="/jobs/saved" {% if not matching %}aria-current="page"{% endif %}>Saved opportunities</a><a href="/jobs/preferences">Opportunity alerts</a></nav>
+  <nav class="opportunity-nav" aria-label="My opportunities">
+    <a href="/jobs">All opportunities</a
+    ><a href="/jobs/matches" {% if matching %}aria-current="page" {% endif %}
+      >For you</a
+    ><a href="/jobs/saved" {% if not matching %}aria-current="page" {% endif %}
+      >Saved opportunities</a
+    ><a href="/jobs/preferences">Opportunity alerts</a>
+  </nav>
   <div class="job-list">
-  {% for item in jobs %}
-    {% set job = item.job %}
+    {% for item in jobs %} {% set job = item.job %}
     <div class="saved-opportunity">
-    {% if job.unavailable|default(false) %}<p class="opportunity-unavailable">This opportunity is no longer available from its source.</p>{% else %}{% include "jobs/_card.html" %}{% if job.status in ['closed', 'unconfirmed', 'withdrawn'] %}<p class="opportunity-unavailable">{{ job.status|replace('_', ' ')|capitalize }} · No deadline reminder will be sent while this opportunity is unavailable.</p>{% endif %}{% endif %}
-    {% if not matching %}<div class="saved-actions">
-      <form method="post" action="/jobs/{{ job.id }}/reminder"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label class="consent-choice"><input type="checkbox" name="remind" value="true" {% if item.saved.remind %}checked{% endif %}><span>Deadline reminder</span></label><button class="btn btn-secondary btn-sm" type="submit">Update reminder</button></form>
-      <form method="post" action="/jobs/{{ job.id }}/unsave"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="btn btn-ghost btn-sm" type="submit">Remove saved opportunity</button></form>
-    </div>{% endif %}
+      {% if job.unavailable|default(false) %}
+      <p class="opportunity-unavailable">
+        This opportunity is no longer available from its source.
+      </p>
+      {% else %}{% include "jobs/_card.html" %}{% if job.status in ['closed',
+      'unconfirmed', 'withdrawn'] %}
+      <p class="opportunity-unavailable">
+        {{ job.status|replace('_', ' ')|capitalize }} · No deadline reminder
+        will be sent while this opportunity is unavailable.
+      </p>
+      {% endif %}{% endif %} {% if not matching %}
+      <div class="saved-actions">
+        <form method="post" action="/jobs/{{ job.id }}/reminder">
+          <input
+            type="hidden"
+            name="csrf_token"
+            value="{{ csrf_token }}"
+          /><label class="consent-choice"
+            ><input
+              type="checkbox"
+              name="remind"
+              value="true"
+              {%
+              if
+              item.saved.remind
+              %}checked{%
+              endif
+              %}
+            /><span>Deadline reminder</span></label
+          ><button class="btn btn-secondary btn-sm" type="submit">
+            Update reminder
+          </button>
+        </form>
+        <form method="post" action="/jobs/{{ job.id }}/unsave">
+          <input
+            type="hidden"
+            name="csrf_token"
+            value="{{ csrf_token }}"
+          /><button class="btn btn-ghost btn-sm" type="submit">
+            Remove saved opportunity
+          </button>
+        </form>
+      </div>
+      {% endif %}
     </div>
-  {% else %}<div class="empty-state"><span class="empty-icon">{{ icon('briefcase', 28) }}</span><h2>{{ 'Your next match is on its way' if matching else 'Keep opportunities within reach' }}</h2><p>{{ 'Try broader interests or enable alerts to hear about new matches.' if matching else 'Save an opportunity from its detail page to return to it and follow its deadline.' }}</p><a class="btn btn-secondary" href="{{ '/jobs/preferences' if matching else '/jobs' }}">{{ 'Update interests' if matching else 'Explore opportunities' }}</a></div>{% endfor %}
+    {% else %}
+    <div class="empty-state">
+      <span class="empty-icon">{{ icon('briefcase', 28) }}</span>
+      <h2>
+        {{ 'Your next match is on its way' if matching else 'Keep opportunities within reach' }}
+      </h2>
+      <p>
+        {{ 'Try broader interests or enable alerts to hear about new matches.'
+        if matching else 'Save an opportunity from its detail page to return to it and follow its deadline.' }}
+      </p>
+      <a
+        class="btn btn-secondary"
+        href="{{ '/jobs/preferences' if matching else '/jobs' }}"
+        >{{ 'Update interests' if matching else 'Explore opportunities' }}</a
+      >
+    </div>
+    {% endfor %}
   </div>
-  {% if more %}<a class="btn btn-secondary" href="/jobs/saved?page={{ page_number + 1 }}">Older saved opportunities</a>{% endif %}
+  {% if more %}<a
+    class="btn btn-secondary"
+    href="/jobs/saved?page={{ page_number + 1 }}"
+    >Older saved opportunities</a
+  >{% endif %}
 </section>
 {% endblock %}

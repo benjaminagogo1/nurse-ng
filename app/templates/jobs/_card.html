@@ -2,10 +2,35 @@
 <article class="job-row opportunity-card">
   <div class="opportunity-card-top">
     <span class="opportunity-logo">{{ icon('building', 24) }}</span>
-    <div class="opportunity-card-title"><h2><a class="job-title" href="/jobs/{{ job.id }}">{{ job.title }}</a></h2><p>{{ job.organization }}</p></div>
-    <span class="opportunity-posted">{{ job.date_label }} {{ job.posted|lower }}</span>
+    <div class="opportunity-card-title">
+      <h2>
+        <a class="job-title" href="/jobs/{{ job.id }}">{{ job.title }}</a>
+      </h2>
+      <p>{{ job.organization }}</p>
+    </div>
+    <span class="opportunity-posted"
+      >{{ job.date_label }} {{ job.posted|lower }}</span
+    >
   </div>
-  <div class="opportunity-card-meta"><span>{{ icon('pin', 15) }} {{ job.location or 'Location not specified' }}</span><span>{{ icon('briefcase', 15) }} {{ job.type }}</span><span>{{ job.mode }}</span></div>
-  <div class="opportunity-card-pay"><strong>{{ job.salary }}</strong>{% if job.closing_date %}<span>{{ icon('calendar', 15) }} Closes {{ job.closing_date }}</span>{% endif %}</div>
-  <div class="opportunity-card-footer"><span>{{ icon('globe' if job.external else 'building', 14) }} {{ 'Approved recruitment source' if job.external else 'Employer submission' }}{% if job.external %} · {{ job.status|replace('_', ' ')|capitalize }}{% endif %}</span><a href="/jobs/{{ job.id }}" aria-label="View {{ job.title }}">View opportunity {{ icon('arrow', 16) }}</a></div>
+  <div class="opportunity-card-meta">
+    <span
+      >{{ icon('pin', 15) }} {{ job.location or 'Location not specified'
+      }}</span
+    ><span>{{ icon('briefcase', 15) }} {{ job.type }}</span
+    ><span>{{ job.mode }}</span>
+  </div>
+  <div class="opportunity-card-pay">
+    <strong>{% if job.salary != 'Salary not stated' %}Salary: {% endif %}{{ job.salary }}</strong>{% if job.closing_date %}<span
+      >{{ icon('calendar', 15) }} Closes {{ job.closing_date }}</span
+    >{% endif %}
+  </div>
+  <div class="opportunity-card-footer">
+    <span
+      >{{ icon('globe' if job.external else 'building', 14) }} {{ 'Approved recruitment source' if job.external else 'Employer submission' }}{% if
+      job.external %} · {{ job.status|replace('_', ' ')|capitalize }}{% endif
+      %}</span
+    ><a href="/jobs/{{ job.id }}" aria-label="View {{ job.title }}"
+      >View opportunity {{ icon('arrow', 16) }}</a
+    >
+  </div>
 </article>

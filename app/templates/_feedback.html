@@ -1,11 +1,79 @@
-{% from "_icons.html" import icon %}
-{% macro feedback_slot(notice=none) %}
+{% from "_icons.html" import icon %} {% macro feedback_slot(notice=none) %}
 <div class="feedback-slot" data-feedback-slot>
-  <div class="action-feedback action-feedback--{{ notice.tone if notice else 'info' }}" data-feedback-panel tabindex="-1" role="{{ 'alert' if notice and notice.tone == 'error' else 'status' }}" aria-labelledby="feedback-title" aria-describedby="feedback-body" {% if not notice %}hidden{% endif %}>
-    <span class="feedback-symbol" aria-hidden="true"><span data-feedback-icon="success" {% if not notice or notice.tone != 'success' %}hidden{% endif %}>{{ icon('check', 23) }}</span><span data-feedback-icon="error" {% if not notice or notice.tone != 'error' %}hidden{% endif %}>{{ icon('info', 23) }}</span><span data-feedback-icon="info" {% if notice and notice.tone != 'info' %}hidden{% endif %}>{{ icon('info', 23) }}</span></span>
-    <div class="feedback-copy"><h2 id="feedback-title">{{ notice.title if notice else '' }}</h2><p id="feedback-body">{{ notice.body if notice else '' }}</p></div>
-    <button type="button" class="feedback-dismiss" data-feedback-dismiss aria-label="Dismiss notification" hidden>{{ icon('close', 18) }}</button>
+  <div
+    class="action-feedback action-feedback--{{ notice.tone if notice else 'info' }}"
+    data-feedback-panel
+    tabindex="-1"
+    role="{{ 'alert' if notice and notice.tone == 'error' else 'status' }}"
+    aria-labelledby="feedback-title"
+    aria-describedby="feedback-body"
+    {%
+    if
+    not
+    notice
+    %}hidden{%
+    endif
+    %}
+  >
+    <span class="feedback-symbol" aria-hidden="true"
+      ><span
+        data-feedback-icon="success"
+        {%
+        if
+        not
+        notice
+        or
+        notice.tone
+        !="success"
+        %}hidden{%
+        endif
+        %}
+        >{{ icon('check', 23) }}</span
+      ><span
+        data-feedback-icon="error"
+        {%
+        if
+        not
+        notice
+        or
+        notice.tone
+        !="error"
+        %}hidden{%
+        endif
+        %}
+        >{{ icon('info', 23) }}</span
+      ><span
+        data-feedback-icon="info"
+        {%
+        if
+        notice
+        and
+        notice.tone
+        !="info"
+        %}hidden{%
+        endif
+        %}
+        >{{ icon('info', 23) }}</span
+      ></span
+    >
+    <div class="feedback-copy">
+      <h2 id="feedback-title">{{ notice.title if notice else '' }}</h2>
+      <p id="feedback-body">{{ notice.body if notice else '' }}</p>
+    </div>
+    <button
+      type="button"
+      class="feedback-dismiss"
+      data-feedback-dismiss
+      aria-label="Dismiss notification"
+      hidden
+    >
+      {{ icon('close', 18) }}
+    </button>
   </div>
-  {% if notice and notice.fields %}<script type="application/json" data-feedback-fields>{{ notice.fields|tojson }}</script>{% endif %}
+  {% if notice and notice.fields %}
+  <script type="application/json" data-feedback-fields>
+    {{ notice.fields|tojson }}
+  </script>
+  {% endif %}
 </div>
 {% endmacro %}

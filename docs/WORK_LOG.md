@@ -88,13 +88,13 @@ Test attempt:
 
 Final verification:
 
-| Command | Result |
-|---|---|
-| `./venv/bin/python -m pytest -o addopts="" -q` | **35 passed in 8.23 s**, exit code 0 |
-| `./venv/bin/ruff check .` | **All checks passed** |
+| Command                                                          | Result                                                                                                                                            |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `./venv/bin/python -m pytest -o addopts="" -q`                   | **35 passed in 8.23 s**, exit code 0                                                                                                              |
+| `./venv/bin/ruff check .`                                        | **All checks passed**                                                                                                                             |
 | `./venv/bin/alembic revision --autogenerate -m "initial schema"` | Generated `migrations/versions/253564276f57_initial_schema.py`; detected `users`, `nurse_profiles`, `credential_claims`, and `field_visibilities` |
-| `./venv/bin/alembic upgrade head` | Applied `253564276f57` (initial schema) to SQLite (an embedded Structured Query Language database) |
-| `./venv/bin/alembic check` | **No new upgrade operations detected** (no schema drift) |
+| `./venv/bin/alembic upgrade head`                                | Applied `253564276f57` (initial schema) to SQLite (an embedded Structured Query Language database)                                                |
+| `./venv/bin/alembic check`                                       | **No new upgrade operations detected** (no schema drift)                                                                                          |
 
 Files created during verification: `migrations/versions/253564276f57_initial_schema.py` and the development database `nurse_ng.db` (ignored by `.gitignore`).
 
@@ -159,11 +159,11 @@ Defects found during the resumed review and fixed:
 
 Verification was run by the user in the terminal and the output pasted back, because the harness safety classifier was still refusing Bash (a command-line shell) execution.
 
-| Command | Result |
-|---|---|
-| `./venv/bin/python -m pytest -o addopts="" -q` | **67 passed in 25.54 s**, exit code 0 |
-| `./venv/bin/ruff check .` | **All checks passed** after one fix (below) |
-| `./venv/bin/alembic check` | **No new upgrade operations detected** (no schema drift) |
+| Command                                        | Result                                                   |
+| ---------------------------------------------- | -------------------------------------------------------- |
+| `./venv/bin/python -m pytest -o addopts="" -q` | **67 passed in 25.54 s**, exit code 0                    |
+| `./venv/bin/ruff check .`                      | **All checks passed** after one fix (below)              |
+| `./venv/bin/alembic check`                     | **No new upgrade operations detected** (no schema drift) |
 
 Fixes applied during verification:
 
@@ -216,12 +216,12 @@ Static type-checking after verification reported one diagnostic: the plain `str`
 
 The harness classifier still refused Bash execution for `ruff`, `pytest`, and `alembic` in this session, so the user ran the four commands in the terminal and pasted the output, as in section 14 of the previous session.
 
-| Command | Result |
-|---|---|
-| `./venv/bin/ruff check .` | **All checks passed!** |
-| `./venv/bin/pytest -o addopts="" -q` | **74 passed in 31.32s**, exit code 0 |
-| `./venv/bin/alembic upgrade head` | Applied `8f2c1d4a9b6e` (add login lockout columns) to the development SQLite database |
-| `./venv/bin/alembic check` | **No new upgrade operations detected** (no schema drift) |
+| Command                              | Result                                                                                |
+| ------------------------------------ | ------------------------------------------------------------------------------------- |
+| `./venv/bin/ruff check .`            | **All checks passed!**                                                                |
+| `./venv/bin/pytest -o addopts="" -q` | **74 passed in 31.32s**, exit code 0                                                  |
+| `./venv/bin/alembic upgrade head`    | Applied `8f2c1d4a9b6e` (add login lockout columns) to the development SQLite database |
+| `./venv/bin/alembic check`           | **No new upgrade operations detected** (no schema drift)                              |
 
 The total is 74 tests: the previous 67 plus the seven new hardening cases. The increment is verified; no defects surfaced during execution.
 
@@ -302,13 +302,13 @@ and then applied via `alembic upgrade a1b2c3d4e5f6`. The second branch
 `e8f1a2b3c4d5` (commit `2784d9c`, UI/UX redesign) was applied next. After both
 branches converged the database reached head `e8f1a2b3c4d5` and no drift remained.
 
-| Command | Result |
-|---|---|
-| `./venv/bin/alembic upgrade a1b2c3d4e5f6` | Add missing columns defensively (skipped if present); ran on already-upgraded DB without error |
-| `./venv/bin/alembic upgrade e8f1a2b3c4d5` | Applied harden community trust revision |
-| `./venv/bin/alembic check` | **No new upgrade operations detected** (no schema drift) |
-| `./venv/bin/ruff check .` | **All checks passed** |
-| `./venv/bin/python -m pytest -o addopts='' -q` | **104 passed in 44.64 seconds** |
+| Command                                        | Result                                                                                         |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `./venv/bin/alembic upgrade a1b2c3d4e5f6`      | Add missing columns defensively (skipped if present); ran on already-upgraded DB without error |
+| `./venv/bin/alembic upgrade e8f1a2b3c4d5`      | Applied harden community trust revision                                                        |
+| `./venv/bin/alembic check`                     | **No new upgrade operations detected** (no schema drift)                                       |
+| `./venv/bin/ruff check .`                      | **All checks passed**                                                                          |
+| `./venv/bin/python -m pytest -o addopts='' -q` | **104 passed in 44.64 seconds**                                                                |
 
 This is the current verified baseline. Both the previously known 89-test case set
 and the 14 community cases are covered, plus one login-probe test module added on
@@ -316,26 +316,26 @@ and the 14 community cases are covered, plus one login-probe test module added o
 
 ## Verification ledger
 
-| Date | Item | Status |
-|---|---|---|
-| 2026-10-18 | Foundation, authentication, and profile tests | **46 passed** |
-| 2026-10-18 | Ruff (Python linter) | **All checks passed** |
-| 2026-10-18 | Initial Alembic (migration tool) revision | **Generated and applied** |
-| 2026-10-18 | Alembic schema drift check | **No drift detected** |
-| 2026-10-18 | Activation/sharing increment tests (21 new, 67 total) | **67 passed** |
-| 2026-10-18 | Ruff and schema-drift check after the sharing increment | **All checks passed; no drift detected** |
-| 2026-10-18 | NMCN (Nursing and Midwifery Council of Nigeria) research memo | **Not started; deferred by user** |
-| 2026-10-21 | Authentication hardening tests (7 new, 74 total) | **74 passed** |
-| 2026-10-21 | Ruff (Python linter) after authentication hardening | **All checks passed** |
-| 2026-10-21 | Lockout migration `8f2c1d4a9b6e` | **Applied to development SQLite database** |
-| 2026-10-21 | Alembic schema drift check after authentication hardening | **No drift detected** |
-| 2026-10-21 | `.env.example` tracking and dependency lockfile | **`.env.example` now trackable; 42 distributions pinned in `requirements.lock`** |
-| 2026-10-21 | Document-review tests (15 new, 89 total) | **89 passed** |
-| 2026-10-21 | Ruff (Python linter) after document review | **All checks passed** |
-| 2026-10-21 | Document-review migration `c4e7a1b9d2f3` | **Applied to development SQLite database** |
-| 2026-10-21 | Alembic schema drift check after document review | **No drift detected** |
-| 2026-10-28 | Pre-hardening baseline with separate community + hardening branches | **103 passed; ruff clean** |
-| 2026-10-29 | Schema fix for the duplicate column head; both branches applied; probe test module added | **104 passed; ruff clean; no drift** |
+| Date       | Item                                                                                     | Status                                                                           |
+| ---------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| 2026-10-18 | Foundation, authentication, and profile tests                                            | **46 passed**                                                                    |
+| 2026-10-18 | Ruff (Python linter)                                                                     | **All checks passed**                                                            |
+| 2026-10-18 | Initial Alembic (migration tool) revision                                                | **Generated and applied**                                                        |
+| 2026-10-18 | Alembic schema drift check                                                               | **No drift detected**                                                            |
+| 2026-10-18 | Activation/sharing increment tests (21 new, 67 total)                                    | **67 passed**                                                                    |
+| 2026-10-18 | Ruff and schema-drift check after the sharing increment                                  | **All checks passed; no drift detected**                                         |
+| 2026-10-18 | NMCN (Nursing and Midwifery Council of Nigeria) research memo                            | **Not started; deferred by user**                                                |
+| 2026-10-21 | Authentication hardening tests (7 new, 74 total)                                         | **74 passed**                                                                    |
+| 2026-10-21 | Ruff (Python linter) after authentication hardening                                      | **All checks passed**                                                            |
+| 2026-10-21 | Lockout migration `8f2c1d4a9b6e`                                                         | **Applied to development SQLite database**                                       |
+| 2026-10-21 | Alembic schema drift check after authentication hardening                                | **No drift detected**                                                            |
+| 2026-10-21 | `.env.example` tracking and dependency lockfile                                          | **`.env.example` now trackable; 42 distributions pinned in `requirements.lock`** |
+| 2026-10-21 | Document-review tests (15 new, 89 total)                                                 | **89 passed**                                                                    |
+| 2026-10-21 | Ruff (Python linter) after document review                                               | **All checks passed**                                                            |
+| 2026-10-21 | Document-review migration `c4e7a1b9d2f3`                                                 | **Applied to development SQLite database**                                       |
+| 2026-10-21 | Alembic schema drift check after document review                                         | **No drift detected**                                                            |
+| 2026-10-28 | Pre-hardening baseline with separate community + hardening branches                      | **103 passed; ruff clean**                                                       |
+| 2026-10-29 | Schema fix for the duplicate column head; both branches applied; probe test module added | **104 passed; ruff clean; no drift**                                             |
 
 ---
 
@@ -368,12 +368,12 @@ and the 14 community cases are covered, plus one login-probe test module added o
 
 ### 4. Community choices selected
 
-| Question | User choice | Reason and trade-off record |
-|---|---|---|
-| Which community experiences? | All three: topic discussions, a public feed, and finding and connecting with other nurses | D12, L55 |
-| How do members connect? | Both accepted connection requests and immediate following of public updates | L56 |
-| Who reads and contributes? | Anyone can read the feed and topic discussions; registered members sign in to post and reply | D13, L57 |
-| How do topics and the feed relate? | A topic post also appears in the public feed, with the same conversation and replies in both places | L58 |
+| Question                           | User choice                                                                                         | Reason and trade-off record |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------- |
+| Which community experiences?       | All three: topic discussions, a public feed, and finding and connecting with other nurses           | D12, L55                    |
+| How do members connect?            | Both accepted connection requests and immediate following of public updates                         | L56                         |
+| Who reads and contributes?         | Anyone can read the feed and topic discussions; registered members sign in to post and reply        | D13, L57                    |
+| How do topics and the feed relate? | A topic post also appears in the public feed, with the same conversation and replies in both places | L58                         |
 
 ### 5. Documentation of the approved direction
 
@@ -485,12 +485,12 @@ Planned sequence:
 
 The user explicitly approved execution of the full verification set. A first test invocation reached the final portion of the suite but exceeded the command's 120-second harness limit, so its partial output was not counted as a result. Re-running with a longer command limit established the baseline:
 
-| Command | Result |
-|---|---|
-| `./venv/bin/python -m pytest -o addopts='' -q` | **103 passed in 65.21 seconds** |
-| `./venv/bin/ruff check .` | **All checks passed** |
-| `./venv/bin/pip check` | **No broken requirements found** |
-| `git diff --check` | **Passed** (no whitespace errors) |
+| Command                                        | Result                            |
+| ---------------------------------------------- | --------------------------------- |
+| `./venv/bin/python -m pytest -o addopts='' -q` | **103 passed in 65.21 seconds**   |
+| `./venv/bin/ruff check .`                      | **All checks passed**             |
+| `./venv/bin/pip check`                         | **No broken requirements found**  |
+| `git diff --check`                             | **Passed** (no whitespace errors) |
 
 This is the pre-hardening result: the previously documented 89 cases plus 14 community cases. Migration drift and reversibility remain for the final isolated verification after the new hardening revision is written.
 
@@ -669,7 +669,6 @@ This is the pre-hardening result: the previously documented 89 cases plus 14 com
 - **Database:** backup `/tmp/nurse-vacancy-migration-lg26zacf/before.db`; trial and real upgrade to `3838cd201521` preserved every original value across 24 tables. There are now 27 tables; foreign keys and Alembic drift checks passed. Downgrade refuses populated vacancy data that the old schema cannot represent.
 - **Remaining:** verified live source activation, more Nigerian/international adapters, independent application-link checks, explicit withdrawal signals, broader extraction/identity merging, AI evaluation, saved jobs/notifications, A03 employer safeguards, A10 PostgreSQL readiness and retention/supervision. Updated the saved capability tracker and operating instructions without marking the whole recruitment system complete.
 
-
 ## Session 2026-11-07 — Source activation and reuse scope
 
 - **User direction:** implement the remaining live-activation requirement. The user clarified that a separate licence should not be mandatory for a government source. Recorded L81: the application accepts a documented legal basis, including applicable government-publication rules, published reuse terms or written authorization. It records staff findings rather than independently determining legal rights.
@@ -681,13 +680,11 @@ This is the pre-hardening result: the previously documented 89 cases plus 14 com
 - **Automated verification:** the focused recruitment/ingestion checks passed. The complete suite, including 18 additional activation and migration cases, passed **298 tests in 362.47 seconds**. Ruff and `git diff --check` passed. Tests cover legal-basis approval, absent rights, invalid scope, scope widening, expiry, reapproval, stale results, same-origin redirects, public-read gates and migration preservation.
 - **Browser verification:** the first browser run could not create localhost sockets inside the sandbox; the permitted rerun passed. The full vacancy journey passed collector configuration, automatic publication, external applications, international salary display, exception review and reflow (`/tmp/nurse-ng-vacancy-browser-241up3cv`). A separate isolated source-review run passed the new legal-basis form, remaining activation blockers, exact URL preservation and mobile/desktop reflow (`/tmp/nurse-ng-activation-browser-8wm9they`). All approvals and example vacancies in these checks belong only to temporary databases. Temporary servers/browsers were stopped. This is targeted verification, not a complete accessibility audit.
 
-
 ## Session 2026-11-08 — Reversed vacancy salary ranges
 
 - **User direction:** fix the reversed salary range issue found during the latest-work inspection.
 - **Fix:** the shared vacancy validator compares minimum and maximum salaries numerically. Reversed ranges remain pending with a salary issue and their original evidence intact; both automatic and staff publication are blocked. A published job becomes unconfirmed if a later collection introduces a reversed range and can publish again once the source corrects it. Valid ranges, equal bounds, single amounts and one-sided salaries remain supported.
 - **Verification:** three new regression cases reproduced the bug before the fix. Afterwards, the vacancy-ingestion and source-activation suites passed **55 tests in 14.80 seconds**, including eight new salary cases. Ruff and whitespace checks passed. No schema migration or application database changes were required.
-
 
 ## Session 2026-11-08 — Automatic source activation
 
@@ -699,7 +696,6 @@ This is the pre-hardening result: the previously documented 89 cases plus 14 com
 - **Database:** `/tmp/nurse-automatic-activation-upgrade.py` backed up the local database to `/tmp/nurse-automatic-activation-migration-cm1u98__/before.db`, upgraded a trial copy and then the actual database to `6a21d8e40c93`. Every original value across 27 application tables was preserved; foreign keys and Alembic drift checks passed. The migration preserves historical staff control and audit records, and refuses downgrade while automatic activations exist.
 - **Operational state:** local data still contains 48 pending candidates and zero imported jobs. No local recruitment worker was running at inspection; automatic checks take effect on its next run. No live approvals, source fetches, fabricated vacancies or external deployment were performed during this implementation.
 
-
 ## Session 2026-11-08 — LSHSC missing-intermediate compatibility
 
 - **User direction:** the user cannot reach LSHSC's administrator and needs a solution on Nurse.ng's side. Recorded L83 and preserved the earlier salary and automatic-activation work.
@@ -708,7 +704,6 @@ This is the pre-hardening result: the previously documented 89 cases plus 14 com
 - **Live verification:** `/tmp/nurse-lshsc-tls-check.py` first tested a temporary verified context, then the installed unmodified transport. Both passed robots checks and returned HTTP 200 from `https://www.lshsc.ng/recruitment/` after requesting the original `https://lshsc.ng/recruitment`, with 39,032 response bytes and zero structured vacancies. The real fetcher retained hostname verification and complete-root-chain requirements. These were read-only probes, not source approval or publication.
 - **Regression checks:** seven new real in-memory TLS handshake cases cover both hostnames, unrelated hosts, the normal full-chain path, missing trusted roots even when partial-chain trust is initially enabled, wrong hostnames and expired certificates. TLS/fetch suites passed **33 tests in 4.05 seconds**. Discovery/automatic-activation/source-review/vacancy-ingestion suites passed **111 tests in 36.71 seconds**. Ruff, fingerprint/chain verification and whitespace checks passed.
 - **Remaining source state:** the TLS failure is resolved in the transport. The source remains subject to independent identity/reuse review and automatic activation's exact-origin rule; the website redirects to the www origin and currently exposes general guidance rather than structured vacancies. No administrator was contacted, no approval was fabricated, no application database state was rewritten, and no background worker or external deployment was started by this change.
-
 
 ## Session 2026-11-08 — Verify LSHSC through the actual background worker
 
@@ -795,7 +790,6 @@ This is the pre-hardening result: the previously documented 89 cases plus 14 com
 - **Browser evidence:** final isolated Chrome run passed at 320, 390 and 1280 px, including larger text. Assertions verify feedback is fully visible below the header. Covered valid/invalid photos, preview retention offline, a paused upload with duplicate-submit prevention, a lost response after the server commits, email verification, password mismatch/success and deletion. Text contrast measured 5.81:1 in light mode and 8.40:1 in dark mode. Inspected final success/error screenshots, including the password result and large-text layout. Final artifacts: `/tmp/nurse-account-feedback-gge50g85/`; repeatable runner: `tests/browser/account_feedback.py`. The runner uses the repository's basic password-store setting to avoid desktop keyring prompts, and disables GPU acceleration in its temporary profile.
 - **Local delivery:** the running app serves the new feedback assets and enhanced recovery form. Browser checks used temporary accounts/databases and a private file mailbox; no real account was changed and no external email was sent for this UI task. Temporary browser/server processes exited. Updated the account guide and recorded L86.
 
-
 ## Session 2026-11-08 — First Reels release
 
 - **User direction:** implement the agreed professional Reels experience, reusing existing community features and prioritising Nigerian opportunities and voices.
@@ -807,7 +801,6 @@ This is the pre-hardening result: the previously documented 89 cases plus 14 com
 - **Operations:** documented startup, retry/recovery, deletion, maintenance and production limitations in `docs/REELS.md`, updated README and example configuration, and recorded L87. The local implementation is ready to use. Object-storage/CDN integration, adaptive streaming and production service supervision remain future deployment work; no external provider was configured, deployment performed, or real user email sent.
 
 - **Final refinements and evidence:** the final focused rerun passed **23 Reels tests in 14.68 seconds** after the status-response refinement. The final isolated browser/CLI-worker run passed with a real captioned clip and light/dark/large-text checks; artifacts and worker logs: `/tmp/nurse-reels-browser-9cyg8v30/`. Moved timed cues above the custom controls and allowed feed controls to wrap with enlarged text. A sandboxed focused rerun stalled before results; it was stopped and the successful rerun used the local socket access needed by TestClient. Temporary browser/server processes exited; the local application worker remains running.
-
 
 ## Session 2026-11-08 — Simplify the Reels upload form
 
@@ -821,7 +814,6 @@ This is the pre-hardening result: the previously documented 89 cases plus 14 com
 - **User direction:** save the seven recommendations from the discussion about bringing Nurse.ng to a world-standard level in a project file.
 - **Documentation:** added `docs/WORLD_STANDARD_ROADMAP.md` with all seven priorities: public hosting/recovery, trust/account protection, Nigerian opportunity coverage, member discovery/onboarding, notifications/messaging, consistent experience quality, and real-user validation/support. Each records the current foundation and remaining work, followed by the recommended sequence and links to existing operating guides.
 - **Discoverability:** linked the roadmap from README's Documents list and the build-plan assessment tracker. Preserved the historical assessment and distinguished remaining work from features already implemented. This change records recommendations; it does not mark them completed or change application behaviour.
-
 
 ## Session 2026-11-08 — Simplify the jobs-page filters
 
@@ -1329,3 +1321,136 @@ This is the pre-hardening result: the previously documented 89 cases plus 14 com
 - **Delivery:** changes remain local and uncommitted; no deployment performed.
   Browser fixtures used temporary databases and scripted recruitment responses.
   Mobile evidence uses Chrome viewport emulation.
+
+## 9 November 2026 — Opportunity alerts settings redesign
+
+- **User direction:** improve the Opportunity alerts settings page; clarified
+  that the request referred to `/jobs/preferences` rather than the Jobs sidebar.
+- **Delivered:** replaced the narrow form card with a coherent Jobs workspace,
+  active navigation, grouped preference fields, a distinct new-match alert switch,
+  and clear Save preferences / View my matches actions. Delivery guidance now has
+  its own card linking to notification settings. Inputs remain left aligned and
+  layouts adapt to desktop, tablet and mobile in light and dark themes.
+- **Controls:** retained form field names, saved choices, CSRF, feedback/validation
+  behavior and separate delivery consent. The switch supports keyboard interaction
+  and uses a native checkbox when forced colors are active. Its copy makes clear
+  that changes take effect on save; no delivery channel is enabled implicitly.
+- **Functional fix:** browser testing exposed an existing decoding issue: choosing
+  All countries submitted an empty string that FastAPI replaced with the POST
+  parameter's Nigeria default. The POST default now preserves the empty selection;
+  the new-user GET still selects Nigeria. Added regression coverage for saving
+  both Nigeria and All countries and retaining the other choices.
+- **Assets:** versioned Jobs CSS as v2 and the public shell cache as v13, preserving
+  earlier asset additions and navigation metadata handling.
+- **Verification:** all **23 opportunity-watch tests passed** in 28.19 seconds
+  (`/tmp/nurse-opportunity-alert-tests.xml`). Final isolated browser verification
+  passed seven selected axe/reflow audits covering desktop/tablet/mobile,
+  light/dark, high contrast, enlarged text and enabled/disabled preferences.
+  Keyboard toggling, saving/reloading, validation retention, disabling, matches
+  and delivery links passed; existing notification delivery choices stayed intact.
+  Artifacts: `/tmp/nurse-jobs-ui-c18byugf/`. Native forced-color control and rendered
+  contrast were checked separately and visually reviewed: axe's contrast rule
+  reports authored colors rather than the browser-forced paint colors in this
+  emulation, so that mode was not counted as an axe contrast pass. Ruff, JavaScript
+  syntax and whitespace checks passed. No schema or dependency changes.
+- **Delivery:** local and uncommitted; no deployment. Browser fixtures used a
+  temporary database, and mobile evidence uses Chrome viewport emulation.
+
+## 10 November 2026 — Staff approval with working vacancy collection
+
+- **Request:** approve the pending sources and complete collection/publication
+  setup. A preliminary status-only operation ran on a database copy and was
+  superseded before any application to the live database.
+- **Implementation:** added **Approve and start vacancy collection**, which records
+  staff source selection and configures factual indexing, scope, expiry and the
+  next check in one action. Fixed the staff collection path to return sanitized
+  factual records instead of passing original HTML into the factual ingestor.
+  Existing full-content permission requirements remain separate.
+- **Address handling:** retain exact submitted URLs, use HTTPS for collection and
+  allow the conventional www alias within the approved path. Other publishers
+  remain blocked before requests. Successful address resolution updates the
+  collection scope without replacing the submitted URL. Unknown countries and
+  ambiguous vacancy dates are not supplied from guesses.
+- **Verification:** all **217 targeted tests passed**, covering source approval,
+  worker collection, factual storage, vacancy publication, jobs/workspace flows,
+  opportunity matching, expiry, revocation, pauses, CSRF, stale forms and redirect
+  scope. Ruff and whitespace checks passed. A live EHA Clinics check in a temporary
+  database confirmed and published **Medical Laboratory Scientist - Lagos** through
+  the new staff path, retaining factual snapshots and the original announcement
+  link.
+- **Local operation:** approved 115 pending sources and configured two existing
+  staff approvals. All 120 sources then had authorized collectors. Recorded 117
+  decisions with the owner's request in their notes. Backup and per-source receipts:
+  `/tmp/nurse-ng-collection-setup-et7op6qk/`. Subsequently enabled the same direct
+  factual collection path on EHA's existing approval to refresh its vacancy details;
+  its previous automatic evidence remains in the audit history.
+- **Runtime:** increased the local daily task budget from 100 to 600 for the 120
+  configured sources and kept the existing network limits and leases. Started the
+  recruitment worker; the existing Uvicorn reload server was already healthy.
+  Runtime record and worker log: `/tmp/nurse-ng-collection-runtime-km1zhe8_/`.
+  Initial checks include unavailable websites and empty pages; an approved source
+  is not a claim that a supported open vacancy exists. No schema or new runtime
+  dependency was needed.
+- **Final live check:** the persistent worker refreshed the EHA vacancy at
+  `2026-11-10 00:58:20 UTC` with one publishable record and no duplicate job.
+  Both `/jobs` and the vacancy detail returned HTTP 200 and displayed the actual
+  role and original announcement link. All 120 sources were approved with
+  authorized collectors and zero pending sources at verification. The first pass
+  continues in the background; source access failures remain visible. Reloaded
+  the web configuration after updating the local worker budget.
+
+## 10 November 2026 — Vacancy quality, salary clarity and recovering workers
+
+- **Requested safeguards:** direct public profile links now enforce the owner's
+  active account status. Document decisions use an atomic pending-state update;
+  overlapping reviewers cannot replace the winning decision or leave the public
+  label inconsistent with it.
+- **Collection:** explicitly labelled salary blocks now retain amounts, currencies,
+  pay periods and gross/net wording. Nearby fees and benefits are not treated as
+  base salary. Repeated structured objects, tracking links and identical pending
+  announcements no longer create unnecessary conflicts or separate reviews.
+  Categories, admissions, courses and service pages are excluded, and ordinary
+  health articles need a job or programme signal before becoming candidates.
+- **Refresh correction:** unchanged original facts are normalized again on each
+  successful collection, so an extractor correction updates existing vacancies.
+  Staff corrections survive while their source evidence is unchanged. This fixed
+  EHA's missing gross-pay qualifier without replacing its job ID.
+- **Salary presentation:** Jobs cards label salary explicitly. Saved offline jobs
+  show employer/location separately from **Salary: NGN 181,440 per month · gross**.
+  Older saved amounts using `/month` also receive the clearer display format.
+  Updated the offline script and shell cache versions.
+- **Live maintenance:** rehearsed migration and cleanup on a private database
+  copy, backed up the live database/configuration, and upgraded to `e6480d3fb942`.
+  Excluded 22 non-vacancy records and held two identical CBN records as duplicates,
+  retaining snapshots and decision history. Accounts, document cases, evidence
+  rows, sources and the existing job were preserved. Backup and audit receipts:
+  `/tmp/nurse-ng-quality-rollout-gf346a4y/`.
+- **Operation:** replaced the verified manual recruitment process with
+  `nurse-ng-workers.service`, supervising recruitment and Reels. The service is
+  enabled, user lingering is enabled, and both roles report healthy progress.
+  Readiness was verified as HTTP 503 before the required workers started and
+  HTTP 200 afterward. The notification delivery role was not activated.
+- **Verification:** privacy/review, collection and supervisor tests included a
+  real isolated worker kill/replacement check. A 153-case focused run passed.
+  The final collection/publication pass exercised 90 cases; its remaining
+  formatting-sensitive assertion passed after repair. A separate formatting
+  pass appeared during work, introducing invalid Jinja expressions and wrapping
+  string literals. Restored the affected expressions/literals while preserving
+  the surrounding formatting, and made affected HTML assertions independent of
+  indentation. All reported failures passed on focused reruns. The later broad
+  run stopped at 359 passes and 12 such failures before those repairs; a full
+  green run of the final working tree is not claimed.
+- **Browser verification:** the isolated quality journey passed 25 screen states
+  after template repair. The salary view passed at 390, 1280, and 320 pixels with
+  enlarged text, including the user's saved-offline layout, accessibility rules,
+  and reflow. Screenshots were inspected. Salary artifacts:
+  `/tmp/nurse-salary-layout-9qr_0rc_/`; quality artifacts:
+  `/tmp/nurse-quality-browser-8lbhxg7i/`.
+- **Final live observation at 16:19 UTC:** the original EHA job
+  `01a1bdac-f227-7cba-a5a7-672e5b9d05f9` displayed
+  **NGN 181,440 per month · gross**. Jobs, its detail, liveness and readiness all
+  returned HTTP 200; SQLite integrity and foreign-key checks passed. One public
+  job and 12 pending candidates remained as collection continued. Pending
+  records still require missing facts or a relevance decision; they were not
+  bulk-published. Worker supervision improves local operation; the web server
+  remains the existing development server.

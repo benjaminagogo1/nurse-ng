@@ -16,6 +16,8 @@ from app.services.announcement_extraction import (
 )
 from app.services.recruitment_fetch import FetchError, in_scope, origin, require_success
 from app.services.vacancy_extraction import extract_records, normalize
+from app.services.vacancy_quality import non_vacancy_reason
+from app.services.vacancy_salary import salary_from_text
 
 
 class ApplicationFacts(HTMLParser):
@@ -71,20 +73,27 @@ def current_index(page):
 
 
 def index_authorized(source):
+    from app.services.recruitment_indexing import staff_index_authorized
+
     evidence = (source.activation_review or {}).get("evidence", {})
     return bool(
         source.reuse_basis == "factual_index"
         and source.permission_status == "limited"
-        and source.approval_mode == "automatic"
         and source.collection_adapter == "factual_index"
         and source.allow_collection
         and not source.allow_snapshot_retention
         and not source.allow_republication
         and evidence.get("mode") == "factual_index"
         and evidence.get("scope") == source.reuse_url_prefix
-        and evidence.get("recruitment_page") == source.observed_url
         and evidence.get("requested_url") == source.original_url
-        and in_scope(source.observed_url, source.reuse_url_prefix)
+        and (
+            staff_index_authorized(source)
+            or (
+                source.approval_mode == "automatic"
+                and evidence.get("recruitment_page") == source.observed_url
+                and in_scope(source.observed_url, source.reuse_url_prefix)
+            )
+        )
     )
 
 
@@ -114,21 +123,38 @@ def factual_records(page, evidence, *, listed_on=""):
         rows = extract_records(page.body)
     except FetchError:
         rows = []
+    # Some sites embed identical JobPosting objects more than once. They still
+    # describe one job; differing objects must keep the multi-job salary safeguard.
+    rows = list({json.dumps(row, sort_keys=True): row for row in rows}.values())
     structured = bool(rows)
     if not rows:
         rows = extract_announcements(page.body, page.url)
     result = []
     for raw in rows:
         data = normalize(raw)
+        headings = parsed.main_headings or parsed.headings
+        if (
+            structured and len(rows) == 1 and not data["announcement_url"]
+            and len(headings) == 1 and not non_vacancy_reason(headings[0])
+            and data["title"] and data["title"].casefold() in headings[0].casefold()
+        ):
+            data["announcement_url"] = page.url
+        if non_vacancy_reason(data["title"], data["announcement_url"]):
+            continue
         if not in_scope(data["announcement_url"], evidence["scope"]):
             continue
         if not structured:
             # The verified publisher is the organisation offering the announcement.
-            data["employer"] = data["employer"] or evidence["organisation"]
+            if evidence.get("employer_fallback_allowed", True):
+                data["employer"] = data["employer"] or evidence["organisation"]
             data["city"] = data["city"] or applications.properties.get("addressLocality", "")
             if not data["country"] and re.search(r"\bNigeria(?:n|ns)?\b", parsed.text, re.I):
                 data["country"] = "NG"
             data["closing_date"] = data["closing_date"] or prose_deadline(parsed.text)
+        # Ordinary detail pages often state remuneration without JSON-LD salary data.
+        # Never apply one page-wide salary to several structured job adverts.
+        if not data["salary"] and len(rows) == 1:
+            data["salary"] = salary_from_text(parsed.text)
         deadline_text = labelled(
             parsed.text, r"application deadline|closing date|deadline|applications close"
         )
@@ -199,9 +225,12 @@ def factual_records(page, evidence, *, listed_on=""):
                 "currency": data["salary"]["currency"],
                 "value": {
                     "unitText": data["salary"]["unit"],
-                    **{k: v for k, v in data["salary"].items() if k not in {"currency", "unit"}},
+                    **{k: v for k, v in data["salary"].items()
+                       if k in {"value", "minValue", "maxValue"}},
                 },
             }
+            if data["salary"].get("basis"):
+                fact["_salary_basis"] = data["salary"]["basis"]
         if structured and isinstance(raw.get("employmentType"), str):
             fact["employmentType"] = raw["employmentType"][:40]
         result.append(fact)

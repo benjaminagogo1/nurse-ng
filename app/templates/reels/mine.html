@@ -1,15 +1,44 @@
-{% extends 'reels/layout.html' %}
-{% from '_icons.html' import icon %}
-{% from '_empty_state.html' import empty_state %}
-{% block content %}
+{% extends 'reels/layout.html' %} {% from '_icons.html' import icon %} {% from
+'_empty_state.html' import empty_state %} {% block content %}
 <section class="reels-page">
-
-  <header class="reels-heading"><div><p class="eyebrow">Your voice, your space</p><h1>My reels</h1></div>{% if reels or page_number > 1 %}<a class="btn btn-primary" href="/reels/new">{{ icon('plus', 18) }} Create a reel</a>{% endif %}</header>
+  <header class="reels-heading">
+    <div>
+      <p class="eyebrow">Your voice, your space</p>
+      <h1>My reels</h1>
+    </div>
+    {% if reels or page_number > 1 %}<a
+      class="btn btn-primary"
+      href="/reels/new"
+      >{{ icon('plus', 18) }} Create a reel</a
+    >{% endif %}
+  </header>
   <a class="reels-back" href="/reels">← Explore reels</a>
-  <div class="reel-upload-list">{% for reel in reels %}<a class="reel-upload-item" href="/reels/{{ reel.post_id }}/status"><span class="reel-upload-item-icon">{{ icon('play', 25) }}</span><div><strong>{{ reel.post.body|truncate(110) }}</strong><span>{{ reel.created_at.strftime('%d %b %Y') }} · {{ 'Live' if reel.state == 'ready' else 'Needs attention' if reel.state == 'failed' else 'Processing' if reel.state == 'processing' else 'Waiting to process' }}</span></div>{{ icon('chevron', 18) }}</a>{% else %}
-    {% if page_number > 1 %}{{ empty_state('No more reels here', 'Return to the first page to see your uploads and their status.', '/reels/mine', 'Back to my reels') }}
-    {% else %}{{ empty_state('Create your first reel', 'Share an opportunity, a lesson or a little of your experience. Your uploads and their status will appear here.', '/reels/new', 'Create a reel', 'play', primary=true) }}{% endif %}
-  {% endfor %}</div>
-  <nav class="reels-pagination" aria-label="My reels pages">{% if page_number > 1 %}<a href="/reels/mine?page={{ page_number - 1 }}">← Previous</a>{% endif %}{% if has_more %}<a href="/reels/mine?page={{ page_number + 1 }}">Next →</a>{% endif %}</nav>
+  <div class="reel-upload-list">
+    {% for reel in reels %}<a
+      class="reel-upload-item"
+      href="/reels/{{ reel.post_id }}/status"
+      ><span class="reel-upload-item-icon">{{ icon('play', 25) }}</span>
+      <div>
+        <strong>{{ reel.post.body|truncate(110) }}</strong
+        ><span
+          >{{ reel.created_at.strftime('%d %b %Y') }} · {{ 'Live' if reel.state
+          == 'ready' else 'Needs attention' if reel.state == 'failed' else
+          'Processing' if reel.state == 'processing' else 'Waiting to process'
+          }}</span
+        >
+      </div>
+      {{ icon('chevron', 18) }}</a
+    >{% else %} {% if page_number > 1 %}{{ empty_state('No more reels here',
+    'Return to the first page to see your uploads and their status.',
+    '/reels/mine', 'Back to my reels') }} {% else %}{{ empty_state('Create your first reel', 'Share an opportunity, a lesson or a little of your experience. Your uploads and their status will appear here.', '/reels/new', 'Create a reel', 'play', primary=true) }}{% endif %} {% endfor %}
+  </div>
+  <nav class="reels-pagination" aria-label="My reels pages">
+    {% if page_number > 1 %}<a href="/reels/mine?page={{ page_number - 1 }}"
+      >← Previous</a
+    >{% endif %}{% if has_more %}<a
+      href="/reels/mine?page={{ page_number + 1 }}"
+      >Next →</a
+    >{% endif %}
+  </nav>
 </section>
 {% endblock %}

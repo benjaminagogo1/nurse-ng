@@ -5,6 +5,7 @@
   <p class="eyebrow">Staff only</p>
   <p><a href="/recruitment/coverage" class="text-link">Nigerian coverage and collection gaps →</a></p>
   <h1>Recruitment sources</h1>
+  <div class="button-row"><a class="button-primary" href="/recruitment/vacancies?state=pending">Review pending vacancies ({{ pending_records }})</a><a href="/jobs">View published vacancies ({{ public_jobs }})</a><a href="#add-source">Add a source URL</a><a href="#worker-health">Worker health</a></div>
   <p>Nigeria is the discovery priority: federal and state recruitment, private employers, public and digital health, youth fellowships, internships, and graduate programmes. When both queues have work, four of every five worker attempts prefer Nigerian sources.</p>
   <p class="lede">Discover institutions, check their recruitment channels, and record the evidence needed for approval.</p>
   <p class="field-hint">The background worker activates sources that pass automatic evidence checks. Uncertain cases need review. Source activation does not verify individual vacancies. Valid vacancies publish automatically; exceptions go to vacancy review.</p>
@@ -30,7 +31,7 @@
   </div>
   <nav class="source-actions" aria-label="Source pages">{% if previous_url %}<a href="{{ previous_url }}">Previous</a>{% endif %}<span>Page {{ page_number }}</span>{% if next_url %}<a href="{{ next_url }}">Next</a>{% endif %}</nav>
 
-  <details class="source-card" {% if error and values %}open{% endif %}>
+  <details class="source-card" id="add-source" {% if error and values %}open{% endif %}>
     <summary>Add a source you already know</summary>
     <form method="post" action="/recruitment/sources" class="source-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -74,9 +75,11 @@
     </form>
   </details>
 
-  <h2>Worker activity</h2>
-  <p>{{ counts.get('queued', 0) }} queued · {{ counts.get('running', 0) }} running · {{ counts.get('failed', 0) }} failed</p>
-  <p class="field-hint">The separate discovery worker must be running for schedules and page checks to execute. Times are UTC.</p>
+  <h2 id="worker-health">Worker health and activity</h2>
+  {% for worker in workers %}<article class="source-card"><h3>{{ worker.name|capitalize }} worker · {{ 'Healthy' if worker.healthy else 'Needs attention' }}</h3><p>{% if worker.state == 'idle' %}Running and waiting for eligible work.{% elif worker.state == 'working' %}Processing a task.{% elif worker.state in ['missing', 'stopped'] %}No active worker is reporting. Start the worker supervisor.{% elif worker.state == 'stale' %}Progress has stopped. The supervisor should restart this worker.{% else %}The latest worker pass failed. The worker will retry.{% endif %}</p>{% if worker.last_seen_at %}<p class="field-hint">Last progress: {{ worker.last_seen_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</p>{% endif %}</article>{% else %}<p>Worker health is unavailable. Check the database upgrade and worker configuration.</p>{% endfor %}
+  <p>{{ counts.get('queued', 0) }} queued · {{ counts.get('running', 0) }} running · {{ counts.get('failed', 0) }} historical failed tasks</p>
+  <p class="field-hint">Queued tasks are waiting for a worker, retry delay, or collection limit. Running means a check is in progress. Failed tasks record unsuccessful attempts; later attempts may succeed. Historical failures are not the current failure rate. Times are UTC.</p>
+  {% if oldest_waiting %}<p class="field-hint">Oldest queued task: {{ oldest_waiting.strftime('%Y-%m-%d %H:%M') }} UTC.</p>{% endif %}
   {% for task in tasks %}
   <article class="source-card">
     <p><strong>{{ task.kind|capitalize }}</strong> · {{ task.status|capitalize }} · {{ task.created_at.strftime('%Y-%m-%d %H:%M') }}</p>

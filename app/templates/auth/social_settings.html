@@ -1,12 +1,51 @@
-{% extends 'base.html' %}
-{% block title %}Connected sign-ins — Nurse.ng{% endblock %}
-{% block content %}
+{% extends 'base.html' %} {% block title %}Connected sign-ins — Nurse.ng{%
+endblock %} {% block content %}
 <section class="form-page">
-  <a href="/settings">← Account settings</a><h1>Connected sign-ins</h1>
-  <p>Connect Google or LinkedIn to sign in to this account. Your phone and password remain available.</p>
-  {% for provider, label in [('google','Google'),('linkedin','LinkedIn')] %}<section class="event-card"><h2>{{ label }}</h2>
-    {% if provider in linked %}<p>Connected</p><details><summary>Disconnect {{ label }}</summary><form method="post" action="/settings/social/{{ provider }}/disconnect" class="stacked-form" data-pending-label="Disconnecting…"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label for="disconnect-{{ provider }}">Current Nurse.ng password</label><input id="disconnect-{{ provider }}" name="password" type="password" autocomplete="current-password" required><button type="submit">Confirm disconnect</button></form></details>
-    {% else %}<form method="post" action="/auth/social/{{ provider }}/start" data-native-submit><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit">Connect {{ label }}</button></form>{% endif %}
-  </section>{% endfor %}
+  <a href="/settings">← Account settings</a>
+  <h1>Connected sign-ins</h1>
+  <p>
+    Connect Google or LinkedIn to sign in to this account. Your phone and
+    password remain available.
+  </p>
+  {% for provider, label in [('google','Google'),('linkedin','LinkedIn')] %}
+  <section class="event-card">
+    <h2>{{ label }}</h2>
+    {% if provider in linked %}
+    <p>Connected</p>
+    <details>
+      <summary>Disconnect {{ label }}</summary>
+      <form
+        method="post"
+        action="/settings/social/{{ provider }}/disconnect"
+        class="stacked-form"
+        data-pending-label="Disconnecting…"
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" /><label
+          for="disconnect-{{ provider }}"
+          >Current Nurse.ng password</label
+        ><input
+          id="disconnect-{{ provider }}"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          required
+        /><button type="submit">Confirm disconnect</button>
+      </form>
+    </details>
+    {% else %}
+    <form
+      method="post"
+      action="/auth/social/{{ provider }}/start"
+      data-native-submit
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" /><button
+        type="submit"
+      >
+        Connect {{ label }}
+      </button>
+    </form>
+    {% endif %}
+  </section>
+  {% endfor %}
 </section>
 {% endblock %}

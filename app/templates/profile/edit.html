@@ -1,49 +1,95 @@
-{% extends "base.html" %}
-{% from "_icons.html" import icon %}
-{% set page = 'profile' %}
-
-{% block title %}{% if profile %}Edit{% else %}Create{% endif %} your profile — Nurse.ng{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% from "_icons.html" import icon %} {% set page =
+'profile' %} {% block title %}{% if profile %}Edit{% else %}Create{% endif %}
+your profile — Nurse.ng{% endblock %} {% block content %}
 <section class="profile-page profile-editor">
-  {% if profile %}<a class="profile-back-link" href="/profile">{{ icon('chevron', 15) }} Back to my profile</a>{% else %}<p class="eyebrow">My profile</p>{% endif %}
+  {% if profile %}<a class="profile-back-link" href="/profile"
+    >{{ icon('chevron', 15) }} Back to my profile</a
+  >{% else %}
+  <p class="eyebrow">My profile</p>
+  {% endif %}
   <header class="profile-editor-heading">
     <h1>{{ 'Edit your profile' if profile else 'Create your profile' }}</h1>
     <p>Bring your experience, skills and professional story together.</p>
   </header>
-  {% if return_to == 'verification' %}<p class="form-notice">Save your profile to continue to document review. You’ll return to Verification next.</p>{% endif %}
-  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+  {% if return_to == 'verification' %}
+  <p class="form-notice">
+    Save your profile to continue to document review. You’ll return to
+    Verification next.
+  </p>
+  {% endif %} {% if error %}
+  <p class="form-error" role="alert">{{ error }}</p>
+  {% endif %}
 
   <div class="profile-layout">
-    <form method="post" action="/profile/edit" class="stacked-form profile-form">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-      {% if return_to == 'verification' %}<input type="hidden" name="return_to" value="verification">{% endif %}
-      {% include "profile/_fields.html" %}
+    <form
+      method="post"
+      action="/profile/edit"
+      class="stacked-form profile-form"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      {% if return_to == 'verification' %}<input
+        type="hidden"
+        name="return_to"
+        value="verification"
+      />{% endif %} {% include "profile/_fields.html" %}
       <div class="profile-form-footer">
         <div class="profile-save-actions">
-          <button type="submit" class="btn btn-primary">{{ icon('check', 18) }} {{ 'Save and continue to verification' if return_to == 'verification' else 'Save profile' }}</button>
-          {% if profile %}<a href="/profile" class="btn btn-secondary">Cancel</a>{% endif %}
+          <button type="submit" class="btn btn-primary">
+            {{ icon('check', 18) }} {{ 'Save and continue to verification' if
+            return_to == 'verification' else 'Save profile' }}
+          </button>
+          {% if profile %}<a href="/profile" class="btn btn-secondary">Cancel</a
+          >{% endif %}
         </div>
         <div class="profile-local-save">
-          <button type="button" class="profile-inline-link" data-offline-profile>{{ icon('refresh', 16) }} Save locally for synchronization</button>
-          <p class="profile-caption">Local changes stay in this browser until they sync. Review them in <a href="/offline">Offline &amp; sync</a>.</p>
+          <button
+            type="button"
+            class="profile-inline-link"
+            data-offline-profile
+          >
+            {{ icon('refresh', 16) }} Save locally for synchronization
+          </button>
+          <p class="profile-caption">
+            Local changes stay in this browser until they sync. Review them in
+            <a href="/offline">Offline &amp; sync</a>.
+          </p>
         </div>
       </div>
     </form>
 
     <aside class="profile-side-column" aria-label="Profile guidance">
       <section class="profile-panel profile-editor-guide">
-        <span class="profile-review-icon">{{ icon('globe' if profile and profile.discoverable else 'lock', 23) }}</span>
+        <span class="profile-review-icon"
+          >{{ icon('globe' if profile and profile.discoverable else 'lock', 23)
+          }}</span
+        >
         <h2>Your profile, your choice</h2>
         {% if profile and profile.discoverable %}
-        <p class="profile-support-copy">Your profile is public. Changes to shared fields appear immediately.</p>
+        <p class="profile-support-copy">
+          Your profile is public. Changes to shared fields appear immediately.
+        </p>
         {% else %}
-        <p class="profile-support-copy">This profile is private. It is visible only to you until you activate it and choose fields to share.</p>
-        {% endif %}
-        {% if profile %}<a class="profile-inline-link" href="/profile/sharing">Review sharing controls {{ icon('arrow', 16) }}</a>{% endif %}
-        <div class="profile-guide-note"><h3>{{ icon('shield', 18) }} A separate review</h3><p class="profile-support-copy">Your professional status is self-declared. Document review checks your licence and identity separately.</p></div>
+        <p class="profile-support-copy">
+          This profile is private. It is visible only to you until you activate
+          it and choose fields to share.
+        </p>
+        {% endif %} {% if profile %}<a
+          class="profile-inline-link"
+          href="/profile/sharing"
+          >Review sharing controls {{ icon('arrow', 16) }}</a
+        >{% endif %}
+        <div class="profile-guide-note">
+          <h3>{{ icon('shield', 18) }} A separate review</h3>
+          <p class="profile-support-copy">
+            Your professional status is self-declared. Document review checks
+            your licence and identity separately.
+          </p>
+        </div>
       </section>
-      <p class="profile-editor-tip">A good profile sounds like you. Keep your headline specific, and use your bio to share the experience behind your skills.</p>
+      <p class="profile-editor-tip">
+        A good profile sounds like you. Keep your headline specific, and use
+        your bio to share the experience behind your skills.
+      </p>
     </aside>
   </div>
 </section>

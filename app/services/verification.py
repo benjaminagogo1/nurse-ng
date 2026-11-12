@@ -12,7 +12,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.core.storage import (
@@ -245,18 +245,38 @@ def decide_case(
         raise VerificationError("A rejection needs a reason for the nurse.")
 
     now = _utcnow()
-    case.status = CaseStatus.APPROVED if approve else CaseStatus.REJECTED
-    case.decided_by_user_id = reviewer.id
-    case.decided_at = now
-    case.decision_note = cleaned_note
+    # The database owns the transition: two reviewers may both have loaded PENDING.
+    # Keep the case decision and public label in this same transaction.
+    changed = db.execute(
+        update(VerificationCase)
+        .where(VerificationCase.id == case.id, VerificationCase.status == CaseStatus.PENDING)
+        .values(
+            status=CaseStatus.APPROVED if approve else CaseStatus.REJECTED,
+            decided_by_user_id=reviewer.id,
+            decided_at=now,
+            decision_note=cleaned_note,
+        )
+        .execution_options(synchronize_session=False)
+    )
+    if changed.rowcount != 1:
+        db.rollback()
+        db.refresh(case)
+        raise VerificationError("This case has already been decided. Refresh to see the decision.")
+    db.refresh(case)
 
     if approve:
         # A prior approval stands if a later resubmission is rejected; this
         # column only moves forward on approval (DECISIONS L51).
-        reviewed_name = (case.profile.display_name or "").strip()
+        profile = db.scalar(
+            select(NurseProfile)
+            .where(NurseProfile.id == case.profile_id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
+        reviewed_name = (profile.display_name or "").strip()
         case.reviewed_display_name = reviewed_name
-        case.profile.document_reviewed_at = now
-        case.profile.document_reviewed_name = reviewed_name
+        profile.document_reviewed_at = now
+        profile.document_reviewed_name = reviewed_name
 
     db.commit()
     db.refresh(case)

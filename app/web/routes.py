@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Request, Response
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -15,6 +16,20 @@ router = APIRouter()
 def healthz() -> dict[str, str]:
     """Liveness probe. Deliberately touches no data."""
     return {"status": "ok"}
+
+
+@router.get("/readyz")
+def readyz(db: Session = Depends(get_db)):
+    """Report service readiness without exposing queue contents or configuration."""
+    from app.services.worker_health import readiness
+
+    try:
+        ready = readiness(db)
+    except SQLAlchemyError:
+        ready = False
+    return JSONResponse({"status": "ready" if ready else "unavailable"},
+                        status_code=200 if ready else 503,
+                        headers={"Cache-Control": "no-store"})
 
 
 @router.get("/robots.txt", response_class=PlainTextResponse)

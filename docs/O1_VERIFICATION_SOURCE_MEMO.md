@@ -29,14 +29,14 @@ The memo must answer five things for every candidate route: **lawfulness**, **te
 
 These are **hypotheses to test**, not claims about what NMCN offers. Each must be confirmed or struck with a primary source and access date.
 
-| ID | Route to test | What it would mean | What must be verified |
-|---|---|---|---|
-| R1 | NMCN public online register or verification lookup | A source-confirmed check is possible by querying an official system | Whether it exists; what it returns; whether public or login-only; terms of use; rate limits; whether it covers students, graduates, and registered nurses alike |
-| R2 | NMCN formal verification at the nurse's request (letter, email, or portal request) | The nurse requests an official statement; Nurse.ng receives or reviews it | Whether the service exists; who may request; whether third parties may receive the result; fee; turnaround; format (paper/PDF/QR); revocation signalling |
-| R3 | Applicant-obtained official verification report | Same as R2, but the nurse obtains and shares the result | Whether a third party can rely on it; whether it can be forged; whether it can be checked back with NMCN |
-| R4 | Document review of NMCN-issued licence, certificate, or printout | Fallback only; supports "document reviewed" | What security features exist; whether a QR code or lookup can authenticate it; reviewer training and dual review; the exact label and disclaimer |
-| R5 | Direct employer or HR confirmation channel with NMCN | An employer-facing route, not a Nurse.ng route | Whether NMCN confirms status to employers; what authorization is needed; whether it scales beyond a phone call |
-| R6 | Third-party verification or background-check vendor | A vendor absorbs the source relationship | Whether the vendor has a lawful source, not merely a document check; coverage of NMCN status; price; audit trail; data-protection terms |
+| ID  | Route to test                                                                      | What it would mean                                                        | What must be verified                                                                                                                                           |
+| --- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R1  | NMCN public online register or verification lookup                                 | A source-confirmed check is possible by querying an official system       | Whether it exists; what it returns; whether public or login-only; terms of use; rate limits; whether it covers students, graduates, and registered nurses alike |
+| R2  | NMCN formal verification at the nurse's request (letter, email, or portal request) | The nurse requests an official statement; Nurse.ng receives or reviews it | Whether the service exists; who may request; whether third parties may receive the result; fee; turnaround; format (paper/PDF/QR); revocation signalling        |
+| R3  | Applicant-obtained official verification report                                    | Same as R2, but the nurse obtains and shares the result                   | Whether a third party can rely on it; whether it can be forged; whether it can be checked back with NMCN                                                        |
+| R4  | Document review of NMCN-issued licence, certificate, or printout                   | Fallback only; supports "document reviewed"                               | What security features exist; whether a QR code or lookup can authenticate it; reviewer training and dual review; the exact label and disclaimer                |
+| R5  | Direct employer or HR confirmation channel with NMCN                               | An employer-facing route, not a Nurse.ng route                            | Whether NMCN confirms status to employers; what authorization is needed; whether it scales beyond a phone call                                                  |
+| R6  | Third-party verification or background-check vendor                                | A vendor absorbs the source relationship                                  | Whether the vendor has a lawful source, not merely a document check; coverage of NMCN status; price; audit trail; data-protection terms                         |
 
 **Do not assume that a channel used for foreign regulators (for example, verification requested by an overseas nursing board) is open to a private platform.** If such a channel exists, this memo must record whether its terms permit Nurse.ng's use, and whether an employer-facing product changes the answer.
 
@@ -59,13 +59,13 @@ For each route, capture:
 Fill one row per tested route. Leave blank until sourced.
 
 | Route | Lawful? | Terms permit Nurse.ng? | Cost per check | Turnaround | Coverage | Auditability | Failure mode | Verdict |
-|---|---|---|---|---|---|---|---|---|
-| R1 | | | | | | | | |
-| R2 | | | | | | | | |
-| R3 | | | | | | | | |
-| R4 | | | | | | | | |
-| R5 | | | | | | | | |
-| R6 | | | | | | | | |
+| ----- | ------- | ---------------------- | -------------- | ---------- | -------- | ------------ | ------------ | ------- |
+| R1    |         |                        |                |            |          |              |              |         |
+| R2    |         |                        |                |            |          |              |              |         |
+| R3    |         |                        |                |            |          |              |              |         |
+| R4    |         |                        |                |            |          |              |              |         |
+| R5    |         |                        |                |            |          |              |              |         |
+| R6    |         |                        |                |            |          |              |              |         |
 
 **Verdict values:** source-confirmed · document-only (downgraded label) · rejected (state why) · unresolved (state what is missing).
 
@@ -97,11 +97,11 @@ This memo does not answer these; it hands them to counsel (P2).
 
 ## 8. Kill-criterion mapping
 
-| Condition | What this memo would show | Response |
-|---|---|---|
-| K1: no lawful, reliable route, and document review cannot support a defensible claim | Every route rejected or unresolved | Stop, or relaunch as "document reviewed" with labels, pricing, and claims rewritten |
-| K1 partial: a route exists but its terms prohibit Nurse.ng | R1/R2 exist but are closed to private platforms | Seek written authorization; if refused, treat as K1 |
-| K3: cost cannot be covered | Cost model above | Stop or redesign the verification model |
+| Condition                                                                            | What this memo would show                       | Response                                                                            |
+| ------------------------------------------------------------------------------------ | ----------------------------------------------- | ----------------------------------------------------------------------------------- |
+| K1: no lawful, reliable route, and document review cannot support a defensible claim | Every route rejected or unresolved              | Stop, or relaunch as "document reviewed" with labels, pricing, and claims rewritten |
+| K1 partial: a route exists but its terms prohibit Nurse.ng                           | R1/R2 exist but are closed to private platforms | Seek written authorization; if refused, treat as K1                                 |
+| K3: cost cannot be covered                                                           | Cost model above                                | Stop or redesign the verification model                                             |
 
 ## 9. Decision options
 
@@ -116,9 +116,9 @@ This memo does not answer these; it hands them to counsel (P2).
 
 ## 10. Source log
 
-| Date accessed | Source (title and URL) | What it establishes | Reliability notes |
-|---|---|---|---|
-| — | — | — | No source retrieved: web tooling blocked on 21 October 2026 |
+| Date accessed | Source (title and URL) | What it establishes | Reliability notes                                           |
+| ------------- | ---------------------- | ------------------- | ----------------------------------------------------------- |
+| —             | —                      | —                   | No source retrieved: web tooling blocked on 21 October 2026 |
 
 ## 11. Outreach and open questions
 
@@ -137,4 +137,4 @@ This memo does not answer these; it hands them to counsel (P2).
 
 ---
 
-*Legal and regulatory points require qualified Nigerian counsel. This draft records a research protocol, not findings.*
+_Legal and regulatory points require qualified Nigerian counsel. This draft records a research protocol, not findings._

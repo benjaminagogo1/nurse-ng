@@ -1,10 +1,32 @@
-<form class="conversation-search" method="get" action="{{ listing_path }}" role="search">
+<form
+  class="conversation-search"
+  method="get"
+  action="{{ listing_path }}"
+  role="search"
+>
   <label for="conversation-search">Find a conversation</label>
   <div class="conversation-search-row">
-    <input id="conversation-search" type="search" name="q" value="{{ search_query }}" maxlength="120" placeholder="Makurdi, internships, a hospital name…" aria-describedby="conversation-search-hint">
+    <input
+      id="conversation-search"
+      type="search"
+      name="q"
+      value="{{ search_query }}"
+      maxlength="120"
+      placeholder="Makurdi, internships, a hospital name…"
+      aria-describedby="conversation-search-hint"
+    />
     <button class="btn btn-secondary" type="submit">Search</button>
-    {% if search_query %}<a class="text-link" href="{{ listing_path }}">Clear search</a>{% endif %}
+    {% if search_query %}<a class="text-link" href="{{ listing_path }}"
+      >Clear search</a
+    >{% endif %}
   </div>
-  <p class="field-hint" id="conversation-search-hint">Search questions, shared information, and replies{% if topic %} in {{ topic.name }}{% endif %}.</p>
+  <p class="field-hint" id="conversation-search-hint">
+    Search questions, shared information, and replies{% if topic %} in {{
+    topic.name }}{% endif %}.
+  </p>
 </form>
-{% if search_query %}<p class="conversation-results" role="status">Results for “{{ search_query }}”</p>{% endif %}
+{% if search_query %}
+<p class="conversation-results" role="status">
+  Results for “{{ search_query }}”
+</p>
+{% endif %}

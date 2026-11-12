@@ -1,46 +1,203 @@
-{% extends "base.html" %}
-{% from "_icons.html" import icon %}
-{% from "_empty_state.html" import empty_state %}
-{% block title %}Dashboard — Nurse.ng{% endblock %}
-{% block content %}
+{% extends "base.html" %} {% from "_icons.html" import icon %} {% from
+"_empty_state.html" import empty_state %} {% block title %}Dashboard —
+Nurse.ng{% endblock %} {% block content %}
 <section class="db">
-  {% if not user.onboarding_completed_at %}<aside class="discovery-next dashboard-onboarding"><div><h2>Meet colleagues. Explore your next opportunity.</h2><p>Choose a few interests for suggestions that suit you. Your profile stays under your control.</p></div><a class="btn btn-primary" href="/welcome">Personalise my experience {{ icon('arrow', 16) }}</a></aside>{% endif %}
-  {% if mail_available and not user.email_verified_at %}<p class="form-notice">Protect access to your account: <a href="/settings">{{ 'verify your email address' if user.email else 'add a recovery email' }}</a> for password recovery.</p>{% endif %}
+  {% if not user.onboarding_completed_at %}
+  <aside class="discovery-next dashboard-onboarding">
+    <div>
+      <h2>Meet colleagues. Explore your next opportunity.</h2>
+      <p>
+        Choose a few interests for suggestions that suit you. Your profile stays
+        under your control.
+      </p>
+    </div>
+    <a class="btn btn-primary" href="/welcome"
+      >Personalise my experience {{ icon('arrow', 16) }}</a
+    >
+  </aside>
+  {% endif %} {% if mail_available and not user.email_verified_at %}
+  <p class="form-notice">
+    Protect access to your account:
+    <a href="/settings"
+      >{{ 'verify your email address' if user.email else 'add a recovery email'
+      }}</a
+    >
+    for password recovery.
+  </p>
+  {% endif %}
   <div class="db-top">
-    <div class="db-hello"><p class="eyebrow">Your career at a glance</p><h1><span data-greeting>Welcome</span>{% if greeting_name %}, {{ greeting_name }}{% endif %} <span class="greeting-wave" aria-hidden="true">👋</span></h1><p>Keep going — you're making a difference.</p></div>
+    <div class="db-hello">
+      <p class="eyebrow">Your career at a glance</p>
+      <h1>
+        <span data-greeting>Welcome</span>{% if greeting_name %}, {{
+        greeting_name }}{% endif %}
+        <span class="greeting-wave" aria-hidden="true">👋</span>
+      </h1>
+      <p>Keep going — you're making a difference.</p>
+    </div>
     {% if user.account_type == 'employer' %}
-    <div class="db-card completion-card"><span class="mini-label">Build your next great team</span><p>Connect with nursing professionals.</p><a class="btn btn-primary btn-sm" href="/jobs/new">{{ icon('plus', 16) }} Post a job</a></div>
+    <div class="db-card completion-card">
+      <span class="mini-label">Build your next great team</span>
+      <p>Connect with nursing professionals.</p>
+      <a class="btn btn-primary btn-sm" href="/jobs/new"
+        >{{ icon('plus', 16) }} Post a job</a
+      >
+    </div>
     {% else %}
-    <div class="db-card completion-card"><div class="db-card-head"><h2>Profile completion</h2><strong>{{ profile_completion }}%</strong></div><div class="db-progress" role="progressbar" aria-label="Profile completion" aria-valuenow="{{ profile_completion }}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{ profile_completion }}%"></span></div><p>Small steps, more possibilities. <a href="/profile/edit">Complete your profile {{ icon('arrow', 13) }}</a></p></div>
+    <div class="db-card completion-card">
+      <div class="db-card-head">
+        <h2>Profile completion</h2>
+        <strong>{{ profile_completion }}%</strong>
+      </div>
+      <div
+        class="db-progress"
+        role="progressbar"
+        aria-label="Profile completion"
+        aria-valuenow="{{ profile_completion }}"
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
+        <span style="width: {{ profile_completion }}%"></span>
+      </div>
+      <p>
+        Small steps, more possibilities.
+        <a href="/profile/edit"
+          >Complete your profile {{ icon('arrow', 13) }}</a
+        >
+      </p>
+    </div>
     {% endif %}
   </div>
 
   <div class="db-stats" data-tour="dashboard">
-    <a class="db-card db-stat" href="/jobs"><span class="db-stat-icon">{{ icon('briefcase', 24) }}</span><div><small>New job opportunities</small><b>{{ new_job_count }}</b><span class="stat-link">Explore this week's jobs {{ icon('arrow', 14) }}</span></div></a>
-    <a class="db-card db-stat" href="/messages"><span class="db-stat-icon blue">{{ icon('chat', 24) }}</span><div><small>Messages</small><b>{{ unread_count|default(0) }}</b><span class="stat-link">View messages {{ icon('arrow', 14) }}</span></div></a>
-    <a class="db-card db-stat" href="/network"><span class="db-stat-icon violet">{{ icon('users', 24) }}</span><div><small>Network connections</small><b>{{ connection_count }}</b><span class="stat-link">{% if pending_requests %}{{ pending_requests }} pending request{{ 's' if pending_requests != 1 }}{% else %}Grow your network{% endif %} {{ icon('arrow', 14) }}</span></div></a>
+    <a class="db-card db-stat" href="/jobs"
+      ><span class="db-stat-icon">{{ icon('briefcase', 24) }}</span>
+      <div>
+        <small>New job opportunities</small><b>{{ new_job_count }}</b
+        ><span class="stat-link"
+          >Explore this week's jobs {{ icon('arrow', 14) }}</span
+        >
+      </div></a
+    >
+    <a class="db-card db-stat" href="/messages"
+      ><span class="db-stat-icon blue">{{ icon('chat', 24) }}</span>
+      <div>
+        <small>Messages</small><b>{{ unread_count|default(0) }}</b
+        ><span class="stat-link">View messages {{ icon('arrow', 14) }}</span>
+      </div></a
+    >
+    <a class="db-card db-stat" href="/network"
+      ><span class="db-stat-icon violet">{{ icon('users', 24) }}</span>
+      <div>
+        <small>Network connections</small><b>{{ connection_count }}</b
+        ><span class="stat-link"
+          >{% if pending_requests %}{{ pending_requests }} pending request{{ 's'
+          if pending_requests != 1 }}{% else %}Grow your network{% endif %} {{
+          icon('arrow', 14) }}</span
+        >
+      </div></a
+    >
   </div>
 
   <div class="db-cols">
     <div class="db-card featured-jobs">
-      <div class="db-card-head"><h2>{{ 'Opportunities for you' if personalised_jobs else 'Featured jobs' }}</h2></div>
-      <p class="card-subtitle">{{ 'Based on your interests or location. Nigerian opportunities first.' if personalised_jobs else 'Your next opportunity could be right here.' }}</p>
+      <div class="db-card-head">
+        <h2>
+          {{ 'Opportunities for you' if personalised_jobs else 'Featured jobs'
+          }}
+        </h2>
+      </div>
+      <p class="card-subtitle">
+        {{ 'Based on your interests or location. Nigerian opportunities first.'
+        if personalised_jobs else 'Your next opportunity could be right here.'
+        }}
+      </p>
       {% for job in jobs %}{% include "jobs/_card.html" %}{% else %}
-      <div class="empty-state"><span class="empty-icon">{{ icon('briefcase', 28) }}</span><h3>Your next opportunity is on its way</h3><p>New roles will appear here as employers publish them. In the meantime, give your profile a little care.</p><a class="btn btn-secondary btn-sm" href="/profile/edit">Build my profile {{ icon('arrow', 15) }}</a></div>
+      <div class="empty-state">
+        <span class="empty-icon">{{ icon('briefcase', 28) }}</span>
+        <h3>Your next opportunity is on its way</h3>
+        <p>
+          New roles will appear here as employers publish them. In the meantime,
+          give your profile a little care.
+        </p>
+        <a class="btn btn-secondary btn-sm" href="/profile/edit"
+          >Build my profile {{ icon('arrow', 15) }}</a
+        >
+      </div>
       {% endfor %}
-      <a class="card-bottom-link" href="/jobs">Explore all job opportunities {{ icon('arrow', 16) }}</a>
+      <a class="card-bottom-link" href="/jobs"
+        >Explore all job opportunities {{ icon('arrow', 16) }}</a
+      >
     </div>
     <div class="db-side">
-      <div class="db-card"><div class="db-card-head"><h2>Upcoming events</h2>{{ icon('calendar', 18) }}</div>{% for event in events %}<article class="event-card"><h3><a href="/events/{{ event.id }}">{{ event.title }}</a></h3><p>{{ local_time(event.starts_at).strftime('%d %b, %H:%M') }} WAT · {{ event.location }}</p></article>{% else %}<div class="empty-state compact-empty"><h3>No upcoming events yet</h3><p>Meetups and learning sessions will appear here when published.</p></div>{% endfor %}<a class="card-bottom-link" href="/events">Explore community events {{ icon('arrow', 14) }}</a>{% if user.is_staff %}<a class="card-bottom-link" href="/events/new">Publish an event {{ icon('plus', 14) }}</a>{% endif %}</div>
-      <div class="db-card"><div class="db-card-head"><h2>Quick actions</h2></div><div class="quick"><a href="/profile/edit"><span>{{ icon('edit', 21) }}</span>Update<br>profile</a><a href="/jobs"><span>{{ icon('search', 21) }}</span>Find<br>jobs</a><a href="/topics"><span>{{ icon('users', 21) }}</span>Find a<br>group</a><a href="/learning"><span>{{ icon('book', 21) }}</span>Keep<br>learning</a></div></div>
+      <div class="db-card">
+        <div class="db-card-head">
+          <h2>Upcoming events</h2>
+          {{ icon('calendar', 18) }}
+        </div>
+        {% for event in events %}
+        <article class="event-card">
+          <h3><a href="/events/{{ event.id }}">{{ event.title }}</a></h3>
+          <p>
+            {{ local_time(event.starts_at).strftime('%d %b, %H:%M') }} WAT · {{
+            event.location }}
+          </p>
+        </article>
+        {% else %}
+        <div class="empty-state compact-empty">
+          <h3>No upcoming events yet</h3>
+          <p>Meetups and learning sessions will appear here when published.</p>
+        </div>
+        {% endfor %}<a class="card-bottom-link" href="/events"
+          >Explore community events {{ icon('arrow', 14) }}</a
+        >{% if user.is_staff %}<a class="card-bottom-link" href="/events/new"
+          >Publish an event {{ icon('plus', 14) }}</a
+        >{% endif %}
+      </div>
+      <div class="db-card">
+        <div class="db-card-head"><h2>Quick actions</h2></div>
+        <div class="quick">
+          <a href="/profile/edit"
+            ><span>{{ icon('edit', 21) }}</span>Update<br />profile</a
+          ><a href="/jobs"
+            ><span>{{ icon('search', 21) }}</span>Find<br />jobs</a
+          ><a href="/topics"
+            ><span>{{ icon('users', 21) }}</span>Find a<br />group</a
+          ><a href="/learning"
+            ><span>{{ icon('book', 21) }}</span>Keep<br />learning</a
+          >
+        </div>
+      </div>
     </div>
   </div>
   <section class="dashboard-discovery" aria-labelledby="dashboard-people">
-    <div class="discovery-results"><h2 id="dashboard-people">Suggested colleagues</h2>{% if people %}<a href="/nurses">Find colleagues {{ icon('arrow', 15) }}</a>{% endif %}</div>
-    <p class="field-hint"><a href="/welcome">Edit your interests</a> to help find relevant colleagues and opportunities.</p>
-    {% if people %}<div class="profile-card-grid people-grid">{% for card in people %}{% include "community/_person.html" %}{% endfor %}</div>
+    <div class="discovery-results">
+      <h2 id="dashboard-people">Suggested colleagues</h2>
+      {% if people %}<a href="/nurses"
+        >Find colleagues {{ icon('arrow', 15) }}</a
+      >{% endif %}
+    </div>
+    <p class="field-hint">
+      <a href="/welcome">Edit your interests</a> to help find relevant
+      colleagues and opportunities.
+    </p>
+    {% if people %}
+    <div class="profile-card-grid people-grid">
+      {% for card in people %}{% include "community/_person.html" %}{% endfor %}
+    </div>
     {% else %}{{ empty_state('No suggestions yet', 'Colleagues with published profiles will appear here. You can search the directory for someone you know.', '/nurses', 'Find colleagues', level=3) }}{% endif %}
   </section>
-  <div class="dashboard-tip"><span class="feature-icon">{{ icon('sparkle', 23) }}</span><div><strong>A little progress goes a long way.</strong><p>Add your skills and experience to help tell your professional story.</p></div><a href="/profile/edit" class="text-link">Update profile {{ icon('arrow', 16) }}</a></div>
+  <div class="dashboard-tip">
+    <span class="feature-icon">{{ icon('sparkle', 23) }}</span>
+    <div>
+      <strong>A little progress goes a long way.</strong>
+      <p>
+        Add your skills and experience to help tell your professional story.
+      </p>
+    </div>
+    <a href="/profile/edit" class="text-link"
+      >Update profile {{ icon('arrow', 16) }}</a
+    >
+  </div>
 </section>
 {% endblock %}

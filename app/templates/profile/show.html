@@ -1,114 +1,300 @@
-{% extends "base.html" %}
-{% from "_icons.html" import icon %}
-{% from "_avatar.html" import avatar with context %}
-{% set page = 'profile' %}
-
-{% block title %}{{ profile.display_name }} — Nurse.ng{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% from "_icons.html" import icon %} {% from
+"_avatar.html" import avatar with context %} {% set page = 'profile' %} {% block
+title %}{{ profile.display_name }} — Nurse.ng{% endblock %} {% block content %}
 <section class="profile-page">
-  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+  {% if error %}
+  <p class="form-error" role="alert">{{ error }}</p>
+  {% endif %}
   <header class="profile-hero">
     <div class="profile-cover"><p>My profile</p></div>
     <div class="profile-identity">
       <div class="profile-portrait">
         {{ avatar(user, profile.display_name, 'profile-avatar') }}
-        <a href="/settings#photo-heading" class="profile-photo-link">Change photo</a>
+        <a href="/settings#photo-heading" class="profile-photo-link"
+          >Change photo</a
+        >
       </div>
       <div class="profile-identity-copy">
         <h1>{{ profile.display_name }}</h1>
-        {% if profile.headline %}<p class="profile-headline">{{ profile.headline }}</p>{% else %}<a class="profile-inline-link" href="/profile/edit#headline">Add a headline that tells your story {{ icon('arrow', 15) }}</a>{% endif %}
-        {% if profile.location %}<p class="profile-location">{{ icon('pin', 16) }} {{ profile.location }}</p>{% endif %}
+        {% if profile.headline %}
+        <p class="profile-headline">{{ profile.headline }}</p>
+        {% else %}<a class="profile-inline-link" href="/profile/edit#headline"
+          >Add a headline that tells your story {{ icon('arrow', 15) }}</a
+        >{% endif %} {% if profile.location %}
+        <p class="profile-location">
+          {{ icon('pin', 16) }} {{ profile.location }}
+        </p>
+        {% endif %}
       </div>
       <div class="profile-hero-actions">
-        <a class="btn btn-primary" href="/profile/edit">{{ icon('edit', 17) }} Edit profile</a>
+        <a class="btn btn-primary" href="/profile/edit"
+          >{{ icon('edit', 17) }} Edit profile</a
+        >
         {% if is_active and share_url %}
-        <button type="button" class="btn btn-secondary" data-copy="{{ share_url }}">{{ icon('share', 17) }}<span>Share profile</span></button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-copy="{{ share_url }}"
+        >
+          {{ icon('share', 17) }}<span>Share profile</span>
+        </button>
         {% else %}
-        <a class="btn btn-secondary" href="/profile/sharing">{{ icon('share', 17) }} Share profile</a>
+        <a class="btn btn-secondary" href="/profile/sharing"
+          >{{ icon('share', 17) }} Share profile</a
+        >
         {% endif %}
       </div>
     </div>
     <div class="profile-hero-footer">
-      <p>{{ icon('briefcase', 17) }} <span>{{ status_label }} <small>Self-declared</small></span></p>
-      <a href="#visibility">{{ icon('globe' if is_active else 'lock', 17) }} {{ 'Public profile' if is_active else 'Only visible to you' }}</a>
+      <p>
+        {{ icon('briefcase', 17) }}
+        <span>{{ status_label }} <small>Self-declared</small></span>
+      </p>
+      <a href="#visibility"
+        >{{ icon('globe' if is_active else 'lock', 17) }} {{ 'Public profile' if
+        is_active else 'Only visible to you' }}</a
+      >
     </div>
   </header>
 
   <div class="profile-layout">
     <div class="profile-main-column">
-      <section class="profile-panel" id="overview" aria-labelledby="about-heading">
-        <div class="profile-panel-heading"><h2 id="about-heading">About me</h2><a class="profile-edit-link" href="/profile/edit#bio" aria-label="Edit about me">{{ icon('edit', 16) }}</a></div>
+      <section
+        class="profile-panel"
+        id="overview"
+        aria-labelledby="about-heading"
+      >
+        <div class="profile-panel-heading">
+          <h2 id="about-heading">About me</h2>
+          <a
+            class="profile-edit-link"
+            href="/profile/edit#bio"
+            aria-label="Edit about me"
+            >{{ icon('edit', 16) }}</a
+          >
+        </div>
         {% if profile.bio %}
         <div class="profile-story">{{ profile.bio }}</div>
         {% else %}
-        <p class="profile-empty-copy">Introduce yourself in a few words. Share what you care about, your experience and where you want to go next.</p>
-        <a class="profile-inline-link" href="/profile/edit#bio">Write your introduction {{ icon('arrow', 16) }}</a>
+        <p class="profile-empty-copy">
+          Introduce yourself in a few words. Share what you care about, your
+          experience and where you want to go next.
+        </p>
+        <a class="profile-inline-link" href="/profile/edit#bio"
+          >Write your introduction {{ icon('arrow', 16) }}</a
+        >
         {% endif %}
       </section>
 
-      <section class="profile-panel" id="credentials" aria-labelledby="background-heading">
-        <div class="profile-panel-heading"><h2 id="background-heading">Professional background</h2><a class="profile-edit-link" href="/profile/edit#qualification" aria-label="Edit professional background">{{ icon('edit', 16) }}</a></div>
+      <section
+        class="profile-panel"
+        id="credentials"
+        aria-labelledby="background-heading"
+      >
+        <div class="profile-panel-heading">
+          <h2 id="background-heading">Professional background</h2>
+          <a
+            class="profile-edit-link"
+            href="/profile/edit#qualification"
+            aria-label="Edit professional background"
+            >{{ icon('edit', 16) }}</a
+          >
+        </div>
         <dl class="profile-background">
-          <div><dt><span class="profile-detail-icon">{{ icon('cap', 21) }}</span>Highest qualification</dt><dd>{% if profile.qualification %}{{ profile.qualification }}{% else %}<a href="/profile/edit#qualification">Add your qualification</a>{% endif %}</dd></div>
-          <div id="experience"><dt><span class="profile-detail-icon">{{ icon('briefcase', 21) }}</span>Experience</dt><dd>{% if profile.years_experience is not none %}{{ profile.years_experience }} year{{ 's' if profile.years_experience != 1 }}{% else %}<a href="/profile/edit#years_experience">Add your experience</a>{% endif %}</dd></div>
+          <div>
+            <dt>
+              <span class="profile-detail-icon">{{ icon('cap', 21) }}</span
+              >Highest qualification
+            </dt>
+            <dd>
+              {% if profile.qualification %}{{ profile.qualification }}{% else
+              %}<a href="/profile/edit#qualification">Add your qualification</a
+              >{% endif %}
+            </dd>
+          </div>
+          <div id="experience">
+            <dt>
+              <span class="profile-detail-icon"
+                >{{ icon('briefcase', 21) }}</span
+              >Experience
+            </dt>
+            <dd>
+              {% if profile.years_experience is not none %}{{
+              profile.years_experience }} year{{ 's' if profile.years_experience
+              != 1 }}{% else %}<a href="/profile/edit#years_experience"
+                >Add your experience</a
+              >{% endif %}
+            </dd>
+          </div>
         </dl>
-        <p class="profile-caption">These details are self-declared. Document review is managed separately.</p>
+        <p class="profile-caption">
+          These details are self-declared. Document review is managed
+          separately.
+        </p>
       </section>
 
-      <section class="profile-panel" id="skills" aria-labelledby="skills-heading">
-        <div class="profile-panel-heading"><h2 id="skills-heading">Skills &amp; interests</h2><a class="profile-edit-link" href="/profile/edit#skills" aria-label="Edit skills and interests">{{ icon('edit', 16) }}</a></div>
+      <section
+        class="profile-panel"
+        id="skills"
+        aria-labelledby="skills-heading"
+      >
+        <div class="profile-panel-heading">
+          <h2 id="skills-heading">Skills &amp; interests</h2>
+          <a
+            class="profile-edit-link"
+            href="/profile/edit#skills"
+            aria-label="Edit skills and interests"
+            >{{ icon('edit', 16) }}</a
+          >
+        </div>
         <h3 class="profile-detail-label">Skills</h3>
         {% if profile.skills %}
-        <ul class="profile-tags">{% for skill in profile.skills.split(',') if skill.strip() %}<li>{{ skill.strip() }}</li>{% endfor %}</ul>
-        {% else %}<p class="profile-empty-copy">What do you bring to a team? <a href="/profile/edit#skills">Add your skills</a>.</p>{% endif %}
+        <ul class="profile-tags">
+          {% for skill in profile.skills.split(',') if skill.strip() %}
+          <li>{{ skill.strip() }}</li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="profile-empty-copy">
+          What do you bring to a team?
+          <a href="/profile/edit#skills">Add your skills</a>.
+        </p>
+        {% endif %}
         <h3 class="profile-detail-label">Professional interests</h3>
         {% if profile.interests %}
-        <ul class="profile-tags profile-tags-interests">{% for interest in profile.interests.split(', ') %}<li>{{ interest }}</li>{% endfor %}</ul>
-        {% else %}<p class="profile-empty-copy">Find people and opportunities that fit your interests. <a href="/profile/edit#interests-section">Choose your interests</a>.</p>{% endif %}
+        <ul class="profile-tags profile-tags-interests">
+          {% for interest in profile.interests.split(', ') %}
+          <li>{{ interest }}</li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="profile-empty-copy">
+          Find people and opportunities that fit your interests.
+          <a href="/profile/edit#interests-section">Choose your interests</a>.
+        </p>
+        {% endif %}
       </section>
     </div>
 
-    <aside class="profile-side-column" aria-label="Profile settings and document review">
-      <section class="profile-panel" id="visibility" aria-labelledby="visibility-heading">
-        <div class="profile-panel-heading"><h2 id="visibility-heading">Profile visibility</h2>{{ icon('globe' if is_active else 'lock', 20) }}</div>
-        <p class="profile-status{{ ' is-public' if is_active else '' }}">{{ icon('globe' if is_active else 'lock', 15) }} {{ 'Public profile' if is_active else 'Private profile · Draft' }}</p>
+    <aside
+      class="profile-side-column"
+      aria-label="Profile settings and document review"
+    >
+      <section
+        class="profile-panel"
+        id="visibility"
+        aria-labelledby="visibility-heading"
+      >
+        <div class="profile-panel-heading">
+          <h2 id="visibility-heading">Profile visibility</h2>
+          {{ icon('globe' if is_active else 'lock', 20) }}
+        </div>
+        <p class="profile-status{{ ' is-public' if is_active else '' }}">
+          {{ icon('globe' if is_active else 'lock', 15) }} {{ 'Public profile'
+          if is_active else 'Private profile · Draft' }}
+        </p>
         {% if is_active %}
-        <p class="profile-support-copy">Your profile appears in nurse discovery. Visitors see only the fields you marked public ({{ public_field_count }} public).</p>
+        <p class="profile-support-copy">
+          Your profile appears in nurse discovery. Visitors see only the fields
+          you marked public ({{ public_field_count }} public).
+        </p>
         {% if share_url %}
-        <label class="profile-detail-label" for="share-url">Your profile link</label>
-        <input id="share-url" class="profile-share-url" type="text" value="{{ share_url }}" readonly onclick="this.select()">
-        <button class="profile-inline-link" type="button" data-copy="{{ share_url }}">{{ icon('copy', 16) }}<span>Copy link</span></button>
+        <label class="profile-detail-label" for="share-url"
+          >Your profile link</label
+        >
+        <input
+          id="share-url"
+          class="profile-share-url"
+          type="text"
+          value="{{ share_url }}"
+          readonly
+          onclick="this.select()"
+        />
+        <button
+          class="profile-inline-link"
+          type="button"
+          data-copy="{{ share_url }}"
+        >
+          {{ icon('copy', 16) }}<span>Copy link</span>
+        </button>
+        {% endif %} {% if not display_name_shared %}
+        <p class="profile-caption">
+          Your display name is private, so the shared page will not show your
+          name.
+        </p>
         {% endif %}
-        {% if not display_name_shared %}<p class="profile-caption">Your display name is private, so the shared page will not show your name.</p>{% endif %}
         <div class="profile-side-actions">
-          <a class="btn btn-secondary" href="/profile/sharing">Sharing controls {{ icon('arrow', 16) }}</a>
-          <form method="post" action="/profile/deactivate"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="profile-text-button" type="submit">Make private</button></form>
+          <a class="btn btn-secondary" href="/profile/sharing"
+            >Sharing controls {{ icon('arrow', 16) }}</a
+          >
+          <form method="post" action="/profile/deactivate">
+            <input
+              type="hidden"
+              name="csrf_token"
+              value="{{ csrf_token }}"
+            /><button class="profile-text-button" type="submit">
+              Make private
+            </button>
+          </form>
         </div>
         {% else %}
-        <p class="profile-support-copy">Your professional story is just for you for now. Choose what to share when you’re ready to appear in nurse discovery.</p>
-        <p class="profile-caption">Your display name must be public before you publish your profile.</p>
+        <p class="profile-support-copy">
+          Your professional story is just for you for now. Choose what to share
+          when you’re ready to appear in nurse discovery.
+        </p>
+        <p class="profile-caption">
+          Your display name must be public before you publish your profile.
+        </p>
         <div class="profile-side-actions">
-          <a class="btn btn-secondary" href="/profile/sharing">Sharing controls {{ icon('arrow', 16) }}</a>
-          <form method="post" action="/profile/activate"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="btn btn-primary" type="submit">Make public</button></form>
+          <a class="btn btn-secondary" href="/profile/sharing"
+            >Sharing controls {{ icon('arrow', 16) }}</a
+          >
+          <form method="post" action="/profile/activate">
+            <input
+              type="hidden"
+              name="csrf_token"
+              value="{{ csrf_token }}"
+            /><button class="btn btn-primary" type="submit">Make public</button>
+          </form>
         </div>
         {% endif %}
       </section>
 
-      <section class="profile-panel profile-review-panel" aria-labelledby="review-heading">
+      <section
+        class="profile-panel profile-review-panel"
+        aria-labelledby="review-heading"
+      >
         <span class="profile-review-icon">{{ icon('shield', 24) }}</span>
         <h2 id="review-heading">Document review</h2>
         {% if document_reviewed_on %}
-        <p class="profile-status is-public">{{ icon('check', 15) }} Document reviewed</p>
-        <p class="profile-support-copy">{{ document_reviewed_name or profile.display_name }} was reviewed on {{ document_reviewed_on }}.</p>
-        {% if document_review_name_changed %}<p class="form-notice">Your current name differs from the reviewed name. The public receipt distinguishes the current self-declared name from the reviewed name.</p>{% endif %}
-        <a class="profile-inline-link" href="/profile/verification">View review details {{ icon('arrow', 16) }}</a>
+        <p class="profile-status is-public">
+          {{ icon('check', 15) }} Document reviewed
+        </p>
+        <p class="profile-support-copy">
+          {{ document_reviewed_name or profile.display_name }} was reviewed on
+          {{ document_reviewed_on }}.
+        </p>
+        {% if document_review_name_changed %}
+        <p class="form-notice">
+          Your current name differs from the reviewed name. The public receipt
+          distinguishes the current self-declared name from the reviewed name.
+        </p>
+        {% endif %}
+        <a class="profile-inline-link" href="/profile/verification"
+          >View review details {{ icon('arrow', 16) }}</a
+        >
         {% else %}
         <p class="profile-status">Not reviewed</p>
-        <p class="profile-support-copy">Submit your licence and identity documents for a separate review.</p>
-        <a class="profile-inline-link" href="/profile/verification">Go to verification {{ icon('arrow', 16) }}</a>
+        <p class="profile-support-copy">
+          Submit your licence and identity documents for a separate review.
+        </p>
+        <a class="profile-inline-link" href="/profile/verification"
+          >Go to verification {{ icon('arrow', 16) }}</a
+        >
         {% endif %}
-        <p class="profile-caption">Profile publication is separate from document review.</p>
+        <p class="profile-caption">
+          Profile publication is separate from document review.
+        </p>
       </section>
     </aside>
   </div>
@@ -116,18 +302,21 @@
 </section>
 
 <script>
-  document.querySelectorAll('[data-copy]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var text = btn.getAttribute('data-copy');
-      var label = btn.querySelector('span');
+  document.querySelectorAll("[data-copy]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var text = btn.getAttribute("data-copy");
+      var label = btn.querySelector("span");
       var done = function () {
-        label.textContent = 'Link copied';
-        document.getElementById('profile-copy-status').textContent = 'Profile link copied to clipboard.';
+        label.textContent = "Link copied";
+        document.getElementById("profile-copy-status").textContent =
+          "Profile link copied to clipboard.";
       };
       if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(done, function () { window.prompt('Copy this link', text); });
+        navigator.clipboard.writeText(text).then(done, function () {
+          window.prompt("Copy this link", text);
+        });
       } else {
-        window.prompt('Copy this link', text);
+        window.prompt("Copy this link", text);
       }
     });
   });

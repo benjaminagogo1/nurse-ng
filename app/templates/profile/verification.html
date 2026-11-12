@@ -1,18 +1,31 @@
-{% extends "base.html" %}
-{% from "_icons.html" import icon %}
-{% from "_empty_state.html" import empty_state %}
-{% set page = 'verification' %}
-
-{% block title %}Verification — Nurse.ng{% endblock %}
-
-{% block content %}
-{% macro slot(name, title, hint, icon_name, required) %}
+{% extends "base.html" %} {% from "_icons.html" import icon %} {% from
+"_empty_state.html" import empty_state %} {% set page = 'verification' %} {%
+block title %}Verification — Nurse.ng{% endblock %} {% block content %} {% macro
+slot(name, title, hint, icon_name, required) %}
 <div class="slot">
   <span class="slot-icon">{{ icon(icon_name, 22) }}</span>
-  <div class="slot-text"><strong>{{ title }}</strong><small id="{{ name }}-hint" data-hint="{{ hint }}" aria-live="polite">{{ hint }}</small></div>
-  <label class="slot-btn"><span>Upload</span>
-    <input type="file" name="{{ name }}" aria-label="Upload {{ title }}" aria-describedby="{{ name }}-hint" accept="image/jpeg,image/png,application/pdf" {% if required %} required{%
-      endif %}>
+  <div class="slot-text">
+    <strong>{{ title }}</strong
+    ><small id="{{ name }}-hint" data-hint="{{ hint }}" aria-live="polite"
+      >{{ hint }}</small
+    >
+  </div>
+  <label class="slot-btn"
+    ><span>Upload</span>
+    <input
+      type="file"
+      name="{{ name }}"
+      aria-label="Upload {{ title }}"
+      aria-describedby="{{ name }}-hint"
+      accept="image/jpeg,image/png,application/pdf"
+      {%
+      if
+      required
+      %}
+      required{%
+      endif
+      %}
+    />
   </label>
 </div>
 {% endmacro %}
@@ -21,20 +34,25 @@
   <h1>Verification</h1>
   <p class="lede">Build trust in your professional story.</p>
 
-  {% if not profile %}
-    {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
-    {{ empty_state(
-      'Create your profile to start document review',
-      'Add your professional details first. Then return here to upload your documents and follow their review. Your profile starts private.',
-      '/profile/edit?return_to=verification', 'Create profile', symbol='shield', primary=true
-    ) }}
-  {% else %}
-  {% set step = 4 if document_reviewed_on else (2 if pending else 1) %}
+  {% if not profile %} {% if error %}
+  <p class="form-error" role="alert">{{ error }}</p>
+  {% endif %} {{ empty_state( 'Create your profile to start document review',
+  'Add your professional details first. Then return here to upload your documents and follow their review. Your profile starts private.',
+  '/profile/edit?return_to=verification', 'Create profile', symbol='shield',
+  primary=true ) }} {% else %} {% set step = 4 if document_reviewed_on else (2
+  if pending else 1) %}
   <ol class="stepper" aria-label="Verification progress">
     {% for label in ['Documents', 'Review', 'Verification', 'Complete'] %}
     <li
       class="{% if document_reviewed_on or loop.index < step %}is-done{% elif loop.index == step %}is-current{% endif %}"
-      {% if loop.index==step %} aria-current="step" {% endif %}>{{ label }}</li>
+      {% if loop.index==step %}
+      aria-current="step"
+      {%
+      endif
+      %}
+    >
+      {{ label }}
+    </li>
     {% endfor %}
   </ol>
 
@@ -46,15 +64,15 @@
     {% if document_reviewed_on %}
     <p>
       <span class="verification-badge">Document reviewed</span>
-      {{ document_reviewed_name or profile.display_name }} was reviewed on {{ document_reviewed_on }}.
+      {{ document_reviewed_name or profile.display_name }} was reviewed on {{
+      document_reviewed_on }}.
     </p>
     {% if document_review_name_changed %}
     <p class="form-notice">
-      Your current profile name differs. The review remains attached only to
-      the name shown above; the current name is self-declared.
+      Your current profile name differs. The review remains attached only to the
+      name shown above; the current name is self-declared.
     </p>
-    {% endif %}
-    {% else %}
+    {% endif %} {% else %}
     <p><span class="verification-badge muted">Not reviewed</span></p>
     {% endif %}
   </div>
@@ -65,47 +83,68 @@
     this one is decided.
   </p>
   {% else %}
-  <div class="vf-card" style="margin-top:20px">
+  <div class="vf-card" style="margin-top: 20px">
     <h2>Upload Your Documents</h2>
     <p class="field-hint">
-      Please upload clear and valid copies of your credentials. Accepted formats:
-      PDF, JPG, PNG (Max {{ max_megabytes }} MB each).
+      Please upload clear and valid copies of your credentials. Accepted
+      formats: PDF, JPG, PNG (Max {{ max_megabytes }} MB each).
     </p>
 
-    <form method="post" action="/profile/verification" enctype="multipart/form-data" class="vf-form">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <form
+      method="post"
+      action="/profile/verification"
+      enctype="multipart/form-data"
+      class="vf-form"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
 
-      <label class="vf-label" for="registration_number">NMCN registration number</label>
-      <input id="registration_number" name="registration_number" type="text" maxlength="40"
-        value="{{ registration_number }}" required>
-      <p class="field-hint">Shown to the reviewer only. It is never published on your profile.</p>
+      <label class="vf-label" for="registration_number"
+        >NMCN registration number</label
+      >
+      <input
+        id="registration_number"
+        name="registration_number"
+        type="text"
+        maxlength="40"
+        value="{{ registration_number }}"
+        required
+      />
+      <p class="field-hint">
+        Shown to the reviewer only. It is never published on your profile.
+      </p>
 
-  
       <div class="slot-list">
-        {% if allow_extra_evidence %}
-        {{ slot('nursing_certificate', 'Nursing Certificate', 'Your basic nursing qualification', 'file', false) }}
-        {% endif %}
-        {{ slot('licence', 'Registration Certificate', 'NMCN or relevant regulatory body', 'file', true) }}
-        {% if allow_extra_evidence %}
-        {{ slot('additional_certification', 'Additional Certifications', 'Optional', 'file', false) }}
-        {% endif %}
-        {{ slot('government_id', 'ID Card', 'Government issued ID', 'user', true) }}
+        {% if allow_extra_evidence %} {{ slot('nursing_certificate', 'Nursing Certificate', 'Your basic nursing qualification', 'file', false) }} {%
+        endif %} {{ slot('licence', 'Registration Certificate', 'NMCN or relevant regulatory body', 'file', true) }} {% if allow_extra_evidence
+        %} {{ slot('additional_certification', 'Additional Certifications',
+        'Optional', 'file', false) }} {% endif %} {{ slot('government_id', 'ID Card', 'Government issued ID', 'user', true) }}
       </div>
 
       <label class="consent-choice">
-        <input type="checkbox" name="consent" value="on" required>
-        I consent to Nurse.ng storing these documents privately and to a reviewer inspecting them for this review.
+        <input type="checkbox" name="consent" value="on" required />
+        I consent to Nurse.ng storing these documents privately and to a
+        reviewer inspecting them for this review.
       </label>
 
-      <p class="vf-secure">{{ icon('lock', 16) }}<span>Your documents are private and available only to authorized reviewers. A document review checks the names on your documents; it does not confirm registration against the NMCN register.</span></p>
+      <p class="vf-secure">
+        {{ icon('lock', 16) }}<span
+          >Your documents are private and available only to authorized
+          reviewers. A document review checks the names on your documents; it
+          does not confirm registration against the NMCN register.</span
+        >
+      </p>
 
-      <button type="submit" class="button-primary btn-block" style="margin-top:16px">Submit for review</button>
+      <button
+        type="submit"
+        class="button-primary btn-block"
+        style="margin-top: 16px"
+      >
+        Submit for review
+      </button>
     </form>
   </div>
-  {% endif %}
-
-  {% if cases %}
-  <h2 style="margin-top:32px">Review history</h2>
+  {% endif %} {% if cases %}
+  <h2 style="margin-top: 32px">Review history</h2>
   <table class="review-table">
     <thead>
       <tr>
@@ -117,14 +156,20 @@
       </tr>
     </thead>
     <tbody>
-      {% set status_labels = {'pending': 'With a reviewer', 'approved': 'Approved', 'rejected': 'Not approved'} %}
-      {% for case in cases %}
+      {% set status_labels = {'pending': 'With a reviewer', 'approved':
+      'Approved', 'rejected': 'Not approved'} %} {% for case in cases %}
       <tr>
         <td>{{ case.created_at.strftime('%d %B %Y') }}</td>
-        <td><span class="status-badge status-{{ case.status }}">{{ status_labels.get(case.status, case.status) }}</span>
+        <td>
+          <span class="status-badge status-{{ case.status }}"
+            >{{ status_labels.get(case.status, case.status) }}</span
+          >
         </td>
         <td>{{ case.reviewed_display_name or '—' }}</td>
-        <td>{% if case.decided_at %}{{ case.decided_at.strftime('%d %B %Y') }}{% else %}—{% endif %}</td>
+        <td>
+          {% if case.decided_at %}{{ case.decided_at.strftime('%d %B %Y') }}{%
+          else %}—{% endif %}
+        </td>
         <td>{{ case.decision_note or '—' }}</td>
       </tr>
       {% endfor %}

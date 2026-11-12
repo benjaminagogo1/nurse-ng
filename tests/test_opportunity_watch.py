@@ -9,7 +9,7 @@ import pytest
 from sqlalchemy import func, select
 
 from app.models.notifications import Notification
-from app.models.opportunities import SavedOpportunity
+from app.models.opportunities import OpportunityPreference, SavedOpportunity
 from app.models.vacancies import VacancyRecord
 from app.services import notifications
 from app.services import opportunity_watch as watch
@@ -23,7 +23,7 @@ from app.services.recruitment_discovery import execute_discovery
 from app.services.recruitment_fetch import FetchedPage
 from app.services.vacancies import configure_collector, ingest_page
 from app.services.vacancy_extraction import normalize
-from tests.helpers import csrf_from
+from tests.helpers import csrf_from, has_element
 from tests.test_discussions import as_member
 from tests.test_vacancy_ingestion import source, staff  # noqa: F401
 from tests.test_workspace_flows import accounts, job  # noqa: F401
@@ -97,6 +97,26 @@ def test_saved_history_has_pagination_and_expired_titles(db_session, client, acc
     assert "Older saved opportunities" in first.text
     assert first.text.count('class="saved-opportunity"') == 25
     assert second.text.count('class="saved-opportunity"') == 2
+
+
+@pytest.mark.parametrize("country_code", ["NG", ""])
+def test_preference_form_saves_the_selected_country(client, db_session, accounts, country_code):
+    user = accounts["nurse"]
+    as_member(client, user)
+    page = client.get("/jobs/preferences")
+    assert has_element(page, 'option', value='NG', selected=True)
+    response = client.post("/jobs/preferences", data={
+        "csrf_token": csrf_from(page), "country_code": country_code,
+        "keyword": "Public health", "location": "Lagos", "job_type": "fellowship",
+        "enabled": "true",
+    })
+    assert response.status_code == 200
+    assert "Opportunity preferences saved" in response.text
+    choice = db_session.get(OpportunityPreference, user.id)
+    assert (choice.country_code, choice.keyword, choice.location, choice.job_type, choice.enabled) == (
+        country_code, "Public health", "Lagos", "fellowship", True,
+    )
+    assert has_element(client.get("/jobs/preferences"), 'option', value=country_code, selected=True)
 
 
 def test_match_preferences_default_to_nigeria_and_respect_types_and_location(db_session, accounts):

@@ -39,6 +39,7 @@ os.environ.update(
         "NURSE_NG_DATABASE_URL": f"sqlite:///{artifacts / 'browser.db'}",
         "NURSE_NG_PUBLIC_BASE_URL": base,
         "NURSE_NG_ACCOUNT_MAIL_BACKEND": "file",
+        "NURSE_NG_REQUIRED_WORKERS": "recruitment,reels",
         "NURSE_NG_GOOGLE_CLIENT_ID": "",
         "NURSE_NG_LINKEDIN_CLIENT_ID": "",
         "NURSE_NG_ACCOUNT_MAIL_DIR": str(artifacts / "mail"),
@@ -469,8 +470,32 @@ document.activeElement.matches('[data-display-open]')"""
         "/review",
         "/moderation",
         "/recruitment",
+        "/recruitment/vacancies?state=pending",
+        "/recruitment/vacancies?state=duplicate",
     ]:
         audit(path, 320, True)
+    navigate("/recruitment")
+    assert js(
+        "document.querySelector('a[href=\"/recruitment/vacancies?state=pending\"]')"
+        ".textContent.includes('Review pending vacancies')"
+    )
+    js("document.querySelector('a[href=\"/recruitment/vacancies?state=pending\"]').click()")
+    wait_for(
+        lambda: js("location.pathname==='/recruitment/vacancies' && "
+                   "document.readyState==='complete'"),
+        "pending vacancy link",
+    )
+    assert js("document.querySelector('select[name=state]').value==='pending'")
+    navigate("/recruitment")
+    js("document.querySelector('a[href=\"#add-source\"]').click()")
+    assert js("location.hash==='#add-source'")
+    js("document.querySelector('#add-source summary').click()")
+    assert js("document.querySelector('#add-source').open && "
+              "!!document.querySelector('#add-source input[name=source_url]')")
+    js("document.querySelector('a[href=\"#worker-health\"]').click()")
+    assert js("location.hash==='#worker-health' && "
+              "document.body.textContent.includes('historical failed tasks')")
+    assert js("!document.body.textContent.includes('Notifications worker')")
     audit("/events", 1280)
     logout()
     login("+2348000000077")
@@ -506,6 +531,7 @@ document.activeElement.matches('[data-display-open]')"""
                     "keyboard dialogs",
                     "job validation and duplicate prevention",
                     "event publishing and RSVP",
+                    "vacancy review, source URL and worker navigation",
                     "320px at 200% text",
                     "axe accessibility",
                 ],

@@ -1,14 +1,52 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <section class="community-page">
   <a class="text-link" href="/recruitment">← Recruitment sources</a>
   <h1>Nigerian opportunity coverage</h1>
-  <p class="lede">{{ coverage.registered }} registered sources · {{ coverage.collecting }} healthy collectors · {{ coverage.current }} current opportunities</p>
-  <p>Registered sources include candidates still under review. A healthy collector has current approval, permission and a successful source check. It may have no current openings.</p>
-  <p>Discovery checks today: {{ coverage.daily_attempts }} / {{ coverage.daily_limit }} (UTC). {% if coverage.daily_attempts >= coverage.daily_limit %}The daily budget is used; queued checks resume after midnight UTC.{% endif %}</p>
-  <h2>Source types</h2><div class="coverage-grid">{% for item in coverage.categories %}<article class="source-card"><h3>{{ item.label }}</h3><p>{{ item.registered }} registered · {{ item.collecting }} collecting</p></article>{% endfor %}</div>
-  <h2>Current opportunities by type</h2><ul>{% for item in coverage.opportunities %}<li>{{ item.label }}: {{ item.count }}</li>{% else %}<li>No confirmed open Nigerian opportunities are currently available.</li>{% endfor %}</ul>
-  <h2>Recorded state coverage</h2><p>Counts use locations recorded for source organisations, not the locations or eligibility of their opportunities. {{ coverage.unmapped }} sources have no state that can be identified from the recorded location.</p>
-  <div class="coverage-grid">{% for region, count in coverage.regions.items() %}<div class="source-card"><strong>{{ region }}</strong><p>{{ count }} registered source{{ '' if count == 1 else 's' }}</p></div>{% endfor %}</div>
+  <p class="lede">
+    {{ coverage.registered }} registered sources · {{ coverage.collecting }}
+    healthy collectors · {{ coverage.current }} current opportunities
+  </p>
+  <p>
+    Registered sources include candidates still under review. A healthy
+    collector has current approval, permission and a successful source check. It
+    may have no current openings.
+  </p>
+  <p>
+    Discovery checks today: {{ coverage.daily_attempts }} / {{
+    coverage.daily_limit }} (UTC). {% if coverage.daily_attempts >=
+    coverage.daily_limit %}The daily budget is used; queued checks resume after
+    midnight UTC.{% endif %}
+  </p>
+  <h2>Source types</h2>
+  <div class="coverage-grid">
+    {% for item in coverage.categories %}
+    <article class="source-card">
+      <h3>{{ item.label }}</h3>
+      <p>{{ item.registered }} registered · {{ item.collecting }} collecting</p>
+    </article>
+    {% endfor %}
+  </div>
+  <h2>Current opportunities by type</h2>
+  <ul>
+    {% for item in coverage.opportunities %}
+    <li>{{ item.label }}: {{ item.count }}</li>
+    {% else %}
+    <li>No confirmed open Nigerian opportunities are currently available.</li>
+    {% endfor %}
+  </ul>
+  <h2>Recorded state coverage</h2>
+  <p>
+    Counts use locations recorded for source organisations, not the locations or
+    eligibility of their opportunities. {{ coverage.unmapped }} sources have no
+    state that can be identified from the recorded location.
+  </p>
+  <div class="coverage-grid">
+    {% for region, count in coverage.regions.items() %}
+    <div class="source-card">
+      <strong>{{ region }}</strong>
+      <p>{{ count }} registered source{{ '' if count == 1 else 's' }}</p>
+    </div>
+    {% endfor %}
+  </div>
 </section>
 {% endblock %}

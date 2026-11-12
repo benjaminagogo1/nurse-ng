@@ -34,6 +34,7 @@ from app.models.tour import UserTour
 from app.models.user import User
 from app.models.vacancies import VacancyEvent, VacancyRecord, VacancySnapshot
 from app.models.verification import EvidenceAccess, EvidenceDocument, VerificationCase
+from app.models.workers import WorkerHeartbeat
 
 __all__ = [
     "OfflineOperation",
@@ -80,4 +81,5 @@ __all__ = [
     "VacancyRecord",
     "VacancySnapshot",
     "VerificationCase",
+    "WorkerHeartbeat",
 ]

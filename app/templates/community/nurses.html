@@ -1,29 +1,127 @@
-{% extends "base.html" %}
-{% from "_icons.html" import icon %}
-{% from "_empty_state.html" import empty_state %}
-{% block title %}Find colleagues — Nurse.ng{% endblock %}
-{% block content %}
+{% extends "base.html" %} {% from "_icons.html" import icon %} {% from
+"_empty_state.html" import empty_state %} {% block title %}Find colleagues —
+Nurse.ng{% endblock %} {% block content %}
 <section class="community-page discovery-page">
-  <div class="discovery-heading"><div><p class="eyebrow">Grow your network</p><h1>Find colleagues</h1><p class="lede">Meet colleagues with shared interests, experience and ambition.</p></div>{% if user %}<a class="btn btn-secondary" href="/welcome/discover">{{ icon('sparkle', 18) }} Suggestions for you</a>{% endif %}</div>
-  <form method="get" action="/nurses" role="search" aria-label="Find colleagues" class="directory-search">
-    <div data-tour="people"><label for="people-query">Search colleagues</label><input id="people-query" name="q" type="search" value="{{ q }}" maxlength="120" placeholder="Name, headline or skill"></div>
-    <div><label for="people-location">Location</label><input id="people-location" name="location" value="{{ location }}" maxlength="120" placeholder="e.g. Lagos or Abuja"></div>
-    <div><label for="people-interest">Professional interest</label><select id="people-interest" name="interest"><option value="">All interests</option>{% for option in interest_options %}<option value="{{ option }}"{% if interest == option %} selected{% endif %}>{{ option }}</option>{% endfor %}</select></div>
-    <div><label for="people-status">Career stage</label><select id="people-status" name="professional_status"><option value="">All career stages</option>{% for value, label in status_options %}<option value="{{ value }}"{% if professional_status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
-    <div class="directory-actions"><button type="submit" class="btn btn-primary">{{ icon('search', 17) }} Search</button>{% if has_filters and cards %}<a href="/nurses">Clear filters</a>{% endif %}</div>
+  <div class="discovery-heading">
+    <div>
+      <p class="eyebrow">Grow your network</p>
+      <h1>Find colleagues</h1>
+      <p class="lede">
+        Meet colleagues with shared interests, experience and ambition.
+      </p>
+    </div>
+    {% if user %}<a class="btn btn-secondary" href="/welcome/discover"
+      >{{ icon('sparkle', 18) }} Suggestions for you</a
+    >{% endif %}
+  </div>
+  <form
+    method="get"
+    action="/nurses"
+    role="search"
+    aria-label="Find colleagues"
+    class="directory-search"
+  >
+    <div data-tour="people">
+      <label for="people-query">Search colleagues</label
+      ><input
+        id="people-query"
+        name="q"
+        type="search"
+        value="{{ q }}"
+        maxlength="120"
+        placeholder="Name, headline or skill"
+      />
+    </div>
+    <div>
+      <label for="people-location">Location</label
+      ><input
+        id="people-location"
+        name="location"
+        value="{{ location }}"
+        maxlength="120"
+        placeholder="e.g. Lagos or Abuja"
+      />
+    </div>
+    <div>
+      <label for="people-interest">Professional interest</label
+      ><select id="people-interest" name="interest">
+        <option value="">All interests</option>
+        {% for option in interest_options %}
+        <option
+          value="{{ option }}"
+          {% if interest == option %}
+          selected{%
+          endif
+          %}
+        >
+          {{ option }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="people-status">Career stage</label
+      ><select id="people-status" name="professional_status">
+        <option value="">All career stages</option>
+        {% for value, label in status_options %}
+        <option
+          value="{{ value }}"
+          {% if professional_status == value %}
+          selected{%
+          endif
+          %}
+        >
+          {{ label }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="directory-actions">
+      <button type="submit" class="btn btn-primary">
+        {{ icon('search', 17) }} Search</button
+      >{% if has_filters and cards %}<a href="/nurses">Clear filters</a>{% endif
+      %}
+    </div>
   </form>
-  <p class="discovery-privacy">{{ icon('shield', 16) }} Only published profiles and public details appear in searches. Private photos stay private.</p>
-  <div class="discovery-results"><h2>{{ total }} {{ 'colleague' if total == 1 else 'colleagues' }}{% if has_filters %} found{% endif %}</h2>{% if page_count > 1 %}<span>Page {{ directory_page }} of {{ page_count }}</span>{% endif %}</div>
+  <p class="discovery-privacy">
+    {{ icon('shield', 16) }} Only published profiles and public details appear
+    in searches. Private photos stay private.
+  </p>
+  <div class="discovery-results">
+    <h2>
+      {{ total }} {{ 'colleague' if total == 1 else 'colleagues' }}{% if
+      has_filters %} found{% endif %}
+    </h2>
+    {% if page_count > 1 %}<span
+      >Page {{ directory_page }} of {{ page_count }}</span
+    >{% endif %}
+  </div>
   {% if cards %}
   <div class="profile-card-grid people-grid">
     {% for card in cards %}{% include "community/_person.html" %}{% endfor %}
   </div>
-  {% elif has_filters %}
-    {{ empty_state('No public profiles match', 'Try fewer filters or a nearby city. Members choose which details they share.', '/nurses', 'Clear filters', 'search') }}
-  {% else %}
-    {{ empty_state('Your community is growing', 'Published profiles will appear here as colleagues join and choose to share. Explore opportunities while you wait.', '/jobs', 'Explore opportunities', 'users') }}
+  {% elif has_filters %} {{ empty_state('No public profiles match', 'Try fewer filters or a nearby city. Members choose which details they share.',
+  '/nurses', 'Clear filters', 'search') }} {% else %} {{ empty_state('Your community is growing', 'Published profiles will appear here as colleagues join and choose to share. Explore opportunities while you wait.', '/jobs', 'Explore opportunities', 'users') }} {% endif %} {% if page_count > 1 %}
+  <nav class="directory-pagination" aria-label="Colleague directory pages">
+    {% if directory_page > 1 %}<a
+      class="btn btn-secondary"
+      rel="prev"
+      href="{{ previous_url }}"
+      >Previous</a
+    >{% endif %}<span>Page {{ directory_page }} of {{ page_count }}</span>{% if
+    directory_page < page_count %}<a
+      class="btn btn-secondary"
+      rel="next"
+      href="{{ next_url }}"
+      >Next</a
+    >{% endif %}
+  </nav>
+  {% endif %} {% if user %}
+  <p class="field-hint">
+    Want to appear here?
+    <a href="/profile">Review your profile and sharing choices</a>. Browsing
+    never publishes your profile.
+  </p>
   {% endif %}
-  {% if page_count > 1 %}<nav class="directory-pagination" aria-label="Colleague directory pages">{% if directory_page > 1 %}<a class="btn btn-secondary" rel="prev" href="{{ previous_url }}">Previous</a>{% endif %}<span>Page {{ directory_page }} of {{ page_count }}</span>{% if directory_page < page_count %}<a class="btn btn-secondary" rel="next" href="{{ next_url }}">Next</a>{% endif %}</nav>{% endif %}
-  {% if user %}<p class="field-hint">Want to appear here? <a href="/profile">Review your profile and sharing choices</a>. Browsing never publishes your profile.</p>{% endif %}
 </section>
 {% endblock %}
