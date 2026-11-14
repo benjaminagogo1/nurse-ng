@@ -70,3 +70,17 @@ The quality runner used `axe-core@4.10.3` installed under `/tmp/nurse-quality-to
 - [Accessibility result](/tmp/nurse-quality-browser-u8gzjigq/audits.json) and [registration screenshot showing clipping](/tmp/nurse-quality-browser-u8gzjigq/failure.png).
 
 This was not a complete penetration test, dependency vulnerability audit, production load test, real-provider sign-in test, physical-device acceptance run or backup restoration drill. Authoritative NMCN licence verification remains outside the implemented document-review workflow, as the existing project documentation states.
+
+## Follow-up: 14 November
+
+This document preserves the original assessment. For the subsequent vacancy
+selection, project-local ClamAV, scheduled retention, CI and completed isolated
+backup restoration, see [local operations](LOCAL_OPERATIONS.md) and the
+[fresh coverage measurement](verification/2026-11-14/vacancy-coverage-after.json).
+MFA remains deferred at the user's request.
+
+A further [collection-channel update](verification/2026-11-14/COLLECTION_CHANNELS.md)
+raised publicly eligible opportunities from **3 to 6** at 14:13 UTC on 14 November.
+The live Jobs page confirmed six results. This remains a small measured inventory;
+the application serves a wider audience than registered nurses, and existing
+healthcare and early-career relevance rules remain in place.

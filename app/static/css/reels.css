@@ -322,7 +322,7 @@
   border-top: 1px solid #ffffff20;
   padding: 8px 10px 10px;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 2px;
 }
 .reel-actions a,

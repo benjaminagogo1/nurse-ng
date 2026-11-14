@@ -65,6 +65,7 @@ from app.services import reel_worker
 from app.services.auth import register_user
 from app.services.jobs import create_job
 from app.services.profiles import save_profile
+from tests.helpers import approve_test_employer
 
 command.upgrade(Config(str(ROOT / "alembic.ini")), "head")
 with SessionLocal() as db:
@@ -383,6 +384,7 @@ with SessionLocal() as db:
         )
     )
     db.commit()
+    approve_test_employer(db, staff, "Test Hospital")
     listing = create_job(
         db,
         staff,

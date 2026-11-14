@@ -24,6 +24,7 @@ class CaseStatus(StrEnum):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
+    EXPIRED = "expired"
 
 
 class EvidenceKind(StrEnum):
@@ -81,6 +82,11 @@ class EvidenceDocument(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     content_type: Mapped[str] = mapped_column(String(100))
     size_bytes: Mapped[int] = mapped_column(Integer)
     sha256: Mapped[str] = mapped_column(String(64))
+    scan_status: Mapped[str] = mapped_column(
+        String(20), default="pending", server_default="pending"
+    )
+    scanned_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    purged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     case: Mapped["VerificationCase"] = relationship(back_populates="evidence")
 

@@ -1,0 +1,52 @@
+{
+  "measured_at_utc": "2026-11-14T12:45:41.314458+00:00",
+  "eligibility_method": "Full application open_job_condition(), including employer approval",
+  "sources_by_approval": {
+    "approved": 130,
+    "pending": 14
+  },
+  "approved_sources_by_health": {
+    "healthy": 70,
+    "http_error": 4,
+    "dns_error": 8,
+    "redirect_limit": 12,
+    "timeout": 9,
+    "tls_error": 3,
+    "scope_blocked": 6,
+    "connection_error": 11,
+    "policy_blocked": 5,
+    "access_blocked": 1,
+    "rate_limited": 1
+  },
+  "collector_authorized_sources": 130,
+  "vacancies_by_state": {
+    "duplicate": 16,
+    "pending": 16,
+    "published": 5,
+    "rejected": 100
+  },
+  "publicly_eligible_jobs": 3,
+  "public_jobs": [
+    {
+      "title": "Medical Laboratory Scientist - Lagos",
+      "organization": "eHealth Africa",
+      "country": "NG"
+    },
+    {
+      "title": "People and Culture Intern",
+      "organization": "eHealth Africa",
+      "country": "NG"
+    },
+    {
+      "title": "Office Assistant / IT Trainee",
+      "organization": "Desol Medical Solutions Limited",
+      "country": "NG"
+    }
+  ],
+  "pending_issue_counts": {
+    "closing_date": 16,
+    "employer": 11,
+    "country": 5
+  },
+  "pending_without_stored_issues": 0
+}

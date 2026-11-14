@@ -1,0 +1,22 @@
+{
+  "isolated_replay_succeeded": true,
+  "previous_error_preceded_employer_migration": true,
+  "historical_exception_details_unavailable": true,
+  "live_refreshes": [
+    {
+      "source": "https://www.myjobmag.com/jobs-at/federal-ministry-of-health",
+      "health": "healthy",
+      "outcome": "vacancies_collected",
+      "message": "Collected 3 vacancies; 1 publishable, 2 need review.",
+      "finished_at": "2026-11-14 12:29:31.848747"
+    },
+    {
+      "source": "https://www.myjobmag.com/jobs-at/lagos-state-ministry-of-health",
+      "health": "healthy",
+      "outcome": "vacancies_collected",
+      "message": "Collected 3 vacancies; 0 publishable, 3 need review.",
+      "finished_at": "2026-11-14 12:31:08.165350"
+    }
+  ],
+  "unrelated_pending_excluded": 78
+}

@@ -69,6 +69,8 @@ def render(
     section = path.strip("/").split("/")[0] or "home"
     if path == "/auth/dashboard":
         section = "dashboard"
+    elif path.startswith("/staff/employers"):
+        section = "employer-approvals"
     elif path.startswith("/profile/verification"):
         section = "verification"
     elif section in {"posts", "feed"}:

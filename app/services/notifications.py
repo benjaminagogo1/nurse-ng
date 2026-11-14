@@ -278,6 +278,8 @@ def visible_condition():
         .exists()
         & connected
     )
+    from app.services.employers import authorization_condition
+
     application_access = (
         select(JobApplication.id)
         .join(Job)
@@ -285,7 +287,8 @@ def visible_condition():
             JobApplication.id == Notification.application_id,
             or_(
                 JobApplication.applicant_user_id == Notification.recipient_id,
-                Job.employer_user_id == Notification.recipient_id,
+                and_(Job.employer_user_id == Notification.recipient_id,
+                     authorization_condition(Job.employer_user_id, Job.employer_organization_id)),
             ),
         )
         .exists()

@@ -1,0 +1,20 @@
+{% from '_icons.html' import icon %}
+{% macro like_button(post, summary, user, csrf_token, channel='posts') %}
+{% if user %}
+<form action="/{{ channel }}/{{ post.id }}/like" method="post" class="post-like"
+      data-post-like="{{ post.id }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <input type="hidden" name="liked" value="{{ 'no' if summary.liked else 'yes' }}">
+  <button type="submit" aria-pressed="{{ 'true' if summary.liked else 'false' }}">
+    {{ icon('heart', 22) }}
+    <span><span data-like-label>{{ 'Liked' if summary.liked else 'Like' }}</span>
+      <span data-like-count>{{ summary.likes }}</span></span>
+  </button>
+  <span class="post-like-status sr-only" role="status" data-like-status></span>
+</form>
+{% else %}
+<a class="post-like-guest" href="/auth/login" aria-label="Sign in to like; {{ summary.likes }} likes">
+  {{ icon('heart', 22) }}<span>Like <span>{{ summary.likes }}</span></span>
+</a>
+{% endif %}
+{% endmacro %}

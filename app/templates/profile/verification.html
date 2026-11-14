@@ -88,6 +88,7 @@ slot(name, title, hint, icon_name, required) %}
     <p class="field-hint">
       Please upload clear and valid copies of your credentials. Accepted
       formats: PDF, JPG, PNG (Max {{ max_megabytes }} MB each).
+      PDFs may contain up to 25 pages and must have no password or embedded files.
     </p>
 
     <form
@@ -125,6 +126,8 @@ slot(name, title, hint, icon_name, required) %}
         I consent to Nurse.ng storing these documents privately and to a
         reviewer inspecting them for this review.
       </label>
+      <p class="field-hint">Files are removed {{ evidence_retention_days }} days after a
+        decision, or after {{ evidence_pending_retention_days }} days if the review is unfinished.</p>
 
       <p class="vf-secure">
         {{ icon('lock', 16) }}<span

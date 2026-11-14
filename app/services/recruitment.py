@@ -154,7 +154,7 @@ def register_candidate(
     """Write pending candidates only, in the caller's transaction."""
     source_url = checked_url(source_url)
     key = url_key(source_url)
-    if discovered_via == "search":
+    if discovered_via in {"search", "institution_link"}:
         known = db.scalar(select(RecruitmentSource).where(RecruitmentSource.url_key == key))
         if known is not None:
             # Search must not duplicate stronger identity evidence or bypass a prior rejection.
@@ -758,6 +758,37 @@ def ensure_search_schedule(db: Session) -> int:
         interval_hours=6,
     )
     return 1
+
+
+def expand_opportunity_discovery(db: Session, *, dry_run=False):
+    """Persistent searches across source types; never reset an operator's pause/cursor."""
+    from app.services.recruitment_search import search_available
+
+    if not search_available():
+        raise RecruitmentError("Configure a search provider before expanding discovery.")
+    themes = {
+        "Government health opportunities": (
+            '{region} {country} government health recruitment site:gov.ng'),
+        "Hospital and clinic opportunities": '{region} {country} hospital clinic careers vacancies',
+        "NGO opportunities": '{region} {country} NGO health careers vacancies',
+        "Internships and programmes": (
+            '{region} {country} internships fellowships graduate programmes'),
+        "Allied healthcare opportunities": (
+            '{region} {country} pharmacist dental physiotherapy careers'),
+    }
+    created, existing = [], []
+    for theme, query in themes.items():
+        name = 'Broad discovery: ' + theme
+        if db.scalar(select(DiscoverySchedule.id).where(DiscoverySchedule.name == name)):
+            existing.append(name)
+            continue
+        if not dry_run:
+            _add_schedule(db, name=name, provider='search', country_code='NG',
+                          query=query + ' -site:myjobmag.com -site:jobberman.com', interval_hours=6)
+        created.append(name)
+    if not dry_run:
+        db.commit()
+    return {'created': created, 'existing': existing, 'interval_hours': 6, 'dry_run': dry_run}
 
 
 def request_inspection(db: Session, actor: User, source: RecruitmentSource) -> None:

@@ -14,6 +14,7 @@ from app.core.storage import CONTENT_TYPE_SUFFIX, EvidenceStorageError, evidence
 from app.db.session import get_db
 from app.models.user import User
 from app.models.verification import EvidenceDocument
+from app.services.evidence import evidence_available
 from app.services.verification import (
     VerificationError,
     decide_case,
@@ -43,6 +44,7 @@ def _case_context(case, reviewer: User, *, error: str | None = None) -> dict[str
         "case": case,
         "kinds": KIND_LABELS,
         "error": error,
+        "evidence_available": evidence_available,
     }
 
 
@@ -84,6 +86,8 @@ def review_evidence(
 ) -> FileResponse:
     case = _load_case(db, case_id)
     document = _load_evidence(case, evidence_id)
+    if not evidence_available(document):
+        raise HTTPException(status_code=404, detail="This evidence is not available for review.")
 
     try:
         path = evidence_path(document.storage_name)
@@ -101,6 +105,7 @@ def review_evidence(
         headers={
             "Cache-Control": "no-store",
             "X-Robots-Tag": "noindex, nofollow",
+            "X-Content-Type-Options": "nosniff",
         },
     )
 

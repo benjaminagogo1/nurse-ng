@@ -12,6 +12,8 @@ import tempfile
 import time
 import urllib.request
 from datetime import UTC, datetime, timedelta
+from email import policy
+from email.parser import BytesParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -377,7 +379,12 @@ try:
         values = preferences(db, first)
         values["messages"]["email"] = True
         save_preferences(db, first, values)
-        send_message(db, second, first, "File delivery only")
+        delivery_message = send_message(db, second, first, "File delivery only")
+        delivery_notice_id = db.scalar(select(Notification.id).where(
+            Notification.message_id == delivery_message.id,
+            Notification.recipient_id == first_id,
+        ))
+        assert delivery_notice_id is not None
     result = subprocess.run(
         [sys.executable, "-m", "app.cli", "notification-worker", "--once"],
         cwd=ROOT,
@@ -387,8 +394,18 @@ try:
         timeout=30,
     )
     (artifacts / "worker.log").write_text(result.stdout + result.stderr)
-    assert result.returncode == 0 and "state=sent" in result.stdout
-    assert list((artifacts / "mail").glob("*.eml"))
+    assert result.returncode == 0, result.stdout + result.stderr
+    with SessionLocal() as db:
+        delivery_notice = db.get(Notification, delivery_notice_id)
+        assert delivery_notice.email_state == "sent"
+        assert delivery_notice.email_attempts == 1
+        assert delivery_notice.email_lease_token is None
+    messages = [BytesParser(policy=policy.default).parsebytes(path.read_bytes())
+                for path in (artifacts / "mail").glob("*.eml")]
+    assert any("first@example.org" in str(mail["To"])
+               and f"{base}/notifications" in mail.get_body(preferencelist=("plain",)).get_content()
+               and "File delivery only" not in mail.get_body(preferencelist=("plain",)).get_content()
+               for mail in messages)
     assert not errors, errors
     assert not (artifacts / "server.log").read_text().strip()
     print(

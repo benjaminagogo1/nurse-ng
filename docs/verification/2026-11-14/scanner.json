@@ -1,0 +1,6 @@
+{
+  "clean_pdf_accepted": true,
+  "eicar_test_rejected": true,
+  "scanner": "project-local ClamAV 1.5.4",
+  "sudo_required": false
+}

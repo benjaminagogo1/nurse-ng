@@ -6,8 +6,12 @@ from fastapi import Request
 from fastapi.responses import JSONResponse, RedirectResponse
 
 
-def message(title: str, body: str, *, tone: str = "success", fields: dict | None = None):
-    return {"title": title, "body": body, "tone": tone, "fields": fields or {}}
+def message(title: str, body: str, *, tone: str = "success", fields: dict | None = None,
+            compact: bool = False):
+    notice = {"title": title, "body": body, "tone": tone, "fields": fields or {}}
+    if compact:
+        notice["compact"] = True
+    return notice
 
 
 def enhanced(request: Request) -> bool:

@@ -16,6 +16,7 @@ from app.services import offline
 from app.services.auth import register_user
 from app.services.jobs import create_job
 from app.services.profiles import save_profile
+from tests.helpers import approve_test_employer
 from tests.test_community import sign_in
 
 
@@ -71,6 +72,7 @@ def profile(db, user):
 
 def job(db):
     employer = member(db, "2", account_type="employer")
+    approve_test_employer(db, employer, "Example Hospital")
     return create_job(
         db,
         employer,

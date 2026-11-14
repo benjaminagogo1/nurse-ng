@@ -120,12 +120,17 @@ def screenshot(name):
 
 
 def worker():
+    with SessionLocal() as db:
+        pending = db.scalar(select(Reel.post_id).where(Reel.state == "queued"))
+        assert pending is not None
     result = subprocess.run([
         sys.executable, "-m", "app.cli", "reels-worker", "--once",
     ], cwd=ROOT, env=os.environ.copy(), capture_output=True, text=True, timeout=90)
     with (artifacts / "worker.log").open("a") as log:
         log.write(result.stdout + result.stderr)
-    assert result.returncode == 0 and "state=ready" in result.stdout, result.stdout + result.stderr
+    assert result.returncode == 0, result.stdout + result.stderr
+    with SessionLocal() as db:
+        assert db.get(Reel, pending).state == "ready"
 
 
 try:
@@ -179,12 +184,15 @@ try:
     screenshot("04-visible-upload-error.png")
     cdp("Network.emulateNetworkConditions", {"offline": False, "latency": 0,
                                             "downloadThroughput": -1, "uploadThroughput": -1})
+    cdp("Network.overrideNetworkState", {"offline": False, "latency": 0,
+                                        "downloadThroughput": -1, "uploadThroughput": -1})
     js("document.querySelector('[data-reel-upload]').requestSubmit()")
     wait_for(lambda: js("location.pathname.endsWith('/status')"), "uploaded")
     screenshot("05-processing-mobile.png")
     worker()
     wait_for(lambda: js("document.querySelector('[data-status-title]').textContent === "
                         "'Your reel is live'"), "ready")
+    assert js("document.querySelector('[data-status-body]').textContent.includes('Community')")
     screenshot("06-ready-mobile.png")
     with SessionLocal() as db:
         reel = db.scalar(select(Reel))
@@ -212,6 +220,23 @@ try:
     assert js("[...document.querySelectorAll('[data-reel] video')]"
               ".filter(v => v.hasAttribute('src')).length === 1")
     screenshot("07-viewer-mobile.png")
+    liked_post = js("document.querySelector('[data-active] [data-post-like]').dataset.postLike")
+    js("document.querySelector('[data-active] [data-post-like]').requestSubmit()")
+    wait_for(lambda: js("document.querySelector('[data-active] [data-like-label]')"
+                        ".textContent === 'Liked'"), "like reel")
+    assert js("document.querySelector('[data-active] [data-like-count]').textContent") == "1"
+    screenshot("07-liked-mobile.png")
+    navigate("/posts/" + liked_post)
+    assert js("document.querySelector('[data-like-count]').textContent") == "1"
+    assert js("document.querySelector('[data-post-like] button')"
+              ".getAttribute('aria-pressed')") == "true"
+    js("document.querySelector('[data-post-like]').requestSubmit()")
+    wait_for(lambda: js("document.querySelector('[data-like-label]').textContent === 'Like'"),
+             "unlike community video")
+    assert js("document.querySelector('[data-like-count]').textContent") == "0"
+    navigate("/reels")
+    wait_for(lambda: js("!!document.querySelector('[data-active] video')?.currentSrc"),
+             "return to reels")
     js("document.querySelector('[data-data-saver]').click()")
     assert js("document.querySelector('[data-active] video').paused")
     assert js("document.querySelector('[data-active] video').src.endsWith("
@@ -257,7 +282,8 @@ try:
     print(json.dumps({
         "ok": True, "artifacts": str(artifacts), "post_id": post_id,
         "checks": "upload, offline feedback, actual worker, status polling, playback, "
-        "single active source, data saver, saves, comments, navigation, 320/390/1280px",
+        "single active source, shared reel/community likes, unlike, data saver, saves, "
+        "comments, navigation, 320/390/1280px",
     }))
 finally:
     if ws:

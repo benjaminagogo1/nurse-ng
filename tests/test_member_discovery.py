@@ -21,7 +21,7 @@ from app.services.profiles import (
     list_discoverable_profiles,
     save_sharing_settings,
 )
-from tests.helpers import csrf_from, register_and_sign_in
+from tests.helpers import approve_test_employer, csrf_from, register_and_sign_in
 
 
 def person(db, number, *, public=True, name=None, fields=(), **values):
@@ -299,6 +299,8 @@ def test_opportunity_suggestions_use_interests_ng_priority_and_current_jobs(db_s
     employer = person(db_session, 2).user
     employer.account_type = "employer"
     db_session.commit()
+
+    approve_test_employer(db_session, employer, "Test Health")
 
     def job(title, code="NG"):
         return create_job(

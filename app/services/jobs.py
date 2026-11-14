@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.models.jobs import Job, JobApplication, JobStatus, JobType, WorkMode
 from app.models.recruitment import RecruitmentSource
 from app.models.user import AccountType, User
+from app.services.employers import approved_organizations, authorization_condition, authorized
 from app.services.notifications import emit
 from app.services.recruitment import REUSE_BASES, utc
 from app.services.vacancies import FRESHNESS, collector_authorized
@@ -85,6 +86,10 @@ def create_job(
 ) -> Job:
     if user.account_type != AccountType.EMPLOYER.value:
         raise JobError("Only employer accounts can post jobs.")
+    approved = next((org for org in approved_organizations(db, user)
+                     if org.name == organization.strip()), None)
+    if approved is None:
+        raise JobError("Choose an approved organization you are authorized to recruit for.")
     if job_type not in JOB_TYPE_LABELS:
         raise JobError("Choose a valid job type.")
     if work_mode not in WORK_MODE_LABELS:
@@ -116,6 +121,7 @@ def create_job(
     job = Job(
         created_at=datetime.now(UTC),
         employer_user_id=user.id,
+        employer_organization_id=approved.id,
         title=_clean(title, field="Job title", maximum=TITLE_MAX, required=True),
         organization=_clean(
             organization, field="Organization", maximum=ORGANIZATION_MAX, required=True
@@ -182,18 +188,11 @@ def open_job_condition():
         Job.status == JobStatus.OPEN,
         or_(Job.closes_at.is_(None), Job.closes_at > timestamp),
         or_(
-            Job.source_id.is_(None),
+            and_(Job.source_id.is_(None), authorization_condition(
+                Job.employer_user_id, Job.employer_organization_id
+            )),
             and_(
                 Job.confirmed_at >= timestamp - FRESHNESS,
-                or_(
-                    Job.closes_at > timestamp,
-                    and_(
-                        Job.closes_at.is_(None),
-                        Job.normalized_data["_index"]["accepting_applications"]
-                        .as_boolean()
-                        .is_(True),
-                    ),
-                ),
                 Job.source.has(
                     and_(
                         RecruitmentSource.verification_status == "approved",
@@ -325,29 +324,33 @@ def job_card(job: Job) -> dict[str, object]:
     return {
         "id": job.id,
         "title": job.title,
-        "organization": job.organization,
+        "organization": job.organization or "Organisation not stated",
         "location": job.location,
         "salary": salary_label(job),
         "type": JOB_TYPE_LABELS.get(job.job_type, job.job_type or "Employment type not stated"),
         "mode": WORK_MODE_LABELS.get(job.work_mode, job.work_mode or "Work mode not stated"),
         "posted": posted_label(job),
         "date_label": "First listed"
-        if job.normalized_data.get("_index") and not job.normalized_data.get("publication_date")
+        if job.source_id and not job.normalized_data.get("publication_date")
         else "Posted",
         "factual_index": bool(job.normalized_data.get("_index")),
         "description": job.description,
         "external": bool(job.source_id),
         "country": job.country_code,
         "status": effective_job_status(job),
+        "status_label": "Check availability"
+        if job.source_id and not job.closes_at
+        and not job.normalized_data.get("_index", {}).get("accepting_applications")
+        and effective_job_status(job) in {"open", "upcoming"}
+        else effective_job_status(job).replace("_", " ").capitalize(),
         "source_name": job.source.organization.name if job.source_id else "",
         "source_url": job.source.original_url if job.source_id else "",
         "announcement_url": job.normalized_data.get("announcement_url", "")
         if job.source_id
         else "",
         "closing_date": job.normalized_data.get("closing_date", ""),
-        "deadline_timezone": job.normalized_data.get("_index", {}).get(
-            "deadline_timezone", job.source.deadline_timezone
-        )
+        "deadline_timezone": (job.normalized_data.get("_index", {}).get("deadline_timezone")
+                              or job.source.deadline_timezone)
         if job.source_id
         else job.normalized_data.get("deadline_timezone", ""),
         "confirmed_at": job.confirmed_at,
@@ -382,6 +385,8 @@ def apply_for_job(db: Session, user: User, job: Job, *, cover_note: str) -> JobA
         raise JobError("Follow the original announcement for this vacancy's application process.")
     if user.account_type != AccountType.NURSE.value:
         raise JobError("Applications are available to nurse accounts.")
+    if not authorized(db, job.employer_user_id, job.employer_organization_id):
+        raise JobError("This employer is not currently authorized to receive applications.")
     if job.status != JobStatus.OPEN or (job.closes_at and utc(job.closes_at) <= datetime.now(UTC)):
         raise JobError("This job is no longer accepting applications.")
     if not user.full_name:
@@ -418,10 +423,19 @@ def apply_for_job(db: Session, user: User, job: Job, *, cover_note: str) -> JobA
     return application
 
 
+def can_access_applicants(db: Session, user: User, job: Job) -> bool:
+    return user.id == job.employer_user_id and authorized(
+        db, user.id, job.employer_organization_id
+    )
+
+
 def list_applications(db: Session, user: User) -> list[JobApplication]:
     statement = select(JobApplication).options(joinedload(JobApplication.job))
     if user.account_type == AccountType.EMPLOYER.value:
-        statement = statement.join(Job).where(Job.employer_user_id == user.id)
+        statement = statement.join(Job).where(
+            Job.employer_user_id == user.id,
+            authorization_condition(user.id, Job.employer_organization_id),
+        )
     else:
         statement = statement.where(JobApplication.applicant_user_id == user.id)
     return list(db.scalars(statement.order_by(JobApplication.created_at.desc()).limit(100)))
@@ -430,7 +444,7 @@ def list_applications(db: Session, user: User) -> list[JobApplication]:
 def change_application_status(
     db: Session, user: User, application: JobApplication, new_status: str
 ) -> None:
-    owner = application.job.employer_user_id == user.id
+    owner = can_access_applicants(db, user, application.job)
     applicant = application.applicant_user_id == user.id
     if not (owner or applicant):
         raise JobError("This application is not available.")

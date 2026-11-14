@@ -238,8 +238,9 @@ def validation_issues(
     if excluded:
         issues.append(excluded)
     for field, limit in [("title", 250), ("employer", 250), ("description", 30000)]:
-        if not data.get(field) or len(data[field]) > limit:
-            issues.append(f"{field}: required, at most {limit} characters")
+        if (field == "title" and not data.get(field)) or len(data.get(field, "")) > limit:
+            issues.append(f"{field}: {'required, ' if field == 'title' else ''}"
+                          f"at most {limit} characters")
     if not nursing_confirmed and not relevant_opportunity(data):
         issues.append(
             "nursing: health or Nigerian early-career opportunity relevance requires review"
@@ -252,11 +253,12 @@ def validation_issues(
     if (
         not indexing
         and not employer_confirmed
+        and data.get("employer")
         and words(data.get("employer", "")) != words(source.organization.name)
     ):
         issues.append("employer: name differs from the approved organisation")
-    if not re.fullmatch(r"[A-Z]{2}", data.get("country", "")):
-        issues.append("country: an explicit two-letter vacancy country is required")
+    if data.get("country") and not re.fullmatch(r"[A-Z]{2}", data["country"]):
+        issues.append("country: the stated country code is invalid")
     if not in_scope(data.get("announcement_url", ""), source.vacancy_url_prefix):
         issues.append("announcement_url: outside the approved vacancy URL scope")
     salary = data.get("salary", {})
@@ -266,23 +268,19 @@ def validation_issues(
         and Decimal(salary["minValue"]) > Decimal(salary["maxValue"])
     ):
         issues.append("salary: minimum salary cannot exceed maximum salary")
-    timezone = data.get("_index", {}).get("deadline_timezone", source.deadline_timezone)
+    timezone = data.get("_index", {}).get("deadline_timezone") or source.deadline_timezone
     closing = parse_date(data.get("closing_date", ""), timezone, closing=True)
     posted = parse_date(data.get("publication_date", ""), timezone)
     opening = parse_date(data.get("opening_date", ""), timezone)
     index = data.get("_index", {}) if indexing else {}
-    if closing is None and not (
-        index.get("accepting_applications")
-        and not data.get("closing_date")
-        and not index.get("deadline_unresolved")
-    ):
-        issues.append("closing_date: missing or ambiguous deadline")
+    if closing is None and (data.get("closing_date") or index.get("deadline_unresolved")):
+        issues.append("closing_date: the stated deadline is ambiguous")
     if index.get("closed"):
         issues.append("closed: the original announcement no longer accepts applications")
-    if (posted is None and (not indexing or data.get("publication_date"))) or (
+    if (posted is None and data.get("publication_date")) or (
         posted and posted > datetime.now(UTC) + timedelta(minutes=5)
     ):
-        issues.append("publication_date: missing, ambiguous or in the future")
+        issues.append("publication_date: ambiguous or in the future")
     if closing and posted and closing <= posted:
         issues.append("closing_date: deadline is not after publication")
     if data.get("opening_date") and (not opening or (closing and opening >= closing)):

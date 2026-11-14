@@ -11,7 +11,7 @@ from app.services.community import (
     add_reply,
     follow_discussion,
 )
-from tests.helpers import csrf_from
+from tests.helpers import csrf_from, has_element
 from tests.test_discussions import as_member, new_reply_count, paged_replies
 from tests.test_discussions import community as community
 
@@ -53,7 +53,7 @@ def test_replying_across_pages_keeps_the_target_and_does_not_mark_it_read(
     target = replies[0]
     as_member(client, member)
     form = client.get(f"/posts/{post.id}?page=2&reply_to={target.id}")
-    assert f'name="in_reply_to_id" value="{target.id}"' in form.text
+    assert has_element(form, "input", name="in_reply_to_id", value=str(target.id))
     assert 'data-reply-target-explicit="true"' in form.text
     assert f"?page=1&amp;reply_to={target.id}#replies" in form.text
     assert "Replying to Member 1" in form.text and target.body in form.text
@@ -68,7 +68,7 @@ def test_replying_across_pages_keeps_the_target_and_does_not_mark_it_read(
         },
     )
     assert failed.status_code == 400
-    assert f'name="in_reply_to_id" value="{target.id}"' in failed.text
+    assert has_element(failed, "input", name="in_reply_to_id", value=str(target.id))
     assert "x" * 2001 in failed.text and "Page 2 of 2" in failed.text
     result = client.post(
         f"/posts/{post.id}/replies",
@@ -126,7 +126,7 @@ def test_unavailable_targets_reject_publication_without_losing_text(
         },
     )
     assert response.status_code == 400 and "Keep my question" in response.text
-    assert f'name="in_reply_to_id" value="{target_id}"' in response.text
+    assert has_element(response, "input", name="in_reply_to_id", value=str(target_id))
     assert db_session.scalar(select(func.count()).select_from(CommunityReply)) == before
     assert client.get(f"/posts/{post.id}/reply-context/{target_id}").status_code == 404
     if kind != "malformed":
@@ -178,7 +178,7 @@ def test_reply_selection_has_a_native_link_and_can_be_cleared_without_javascript
     assert "Replying to Member 1" in selected.text
     assert "?page=1&amp;reply_to=#reply-form" in selected.text
     cleared = client.get(f"/posts/{post.id}?page=1&reply_to=")
-    assert 'name="in_reply_to_id" value=""' in cleared.text
+    assert has_element(cleared, "input", name="in_reply_to_id", value="")
     response = client.post(
         f"/posts/{post.id}/replies",
         data={

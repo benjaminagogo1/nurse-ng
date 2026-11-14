@@ -22,6 +22,7 @@ from app.services.recruitment_discovery import (
     search_query,
 )
 from app.services.vacancy_extraction import normalize
+from tests.helpers import approve_test_employer
 from tests.test_recruitment import manual, observation
 from tests.test_recruitment import staff as staff
 
@@ -37,6 +38,14 @@ from tests.test_recruitment import staff as staff
     ("Chief Financial Officer", "Manage a hospital's finances", "NG", False),
     ("Office Manager", "Manage public health office supplies", "NG", False),
     ("Registered Nurse", "Nursing care", "GB", True),
+    ("Pharmacist", "Dispense medicines", "NG", True),
+    ("Dental Assistant - Lagos", "Patient care", "NG", True),
+    ("Physiotherapist", "Rehabilitation", "KE", True),
+    ("Radiographer", "Diagnostic imaging", "GB", True),
+    ("Occupational Therapist", "Rehabilitation", "NG", True),
+    ("Pharmacy Technician", "Dispensing", "NG", True),
+    ("Accountant", "Work at a dental practice", "NG", False),
+    ("Sales Manager", "Sell to pharmacists and doctors", "NG", False),
 ])
 def test_relevance_includes_local_programmes_without_admitting_every_job(
     title, description, country, expected,
@@ -62,6 +71,7 @@ def test_feed_ranks_nigeria_before_newer_foreign_jobs_and_preserves_filters(
 ):
     staff.account_type = "employer"
     db_session.commit()
+    approve_test_employer(db_session, staff, "Example")
     def post(title, country):
         return create_job(
             db_session, staff, title=title, country_code=country, organization="Example",

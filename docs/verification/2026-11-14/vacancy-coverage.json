@@ -1,0 +1,534 @@
+{
+  "measured_at_utc": "2026-11-14T05:35:44.172470+00:00",
+  "database_file": "/home/recoding/nurse-ng/nurse_ng.db",
+  "read_only": true,
+  "database_revision": "e6480d3fb942",
+  "sources_by_approval": {
+    "approved": 130,
+    "pending": 14
+  },
+  "vacancies_by_state": {
+    "duplicate": 15,
+    "pending": 90,
+    "published": 4,
+    "rejected": 22
+  },
+  "jobs_by_stored_status": {
+    "open": 2,
+    "unconfirmed": 2
+  },
+  "jobs": [
+    {
+      "title": "Medical Laboratory Scientist - Lagos",
+      "organization": "eHealth Africa",
+      "status": "open",
+      "country_code": "NG",
+      "confirmed_at": "2026-11-13 23:22:54.235546",
+      "closes_at": null,
+      "status_open": true,
+      "deadline_valid": true,
+      "fresh_confirmation": true,
+      "accepting_applications": true,
+      "source_eligible": true,
+      "publicly_eligible": true
+    },
+    {
+      "title": "Senior Nursing Officer",
+      "organization": "Harley and Wall Healthcare and Business Consulting",
+      "status": "unconfirmed",
+      "country_code": "NG",
+      "confirmed_at": "2026-11-10 20:44:58.214456",
+      "closes_at": "2026-12-10 23:59:59",
+      "status_open": false,
+      "deadline_valid": true,
+      "fresh_confirmation": false,
+      "accepting_applications": true,
+      "source_eligible": false,
+      "publicly_eligible": false
+    },
+    {
+      "title": "People and Culture Intern",
+      "organization": "eHealth Africa",
+      "status": "open",
+      "country_code": "NG",
+      "confirmed_at": "2026-11-13 23:22:54.235546",
+      "closes_at": null,
+      "status_open": true,
+      "deadline_valid": true,
+      "fresh_confirmation": true,
+      "accepting_applications": true,
+      "source_eligible": true,
+      "publicly_eligible": true
+    },
+    {
+      "title": "Procurement Intern (NYSC)",
+      "organization": "Black Pelican Group",
+      "status": "unconfirmed",
+      "country_code": "NG",
+      "confirmed_at": "2026-11-13 23:18:23.573862",
+      "closes_at": "2026-12-05 23:59:59",
+      "status_open": false,
+      "deadline_valid": true,
+      "fresh_confirmation": true,
+      "accepting_applications": true,
+      "source_eligible": false,
+      "publicly_eligible": false
+    }
+  ],
+  "publicly_eligible_jobs": 2,
+  "eligibility_method": "Actual open_job_condition external-source branch; every stored job is external. No database migration or application HTTP request was performed.",
+  "approved_sources_by_health": {
+    "healthy": 73,
+    "http_error": 4,
+    "dns_error": 8,
+    "redirect_limit": 11,
+    "timeout": 6,
+    "tls_error": 3,
+    "scope_blocked": 6,
+    "connection_error": 11,
+    "policy_blocked": 5,
+    "access_blocked": 1,
+    "rate_limited": 1,
+    "processing_error": 1
+  },
+  "approved_sources_by_automation": {
+    "monitoring": 130
+  },
+  "collector_authorized_sources": 130,
+  "healthy_authorized_collectors": 73,
+  "approved_source_activation_blockers": {},
+  "approved_sources_successful_within_48_hours": 75,
+  "workers": [
+    {
+      "name": "recruitment",
+      "healthy": true,
+      "state": "idle",
+      "last_seen_at": "2026-11-14 05:35:44.051391"
+    },
+    {
+      "name": "reels",
+      "healthy": true,
+      "state": "idle",
+      "last_seen_at": "2026-11-14 05:35:42.233703"
+    },
+    {
+      "name": "notifications",
+      "healthy": false,
+      "state": "missing",
+      "last_seen_at": null
+    }
+  ],
+  "pending_issue_counts": {
+    "nursing": 77,
+    "closing_date": 13,
+    "country": 11,
+    "employer": 8
+  },
+  "pending_exact_issues": {
+    "nursing: health or Nigerian early-career opportunity relevance requires review": 77,
+    "closing_date: missing or ambiguous deadline": 13,
+    "country: an explicit two-letter vacancy country is required": 11,
+    "employer: required, at most 250 characters": 8
+  },
+  "pending_by_source_organization": {
+    "Federal Ministry of Health Jobs in Nigeria | MyJobMag": 45,
+    "Lagos State Ministry of Health Jobs in Nigeria | MyJobMag": 37,
+    "Nightingales Medical Trust": 2,
+    "Federal Ministry of Health Recruitment 2026/2027: Portal & Requirements": 2,
+    "Federal Agencies Recruitment in Nigeria 2026": 1,
+    "Premier Health Care": 1,
+    "Patients First": 1,
+    "Federal Medical Center, Birnin Kudu": 1
+  },
+  "pending_without_stored_issues": 0,
+  "pending_without_relevance_issue": [
+    {
+      "title": "Central Bank of Nigeria (CBN) Recruitment \u2014 Graduate Trainees & Specialists",
+      "employer": "",
+      "source_organization": "Federal Agencies Recruitment in Nigeria 2026",
+      "country": "NG",
+      "issues": [
+        "employer: required, at most 250 characters",
+        "closing_date: missing or ambiguous deadline"
+      ],
+      "closing_date": "",
+      "first_seen_at": "2026-11-10 01:34:41.193083",
+      "last_seen_at": "2026-11-10 01:34:41.193083"
+    },
+    {
+      "title": "Medical Laboratory Science Intern at Lagos State Ministry of Health",
+      "employer": "",
+      "source_organization": "Lagos State Ministry of Health Jobs in Nigeria | MyJobMag",
+      "country": "NG",
+      "issues": [
+        "employer: required, at most 250 characters",
+        "closing_date: missing or ambiguous deadline"
+      ],
+      "closing_date": "",
+      "first_seen_at": "2026-11-10 02:35:38.524645",
+      "last_seen_at": "2026-11-10 02:35:38.524645"
+    },
+    {
+      "title": "Nursing Officer (Cardiothoracic) at Lagos State Ministry of Health",
+      "employer": "",
+      "source_organization": "Lagos State Ministry of Health Jobs in Nigeria | MyJobMag",
+      "country": "NG",
+      "issues": [
+        "employer: required, at most 250 characters",
+        "closing_date: missing or ambiguous deadline"
+      ],
+      "closing_date": "",
+      "first_seen_at": "2026-11-10 08:36:08.073853",
+      "last_seen_at": "2026-11-10 08:36:08.073853"
+    },
+    {
+      "title": "Nursing Officer (Psychiatry) at Lagos State Ministry of Health",
+      "employer": "",
+      "source_organization": "Lagos State Ministry of Health Jobs in Nigeria | MyJobMag",
+      "country": "NG",
+      "issues": [
+        "employer: required, at most 250 characters",
+        "closing_date: missing or ambiguous deadline"
+      ],
+      "closing_date": "",
+      "first_seen_at": "2026-11-10 14:44:34.104282",
+      "last_seen_at": "2026-11-10 14:44:34.104282"
+    },
+    {
+      "title": "Internship Based on Projects",
+      "employer": "Nightingales Medical Trust",
+      "source_organization": "Nightingales Medical Trust",
+      "country": "",
+      "issues": [
+        "country: an explicit two-letter vacancy country is required",
+        "closing_date: missing or ambiguous deadline"
+      ],
+      "closing_date": "",
+      "first_seen_at": "2026-11-10 14:51:19.637260",
+      "last_seen_at": "2026-11-14 01:25:34.362881"
+    },
+    {
+      "title": "Internship Based on Profession",
+      "employer": "Nightingales Medical Trust",
+      "source_organization": "Nightingales Medical Trust",
+      "country": "",
+      "issues": [
+        "country: an explicit two-letter vacancy country is required",
+        "closing_date: missing or ambiguous deadline"
+      ],
+      "closing_date": "",
+      "first_seen_at": "2026-11-10 14:51:19.637260",
+      "last_seen_at": "2026-11-14 01:25:34.362881"
+    },
+    {
+      "title": "Internships",
+      "employer": "Premier Health Care",
+      "source_organization": "Premier Health Care",
+      "country": "",
+      "issues": [
+        "country: an explicit two-letter vacancy country is required",
+        "closing_date: missing or ambiguous deadline"
+      ],
+      "closing_date": "",
+      "first_seen_at": "2026-11-10 15:11:14.583961",
+      "last_seen_at": "2026-11-14 01:26:53.139789"
+    },
+    {
+      "title": "Medical Assistant Openings \u2022 Patients First",
+      "employer": "Patients First",
+      "source_organization": "Patients First",
+      "country": "",
+      "issues": [
+        "country: an explicit two-letter vacancy country is required",
+        "closing_date: missing or ambiguous deadline"
+      ],
+      "closing_date": "",
+      "first_seen_at": "2026-11-10 16:53:15.960687",
+      "last_seen_at": "2026-11-14 01:49:29.347328"
+    },
+    {
+      "title": "Graduate Trainee Opportunities",
+      "employer": "",
+      "source_organization": "Federal Ministry of Health Recruitment 2026/2027: Portal & Requirements",
+      "country": "NG",
+      "issues": [
+        "employer: required, at most 250 characters",
+        "closing_date: missing or ambiguous deadline"
+      ],
+      "closing_date": "",
+      "first_seen_at": "2026-11-10 17:08:35.478868",
+      "last_seen_at": "2026-11-14 02:05:31.210233"
+    },
+    {
+      "title": "Sale of Internship Application Form for 2026/2027 Session",
+      "employer": "Federal Medical Center, Birnin Kudu",
+      "source_organization": "Federal Medical Center, Birnin Kudu",
+      "country": "",
+      "issues": [
+        "country: an explicit two-letter vacancy country is required",
+        "closing_date: missing or ambiguous deadline"
+      ],
+      "closing_date": "2026-08-23",
+      "first_seen_at": "2026-11-11 09:20:34.436963",
+      "last_seen_at": "2026-11-14 04:39:57.521615"
+    },
+    {
+      "title": "Healthcare Recruitment",
+      "employer": "",
+      "source_organization": "Federal Ministry of Health Recruitment 2026/2027: Portal & Requirements",
+      "country": "NG",
+      "issues": [
+        "employer: required, at most 250 characters",
+        "closing_date: missing or ambiguous deadline"
+      ],
+      "closing_date": "",
+      "first_seen_at": "2026-11-12 11:09:47.370985",
+      "last_seen_at": "2026-11-14 05:21:49.626112"
+    },
+    {
+      "title": "Laboratory Technologist I (Medical Microbiology / Parasitology) at Federal Ministry of Health",
+      "employer": "",
+      "source_organization": "Federal Ministry of Health Jobs in Nigeria | MyJobMag",
+      "country": "NG",
+      "issues": [
+        "employer: required, at most 250 characters",
+        "closing_date: missing or ambiguous deadline"
+      ],
+      "closing_date": "",
+      "first_seen_at": "2026-11-13 17:01:15.838057",
+      "last_seen_at": "2026-11-13 17:01:15.838057"
+    },
+    {
+      "title": "Radiography Intern at Lagos State Ministry of Health",
+      "employer": "",
+      "source_organization": "Lagos State Ministry of Health Jobs in Nigeria | MyJobMag",
+      "country": "NG",
+      "issues": [
+        "employer: required, at most 250 characters",
+        "closing_date: missing or ambiguous deadline"
+      ],
+      "closing_date": "",
+      "first_seen_at": "2026-11-13 23:18:23.573862",
+      "last_seen_at": "2026-11-13 23:18:23.573862"
+    }
+  ],
+  "pending_relevance_examples": [
+    "Head of Secondary School",
+    "Head of Early Years",
+    "Experienced Recruitment Officer",
+    "Provider Manager (Lagos)",
+    "Sales Partner",
+    "Area Sales Manager",
+    "Independent Delivery Agent - Nigeria",
+    "Human Resource Manager",
+    "Head of Aquaculture",
+    "Agric Officer",
+    "Greenhouse Managers",
+    "Collection Specialist"
+  ],
+  "vacancy_yield_sources": [
+    {
+      "organization": "Lagos State Ministry of Health Jobs in Nigeria | MyJobMag",
+      "source_count": 3,
+      "record_count": 50,
+      "pending": 37,
+      "published": 2
+    },
+    {
+      "organization": "Federal Ministry of Health Jobs in Nigeria | MyJobMag",
+      "source_count": 3,
+      "record_count": 47,
+      "pending": 45,
+      "published": 0
+    },
+    {
+      "organization": "Sama Resource Group for Women and Health",
+      "source_count": 1,
+      "record_count": 5,
+      "pending": 0,
+      "published": 0
+    },
+    {
+      "organization": "OhioHealth",
+      "source_count": 2,
+      "record_count": 4,
+      "pending": 0,
+      "published": 0
+    },
+    {
+      "organization": "Jobs at Federal Ministry of Health - Careers Recruiting Now",
+      "source_count": 1,
+      "record_count": 4,
+      "pending": 0,
+      "published": 0
+    },
+    {
+      "organization": "Federal Agencies Recruitment in Nigeria 2026",
+      "source_count": 4,
+      "record_count": 4,
+      "pending": 1,
+      "published": 0
+    },
+    {
+      "organization": "Premier Health Care",
+      "source_count": 2,
+      "record_count": 3,
+      "pending": 1,
+      "published": 0
+    },
+    {
+      "organization": "Federal Ministry of Health Recruitment 2026/2027: Portal & Requirements",
+      "source_count": 2,
+      "record_count": 3,
+      "pending": 2,
+      "published": 0
+    },
+    {
+      "organization": "eHealth Africa",
+      "source_count": 1,
+      "record_count": 2,
+      "pending": 0,
+      "published": 2
+    },
+    {
+      "organization": "University of North Carolina Hospitals",
+      "source_count": 1,
+      "record_count": 2,
+      "pending": 0,
+      "published": 0
+    },
+    {
+      "organization": "Nightingales Medical Trust",
+      "source_count": 1,
+      "record_count": 2,
+      "pending": 2,
+      "published": 0
+    },
+    {
+      "organization": "Bowen University Teaching Hospital",
+      "source_count": 1,
+      "record_count": 2,
+      "pending": 0,
+      "published": 0
+    },
+    {
+      "organization": "University Of Calabar Teaching Hospital",
+      "source_count": 1,
+      "record_count": 1,
+      "pending": 0,
+      "published": 0
+    },
+    {
+      "organization": "Patients First",
+      "source_count": 1,
+      "record_count": 1,
+      "pending": 1,
+      "published": 0
+    },
+    {
+      "organization": "Federal Medical Center, Birnin Kudu",
+      "source_count": 1,
+      "record_count": 1,
+      "pending": 1,
+      "published": 0
+    }
+  ],
+  "recent_tasks": [
+    {
+      "status": "completed",
+      "outcome": "vacancies_collected",
+      "count": 248,
+      "latest_finished_at": "2026-11-14 05:35:38.932490"
+    },
+    {
+      "status": "completed",
+      "outcome": "page_checked",
+      "count": 51,
+      "latest_finished_at": "2026-11-14 05:30:33.969853"
+    },
+    {
+      "status": "failed",
+      "outcome": "redirect_limit",
+      "count": 15,
+      "latest_finished_at": "2026-11-13 23:29:08.885548"
+    },
+    {
+      "status": "failed",
+      "outcome": "connection_error",
+      "count": 11,
+      "latest_finished_at": "2026-11-13 12:38:46.205221"
+    },
+    {
+      "status": "failed",
+      "outcome": "dns_error",
+      "count": 9,
+      "latest_finished_at": "2026-11-13 12:30:54.446079"
+    },
+    {
+      "status": "failed",
+      "outcome": "scope_blocked",
+      "count": 6,
+      "latest_finished_at": "2026-11-13 12:06:07.403587"
+    },
+    {
+      "status": "failed",
+      "outcome": "timeout",
+      "count": 6,
+      "latest_finished_at": "2026-11-14 05:20:13.411407"
+    },
+    {
+      "status": "failed",
+      "outcome": "policy_blocked",
+      "count": 5,
+      "latest_finished_at": "2026-11-13 11:01:58.996445"
+    },
+    {
+      "status": "failed",
+      "outcome": "http_error",
+      "count": 4,
+      "latest_finished_at": "2026-11-13 11:27:24.765245"
+    },
+    {
+      "status": "failed",
+      "outcome": "search_unavailable",
+      "count": 4,
+      "latest_finished_at": "2026-11-14 02:55:08.322990"
+    },
+    {
+      "status": "failed",
+      "outcome": "tls_error",
+      "count": 3,
+      "latest_finished_at": "2026-11-14 01:22:55.328555"
+    },
+    {
+      "status": "failed",
+      "outcome": "access_blocked",
+      "count": 2,
+      "latest_finished_at": "2026-11-13 11:56:45.608701"
+    },
+    {
+      "status": "completed",
+      "outcome": "directory_checked",
+      "count": 1,
+      "latest_finished_at": "2026-11-13 11:05:40.993175"
+    },
+    {
+      "status": "failed",
+      "outcome": "processing_error",
+      "count": 1,
+      "latest_finished_at": "2026-11-14 05:19:00.618673"
+    },
+    {
+      "status": "failed",
+      "outcome": "rate_limited",
+      "count": 1,
+      "latest_finished_at": "2026-11-13 10:22:24.633661"
+    },
+    {
+      "status": "failed",
+      "outcome": "robots_unavailable",
+      "count": 1,
+      "latest_finished_at": "2026-11-13 12:10:29.068166"
+    }
+  ]
+}

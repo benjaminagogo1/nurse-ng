@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Employer approvals — Nurse.ng{% endblock %}
+{% block content %}
+<section class="form-page">
+  <p class="eyebrow">Staff only</p>
+  <h1>Employer approvals</h1>
+  <p>Confirm organization identity and each person's recruiting authority through independently
+    obtained official contact details. Record the reference and checks in your decision.</p>
+  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+  {% for member in memberships %}
+  <article class="db-card">
+    <h2>{{ member.organization.name }}</h2>
+    <p>Website: {{ member.organization.website }}</p>
+    <p>Organization: {{ member.organization.status }} · Access: {{ member.status }}</p>
+    <p>{{ member.user.full_name }} · {{ member.user.email or 'No email' }} ·
+      {{ 'Email verified' if member.user.email_verified_at else 'Email not verified' }}</p>
+    <p class="preserve-lines">{{ member.authority_details }}</p>
+    <form method="post" action="/staff/employers/{{ member.id }}" class="stacked-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <label><input type="checkbox" name="identity_checked" /> Organization identity confirmed</label>
+      <label><input type="checkbox" name="authority_checked" /> This person's recruiting authority confirmed</label>
+      <label><input type="checkbox" name="include_legacy" /> I also checked this account's
+        existing listings under this exact organization name and authorize access to their applications</label>
+      <label for="note-{{ member.id }}">Decision and verification references</label>
+      <textarea id="note-{{ member.id }}" name="note" rows="3" maxlength="2000" required></textarea>
+      <label for="action-{{ member.id }}">Action</label>
+      <select id="action-{{ member.id }}" name="action">
+        <option value="approve">Approve organization and membership</option>
+        <option value="reject">Reject membership</option>
+        <option value="revoke">Revoke membership</option>
+        <option value="suspend_organization">Suspend all access for this organization</option>
+      </select>
+      <button type="submit">Save decision</button>
+    </form>
+  </article>
+  {% else %}<p>No employer requests.</p>{% endfor %}
+  <h2>Recent decisions</h2>
+  <ul>{% for event in events %}<li>{{ event.created_at.strftime('%d %B %Y %H:%M') }} ·
+    {{ event.action|replace('_', ' ') }} · {{ event.note }}</li>
+    {% else %}<li>No decisions yet.</li>{% endfor %}</ul>
+</section>
+{% endblock %}

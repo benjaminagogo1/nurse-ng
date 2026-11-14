@@ -9,6 +9,7 @@ from app.db.session import get_db
 from app.models.jobs import Job, JobApplication, JobStatus
 from app.models.opportunities import SavedOpportunity
 from app.models.user import AccountType, User
+from app.services.employers import approved_organizations, authorized
 from app.services.jobs import (
     APPLICATION_STATUS_LABELS,
     JOB_TYPE_LABELS,
@@ -16,6 +17,7 @@ from app.services.jobs import (
     JobError,
     application_for_job,
     apply_for_job,
+    can_access_applicants,
     change_application_status,
     create_job,
     job_card,
@@ -35,7 +37,7 @@ def _is_employer(user: User | None) -> bool:
     return user is not None and user.account_type == AccountType.EMPLOYER.value
 
 
-def _form_context(user: User, *, values: dict[str, str], error: str | None = None):
+def _form_context(db, user: User, *, values: dict[str, str], error: str | None = None):
     return {
         "title": "Post a job",
         "user": user,
@@ -43,6 +45,7 @@ def _form_context(user: User, *, values: dict[str, str], error: str | None = Non
         "job_types": list(JOB_TYPE_LABELS.items()),
         "work_modes": list(WORK_MODE_LABELS.items()),
         "error": error,
+        "organizations": approved_organizations(db, user),
     }
 
 
@@ -103,13 +106,14 @@ def jobs_page(
 def new_job_form(
     request: Request,
     user: User = Depends(require_user),
+    db: Session = Depends(get_db),
 ) -> Response:
     if not _is_employer(user):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only employer accounts can post jobs.",
         )
-    return render(request, "jobs/new.html", _form_context(user, values=dict(_EMPTY_FORM)))
+    return render(request, "jobs/new.html", _form_context(db, user, values=dict(_EMPTY_FORM)))
 
 
 @router.post("/jobs")
@@ -162,7 +166,7 @@ def publish_job(
         return render(
             request,
             "jobs/new.html",
-            _form_context(user, values=values, error=str(exc)),
+            _form_context(db, user, values=values, error=str(exc)),
             status_code=status.HTTP_400_BAD_REQUEST,
         )
     return redirect_feedback(
@@ -202,6 +206,8 @@ def _job(db: Session, identifier: UUID, user: User | None) -> Job:
         if collector_authorized(job.source) and job.status in {"open", "unconfirmed", "closed"}:
             return job
         raise HTTPException(status_code=404, detail="This opportunity is no longer available.")
+    if job and not authorized(db, job.employer_user_id, job.employer_organization_id):
+        raise HTTPException(status_code=404, detail="This job is no longer available.")
     if job is None or (
         job.status != JobStatus.OPEN
         and (
@@ -233,7 +239,7 @@ def _detail(
             "user": user,
             "job": job_card(job),
             "is_employer": _is_employer(user),
-            "is_owner": bool(user and user.id == job.employer_user_id),
+            "is_owner": bool(user and can_access_applicants(db, user, job)),
             "application": application_for_job(db, user, job) if user else None,
             "error": error,
             "cover_note": cover_note,
@@ -312,7 +318,7 @@ def application_status(
     application = db.get(JobApplication, application_id)
     if application is None:
         raise HTTPException(status_code=404)
-    is_owner = application.job.employer_user_id == user.id
+    is_owner = can_access_applicants(db, user, application.job)
     is_applicant = application.applicant_user_id == user.id
     if not (is_owner or is_applicant):
         raise HTTPException(status_code=404)
@@ -337,10 +343,10 @@ def application_detail(
     db: Session = Depends(get_db),
 ):
     application = db.get(JobApplication, application_id)
-    if application is None or user.id not in {
-        application.applicant_user_id,
-        application.job.employer_user_id,
-    }:
+    if application is None or not (
+        user.id == application.applicant_user_id
+        or can_access_applicants(db, user, application.job)
+    ):
         raise HTTPException(status_code=404)
     return render(
         request,

@@ -23,13 +23,14 @@ from app.services.recruitment_discovery import execute_discovery
 from app.services.recruitment_fetch import FetchedPage
 from app.services.vacancies import configure_collector, ingest_page
 from app.services.vacancy_extraction import normalize
-from tests.helpers import csrf_from, has_element
+from tests.helpers import approve_test_employer, csrf_from, has_element
 from tests.test_discussions import as_member
 from tests.test_vacancy_ingestion import source, staff  # noqa: F401
 from tests.test_workspace_flows import accounts, job  # noqa: F401
 
 
 def make_job(db, employer, **changes):
+    approve_test_employer(db, employer, changes.get("organization", "Example Hospital"))
     return create_job(
         db,
         employer,

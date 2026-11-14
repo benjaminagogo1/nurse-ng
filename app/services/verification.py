@@ -87,6 +87,8 @@ def _store_upload(kind: EvidenceKind, upload: EvidenceUpload) -> EvidenceDocumen
         content_type=content_type,
         size_bytes=size,
         sha256=digest,
+        scan_status="clean",
+        scanned_at=_utcnow(),
     )
 
 
@@ -235,6 +237,11 @@ def decide_case(
         # The label means a second person inspected the documents; a
         # self-decision would make it meaningless (DECISIONS L51).
         raise VerificationError("A reviewer cannot decide their own case.")
+    if approve:
+        from app.services.evidence import evidence_available
+
+        if not case.evidence or any(not evidence_available(doc) for doc in case.evidence):
+            raise VerificationError("All evidence must pass document checks before approval.")
 
     cleaned_note = (note or "").strip()
     if len(cleaned_note) > MAX_DECISION_NOTE:

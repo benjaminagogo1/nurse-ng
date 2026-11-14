@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from app.models.jobs import Job
 from app.models.recruitment import RecruitmentSource
 from app.models.vacancies import VacancyEvent, VacancyRecord, VacancySnapshot
+from app.services.opportunities import EARLY_CAREER, relevant_opportunity
 from app.services.recruitment import (
     RecruitmentError,
     checked_url,
@@ -304,7 +305,7 @@ def _publish(db, record, timestamp):
     job.job_type, job.work_mode = data.get("job_type", ""), data.get("work_mode", "")
     job.salary_min = job.salary_max = None
     job.normalized_data = data
-    timezone = data.get("_index", {}).get("deadline_timezone", source.deadline_timezone)
+    timezone = data.get("_index", {}).get("deadline_timezone") or source.deadline_timezone
     job.closes_at = parse_date(data["closing_date"], timezone, closing=True)
     job.opens_at = parse_date(data.get("opening_date", ""), timezone)
     job.posted_at = parse_date(data["publication_date"], timezone) or record.first_seen_at
@@ -601,7 +602,7 @@ def review_record(
     db.commit()
 
 
-def reconcile_pending_quality(db, *, dry_run=False):
+def reconcile_pending_quality(db, *, dry_run=False, exclude_unrelated=False):
     """Auditably remove obvious non-vacancies and duplicate pending work; retain evidence."""
     records = list(db.scalars(
         select(VacancyRecord).where(VacancyRecord.state == "pending")
@@ -619,6 +620,11 @@ def reconcile_pending_quality(db, *, dry_run=False):
             continue
         reason = non_vacancy_reason(record.normalized.get("title", ""),
                                     record.normalized.get("announcement_url", ""))
+        if (not reason and exclude_unrelated and record.normalized.get("_index")
+                and not relevant_opportunity(record.normalized)
+                and not (not record.normalized.get("country")
+                         and EARLY_CAREER.search(record.normalized.get("title", "")))):
+            reason = "relevance: outside health, nursing and Nigerian early-career opportunities"
         if reason:
             record.state = "rejected"
             record.issues = [reason]
@@ -631,6 +637,50 @@ def reconcile_pending_quality(db, *, dry_run=False):
             continue
         record.revision += 1
         record_event(db, record, action, details={"issues": record.issues})
+        db.flush()
+    if dry_run:
+        db.rollback()
+    else:
+        db.commit()
+    return result
+
+
+def reassess_incomplete_records(db, *, dry_run=False):
+    """Apply current listing rules to fresh pending facts without inventing a new check."""
+    result = {"published": 0, "still_pending": 0, "skipped_unavailable": 0}
+    timestamp = now()
+    for record in db.scalars(select(VacancyRecord).where(VacancyRecord.state == "pending")):
+        source = record.source
+        if (not collector_authorized(source) or source.health_status != "healthy"
+                or not record.last_seen_at or utc(record.last_seen_at) < timestamp - FRESHNESS):
+            result["skipped_unavailable"] += 1
+            continue
+        previous_issues = list(record.issues)
+        # Conflicting identities require their existing review; rechecking metadata
+        # cannot establish which of two contradictory source records is correct.
+        if any(issue.startswith(("identifier:", "conflict:")) for issue in previous_issues):
+            result["still_pending"] += 1
+            continue
+        review = record.normalized.get("_review", {})
+        record.issues = validation_issues(
+            record.normalized, source,
+            employer_confirmed=review.get("employer_confirmed", False),
+            nursing_confirmed=review.get("nursing_confirmed", False),
+        )
+        if not record.issues:
+            _publish(db, record, utc(record.last_seen_at))
+        if record.state == "published":
+            result["published"] += 1
+        else:
+            result["still_pending"] += 1
+        if record.state == "published" or record.issues != previous_issues:
+            record.revision += 1
+            record_event(db, record, "listing_reassessed", details={
+                "previous_issues": previous_issues,
+                "configuration_method": "operator_cli",
+                "note": "Missing optional details no longer prevent listing. "
+                        "Original observation time retained.",
+            })
         db.flush()
     if dry_run:
         db.rollback()

@@ -1,4 +1,5 @@
 {% from "_avatar.html" import avatar with context %}
+{% from "_like_button.html" import like_button %}
 <article class="community-card">
   <header class="community-card-header">
     {{ avatar(post.author, post.author.community_name) }}
@@ -55,7 +56,9 @@
   {% endif %}
 
   <footer class="community-card-footer">
-    {% set summary = summaries[post.id] %} {% if conversation_detail %}<a
+    {% set summary = summaries[post.id] %}
+    {{ like_button(post, summary, user, csrf_token) }}
+    {% if conversation_detail %}<a
       href="#reply-form"
       >Join the conversation</a
     >

@@ -16,7 +16,7 @@ from app.models.verification import (
 from app.services.auth import register_user
 from app.services.profiles import save_profile as save_profile_service
 from app.services.verification import EvidenceUpload, VerificationError, decide_case, submit_case
-from tests.helpers import csrf_from, register_and_sign_in
+from tests.helpers import csrf_from, document_bytes, register_and_sign_in
 from tests.test_profile_pages import save_profile
 from tests.test_profile_sharing import activate, save_sharing
 
@@ -25,13 +25,14 @@ STAFF_PHONE = "+2348022222222"
 OTHER_PHONE = "+2348033333333"
 PASSWORD = "s3cret-pass"
 
-JPEG = b"\xff\xd8\xff\xe0" + b"jpeg-body" * 4
-PNG = b"\x89PNG\r\n\x1a\n" + b"png-body" * 4
-PDF = b"%PDF-1.4\n" + b"pdf-body" * 4
+JPEG, PNG, PDF = (document_bytes(kind) for kind in ("JPEG", "PNG", "PDF"))
 
 
 @pytest.fixture(autouse=True)
 def evidence_dir(tmp_path, monkeypatch):
+    from app.core import storage
+
+    monkeypatch.setattr(storage, "scan_evidence", lambda path: None)
     directory = tmp_path / "evidence"
     monkeypatch.setattr(settings, "evidence_dir", str(directory))
     return directory

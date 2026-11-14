@@ -6,7 +6,7 @@ from app.models.community import CommunityPost
 from app.models.jobs import Job
 from app.services.auth import register_user
 from app.services.community import create_topic
-from tests.helpers import csrf_from
+from tests.helpers import approve_test_employer, csrf_from
 from tests.test_community import sign_in
 
 HEADERS = {"X-Account-Feedback": "1", "Accept": "application/json"}
@@ -16,6 +16,7 @@ def test_job_feedback_preserves_failure_and_confirms_success_once(client, db_ses
     user = register_user(
         db_session, phone="+2348000000111", password="s3cret-pass", account_type="employer"
     )
+    approve_test_employer(db_session, user, "Test clinic")
     sign_in(client, user.phone)
     token = csrf_from(client.get("/jobs/new"))
     bad = client.post("/jobs", headers=HEADERS, data={"csrf_token": token})

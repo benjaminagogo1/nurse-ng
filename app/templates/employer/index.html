@@ -30,6 +30,9 @@ endblock %} {% block content %}
     </div>
   </div>
 
+  {% if is_employer %}
+  <p><a href="/employers/organizations">Manage organization approval</a></p>
+  {% endif %}
   <h2 style="margin-top: 36px">Why Recruit with Nurse.ng?</h2>
   <ul class="rec-grid">
     <li>

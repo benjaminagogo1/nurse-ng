@@ -60,6 +60,38 @@ main > .feedback-slot {
   --feedback-fg: var(--success);
   --feedback-bg: var(--success-bg);
 }
+.feedback-slot:has([data-feedback-compact="true"]:not([hidden])) {
+  display: flex;
+  justify-content: center;
+  padding-inline: clamp(12px, 2vw, 24px);
+  box-sizing: border-box;
+}
+.action-feedback[data-feedback-compact="true"] {
+  width: min(100%, 25rem);
+  box-sizing: border-box;
+  align-items: center;
+  padding: 12px 14px;
+  gap: 10px;
+  margin-block: 12px 18px;
+  border-inline-start-width: 3px;
+  border-radius: 12px;
+  box-shadow: 0 4px 18px rgb(0 0 0 / 7%);
+}
+.action-feedback[data-feedback-compact="true"] .feedback-symbol {
+  flex-basis: 32px;
+  height: 32px;
+}
+.action-feedback[data-feedback-compact="true"] .feedback-copy h2 {
+  margin-bottom: 1px;
+  font-size: .9rem;
+}
+.action-feedback[data-feedback-compact="true"] .feedback-copy p {
+  font-size: .82rem;
+  line-height: 1.45;
+}
+.action-feedback[data-feedback-compact="true"] .feedback-dismiss {
+  margin: -6px;
+}
 .action-feedback--error {
   --feedback-fg: var(--danger);
   --feedback-bg: var(--danger-bg);

@@ -505,3 +505,28 @@ def test_successful_http_approval_and_schedule_management(client, db_session):
     )
     db_session.refresh(schedule)
     assert response.status_code == 200 and not schedule.enabled
+
+
+def test_database_failure_has_safe_diagnostics(db_session, staff, monkeypatch, caplog):
+    from sqlalchemy.exc import OperationalError
+
+    source = manual(db_session, staff)
+    worker.enqueue_due(db_session)
+    original = worker.apply_result
+
+    def fail_success(db, identifier, token, payload, result):
+        if result['ok']:
+            source.observed_url = 'https://uncommitted.example.org/'
+            db.flush()
+            raise OperationalError('SELECT private_information', {'secret': 'hidden-value'},
+                                   RuntimeError('driver-message-secret'))
+        return original(db, identifier, token, payload, result)
+
+    monkeypatch.setattr(worker, 'apply_result', fail_success)
+    task = worker.run_next(db_session, executor=lambda *_: observation())
+    assert 'database: OperationalError' in task.message
+    assert 'saving results' in task.message
+    assert 'private_information' not in caplog.text and 'hidden-value' not in caplog.text
+    assert 'driver-message-secret' not in caplog.text
+    db_session.refresh(source)
+    assert source.observed_url == ''

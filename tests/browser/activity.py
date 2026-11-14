@@ -159,6 +159,24 @@ try:
     navigate("/auth/login", "#phone")
     js("document.querySelector('#phone').value='+2348000010000'; document.querySelector('#password').value='browser-only-password'; document.querySelector('#password').form.requestSubmit()")
     wait_for(lambda: js("!!document.querySelector('.account-menu') && document.readyState === 'complete'"), "staff sign-in")
+    for width in (1280, 320):
+        viewport(width)
+        assert js("document.querySelector('[data-feedback-panel]').dataset.feedbackCompact") == "true"
+        assert js("document.querySelector('[data-feedback-panel]').getBoundingClientRect().width <= Math.min(400, innerWidth)")
+        assert js("document.documentElement.scrollWidth <= innerWidth + 1")
+        screenshot(f"sign-in-compact-{width}.png")
+    js("document.querySelector('form[action=\"/auth/logout\"]').requestSubmit()")
+    wait_for(lambda: js("document.querySelector('#feedback-title')?.textContent === 'Signed out'"), "sign-out notice")
+    for width in (1280, 320):
+        viewport(width)
+        assert js("document.querySelector('[data-feedback-panel]').getBoundingClientRect().width <= Math.min(400, innerWidth)")
+        screenshot(f"sign-out-compact-{width}.png")
+    navigate("/jobs", ".jobs-page")
+    assert js("!!document.querySelector('.jobs-guest-note') && !document.querySelector('.sidebar')")
+    navigate("/auth/login", "#phone")
+    js("document.querySelector('#phone').value='+2348000010000'; document.querySelector('#password').value='browser-only-password'; document.querySelector('#password').form.requestSubmit()")
+    wait_for(lambda: js("!!document.querySelector('.account-menu') && document.readyState === 'complete'"), "staff signs in again")
+    viewport(1440)
     cdp("Emulation.setScriptExecutionDisabled", {"value": True})
     navigate("/staff/users", "[data-analytics-page]")
     assert js("document.querySelector('[data-live-label]').textContent") == "Updated on page load"
@@ -261,6 +279,21 @@ try:
     wait_for(lambda: js("document.querySelector('[data-live-label]').textContent === 'Updates every 30 seconds'"), "online recovery")
     print("Light/dark themes, enlarged text and offline recovery passed.", flush=True)
 
+    navigate("/staff/admins?q=" + str(identifiers[0]), ".admin-page")
+    js("document.querySelector('.admin-member details').open=true; document.querySelector('.admin-member [name=current_password]').value='browser-only-password'; document.querySelector('.admin-member form').requestSubmit()")
+    wait_for(lambda: js("document.querySelector('#feedback-title')?.textContent === 'Administrator added'"), "grant administrator")
+    with SessionLocal() as db:
+        assert db.get(User, identifiers[0]).is_staff
+    for width in (1280, 320):
+        viewport(width)
+        assert js("document.documentElement.scrollWidth <= innerWidth + 1")
+        screenshot(f"administrators-{width}.png")
+    selector = f'form[action="/staff/admins/{identifiers[0]}"]'
+    js(f"const roleForm = document.querySelector({json.dumps(selector)}); roleForm.closest('details').open=true; roleForm.elements.current_password.value='browser-only-password'; roleForm.requestSubmit()")
+    wait_for(lambda: js("document.querySelector('#feedback-title')?.textContent === 'Administrator access removed'"), "revoke administrator")
+    with SessionLocal() as db:
+        assert not db.get(User, identifiers[0]).is_staff
+    navigate("/staff/users", "[data-analytics-page]")
     with SessionLocal() as db:
         operator = db.get(User, staff_id)
         operator.is_staff = False

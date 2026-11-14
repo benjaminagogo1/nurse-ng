@@ -122,8 +122,8 @@ def test_unverified_publishers_do_not_activate(db_session, monkeypatch, host):
     assert list_open_jobs(db_session) == []
 
 
-@pytest.mark.parametrize("deadline", ["", "03/04/2028", "2020-01-01"])
-def test_missing_ambiguous_or_expired_deadlines_never_appear_as_open(
+@pytest.mark.parametrize("deadline", ["03/04/2028", "2020-01-01"])
+def test_ambiguous_or_expired_deadlines_never_appear_as_open(
     db_session, monkeypatch, deadline
 ):
     monkeypatch.setattr(worker, "NETWORK_COOLDOWN_SECONDS", 0)
@@ -208,9 +208,18 @@ def test_search_schedule_is_created_once_and_pause_is_preserved(db_session, monk
     assert not schedule.enabled
 
 
-def test_open_ended_job_needs_current_index_and_job_bound_application_form(db_session, monkeypatch):
+@pytest.mark.parametrize('title', ['Graduate Health Internship', 'Pharmacist', 'Dental Assistant'])
+def test_missing_deadline_keeps_listing_without_claiming_applications_are_open(
+    db_session, monkeypatch, title,
+):
     monkeypatch.setattr(worker, "NETWORK_COOLDOWN_SECONDS", 0)
     item, fetched, target = fixture(db_session, deadline="")
+    fetched.responses[HOME].body = fetched.responses[HOME].body.replace(
+        b'Graduate health internship', title.encode(),
+    )
+    fetched.responses[target].body = fetched.responses[target].body.replace(
+        b'Graduate Health Internship', title.encode(),
+    )
     fetched.responses[HOME].body += b"<h2>Current vacancies</h2>"
     fetched.responses[target].body += (
         b'<form action="/jobs/apply" method="post"><input name="job_id" value="42">'
@@ -222,13 +231,17 @@ def test_open_ended_job_needs_current_index_and_job_bound_application_form(db_se
         (r.normalized, r.issues) for r in db_session.scalars(select(VacancyRecord))
     ]
     assert jobs[0].closes_at is None
+    assert jobs[0].title == title
     assert jobs[0].normalized_data["_index"]["accepting_applications"]
     assert jobs[0].normalized_data["closing_date"] == ""
     fetched.responses[target].body = fetched.responses[target].body.replace(
         b'name="job_id"', b'name="irrelevant"'
     )
     check(db_session, item, fetched)
-    assert list_open_jobs(db_session) == []
+    jobs = list_open_jobs(db_session)
+    assert len(jobs) == 1
+    assert not jobs[0].normalized_data['_index']['accepting_applications']
+    assert job_card(jobs[0])['status_label'] == 'Check availability'
 
 
 def test_unresolved_deadline_not_overridden_by_application_form(db_session, monkeypatch):

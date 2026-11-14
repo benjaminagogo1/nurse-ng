@@ -580,7 +580,7 @@
               : "Your video needs attention";
           status.querySelector("[data-status-body]").textContent =
             data.state === "ready"
-              ? "Your video is ready to watch, share and discuss."
+              ? "Your video is public in Reels, the Community feed and your selected topic. Anyone can watch and share it."
               : data.error;
           status.querySelector("[data-watch-reel]").hidden =
             data.state !== "ready";

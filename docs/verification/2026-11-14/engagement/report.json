@@ -1,0 +1,42 @@
+{
+  "recorded_at_utc": "2026-11-14T07:55:39.423796+00:00",
+  "reels_browser": {
+    "passed": true,
+    "runner": "tests/browser/reels.py",
+    "checks": [
+      "upload and processing",
+      "private until ready",
+      "public viewer",
+      "shared Reels and Community likes",
+      "unlike",
+      "save and comment",
+      "offline errors",
+      "320/390/1280px layouts"
+    ]
+  },
+  "admin_browser": {
+    "passed": true,
+    "runner": "tests/browser/activity.py",
+    "checks": [
+      "admin grant and revoke",
+      "compact sign-in and sign-out",
+      "guest Jobs browsing",
+      "existing analytics",
+      "mobile and desktop"
+    ],
+    "javascript_errors": [],
+    "fixture_accounts": 34,
+    "screenshots": 23
+  },
+  "pytest": {
+    "passed": 151,
+    "failures": 0,
+    "report": "../engagement-pytest.xml"
+  },
+  "final_admin_transaction_check": {
+    "passed": 3,
+    "report": "../admin-final.xml"
+  },
+  "local_database_revision": "e6480f6b2183",
+  "real_admin_roles_changed": false
+}

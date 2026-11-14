@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% from '_icons.html' import icon %}
+{% macro member_card(member, group) %}
+<article class="admin-member">
+  <strong>{{ member.full_name or member.community_name or 'Unnamed account' }}{% if member.id == user.id %} · You{% endif %}</strong>
+  <small>{{ member.email or member.phone }} · {{ 'Administrator' if member.is_staff else 'Member' }}{% if not member.is_active or member.status != 'active' %} · Inactive{% endif %}</small>
+  {% if member.id != user.id and (member.is_staff or (member.is_active and member.status == 'active')) %}
+  <details>
+    <summary>{{ 'Remove administrator access' if member.is_staff else 'Make administrator' }}</summary>
+    <form action="/staff/admins/{{ member.id }}" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="action" value="{{ 'revoke' if member.is_staff else 'grant' }}">
+      <input type="hidden" name="expected_version" value="{{ member.auth_version }}">
+      <p>{% if member.is_staff %}This person will lose access to all admin tools. Their member account stays available.{% else %}This person will be able to manage administrators, review documents and employers, moderate content, and manage recruitment sources.{% endif %}</p>
+      <label for="admin-password-{{ group }}-{{ member.id }}">Confirm with your password</label>
+      <input id="admin-password-{{ group }}-{{ member.id }}" type="password" name="current_password"
+             autocomplete="current-password" required maxlength="128">
+      <button class="btn btn-secondary" type="submit">{{ 'Remove admin access' if member.is_staff else 'Confirm administrator' }}</button>
+    </form>
+  </details>
+  {% endif %}
+</article>
+{% endmacro %}
+{% block content %}
+<section class="admin-page">
+  <header class="admin-heading">
+    <div><p class="eyebrow">Staff workspace</p><h1>Administrators</h1>
+      <p>Give a trusted member access to help manage Nurse.ng.</p></div>
+    <a class="btn btn-secondary" href="/staff/users">{{ icon('users', 18) }} User overview</a>
+  </header>
+  <section class="admin-panel" aria-labelledby="add-admin-title">
+    <h2 id="add-admin-title">Add an administrator</h2>
+    <p class="admin-help">Ask the person to create an account first, then find them below.</p>
+    <form class="admin-search" action="/staff/admins" method="get">
+      <label for="admin-query">Name, email, phone number or user ID
+        <input id="admin-query" type="search" name="q" value="{{ query }}" maxlength="120" required></label>
+      <button class="btn btn-primary" type="submit">Find member</button>
+    </form>
+    {% for member in matches %}{{ member_card(member, 'search') }}
+    {% else %}{% if query %}<p>No matching account found. Check the person's account details.</p>{% endif %}{% endfor %}
+    {% if matches|length == 20 %}<p class="admin-help">Showing the first 20 matches. Use a more specific search to narrow the list.</p>{% endif %}
+  </section>
+  <section class="admin-panel" aria-labelledby="current-admins-title">
+    <h2 id="current-admins-title">Current administrators</h2>
+    <p class="admin-help">You cannot remove your own access. Role changes sign the affected person out so their next sign-in uses the new permissions.</p>
+    {% for member in administrators %}{{ member_card(member, 'current') }}{% endfor %}
+  </section>
+  <section class="admin-panel" aria-labelledby="admin-history-title">
+    <h2 id="admin-history-title">Recent access changes</h2>
+    {% if events %}<ol class="admin-history">
+      {% for event in events %}<li>
+        {{ event.actor.full_name or event.actor.community_name or 'Administrator' if event.actor else 'Deleted account' }}
+        {{ 'granted administrator access to' if event.action == 'granted' else 'removed administrator access from' }}
+        {{ event.target.full_name or event.target.community_name or 'member' if event.target else 'a deleted account' }}.
+        <time datetime="{{ event.created_at.isoformat() }}">{{ event.created_at.strftime('%d %b %Y, %H:%M') }} UTC</time>
+      </li>{% endfor %}
+    </ol>{% else %}<p class="admin-help">Changes made here will appear in this history.</p>{% endif %}
+  </section>
+</section>
+{% endblock %}

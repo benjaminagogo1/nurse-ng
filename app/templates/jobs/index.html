@@ -17,6 +17,10 @@ block title %}Job opportunities — Nurse.ng{% endblock %} {% block content %}
       >Looking to hire? {{ icon('arrow', 16) }}</a
     >{% endif %}
   </header>
+  {% if not user %}
+  <p class="jobs-guest-note">You’re browsing public job listings.
+    <a href="/auth/login">Sign in</a> to save opportunities or submit an application on Nurse.ng.</p>
+  {% endif %}
   {% if user %}
   <nav class="jobs-navigation" aria-label="My opportunities">
     <a href="/jobs" aria-current="page"

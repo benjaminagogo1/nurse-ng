@@ -18,6 +18,7 @@
       ? notice.tone
       : "error";
     panel.className = "action-feedback action-feedback--" + tone;
+    panel.dataset.feedbackCompact = String(notice.compact === true);
     panel.setAttribute("role", tone === "error" ? "alert" : "status");
     panel.querySelector("#feedback-title").textContent = notice.title;
     panel.querySelector("#feedback-body").textContent = notice.body;
@@ -80,7 +81,7 @@
   const forms = [...document.querySelectorAll('form[method="post" i]')].filter(
     (form) =>
       !form.matches(
-        ".message-compose, [data-reel-action], [data-reel-upload], [data-native-submit]",
+        ".message-compose, [data-reel-action], [data-reel-upload], [data-native-submit], [data-post-like]",
       ) && formAction(form).origin === location.origin,
   );
   const initialFields = document.querySelector("[data-feedback-fields]");

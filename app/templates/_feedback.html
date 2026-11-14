@@ -3,6 +3,7 @@
   <div
     class="action-feedback action-feedback--{{ notice.tone if notice else 'info' }}"
     data-feedback-panel
+    data-feedback-compact="{{ 'true' if notice and notice.compact else 'false' }}"
     tabindex="-1"
     role="{{ 'alert' if notice and notice.tone == 'error' else 'status' }}"
     aria-labelledby="feedback-title"

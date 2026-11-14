@@ -13,6 +13,8 @@ from app.models.community import (
     DiscussionReplyRead,
     Follow,
 )
+from app.models.employers import EmployerMembership, EmployerOrganization, EmployerReviewEvent
+from app.models.engagement import PostLike
 from app.models.events import CommunityEvent, EventAttendance
 from app.models.jobs import Job, JobApplication
 from app.models.messages import DirectMessage
@@ -30,6 +32,7 @@ from app.models.recruitment import (
 )
 from app.models.reels import Reel, ReelSave
 from app.models.social_auth import SocialAuthAttempt, SocialEnrollment, SocialIdentity
+from app.models.staff import StaffRoleEvent
 from app.models.tour import UserTour
 from app.models.user import User
 from app.models.vacancies import VacancyEvent, VacancyRecord, VacancySnapshot
@@ -37,6 +40,11 @@ from app.models.verification import EvidenceAccess, EvidenceDocument, Verificati
 from app.models.workers import WorkerHeartbeat
 
 __all__ = [
+    "PostLike",
+    "StaffRoleEvent",
+    "EmployerMembership",
+    "EmployerOrganization",
+    "EmployerReviewEvent",
     "OfflineOperation",
     "OfflineUpload",
     "CommunityEvent",

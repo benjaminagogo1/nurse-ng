@@ -14,6 +14,7 @@ from app.services.announcement_extraction import (
     extract_announcements,
     labelled,
 )
+from app.services.opportunities import EARLY_CAREER, relevant_opportunity
 from app.services.recruitment_fetch import FetchError, in_scope, origin, require_success
 from app.services.vacancy_extraction import extract_records, normalize
 from app.services.vacancy_quality import non_vacancy_reason
@@ -143,6 +144,13 @@ def factual_records(page, evidence, *, listed_on=""):
             continue
         if not in_scope(data["announcement_url"], evidence["scope"]):
             continue
+        if structured and not relevant_opportunity(data) and not (
+            not data["country"] and EARLY_CAREER.search(data["title"])
+        ):
+            # Publisher sidebars often embed unrelated JobPosting objects. Do not
+            # fill the review queue with them. Unknown-country programmes still
+            # reach validation; this selection never grants publication eligibility.
+            continue
         if not structured:
             # The verified publisher is the organisation offering the announcement.
             if evidence.get("employer_fallback_allowed", True):
@@ -177,7 +185,8 @@ def factual_records(page, evidence, *, listed_on=""):
             )
         )
         summary = (
-            f"{data['employer']} has published this opportunity"
+            (f"{data['employer']} has published this opportunity"
+             if data['employer'] else "This opportunity was published")
             + (
                 f" in {'Nigeria' if data['country'] == 'NG' else data['country']}"
                 if data["country"]
@@ -259,17 +268,43 @@ def collect_index(payload, page, fetcher, evidence):
     from app.services.recruitment_discovery import CAREER_WORDS, PageLinks, _safe_link
 
     result = page_facts(page, evidence)
-    links = announcement_links(page.body, page.url, evidence["scope"], include_channels=True)
-    offset = int(payload.get("page_offset", 0)) % max(1, len(links))
+    links = announcement_links(
+        page.body, page.url, evidence["scope"], include_channels=True,
+        page_offset=int(payload.get("page_offset", 0)),
+    )
     result.update(detail_pages=[], detail_errors=[], detail_count=len(links), links=[])
+
+    def discover_portals(observed):
+        parsed = PageLinks()
+        parsed.feed(observed.text)
+        known = {link['url'] for link in result['links']}
+        for href, label in parsed.links:
+            external = _safe_link(observed.url, href)
+            if (external and external not in known
+                    and not in_scope(external, evidence['scope'])
+                    and CAREER_WORDS.search(href.replace('-', ' ') + ' ' + label)
+                    and len(result['links']) < 3):
+                result['links'].append({'url': external, 'label': label,
+                                        'reference': observed.url})
+                known.add(external)
+
+    discover_portals(page)
     pending = [
-        (url, 1, page.url if current_index(page) else "")
-        for url in (links[offset:] + links[:offset])
+        (url, 1, page.url if current_index(page) else "", False)
+        for url in links
     ]
+    channel = evidence.get("collection_channel", "")
+    if channel:
+        if not in_scope(channel, evidence["scope"]):
+            raise FetchError("scope_blocked", "The selected channel is outside approved scope.")
+        if channel != page.url:
+            # A current recruitment channel can be more useful than the publisher's
+            # original discovery page. It uses one of the existing four requests.
+            pending.insert(0, (channel, 0, "", True))
     seen = {page.url}
     checked = 0
     while pending and checked < 4:
-        target, depth, listed_on = pending.pop(0)
+        target, depth, listed_on, selected_channel = pending.pop(0)
         if target in seen:
             continue
         seen.add(target)
@@ -279,28 +314,20 @@ def collect_index(payload, page, fetcher, evidence):
                 target, allowed_origin=origin(page.url), allowed_url_prefix=evidence["scope"]
             )
             result["detail_pages"].append(page_facts(child, evidence, listed_on=listed_on))
-            page_links = PageLinks()
-            page_links.feed(child.text)
-            for href, label in page_links.links:
-                external = _safe_link(child.url, href)
-                if (
-                    external
-                    and not in_scope(external, evidence["scope"])
-                    and CAREER_WORDS.search(href.replace("-", " ") + " " + label)
-                    and len(result["links"]) < 3
-                ):
-                    result["links"].append(
-                        {"url": external, "label": label, "reference": child.url}
-                    )
+            discover_portals(child)
             if depth < 2:
                 children = announcement_links(
-                    child.body, child.url, evidence["scope"], include_channels=True
+                    child.body, child.url, evidence["scope"], include_channels=True,
+                    page_offset=int(payload.get("page_offset", 0)),
                 )
-                child_offset = int(payload.get("page_offset", 0)) % max(1, len(children))
-                pending[0:0] = [
-                    (url, depth + 1, child.url if current_index(child) else "")
-                    for url in children[child_offset:] + children[:child_offset]
+                descendants = [
+                    (url, depth + 1, child.url if current_index(child) else "", False)
+                    for url in children
                 ]
+                if selected_channel:
+                    pending[0:0] = descendants
+                else:
+                    pending.extend(descendants)
         except FetchError as exc:
             result["detail_errors"].append({"url": target, "outcome": exc.code})
     return result

@@ -1,0 +1,10 @@
+[Unit]
+Description=Nurse.ng private SQLite and upload backup
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/nurse-ng
+ExecStart=%h/nurse-ng/venv/bin/python -m app.cli backup
+UMask=0077
+NoNewPrivileges=true
+TimeoutStartSec=10min

@@ -8,6 +8,14 @@ HEALTH_FIELD = re.compile(
     r"health(?:care|[ -]+(?:care|informatics|information|data|systems?|fellow\w*))|"
     r"clinical|medical|epidemiolog\w*)\b", re.I,
 )
+HEALTH_PROFESSION = re.compile(
+    r"\b(?:pharmacists?|pharmacy\s+(?:technicians?|assistants?)|"
+    r"dentists?|dental\s+(?:assistants?|nurses?|hygienists?|therapists?|technicians?)|"
+    r"physiotherapists?|occupational\s+therapists?|speech\s+(?:therapists?|pathologists?)|"
+    r"radiographers?|radiologists?|sonographers?|optometrists?|opticians?|"
+    r"dietitians?|dieticians?|nutritionists?|paramedics?|physicians?|"
+    r"doctors?|surgeons?|anaesthetists?|anesthetists?)\b", re.I,
+)
 EARLY_CAREER = re.compile(
     r"\b(?:fellows?(?:hip)?s?|interns?(?:hip)?s?|graduate|trainees?|apprentice\w*)\b", re.I,
 )
@@ -17,6 +25,7 @@ def relevant_opportunity(data: dict) -> bool:
     """Recognize relevance, never infer an applicant's qualifications or eligibility.
 
     Nigerian early-career programmes may span sectors, such as Jubilee Fellows.
+    A missing country does not hide an otherwise identifiable programme.
     International trainee titles need an explicit health field in their description.
     An employer's name alone cannot make an unrelated vacancy relevant.
     """
@@ -24,7 +33,8 @@ def relevant_opportunity(data: dict) -> bool:
     return bool(
         NURSING.search(title)
         or HEALTH_FIELD.search(title)
-        or (data.get("country") == "NG" and EARLY_CAREER.search(title))
+        or HEALTH_PROFESSION.search(title)
+        or (data.get("country", "") in {"NG", ""} and EARLY_CAREER.search(title))
         or (EARLY_CAREER.search(title) and HEALTH_FIELD.search(data.get("description", "")))
     )
 

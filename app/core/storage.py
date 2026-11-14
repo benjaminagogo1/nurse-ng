@@ -1,27 +1,19 @@
-"""Private evidence storage on the local filesystem.
-
-Files are written under ``settings.evidence_dir`` with opaque names and are
-never placed in the static tree. The only read path is the authenticated
-reviewer route. Content is validated by magic bytes, not by the client's
-declared type or filename (DECISIONS L48).
-
-This is a development and pilot store. Before production it must move to
-private object storage with encryption, malware scanning, and a retention job.
-"""
+"""Private evidence: bounded parsing, quarantine, and fail-closed malware scanning."""
 
 import hashlib
+import os
 import re
+import shlex
+import subprocess
+import sys
+import tempfile
 import uuid
 from pathlib import Path
 
 from app.core.config import settings
 
 ALLOWED_CONTENT_TYPES = frozenset({"image/jpeg", "image/png", "application/pdf"})
-CONTENT_TYPE_SUFFIX = {
-    "image/jpeg": ".jpg",
-    "image/png": ".png",
-    "application/pdf": ".pdf",
-}
+CONTENT_TYPE_SUFFIX = {"image/jpeg": ".jpg", "image/png": ".png", "application/pdf": ".pdf"}
 _STORAGE_NAME_RE = re.compile(r"^[0-9a-f]{32}$")
 
 
@@ -29,16 +21,20 @@ class EvidenceStorageError(ValueError):
     """An uploaded file cannot be accepted."""
 
 
+class EvidenceScanUnavailable(EvidenceStorageError):
+    """Retryable scanner outage; the file must remain unavailable."""
+
+
 def _root() -> Path:
-    return Path(settings.evidence_dir)
-
-
-def _max_megabytes() -> int:
-    return max(1, settings.evidence_max_bytes // (1024 * 1024))
+    root = Path(settings.evidence_dir).resolve()
+    public = (Path(__file__).resolve().parents[1] / "static").resolve()
+    media = Path(settings.community_media_dir).resolve()
+    if root == public or public in root.parents or root == media or media in root.parents:
+        raise EvidenceStorageError("Private evidence storage is not configured correctly.")
+    return root
 
 
 def sniff_content_type(data: bytes) -> str | None:
-    """Return the content type implied by the leading bytes, or None."""
     if data.startswith(b"\xff\xd8\xff"):
         return "image/jpeg"
     if data.startswith(b"\x89PNG\r\n\x1a\n"):
@@ -48,55 +44,87 @@ def sniff_content_type(data: bytes) -> str | None:
     return None
 
 
-def save_evidence(data: bytes) -> tuple[str, str, int, str]:
-    """Validate and store ``data``.
+def validate_evidence(path: Path) -> str:
+    try:
+        result = subprocess.run(
+            [sys.executable, "-m", "app.core.evidence_validation", str(path.resolve())],
+            capture_output=True, timeout=12, check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        raise EvidenceStorageError(
+            "The document could not be validated. Try another file."
+        ) from None
+    content_type = result.stdout.decode("ascii", errors="replace").strip()
+    if result.returncode or content_type not in ALLOWED_CONTENT_TYPES:
+        raise EvidenceStorageError(
+            "Choose a complete JPEG, PNG, or PDF document. PDFs must have 1–25 pages, "
+            "without passwords, scripts, or embedded files."
+        )
+    return content_type
 
-    Returns ``(storage_name, content_type, size_bytes, sha256)``. Raises
-    ``EvidenceStorageError`` for empty, oversized, or unsupported content.
-    """
+
+def scan_evidence(path: Path) -> None:
+    try:
+        command = shlex.split(settings.evidence_scan_command)
+        if not command:
+            raise OSError("Scanner not configured")
+        result = subprocess.run(
+            [*command, "--no-summary", str(path.resolve())],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            timeout=settings.evidence_scan_timeout_seconds, check=False,
+        )
+    except (ValueError, OSError, subprocess.TimeoutExpired):
+        raise EvidenceScanUnavailable(
+            "Document scanning is temporarily unavailable. Please try again later."
+        ) from None
+    if result.returncode == 1:
+        raise EvidenceStorageError("The document was rejected by the malware scanner.")
+    if result.returncode != 0:
+        raise EvidenceScanUnavailable(
+            "Document scanning is temporarily unavailable. Please try again later."
+        )
+
+
+def save_evidence(data: bytes) -> tuple[str, str, int, str]:
     if not data:
         raise EvidenceStorageError("Choose a file to upload.")
     if len(data) > settings.evidence_max_bytes:
-        raise EvidenceStorageError(f"Each file must be at most {_max_megabytes()} MB.")
-
-    content_type = sniff_content_type(data)
-    if content_type not in ALLOWED_CONTENT_TYPES:
+        maximum = max(1, settings.evidence_max_bytes // (1024 * 1024))
+        raise EvidenceStorageError(f"Each file must be at most {maximum} MB.")
+    if sniff_content_type(data) is None:
         raise EvidenceStorageError("Upload a JPEG, PNG, or PDF file.")
-
-    storage_name = uuid.uuid4().hex
     root = _root()
-    # The directory and files are private to the service account. ``mkdir``
-    # does not tighten an existing directory, so deployment must check it.
+    temporary = None
     try:
         root.mkdir(mode=0o700, parents=True, exist_ok=True)
-    except OSError:
-        raise EvidenceStorageError("The file could not be stored.") from None
-    temporary = root / f".{storage_name}.tmp"
-    try:
-        temporary.write_bytes(data)
-        temporary.chmod(0o600)
+        root.chmod(0o700)
+        descriptor, name = tempfile.mkstemp(prefix=".quarantine-", dir=root)
+        temporary = Path(name)
+        with os.fdopen(descriptor, "wb") as output:
+            output.write(data)
+        content_type = validate_evidence(temporary)
+        scan_evidence(temporary)
+        storage_name = uuid.uuid4().hex
         temporary.replace(root / storage_name)
     except OSError:
-        temporary.unlink(missing_ok=True)
         raise EvidenceStorageError("The file could not be stored.") from None
-
-    digest = hashlib.sha256(data).hexdigest()
-    return storage_name, content_type, len(data), digest
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+    return storage_name, content_type, len(data), hashlib.sha256(data).hexdigest()
 
 
 def evidence_path(storage_name: str) -> Path:
-    """Resolve a stored evidence file, rejecting anything but an opaque name."""
     if not _STORAGE_NAME_RE.fullmatch(storage_name):
         raise EvidenceStorageError("Unknown evidence file.")
-    root = _root().resolve()
-    path = (root / storage_name).resolve()
-    if path.parent != root:
+    root = _root()
+    path = root / storage_name
+    if path.is_symlink() or path.resolve().parent != root:
         raise EvidenceStorageError("Unknown evidence file.")
     return path
 
 
 def delete_evidence(storage_name: str) -> None:
-    """Remove a stored file. Used only to clean up a failed multi-file submit."""
     try:
         evidence_path(storage_name).unlink(missing_ok=True)
     except EvidenceStorageError:

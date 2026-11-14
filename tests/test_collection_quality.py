@@ -192,7 +192,7 @@ def test_duplicate_pending_sources_keep_evidence_but_create_one_review(
         db_session.add(other)
         db_session.flush()
         others.append(other)
-    raw = posting(validThrough="")
+    raw = posting(validThrough="next month")
     for index, item in enumerate([source, *others]):
         ingest_page(db_session, item, page_result([raw]), registry.now() + timedelta(seconds=index))
         db_session.commit()
@@ -203,7 +203,7 @@ def test_duplicate_pending_sources_keep_evidence_but_create_one_review(
     assert db_session.scalar(select(func.count()).select_from(VacancyEvent)) == 3
     # Materially different facts need a separate review, even at the same URL.
     ingest_page(db_session, others[0],
-                page_result([posting(validThrough="", title="Nurse manager")]),
+                page_result([posting(validThrough="next month", title="Nurse manager")]),
                 registry.now() + timedelta(seconds=10))
     db_session.commit()
     db_session.refresh(records[1])
@@ -287,3 +287,52 @@ def test_unchanged_source_facts_receive_updated_normalization(db_session, source
     assert salary_label(refreshed) == 'NGN 181,440 per month · gross'
     assert any(event.details.get('normalization_changed') for event in
                db_session.scalars(select(VacancyEvent).where(VacancyEvent.record_id == record.id)))
+
+
+def test_rotating_batches_keep_nursing_links_ahead_of_channels():
+    body = ('<a href="/careers">Careers</a>' + ''.join(
+        f'<a href="/jobs/nurse-{i}">Registered Nurse {i}</a>' for i in range(5)
+    ) + '<a href="/jobs/medical-intern">Medical Intern</a>').encode()
+    visited = set()
+    for offset in range(0, 20, 4):
+        links = announcement_links(body, 'https://example.ng/', 'https://example.ng/',
+                                   include_channels=True, page_offset=offset)
+        assert all('/jobs/nurse-' in url for url in links[:2])
+        assert links[2] == 'https://example.ng/jobs/medical-intern'
+        assert links[3] == 'https://example.ng/careers'
+        visited.update(links[:2])
+    assert len(visited) == 5
+
+
+def test_factual_index_ignores_unrelated_structured_adverts():
+    import base64
+
+    data = page_result([posting(title='Head of Aquaculture'),
+                        posting(identifier='nurse', title='Registered Nurse'),
+                        posting(identifier='intern', title='Procurement Intern')])
+    page = FetchedPage(data['observed_url'], 200, 'text/html',
+                       base64.b64decode(data['body_base64']))
+    facts = factual_records(page, {'scope': 'https://hospital.example.ng/',
+                                   'organisation': 'Example Hospital'})
+    assert {row['title'] for row in facts} == {'Registered Nurse', 'Procurement Intern'}
+
+
+def test_unrelated_factual_queue_cleanup_is_previewable_and_preserves_reviews(
+    db_session, source,  # noqa: F811
+):
+    collect(db_session, source, [posting(title='Head of Aquaculture')])
+    record = db_session.scalar(select(VacancyRecord))
+    record.normalized = {**record.normalized, '_index': {'publisher': 'Example'}}
+    db_session.commit()
+    preview = reconcile_pending_quality(db_session, dry_run=True, exclude_unrelated=True)
+    assert preview['excluded'] == 1
+    db_session.refresh(record)
+    assert record.state == 'pending'
+    record.normalized = {**record.normalized, '_review': {'nursing_confirmed': True}}
+    db_session.commit()
+    assert reconcile_pending_quality(db_session, exclude_unrelated=True)['excluded'] == 0
+    record.normalized = {key: value for key, value in record.normalized.items() if key != '_review'}
+    db_session.commit()
+    assert reconcile_pending_quality(db_session, exclude_unrelated=True)['excluded'] == 1
+    db_session.refresh(record)
+    assert record.state == 'rejected'

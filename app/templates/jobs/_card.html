@@ -22,12 +22,12 @@
   <div class="opportunity-card-pay">
     <strong>{% if job.salary != 'Salary not stated' %}Salary: {% endif %}{{ job.salary }}</strong>{% if job.closing_date %}<span
       >{{ icon('calendar', 15) }} Closes {{ job.closing_date }}</span
-    >{% endif %}
+    >{% elif job.external %}<span>{{ icon('calendar', 15) }} Closing date not stated</span>{% endif %}
   </div>
   <div class="opportunity-card-footer">
     <span
       >{{ icon('globe' if job.external else 'building', 14) }} {{ 'Approved recruitment source' if job.external else 'Employer submission' }}{% if
-      job.external %} · {{ job.status|replace('_', ' ')|capitalize }}{% endif
+      job.external %} · {{ job.status_label }}{% endif
       %}</span
     ><a href="/jobs/{{ job.id }}" aria-label="View {{ job.title }}"
       >View opportunity {{ icon('arrow', 16) }}</a

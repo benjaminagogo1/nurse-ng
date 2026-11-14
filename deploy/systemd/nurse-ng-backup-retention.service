@@ -1,0 +1,9 @@
+[Unit]
+Description=Nurse.ng expired backup removal
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/nurse-ng
+ExecStart=%h/nurse-ng/venv/bin/python -m app.cli prune-backups
+UMask=0077
+NoNewPrivileges=true

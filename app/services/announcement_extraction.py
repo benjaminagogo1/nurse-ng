@@ -5,7 +5,7 @@ from datetime import datetime
 from html.parser import HTMLParser
 from urllib.parse import urljoin, urlsplit
 
-from app.services.opportunities import relevant_opportunity
+from app.services.opportunities import NURSING, relevant_opportunity
 from app.services.recruitment_fetch import in_scope, public_url, url_key
 from app.services.vacancy_extraction import normalize
 from app.services.vacancy_quality import announcement_intent, non_vacancy_reason
@@ -130,6 +130,7 @@ def extract_announcements(body: bytes, url: str) -> list[dict]:
     elif not re.fullmatch(r"[A-Z]{2}", country):
         country = ""
     # Names and dates remain empty when not present, sending the record to review.
+    deadline = labelled(text, r"application deadline|closing date|deadline|applications close")
     raw = {
         "@type": "JobPosting",
         "url": url,
@@ -141,9 +142,7 @@ def extract_announcements(body: bytes, url: str) -> list[dict]:
             labelled(text, r"published|publication date|date posted")
             or parsed.meta.get("article:published_time", "")
         ),
-        "validThrough": explicit_date(
-            labelled(text, r"application deadline|closing date|deadline|applications close")
-        ),
+        "validThrough": explicit_date(deadline) or deadline,
         "_adapter": "announcements-v1",
     }
     # Preserve the original evidence for review; normalize performs no new inference.
@@ -151,7 +150,9 @@ def extract_announcements(body: bytes, url: str) -> list[dict]:
     return [raw]
 
 
-def announcement_links(body: bytes, url: str, prefix: str, *, include_channels=False) -> list[str]:
+def announcement_links(
+    body: bytes, url: str, prefix: str, *, include_channels=False, page_offset=0,
+) -> list[str]:
     parsed = AnnouncementHTML()
     parsed.feed(body.decode("utf-8", errors="replace"))
     result, seen = [], {url_key(url)}
@@ -169,7 +170,7 @@ def announcement_links(body: bytes, url: str, prefix: str, *, include_channels=F
         # Category pages may lead to real adverts; admissions and service links do not.
         if excluded and (not include_channels or not excluded.startswith("category:")):
             continue
-        individual = relevant_opportunity({"title": label, "country": "NG"}) and (
+        individual = not excluded and relevant_opportunity({"title": label, "country": "NG"}) and (
             announcement_intent(label, url=target)
         )
         if not individual and not (
@@ -193,7 +194,20 @@ def announcement_links(body: bytes, url: str, prefix: str, *, include_channels=F
             continue
         seen.add(url_key(target))
         result.append(target)
-        priority[target] = (
-            2 if excluded else 0 if individual else 1
-        )
-    return sorted(result, key=priority.get) if include_channels else result
+        priority[target] = 0 if individual and NURSING.search(label) else 1 if individual else 2
+    if not include_channels:
+        return result
+    # Rotate within relevance groups, never rotate a navigation link ahead of a
+    # nursing advert. Advance by one per four-page worker batch to avoid starving
+    # the fourth link when a channel uses one of the four requests.
+    groups = []
+    for rank in range(3):
+        group = [target for target in result if priority[target] == rank]
+        offset = (page_offset // 4) % max(1, len(group))
+        groups.append(group[offset:] + group[:offset])
+    # Keep room for other health roles/programmes when nursing links are plentiful.
+    preferred = groups[0][:2] + groups[1][:1]
+    individuals = preferred + [url for url in groups[0] + groups[1] if url not in preferred]
+    channels = groups[2]
+    # Reserve a request for discovery, while using most requests for actual roles.
+    return individuals[:3] + channels[:1] + individuals[3:] + channels[1:]

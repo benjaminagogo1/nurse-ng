@@ -1,0 +1,19 @@
+{
+  "verified_at_utc": "2026-11-14T06:09:02.825175+00:00",
+  "revision": "e6480e5a1072",
+  "backup_directory": "/home/recoding/nurse-ng/.local-backups/before-employer-evidence-20261114T055552Z",
+  "integrity_check": "ok",
+  "foreign_key_violations": 0,
+  "existing_core_records_preserved": true,
+  "worker_service_active": true,
+  "http_checks": [
+    {
+      "path": "/",
+      "status": 200
+    },
+    {
+      "path": "/jobs",
+      "status": 200
+    }
+  ]
+}

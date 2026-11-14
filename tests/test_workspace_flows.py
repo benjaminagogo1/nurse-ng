@@ -12,7 +12,7 @@ from app.services.auth import register_user
 from app.services.community import connection_pair_key
 from app.services.jobs import create_job
 from app.services.messages import unread_count
-from tests.helpers import csrf_from
+from tests.helpers import approve_test_employer, csrf_from
 from tests.test_community import sign_in
 
 
@@ -24,12 +24,15 @@ def accounts(db_session):
             full_name=name, email=f"member{number}@example.com", account_type=role,
         )
 
-    return {
+    result = {
         "nurse": create(1, "Ada Nurse"),
         "peer": create(2, "Bola Nurse"),
         "employer": create(3, "City Hospital", "employer"),
         "other_employer": create(4, "Other Hospital", "employer"),
     }
+    approve_test_employer(db_session, result["employer"], "City Hospital")
+    approve_test_employer(db_session, result["other_employer"], "Other Hospital")
+    return result
 
 
 @pytest.fixture

@@ -14,13 +14,17 @@ content %}
       {{ 'Your reel is live' if reel.state == 'ready' else 'Your video needs attention' if reel.state == 'failed' else 'Making your reel ready' }}
     </h1>
     <p data-status-body>
-      {% if reel.state == 'ready' %}Your video is ready to watch, share and
-      discuss.{% elif reel.state == 'failed' %}{{ reel.error }}{% elif
+      {% if reel.state == 'ready' %}Your video is public in Reels, the Community
+      feed and your selected topic. Anyone can watch and share it.{% elif reel.state == 'failed' %}{{ reel.error }}{% elif
       reel.state == 'queued' %}Upload received. Your video is waiting to be
       processed. You can leave this page and return from My reels.{% else %}We
       are preparing your video and cover image. You can leave this page and
       return from My reels.{% endif %}
     </p>
+    <p class="field-hint">After processing, find your video in <a href="/reels">Reels</a>,
+      the <a href="/feed">Community feed</a> and
+      <a href="/topics/{{ reel.post.topic.slug }}">{{ reel.post.topic.name }}</a>.
+      Manage this upload from <a href="/reels/mine">My reels</a>.</p>
     <ol class="reel-processing-steps">
       <li data-step="uploaded" class="is-done">
         {{ icon('check', 18) }} Uploaded

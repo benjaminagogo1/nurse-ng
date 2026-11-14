@@ -1,0 +1,11 @@
+[Unit]
+Description=Hourly private evidence maintenance
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+RandomizedDelaySec=120
+Unit=nurse-ng-evidence.service
+
+[Install]
+WantedBy=timers.target

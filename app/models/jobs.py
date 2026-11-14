@@ -50,6 +50,9 @@ class Job(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     employer_user_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
+    employer_organization_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("employer_organizations.id", ondelete="RESTRICT"), index=True
+    )
     title: Mapped[str] = mapped_column(String(250))
     organization: Mapped[str] = mapped_column(String(250))
     location: Mapped[str] = mapped_column(String(250), default="")

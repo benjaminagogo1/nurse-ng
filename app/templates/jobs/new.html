@@ -11,6 +11,11 @@
   <p class="form-error" role="alert">{{ error }}</p>
   {% endif %}
 
+  {% if not organizations %}
+  <p class="form-notice">Before publishing, verify your email in account settings and
+    request approval to recruit for your organization.</p>
+  <p><a href="/employers/organizations">Manage organization approval</a></p>
+  {% else %}
   <form method="post" action="/jobs" class="stacked-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
 
@@ -24,13 +29,11 @@
     />
 
     <label for="organization">Organization</label>
-    <input
-      id="organization"
-      name="organization"
-      maxlength="160"
-      value="{{ values.organization }}"
-      required
-    />
+    <select id="organization" name="organization" required>
+      {% for organization in organizations %}
+      <option value="{{ organization.name }}" {% if values.organization == organization.name %}selected{% endif %}>{{ organization.name }}</option>
+      {% endfor %}
+    </select>
 
     <label for="location"
       >Location <span class="optional">(optional)</span></label
@@ -125,5 +128,6 @@
 
     <button type="submit">Publish job</button>
   </form>
+  {% endif %}
 </section>
 {% endblock %}

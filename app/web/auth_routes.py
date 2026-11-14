@@ -236,7 +236,8 @@ def login(
         request, "/",
         message(
             'Signed in',
-            'Welcome back to Nurse.ng.',
+            'Welcome back.',
+            compact=True,
         ),
     )
 
@@ -251,7 +252,8 @@ def logout(
         request, "/",
         message(
             'Signed out',
-            'You have signed out of this browser.',
+            'See you again soon.',
+            compact=True,
         ),
     )
 

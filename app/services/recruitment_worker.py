@@ -1,12 +1,14 @@
 """Durable discovery queue with leases, fencing and a hard network-process deadline."""
 
+import logging
 import multiprocessing
 import secrets
+import traceback
 from collections import deque
 from datetime import timedelta
 
 from sqlalchemy import case, func, literal, or_, select, union_all, update
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -27,6 +29,21 @@ TASK_SECONDS = 45
 LEASE_SECONDS = 90
 MAX_ATTEMPTS = 3
 NETWORK_COOLDOWN_SECONDS = 60
+logger = logging.getLogger(__name__)
+
+
+def processing_failure(exc, task_id, stage):
+    """Diagnose failures without logging SQL parameters or fetched page content."""
+    category = "database" if isinstance(exc, SQLAlchemyError) else "processing"
+    frames = " > ".join(f"{frame.name}:{frame.lineno}"
+                        for frame in traceback.extract_tb(exc.__traceback__))
+    logger.error("Recruitment task %s failed during %s: %s/%s [%s]",
+                 task_id, stage, category, type(exc).__name__, frames)
+    return {
+        "ok": False, "outcome": "processing_error", "retryable": False,
+        "message": f"Collection failed during {stage} ({category}: {type(exc).__name__}). "
+                   "No partial discovery was committed.",
+    }
 
 
 def _nigerian_source():
@@ -577,16 +594,16 @@ def apply_result(db: Session, task_id, token: str, payload: dict, result: dict) 
                     )
                 },
             )
-            # Bound expansion: institution/search pages can reveal recruitment pages;
-            # those pages are inspected but cannot recursively generate an endless crawl.
-            if not payload.get("collect_vacancies") and source.source_type in {
-                "institution_site",
-                "search_candidate",
-            }:
+            # Collectors can discover an employer's separate recruitment portal too.
+            # Linked pages are leaves: one hop and three candidates, never an endless crawl.
+            if source.discovered_via != "institution_link" and (
+                payload.get("collect_vacancies")
+                or source.source_type in {"institution_site", "search_candidate"}
+            ):
                 org = source.organization
                 for link in result.get("links", [])[:3]:
                     if (
-                        automatically_activated
+                        (automatically_activated or payload.get("collect_vacancies"))
                         and source.collection_adapter == "factual_index"
                         and in_scope(link["url"], source.vacancy_url_prefix)
                     ):
@@ -689,27 +706,17 @@ def run_next(db: Session, *, executor=None) -> DiscoveryTask | None:
     db.commit()
     try:
         result = (executor or isolated_execute)(kind, payload)
-    except Exception:
-        result = {
-            "ok": False,
-            "outcome": "processing_error",
-            "retryable": False,
-            "message": "The page checker failed; no source was approved.",
-        }
+    except Exception as exc:
+        result = processing_failure(exc, identifier, "page checking")
     try:
         apply_result(db, identifier, token, payload, result)
-    except Exception:
+    except Exception as exc:
         db.rollback()
         apply_result(
             db,
             identifier,
             token,
             payload,
-            {
-                "ok": False,
-                "outcome": "processing_error",
-                "retryable": False,
-                "message": "Invalid adapter output. No partial discovery was committed.",
-            },
+            processing_failure(exc, identifier, "saving results"),
         )
     return db.get(DiscoveryTask, identifier, populate_existing=True)

@@ -54,6 +54,7 @@ from websockets.sync.client import connect
 
 from app.db.session import SessionLocal
 from app.services.auth import register_user
+from tests.helpers import approve_test_employer
 
 command.upgrade(Config(str(ROOT / "alembic.ini")), "head")
 with SessionLocal() as db:
@@ -193,6 +194,7 @@ with SessionLocal() as db:
         full_name="Quality Staff",
         account_type="employer",
     )
+    approve_test_employer(db, staff, "Quality hospital")
     staff.is_staff = True
     db.commit()
     topic = create_topic(db, staff, name="Quality community", description="")
@@ -236,6 +238,23 @@ def audit(path, width=390, large=False):
     navigate(path)
     if large:
         js("document.documentElement.style.fontSize='32px'")
+    if path in {"/auth/register", "/auth/login"}:
+        assert js("""(() => {
+          const heading = document.querySelector('.auth-panel h2');
+          const range = document.createRange(); range.selectNodeContents(heading);
+          for (const rect of range.getClientRects()) {
+            if (!rect.width || !rect.height) continue;
+            if (rect.left < 0 || rect.right > innerWidth + 1) return false;
+            for (let parent = heading; parent; parent = parent.parentElement) {
+              const style = getComputedStyle(parent), bounds = parent.getBoundingClientRect();
+              if (['hidden', 'clip'].includes(style.overflowX) &&
+                  (rect.left < bounds.left - 1 || rect.right > bounds.right + 1)) return false;
+              if (['hidden', 'clip'].includes(style.overflowY) &&
+                  (rect.top < bounds.top - 1 || rect.bottom > bounds.bottom + 1)) return false;
+            }
+          }
+          return !/communitythat|supportsyour|support\\.A|ofpossibilities/.test(heading.innerText);
+        })()"""), "Auth heading text must remain separated and visible"
     js(axe_source)
     result = js(
         """axe.run(document, {runOnly: {type:'tag', values:[
@@ -500,6 +519,10 @@ document.activeElement.matches('[data-display-open]')"""
     logout()
     login("+2348000000077")
     navigate(event_path)
+    cdp("Network.overrideNetworkState", {
+        "offline": False, "latency": 0, "downloadThroughput": -1, "uploadThroughput": -1,
+    })
+    wait_for(lambda: js("navigator.onLine"), "online RSVP environment")
     submit(event_path + "/rsvp")
     wait_for(lambda: feedback("RSVP saved"), "member RSVP")
     assert js("document.body.textContent.includes('You are planning to attend')")

@@ -48,6 +48,7 @@ from websockets.sync.client import connect
 from app.db.session import SessionLocal
 from app.models.user import User
 from app.services.auth import register_user
+from tests.helpers import approve_test_employer
 
 command.upgrade(Config(str(ROOT / "alembic.ini")), "head")
 from app.models.opportunities import SavedOpportunity
@@ -57,6 +58,7 @@ from app.services.jobs import create_job
 def create_opportunity(title="Public health fellowship"):
     with SessionLocal() as db:
         employer = db.get(User, employer_id)
+        approve_test_employer(db, employer, "Example Health Team")
         job = create_job(
             db,
             employer,

@@ -4,6 +4,8 @@ A professional platform for nurses and healthcare employers, beginning in Nigeri
 
 ## Documents
 
+- [Video likes, visibility and administrator management](docs/ENGAGEMENT_AND_ADMIN.md).
+- [Employer approval and private evidence operations](docs/EMPLOYER_AND_EVIDENCE_OPERATIONS.md) — required migration, scanner, retention timer and legacy review.
 - [Offline reading, drafts and sync](docs/OFFLINE.md) — supported actions, resumable Reel uploads, storage limits and setup.
 - [App quality and device verification](docs/QUALITY_VERIFICATION.md).
 - [Community events](docs/EVENTS.md) — publishing, RSVPs and calendar downloads.

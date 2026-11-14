@@ -1,0 +1,46 @@
+.post-like { margin: 0; min-width: 0; }
+.post-like button, .post-like-guest {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  min-height: 44px; padding: 8px 12px; border: 1px solid var(--line);
+  border-radius: 999px; color: var(--muted); background: var(--surface);
+  font: inherit; font-size: .85rem; font-weight: 650; cursor: pointer;
+  text-decoration: none;
+}
+.post-like button[aria-pressed="true"] { color: var(--danger); }
+.post-like button[aria-pressed="true"] .icon { fill: currentColor; }
+.post-like button:disabled { opacity: .65; cursor: wait; }
+[data-like-count] { font-variant-numeric: tabular-nums; margin-inline-start: 3px; }
+.post-like-status:not(.sr-only) {
+  display: block; max-width: 24rem; margin-block: 6px; font-size: .8rem;
+  color: var(--danger); overflow-wrap: anywhere;
+}
+.reel-actions .post-like button { border: 0; border-radius: 12px; }
+.reel-actions .post-like button[aria-pressed="true"] { color: #fb7185; }
+.admin-page { max-width: 960px; margin-inline: auto;
+  padding: clamp(16px, 3vw, 32px); box-sizing: border-box; }
+.admin-heading { display: flex; gap: 16px; align-items: center; justify-content: space-between; }
+.admin-panel { margin-block: 24px; padding: 24px; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 16px; }
+.admin-panel h2 { margin: 0 0 8px; }
+.admin-search { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
+.admin-search label { flex: 1 1 260px; }
+.admin-search input { display: block; width: 100%; margin-top: 8px; }
+.admin-member { padding-block: 18px; border-bottom: 1px solid var(--line); }
+.admin-member:last-child { border: 0; padding-bottom: 0; }
+.admin-member strong, .admin-member small { display: block; overflow-wrap: anywhere; }
+.admin-member small, .admin-help { color: var(--muted); }
+.admin-member details { margin-top: 12px; }
+.admin-member summary { cursor: pointer; min-height: 44px; display: flex; align-items: center;
+  color: var(--accent); font-weight: 650; }
+.admin-member form { max-width: 480px; }
+.admin-member form input { width: 100%; margin-block: 8px 12px; }
+.admin-history { padding-left: 20px; }
+.admin-history li { margin-block: 12px; overflow-wrap: anywhere; }
+.admin-history time { display: block; color: var(--muted); font-size: .8rem; }
+.jobs-guest-note { padding: 12px 16px; border: 1px solid var(--line);
+  border-radius: 12px; background: var(--surface); color: var(--muted); }
+.jobs-guest-note a { text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 600px) {
+  .admin-heading { align-items: flex-start; flex-direction: column; }
+  .admin-panel { padding: 16px; }
+}

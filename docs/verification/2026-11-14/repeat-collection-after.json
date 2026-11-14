@@ -1,0 +1,127 @@
+{
+  "measured_at_utc": "2026-11-14T14:28:02.123971+00:00",
+  "sources": [
+    {
+      "source_url": "https://www.myjobmag.com/jobs-at/federal-ministry-of-health",
+      "channel": "https://www.myjobmag.com/jobs-by-industry/medical",
+      "approval": "approved",
+      "health": "healthy",
+      "last_success": "2026-11-14 14:25:08.085982",
+      "next_check": "2026-11-14 20:25:08.085982",
+      "revision": 24,
+      "tasks": [
+        {
+          "status": "completed",
+          "outcome": "vacancies_collected",
+          "message": "Collected 0 vacancies; 0 publishable, 0 need review. 1 detail pages deferred or unavailable.",
+          "result_count": 0,
+          "started_at": "2026-11-14 14:24:30.616377",
+          "finished_at": "2026-11-14 14:25:08.085982"
+        },
+        {
+          "status": "completed",
+          "outcome": "vacancies_collected",
+          "message": "Collected 1 vacancies; 1 publishable, 0 need review.",
+          "result_count": 0,
+          "started_at": "2026-11-14 14:12:35.751923",
+          "finished_at": "2026-11-14 14:13:15.557011"
+        }
+      ]
+    },
+    {
+      "source_url": "https://www.myjobmag.com/jobs-at/lagos-state-ministry-of-health",
+      "channel": "https://www.myjobmag.com/jobs-by-title/nurse",
+      "approval": "approved",
+      "health": "healthy",
+      "last_success": "2026-11-14 14:26:48.339344",
+      "next_check": "2026-11-14 20:26:48.339344",
+      "revision": 22,
+      "tasks": [
+        {
+          "status": "completed",
+          "outcome": "vacancies_collected",
+          "message": "Collected 3 vacancies; 3 publishable, 0 need review.",
+          "result_count": 0,
+          "started_at": "2026-11-14 14:26:09.551923",
+          "finished_at": "2026-11-14 14:26:48.339344"
+        },
+        {
+          "status": "completed",
+          "outcome": "vacancies_collected",
+          "message": "Collected 3 vacancies; 3 publishable, 0 need review.",
+          "result_count": 0,
+          "started_at": "2026-11-14 14:11:06.836648",
+          "finished_at": "2026-11-14 14:11:34.858379"
+        }
+      ]
+    }
+  ],
+  "queue": {},
+  "coverage": {
+    "measured_at_utc": "2026-11-14T14:28:02.267875+00:00",
+    "eligibility_method": "Full application open_job_condition(), including employer approval",
+    "sources_by_approval": {
+      "approved": 130,
+      "pending": 14
+    },
+    "approved_sources_by_health": {
+      "healthy": 73,
+      "http_error": 4,
+      "dns_error": 8,
+      "redirect_limit": 12,
+      "timeout": 6,
+      "tls_error": 3,
+      "scope_blocked": 6,
+      "connection_error": 11,
+      "policy_blocked": 5,
+      "access_blocked": 1,
+      "rate_limited": 1
+    },
+    "collector_authorized_sources": 130,
+    "vacancies_by_state": {
+      "duplicate": 16,
+      "pending": 16,
+      "published": 9,
+      "rejected": 100
+    },
+    "publicly_eligible_jobs": 6,
+    "public_jobs": [
+      {
+        "title": "Medical Laboratory Scientist - Lagos",
+        "organization": "eHealth Africa",
+        "country": "NG"
+      },
+      {
+        "title": "People and Culture Intern",
+        "organization": "eHealth Africa",
+        "country": "NG"
+      },
+      {
+        "title": "Office Assistant / IT Trainee",
+        "organization": "Desol Medical Solutions Limited",
+        "country": "NG"
+      },
+      {
+        "title": "Registered Nurse",
+        "organization": "St Dominic Catholic Hospital",
+        "country": "NG"
+      },
+      {
+        "title": "Oncology Nurse",
+        "organization": "Ascentech Services Limited",
+        "country": "NG"
+      },
+      {
+        "title": "Nurse",
+        "organization": "Baptist Mission Schools (BMS)",
+        "country": "NG"
+      }
+    ],
+    "pending_issue_counts": {
+      "closing_date": 16,
+      "employer": 11,
+      "country": 5
+    },
+    "pending_without_stored_issues": 0
+  }
+}

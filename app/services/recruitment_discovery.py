@@ -82,6 +82,10 @@ DISCOVERY_CATEGORIES = (
     "federal health recruitment",
     "state primary healthcare recruitment",
     "graduate internship programme",
+    "NGO health careers",
+    "NGO internship and volunteer programme",
+    "midwifery recruitment",
+    "allied healthcare careers",
 )
 
 
@@ -231,7 +235,8 @@ def search_query(payload: dict) -> str:
     # round as well. Fellowships must not wait months behind hospital searches.
     regions = ("", *NIGERIAN_REGIONS)
     region = (
-        regions[(index // len(DISCOVERY_CATEGORIES)) % len(regions)]
+        regions[(index // len(DISCOVERY_CATEGORIES) if '{category}' in payload['query']
+                 else index) % len(regions)]
         if payload.get("country_code") == "NG"
         else ""
     )

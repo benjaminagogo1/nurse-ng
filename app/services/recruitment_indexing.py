@@ -2,6 +2,9 @@
 
 from urllib.parse import urlsplit, urlunsplit
 
+from sqlalchemy import update
+
+from app.models.recruitment import RecruitmentSource
 from app.services.recruitment_fetch import in_scope, origin, public_url
 
 
@@ -81,3 +84,38 @@ def accept_collection_address(source, observed_url: str) -> bool:
         },
     }
     return True
+
+
+def select_collection_channel(db, source, url, *, dry_run=False):
+    """Operator configuration within an existing factual approval; never grant new scope."""
+    from app.services.recruitment import RecruitmentError, event, now
+    from app.services.vacancies import collector_authorized
+
+    if not collector_authorized(source) or not staff_index_authorized(source):
+        raise RecruitmentError("Choose a currently approved staff-selected factual source.")
+    channel = public_url(url)
+    if not in_scope(channel, source.reuse_url_prefix):
+        raise RecruitmentError("The channel must be within the source's existing approved scope.")
+    previous = source.activation_review['evidence'].get('collection_channel', '')
+    result = {'source': source.original_url, 'previous_channel': previous,
+              'collection_channel': channel, 'changed': previous != channel, 'dry_run': dry_run}
+    if not dry_run and previous != channel:
+        review = {**source.activation_review, 'evidence': {
+            **source.activation_review['evidence'], 'collection_channel': channel,
+        }}
+        changed = db.execute(
+            update(RecruitmentSource)
+            .where(RecruitmentSource.id == source.id, RecruitmentSource.revision == source.revision)
+            .values(activation_review=review, revision=source.revision + 1, next_check_at=now())
+            .execution_options(synchronize_session=False)
+        )
+        if changed.rowcount != 1:
+            db.rollback()
+            raise RecruitmentError("This source changed. Reload it before selecting a channel.")
+        event(db, source, 'collection_channel_selected', reference=channel, details={
+            'previous_channel': previous, 'configuration_method': 'operator_cli',
+            'note': 'Selected a recruitment channel within the existing factual collection scope.',
+        })
+        db.commit()
+        db.refresh(source)
+    return result

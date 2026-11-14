@@ -44,12 +44,16 @@
         document.content_type }} · {{ (document.size_bytes / 1024)|round(1) }}
         KB
       </span>
+      {% if evidence_available(document) %}
       <a
         href="/review/{{ case.id }}/evidence/{{ document.id }}"
         target="_blank"
         rel="noopener"
         >Download</a
       >
+      {% elif document.scan_status == 'missing' and not document.purged_at %}
+      <span>Unavailable — file missing. Request a replacement document.</span>
+      {% else %}<span>Unavailable — {{ 'retention period ended' if document.purged_at else 'document checks required' }}</span>{% endif %}
     </li>
     {% endfor %}
   </ul>

@@ -1,12 +1,13 @@
 /* Only public application assets and the neutral shell belong in this cache. */
 "use strict";
-const CACHE = "nurse-offline-shell-v15";
+const CACHE = "nurse-offline-shell-v18";
 const ASSETS = [
   "/offline-shell",
   "/static/css/app.css?v=7",
-  "/static/css/design.css?v=9",
+  "/static/css/design.css?v=10",
   "/static/css/appearance.css?v=7",
-  "/static/css/feedback.css",
+  "/static/css/feedback.css?v=3",
+  "/static/css/engagement.css?v=1",
   "/static/css/notifications.css?v=7",
   "/static/css/opportunities.css",
   "/static/css/discovery.css?v=7",
@@ -15,7 +16,8 @@ const ASSETS = [
   "/static/css/jobs.css?v=2",
   "/static/js/display.js",
   "/static/js/app.js",
-  "/static/js/feedback.js?v=7",
+  "/static/js/feedback.js?v=8",
+  "/static/js/likes.js?v=1",
   "/static/js/community-replies.js",
   "/static/js/offline-store.js?v=6",
   "/static/js/offline.js?v=10",

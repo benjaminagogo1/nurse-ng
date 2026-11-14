@@ -114,7 +114,7 @@ def test_another_publisher_redirect_is_blocked_before_destination_fetch(db_sessi
     assert list_open_jobs(db_session) == []
 
 
-def test_source_country_can_be_unknown_but_job_country_must_be_stated(db_session, monkeypatch):
+def test_source_and_job_country_can_remain_unknown(db_session, monkeypatch):
     monkeypatch.setattr(worker, "NETWORK_COOLDOWN_SECONDS", 0)
     item, fetched, target = fixture(db_session, host="https://hospital.example.ng/")
     item.organization.country_code = ""
@@ -124,9 +124,11 @@ def test_source_country_can_be_unknown_but_job_country_must_be_stated(db_session
         b"Nigeria", b"elsewhere"
     )
     check(db_session, item, fetched)
-    assert collector_authorized(item) and list_open_jobs(db_session) == []
+    assert collector_authorized(item)
+    assert len(list_open_jobs(db_session)) == 1
     record = db_session.scalar(select(VacancyRecord))
-    assert any(issue.startswith("country:") for issue in record.issues)
+    assert record.normalized['country'] == ''
+    assert not any(issue.startswith('country:') for issue in record.issues)
 
 
 def test_combined_approval_is_staff_only_and_has_csrf_and_revision_checks(client, db_session):

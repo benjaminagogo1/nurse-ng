@@ -49,6 +49,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         "check-config", help="Validate startup settings without displaying secrets."
     )
     subparsers.add_parser("cleanup-account-files", help="Retry queued account file removals.")
+    evidence = subparsers.add_parser(
+        "maintain-evidence", help="Check legacy evidence and purge expired private files."
+    )
+    evidence.add_argument("--dry-run", action="store_true")
+    subparsers.add_parser("backup", help="Back up SQLite and referenced uploads privately.")
+    subparsers.add_parser("prune-backups", help="Remove expired automatic backups.")
+    subparsers.add_parser("vacancy-coverage",
+                         help="Measure current public jobs and review blockers.")
+    restore = subparsers.add_parser("restore-backup", help="Restore to a NEW private directory.")
+    restore.add_argument("backup")
+    restore.add_argument("destination")
 
     for name in ("set-staff", "unset-staff"):
         command = subparsers.add_parser(name)
@@ -86,8 +97,95 @@ def main(argv: Sequence[str] | None = None) -> int:
         "reconcile-vacancies", help="Clean duplicate/non-vacancy review work."
     )
     quality.add_argument("--dry-run", action="store_true")
+    quality.add_argument("--exclude-unrelated", action="store_true",
+                         help="Also exclude unreviewed, unrelated factual-index adverts.")
+    reassess = subparsers.add_parser(
+        "reassess-incomplete-vacancies", help="List fresh adverts with missing optional details."
+    )
+    reassess.add_argument("--dry-run", action="store_true")
+    expand = subparsers.add_parser(
+        "expand-opportunity-discovery", help="Search across more healthcare and programme websites."
+    )
+    expand.add_argument("--dry-run", action="store_true")
+    channel = subparsers.add_parser("set-collection-channel",
+                                   help="Select a channel within an already approved publisher.")
+    channel.add_argument("--source-url", required=True)
+    channel.add_argument("--channel-url", required=True)
+    channel.add_argument("--dry-run", action="store_true")
 
     args = parser.parse_args(argv)
+    if args.command == "expand-opportunity-discovery":
+        from app.services.recruitment import expand_opportunity_discovery
+
+        with SessionLocal() as db:
+            try:
+                result = expand_opportunity_discovery(db, dry_run=args.dry_run)
+            except ValueError as exc:
+                parser.error(str(exc))
+        print(json.dumps(result, indent=2))
+        return 0
+    if args.command == "reassess-incomplete-vacancies":
+        from app.services.vacancies import reassess_incomplete_records
+
+        with SessionLocal() as db:
+            result = reassess_incomplete_records(db, dry_run=args.dry_run)
+        print(json.dumps(result, indent=2))
+        return 0
+    if args.command == "set-collection-channel":
+        from app.models.recruitment import RecruitmentSource
+        from app.services.recruitment_indexing import select_collection_channel
+
+        with SessionLocal() as db:
+            sources = list(db.scalars(select(RecruitmentSource).where(
+                RecruitmentSource.original_url == args.source_url,
+            )))
+            if len(sources) != 1:
+                parser.error("Choose an exact URL belonging to one registered source.")
+            try:
+                result = select_collection_channel(db, sources[0], args.channel_url,
+                                                   dry_run=args.dry_run)
+            except ValueError as exc:
+                parser.error(str(exc))
+        print(json.dumps(result, indent=2))
+        return 0
+    if args.command == "vacancy-coverage":
+        from app.services.vacancy_coverage import measure_coverage
+
+        with SessionLocal() as db:
+            result = measure_coverage(db)
+        print(json.dumps(result, indent=2))
+        return 0
+    if args.command in {"backup", "restore-backup", "prune-backups"}:
+        from app.services.backups import (
+            BackupError,
+            backup_lock,
+            create_backup,
+            prune_backups,
+            restore_backup,
+        )
+
+        try:
+            if args.command == "backup":
+                result = create_backup()
+            elif args.command == "restore-backup":
+                result = restore_backup(args.backup, args.destination)
+            else:
+                with backup_lock(settings.backup_dir) as root:
+                    result = {"pruned": prune_backups(root)}
+        except (BackupError, OSError) as exc:
+            print(str(exc) if isinstance(exc, BackupError) else
+                  "Backup filesystem operation failed; check private storage access.",
+                  file=sys.stderr)
+            return 1
+        print(json.dumps(result, indent=2))
+        return 0
+    if args.command == "maintain-evidence":
+        from app.services.evidence import maintain_evidence
+
+        with SessionLocal() as db:
+            result = maintain_evidence(db, dry_run=args.dry_run)
+        print(json.dumps(result))
+        return 1 if result["scan_unavailable"] else 0
     if args.command == "workers":
         from app.services.worker_runtime import run_supervisor
 
@@ -111,7 +209,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         from app.services.vacancies import reconcile_pending_quality
 
         with SessionLocal() as db:
-            result = reconcile_pending_quality(db, dry_run=args.dry_run)
+            result = reconcile_pending_quality(db, dry_run=args.dry_run,
+                                               exclude_unrelated=args.exclude_unrelated)
         print(json.dumps({"dry_run": args.dry_run, **result}))
         return 0
     if args.command in {"recruitment-worker", "reels-worker", "notification-worker"}:

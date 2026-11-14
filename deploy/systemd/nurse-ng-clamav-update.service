@@ -1,0 +1,11 @@
+[Unit]
+Description=Update project-local ClamAV signatures
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/nurse-ng
+ExecStart=%h/nurse-ng/deploy/clamav-local update
+UMask=0077
+NoNewPrivileges=true
+TimeoutStartSec=10min

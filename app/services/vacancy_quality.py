@@ -60,6 +60,10 @@ def non_vacancy_reason(title: str, url: str = "") -> str:
             r"^/jobs-(?:at|by-[^/]+|in)/", parts.path,
         ):
             return "category: this is a publisher's employer or jobs category page"
+        if (parts.hostname or "").removeprefix("www.") == "jobberman.com" and re.match(
+            r"^/jobs(?:/|$)", parts.path,
+        ):
+            return "category: this is a publisher's jobs search page"
     except ValueError:
         pass
     if re.search(

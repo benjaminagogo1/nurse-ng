@@ -55,6 +55,7 @@ from app.models.profile import NurseProfile
 from app.services.community import connection_pair_key
 from app.services.jobs import create_job
 from app.services.profiles import get_visibility_map
+from tests.helpers import approve_test_employer
 from tests.test_member_discovery import person
 
 with SessionLocal() as db:
@@ -75,6 +76,7 @@ with SessionLocal() as db:
     employer = public.user
     employer.account_type = "employer"
     db.commit()
+    approve_test_employer(db, employer, "Example Health")
     job = create_job(
         db,
         employer,

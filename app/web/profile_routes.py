@@ -157,6 +157,8 @@ def _verification_context(
         **_document_review_context(profile),
         "registration_number": registration_number,
         "max_megabytes": max(1, settings.evidence_max_bytes // (1024 * 1024)),
+        "evidence_retention_days": settings.evidence_retention_days,
+        "evidence_pending_retention_days": settings.evidence_pending_retention_days,
         "error": error,
         "allow_extra_evidence": True,
     }

@@ -119,7 +119,7 @@ def candidates_from_results(rows, *, query, provider, permission="", target_coun
     """Only minimal discovery facts, never provider snippets or implied source approval."""
     from app.services.recruitment_fetch import origin
 
-    candidates, seen = [], set()
+    candidates, seen, publisher_counts = [], set(), {}
     for row in rows[:100]:
         try:
             target = public_url(row["url"])
@@ -130,6 +130,11 @@ def candidates_from_results(rows, *, query, provider, permission="", target_coun
             if key in seen:
                 continue
             seen.add(key)
+            publisher = origin(target).split('://', 1)[1].removeprefix('www.')
+            # A popular aggregator must not consume every discovery slot.
+            if publisher_counts.get(publisher, 0) >= 2:
+                continue
+            publisher_counts[publisher] = publisher_counts.get(publisher, 0) + 1
             candidates.append(
                 {
                     "identity_key": "search:" + key,

@@ -150,7 +150,7 @@ def test_new_edit_form_defaults_to_student(client):
 
     page = client.get("/profile/edit")
 
-    assert 'value="student" selected' in page.text
+    assert has_element(page, "option", value="student", selected=True)
 
 
 def test_display_name_is_required(client, db_session):

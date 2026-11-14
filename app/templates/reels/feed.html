@@ -199,6 +199,8 @@
             >{% endif %}
           </div>
           <div class="reel-actions">
+            {% from '_like_button.html' import like_button %}
+            {{ like_button(post, summaries[post.id], user, csrf_token, 'reels') }}
             <a
               href="/posts/{{ post.id }}#replies"
               data-comments="/reels/{{ post.id }}/comments"

@@ -6,6 +6,8 @@ import secrets
 
 os.environ.update({
     "NURSE_NG_ENVIRONMENT": "development",
+    "NURSE_NG_DATABASE_URL": "sqlite://",
+    "NURSE_NG_ACCOUNT_MAIL_BACKEND": "disabled",
     "NURSE_NG_DEBUG": "false",
     "NURSE_NG_SECRET_KEY": secrets.token_urlsafe(32),
     "NURSE_NG_ALLOWED_HOSTS": "localhost,127.0.0.1,::1",

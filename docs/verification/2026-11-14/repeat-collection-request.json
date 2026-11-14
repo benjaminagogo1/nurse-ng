@@ -1,0 +1,86 @@
+{
+  "requested_at_utc": "2026-11-14T14:24:27.085567+00:00",
+  "before": {
+    "measured_at_utc": "2026-11-14T14:24:27.346384+00:00",
+    "eligibility_method": "Full application open_job_condition(), including employer approval",
+    "sources_by_approval": {
+      "approved": 130,
+      "pending": 14
+    },
+    "approved_sources_by_health": {
+      "healthy": 73,
+      "http_error": 4,
+      "dns_error": 8,
+      "redirect_limit": 12,
+      "timeout": 6,
+      "tls_error": 3,
+      "scope_blocked": 6,
+      "connection_error": 11,
+      "policy_blocked": 5,
+      "access_blocked": 1,
+      "rate_limited": 1
+    },
+    "collector_authorized_sources": 130,
+    "vacancies_by_state": {
+      "duplicate": 16,
+      "pending": 16,
+      "published": 9,
+      "rejected": 100
+    },
+    "publicly_eligible_jobs": 6,
+    "public_jobs": [
+      {
+        "title": "Medical Laboratory Scientist - Lagos",
+        "organization": "eHealth Africa",
+        "country": "NG"
+      },
+      {
+        "title": "People and Culture Intern",
+        "organization": "eHealth Africa",
+        "country": "NG"
+      },
+      {
+        "title": "Office Assistant / IT Trainee",
+        "organization": "Desol Medical Solutions Limited",
+        "country": "NG"
+      },
+      {
+        "title": "Registered Nurse",
+        "organization": "St Dominic Catholic Hospital",
+        "country": "NG"
+      },
+      {
+        "title": "Oncology Nurse",
+        "organization": "Ascentech Services Limited",
+        "country": "NG"
+      },
+      {
+        "title": "Nurse",
+        "organization": "Baptist Mission Schools (BMS)",
+        "country": "NG"
+      }
+    ],
+    "pending_issue_counts": {
+      "employer": 11,
+      "closing_date": 16,
+      "country": 5
+    },
+    "pending_without_stored_issues": 0
+  },
+  "daily_attempts_used": 343,
+  "daily_limit": 600,
+  "sources": [
+    {
+      "source_url": "https://www.myjobmag.com/jobs-at/lagos-state-ministry-of-health",
+      "channel": "https://www.myjobmag.com/jobs-by-title/nurse",
+      "already_queued": false
+    },
+    {
+      "source_url": "https://www.myjobmag.com/jobs-at/federal-ministry-of-health",
+      "channel": "https://www.myjobmag.com/jobs-by-industry/medical",
+      "already_queued": false
+    }
+  ],
+  "apply": true,
+  "tasks_enqueued": 2
+}

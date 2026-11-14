@@ -449,6 +449,10 @@ def discussion_summaries(
     }
     if not result:
         return result
+    from app.services.engagement import like_summaries
+
+    for post_id, likes in like_summaries(db, result, user).items():
+        result[post_id].update(likes)
     for post_id, count, latest in db.execute(
         select(CommunityReply.post_id, func.count(), func.max(CommunityReply.created_at))
         .where(CommunityReply.post_id.in_(result), CommunityReply.status == ContentStatus.PUBLISHED)

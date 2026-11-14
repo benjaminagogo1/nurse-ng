@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Organization approval — Nurse.ng{% endblock %}
+{% block content %}
+<section class="form-page">
+  <h1>Organization approval</h1>
+  <p>Staff check your organization and your authority to recruit before you can publish jobs
+    or access applications. <a href="/settings">Verify your email in account settings</a>.</p>
+  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+  <h2>Your organizations</h2>
+  <ul>
+    {% for member in memberships %}
+    <li>{{ member.organization.name }} — Organization: {{ member.organization.status }};
+      your access: {{ member.status }}.</li>
+    {% else %}<li>No requests yet.</li>{% endfor %}
+  </ul>
+  <p><a href="/jobs/new">Post a job for an approved organization</a></p>
+  <h2>Request approval</h2>
+  <form method="post" action="/employers/organizations" class="stacked-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <label for="name">Organization's registered name</label>
+    <input id="name" name="name" value="{{ values.name }}" maxlength="160" required />
+    <label for="website">Official website</label>
+    <input id="website" name="website" type="url" value="{{ values.website }}" maxlength="500" placeholder="https://hospital.example" required />
+    <label for="authority_details">Your role and recruiting authority</label>
+    <textarea id="authority_details" name="authority_details" maxlength="2000" rows="5" required>{{ values.authority_details }}</textarea>
+    <p class="field-hint">Explain how staff can confirm your role using the organization's official contact details.</p>
+    <button type="submit">Request approval</button>
+  </form>
+</section>
+{% endblock %}

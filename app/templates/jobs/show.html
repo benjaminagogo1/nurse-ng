@@ -19,7 +19,7 @@ content %}
     <div class="jobs-detail-footer">
       <div class="jobs-detail-tags">
         <span>{{ job.type }}</span><span>{{ job.mode }}</span
-        ><span>{{ job.status|replace('_', ' ')|capitalize }}</span>
+        ><span>{{ job.status_label }}</span>
       </div>
       <p>{{ job.date_label }} {{ job.posted|lower }}</p>
     </div>
@@ -37,12 +37,16 @@ content %}
       </p>
       {% endif %}
       <div class="job-description">
-        {{ job.description or 'The employer has not added a detailed description for this role. You can introduce yourself with a note when applying.' }}
+        {{ job.description or ('See the original announcement for the available details.' if job.external else 'The employer has not added a detailed description for this role. You can introduce yourself with a note when applying.') }}
       </div>
       {% for label, value in job.requirements.items() %}
       <h2>{{ label }}</h2>
       <div class="job-description">{{ value }}</div>
-      {% endfor %} {% if job.licence %}
+      {% endfor %}
+      {% if job.external and not job.requirements %}
+      <p>Eligibility requirements are not supplied in this listing. See the original announcement.</p>
+      {% endif %}
+      {% if job.licence %}
       <p class="jobs-caption">
         Adapted from
         <a href="{{ job.licence.source_url }}">{{ job.licence.attribution }}</a>
@@ -68,12 +72,10 @@ content %}
             <dt>Work arrangement</dt>
             <dd>{{ job.mode }}</dd>
           </div>
-          {% if job.country %}
           <div>
             <dt>Country code</dt>
-            <dd>{{ job.country }}</dd>
+            <dd>{{ job.country or 'Not stated' }}</dd>
           </div>
-          {% endif %}
           <div>
             <dt>Closing date</dt>
             <dd>
@@ -133,14 +135,14 @@ content %}
           announcement.
         </p>
         <p class="jobs-caption">
-          Last confirmed: {{ job.confirmed_at.strftime('%Y-%m-%d %H:%M') if
+          Last checked: {{ job.confirmed_at.strftime('%Y-%m-%d %H:%M') if
           job.confirmed_at else 'Not confirmed' }} UTC{% if job.clarified %}.
           Some fields were clarified by Nurse.ng following staff review.{% endif
           %}
         </p>
         {% if not job.closing_date %}
         <p class="jobs-caption">
-          No closing date stated — check the original announcement.
+          No closing date stated. Check availability in the original announcement.
         </p>
         {% endif %} {% else %}
         <p>

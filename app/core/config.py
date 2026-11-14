@@ -80,6 +80,12 @@ class Settings(BaseSettings):
     # directory; never point this inside ``app/static``.
     evidence_dir: str = "evidence"
     evidence_max_bytes: int = 5 * 1024 * 1024
+    evidence_scan_command: str = "clamscan"
+    evidence_scan_timeout_seconds: int = Field(default=60, ge=1, le=120)
+    evidence_retention_days: int = Field(default=90, ge=1, le=365)
+    evidence_pending_retention_days: int = Field(default=180, ge=1, le=365)
+    backup_dir: str = ".local-backups/automatic"
+    backup_retention_days: int = Field(default=7, ge=1, le=30)
 
     # Public community media is kept separate from private review evidence.
     # These are conservative pilot defaults and remain configurable while the

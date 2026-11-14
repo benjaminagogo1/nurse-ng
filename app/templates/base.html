@@ -45,7 +45,7 @@ feedback_slot -%} {%- macro nav_link(href, key, label, name, current) -%}
     />
     <link
       rel="stylesheet"
-      href="{{ url_for('static', path='/css/design.css') }}?v=9"
+      href="{{ url_for('static', path='/css/design.css') }}?v=10"
     />
     <link
       rel="stylesheet"
@@ -53,11 +53,13 @@ feedback_slot -%} {%- macro nav_link(href, key, label, name, current) -%}
     />
     <link
       rel="stylesheet"
-      href="{{ url_for('static', path='/css/feedback.css') }}"
+      href="{{ url_for('static', path='/css/feedback.css') }}?v=3"
     />
     <script src="{{ url_for('static', path='/js/app.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/engagement.css') }}?v=1" />
+    <script src="{{ url_for('static', path='/js/likes.js') }}?v=1" defer></script>
     <script
-      src="{{ url_for('static', path='/js/feedback.js') }}?v=7"
+      src="{{ url_for('static', path='/js/feedback.js') }}?v=8"
       defer
     ></script>
     {% if draft_session_known|default(true) %}
@@ -372,7 +374,7 @@ feedback_slot -%} {%- macro nav_link(href, key, label, name, current) -%}
           <p class="side-heading">Staff</p>
           <ul class="side-list">
             {{ nav_link('/staff/users', 'staff-users', 'User analytics',
-            'dashboard', page) }}{{ nav_link('/review', 'review', 'Document reviews', 'review', page) }}{{ nav_link('/moderation', 'moderation',
+            'dashboard', page) }}{{ nav_link('/staff/admins', 'staff-admins', 'Administrators', 'shield', page) }}{{ nav_link('/review', 'review', 'Document reviews', 'review', page) }}{{ nav_link('/staff/employers', 'employer-approvals', 'Employer approvals', 'briefcase', page) }}{{ nav_link('/moderation', 'moderation',
             'Moderation', 'flag', page) }}{{ nav_link('/recruitment',
             'recruitment', 'Recruitment sources', 'building', page) }}
           </ul>
