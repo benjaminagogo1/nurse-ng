@@ -1,0 +1,471 @@
+{
+  "coverage": {
+    "measured_at_utc": "2026-11-15T02:18:29.766944+00:00",
+    "eligibility_method": "Full application open_job_condition(), including employer approval",
+    "sources_by_approval": {
+      "approved": 130,
+      "pending": 50
+    },
+    "approved_sources_by_health": {
+      "timeout": 8,
+      "healthy": 71,
+      "http_error": 4,
+      "dns_error": 8,
+      "redirect_limit": 12,
+      "tls_error": 3,
+      "scope_blocked": 6,
+      "connection_error": 11,
+      "policy_blocked": 5,
+      "access_blocked": 1,
+      "rate_limited": 1
+    },
+    "collector_authorized_sources": 130,
+    "vacancies_by_state": {
+      "duplicate": 10,
+      "pending": 5,
+      "published": 37,
+      "rejected": 100
+    },
+    "publicly_eligible_jobs": 30,
+    "public_jobs": [
+      {
+        "title": "Medical Laboratory Scientist - Lagos",
+        "organization": "eHealth Africa",
+        "country": "NG"
+      },
+      {
+        "title": "People and Culture Intern",
+        "organization": "eHealth Africa",
+        "country": "NG"
+      },
+      {
+        "title": "Office Assistant / IT Trainee",
+        "organization": "Desol Medical Solutions Limited",
+        "country": "NG"
+      },
+      {
+        "title": "Registered Nurse",
+        "organization": "St Dominic Catholic Hospital",
+        "country": "NG"
+      },
+      {
+        "title": "Oncology Nurse",
+        "organization": "Ascentech Services Limited",
+        "country": "NG"
+      },
+      {
+        "title": "Nurse",
+        "organization": "Baptist Mission Schools (BMS)",
+        "country": "NG"
+      },
+      {
+        "title": "Nursing Officer (Cardiothoracic) at Lagos State Ministry of Health",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Internship Based on Projects",
+        "organization": "Nightingales Medical Trust",
+        "country": ""
+      },
+      {
+        "title": "Internship Based on Profession",
+        "organization": "Nightingales Medical Trust",
+        "country": ""
+      },
+      {
+        "title": "Internships",
+        "organization": "Premier Health Care",
+        "country": ""
+      },
+      {
+        "title": "Medical Assistant Openings \u2022 Patients First",
+        "organization": "Patients First",
+        "country": ""
+      },
+      {
+        "title": "Graduate Trainee Opportunities",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Healthcare Recruitment",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Laboratory Technologist I (Medical Microbiology / Parasitology) at Federal Ministry of Health",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Radiography Intern at Lagos State Ministry of Health",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Associate Professor / Reader (Medical Microbiology / Parasitology) at Federal Ministry of Health",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Nursing Officer (Burns and Plastic Nursing) at Lagos State Ministry of Health",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Nursing Officer (Oncology) at Lagos State Ministry of Health",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "IV Therapy Nurse",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Pharmacist",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Medical Officer",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Pharmacist Intern",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Pharmacy Intern",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Pharmacist",
+        "organization": "eHealth Africa",
+        "country": "NG"
+      },
+      {
+        "title": "Dental Assistant - Lagos",
+        "organization": "eHealth Africa",
+        "country": "NG"
+      },
+      {
+        "title": "Central Bank of Nigeria (CBN) Recruitment \u2014 Graduate Trainees & Specialists",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Physician Opportunities",
+        "organization": "OhioHealth",
+        "country": ""
+      },
+      {
+        "title": "Registered Nurse",
+        "organization": "Foremost Radiology Consultants Limited (FRCL)",
+        "country": "NG"
+      },
+      {
+        "title": "Registered Nurse",
+        "organization": "Westcare Specialist Hospital",
+        "country": "NG"
+      },
+      {
+        "title": "First Bank Recruitment 2026/2027: Graduate Trainee & Experienced Hire Guide",
+        "organization": "",
+        "country": "NG"
+      }
+    ],
+    "pending_issue_counts": {
+      "employer": 3,
+      "closing_date": 4,
+      "conflict": 1
+    },
+    "pending_without_stored_issues": 0
+  },
+  "schedules": [
+    {
+      "name": "Broad discovery: Allied healthcare opportunities",
+      "query": "{region} {country} pharmacist dental physiotherapy careers -site:myjobmag.com -site:jobberman.com",
+      "enabled": true,
+      "interval_hours": 6,
+      "next_page": 1,
+      "next_run_at": "2026-11-15 08:16:49.226988",
+      "tasks": [
+        {
+          "status": "queued",
+          "outcome": "",
+          "result_count": 0,
+          "message": "",
+          "finished_at": "None"
+        }
+      ]
+    },
+    {
+      "name": "Broad discovery: Government health opportunities",
+      "query": "{region} {country} government health recruitment site:gov.ng -site:myjobmag.com -site:jobberman.com",
+      "enabled": true,
+      "interval_hours": 6,
+      "next_page": 2,
+      "next_run_at": "2026-11-15 08:16:49.226988",
+      "tasks": [
+        {
+          "status": "completed",
+          "outcome": "search_checked",
+          "result_count": 17,
+          "message": "SearXNG found 18 candidate pages; 0 instance failures; 0 upstream engines unavailable.",
+          "finished_at": "2026-11-15 02:16:58.183672"
+        }
+      ]
+    },
+    {
+      "name": "Broad discovery: Hospital and clinic opportunities",
+      "query": "{region} {country} hospital clinic careers vacancies -site:myjobmag.com -site:jobberman.com",
+      "enabled": true,
+      "interval_hours": 6,
+      "next_page": 2,
+      "next_run_at": "2026-11-15 08:16:49.226988",
+      "tasks": [
+        {
+          "status": "completed",
+          "outcome": "search_checked",
+          "result_count": 19,
+          "message": "SearXNG found 20 candidate pages; 0 instance failures; 0 upstream engines unavailable.",
+          "finished_at": "2026-11-15 02:18:05.408115"
+        }
+      ]
+    },
+    {
+      "name": "Broad discovery: Internships and programmes",
+      "query": "{region} {country} internships fellowships graduate programmes -site:myjobmag.com -site:jobberman.com",
+      "enabled": true,
+      "interval_hours": 6,
+      "next_page": 1,
+      "next_run_at": "2026-11-15 08:16:49.226988",
+      "tasks": [
+        {
+          "status": "queued",
+          "outcome": "",
+          "result_count": 0,
+          "message": "",
+          "finished_at": "None"
+        }
+      ]
+    },
+    {
+      "name": "Broad discovery: NGO opportunities",
+      "query": "{region} {country} NGO health careers vacancies -site:myjobmag.com -site:jobberman.com",
+      "enabled": true,
+      "interval_hours": 6,
+      "next_page": 1,
+      "next_run_at": "2026-11-15 08:16:49.226988",
+      "tasks": [
+        {
+          "status": "queued",
+          "outcome": "",
+          "result_count": 0,
+          "message": "",
+          "finished_at": "None"
+        }
+      ]
+    },
+    {
+      "name": "Nigerian healthcare institutions",
+      "query": "",
+      "enabled": true,
+      "interval_hours": 24,
+      "next_page": 2,
+      "next_run_at": "2026-11-15 08:39:32.050261",
+      "tasks": [
+        {
+          "status": "completed",
+          "outcome": "directory_checked",
+          "result_count": 0,
+          "message": "Checked 20 directory records; 1 could not be used.",
+          "finished_at": "2026-11-14 10:39:59.664758"
+        },
+        {
+          "status": "completed",
+          "outcome": "directory_checked",
+          "result_count": 4,
+          "message": "Checked 20 directory records; 0 could not be used.",
+          "finished_at": "2026-11-13 11:05:40.993175"
+        }
+      ]
+    },
+    {
+      "name": "Nigerian opportunities across the web",
+      "query": "{category} {region} {country} applications careers opportunities",
+      "enabled": true,
+      "interval_hours": 6,
+      "next_page": 2,
+      "next_run_at": "2026-11-15 02:40:04.381426",
+      "tasks": [
+        {
+          "status": "failed",
+          "outcome": "search_unavailable",
+          "result_count": 0,
+          "message": "Search providers unavailable: searxng connection_error",
+          "finished_at": "2026-11-14 20:55:17.986229"
+        },
+        {
+          "status": "failed",
+          "outcome": "search_unavailable",
+          "result_count": 0,
+          "message": "Search providers unavailable: searxng connection_error",
+          "finished_at": "2026-11-14 14:55:19.578271"
+        }
+      ]
+    },
+    {
+      "name": "Worldwide healthcare institutions",
+      "query": "",
+      "enabled": true,
+      "interval_hours": 168,
+      "next_page": 3,
+      "next_run_at": "2026-11-15 19:46:18.528072",
+      "tasks": [
+        {
+          "status": "completed",
+          "outcome": "directory_checked",
+          "result_count": 20,
+          "message": "Checked 20 directory records; 0 could not be used.",
+          "finished_at": "2026-11-08 19:47:26.468352"
+        },
+        {
+          "status": "completed",
+          "outcome": "directory_checked",
+          "result_count": 20,
+          "message": "Checked 20 directory records; 0 could not be used.",
+          "finished_at": "2026-11-07 19:47:35.166934"
+        }
+      ]
+    }
+  ],
+  "public_jobs_by_publisher": {
+    "erp.eha.ng": 4,
+    "www.myjobmag.com": 12,
+    "www.nightingaleseldercare.com": 2,
+    "www.yai.org": 1,
+    "patientsfirst.com": 1,
+    "recruitmentblueprints.com": 3,
+    "www.jobberman.com": 5,
+    "currentaffairs.com.ng": 1,
+    "careers.ohiohealth.com": 1
+  },
+  "queue": {
+    "queued": 39
+  },
+  "attempts_last_24h": 374,
+  "daily_task_limit": 600,
+  "recent_sources": [
+    {
+      "url": "https://www.eha.ng/careers",
+      "status": "pending",
+      "health": "unchecked",
+      "discovered_via": "search",
+      "created_at": "2026-11-15 02:18:05"
+    },
+    {
+      "url": "https://medicalworldnigeria.com/jobs/hospital-jobs?page=1",
+      "status": "pending",
+      "health": "unchecked",
+      "discovered_via": "search",
+      "created_at": "2026-11-15 02:18:05"
+    },
+    {
+      "url": "https://www.glassdoor.com/Job/ikeja-healthcare-jobs-SRCH_IL.0,5_IC2592236_KO6,16.htm",
+      "status": "pending",
+      "health": "unchecked",
+      "discovered_via": "search",
+      "created_at": "2026-11-15 02:18:05"
+    },
+    {
+      "url": "https://ng.indeed.com/q-hospital-l-lagos-jobs.html",
+      "status": "pending",
+      "health": "unchecked",
+      "discovered_via": "search",
+      "created_at": "2026-11-15 02:18:05"
+    },
+    {
+      "url": "https://jobsinnigeria.careers/job-category/healthcaremedical-jobs-in-nigeria/",
+      "status": "pending",
+      "health": "unchecked",
+      "discovered_via": "search",
+      "created_at": "2026-11-15 02:18:05"
+    },
+    {
+      "url": "https://www.hotnigerianjobs.com/role/423/",
+      "status": "pending",
+      "health": "unchecked",
+      "discovered_via": "search",
+      "created_at": "2026-11-15 02:18:05"
+    },
+    {
+      "url": "https://ng.linkedin.com/jobs/hospital-jobs",
+      "status": "pending",
+      "health": "unchecked",
+      "discovered_via": "search",
+      "created_at": "2026-11-15 02:18:05"
+    },
+    {
+      "url": "https://freehire.me/roles/healthcare/nigeria",
+      "status": "pending",
+      "health": "unchecked",
+      "discovered_via": "search",
+      "created_at": "2026-11-15 02:18:05"
+    },
+    {
+      "url": "https://jobdockets.com/jobs/c/healthcare-medical",
+      "status": "pending",
+      "health": "unchecked",
+      "discovered_via": "search",
+      "created_at": "2026-11-15 02:18:05"
+    },
+    {
+      "url": "https://saltcitycareers.com.ng/hospital-jobs-in-nigeria/",
+      "status": "pending",
+      "health": "unchecked",
+      "discovered_via": "search",
+      "created_at": "2026-11-15 02:18:05"
+    },
+    {
+      "url": "https://www.jobsregion.com/latest-vacancies-at-eha-clinics/",
+      "status": "pending",
+      "health": "unchecked",
+      "discovered_via": "search",
+      "created_at": "2026-11-15 02:18:05"
+    },
+    {
+      "url": "https://ng.linkedin.com/jobs/healthcare-jobs",
+      "status": "pending",
+      "health": "unchecked",
+      "discovered_via": "search",
+      "created_at": "2026-11-15 02:18:05"
+    },
+    {
+      "url": "https://www.nelajobs.com/nigeria-jobs/medical-jobs-in-Nigeria",
+      "status": "pending",
+      "health": "unchecked",
+      "discovered_via": "search",
+      "created_at": "2026-11-15 02:18:05"
+    },
+    {
+      "url": "https://www.nelajobs.com/nigeria-jobs/nurse-jobs-in-Nigeria",
+      "status": "pending",
+      "health": "unchecked",
+      "discovered_via": "search",
+      "created_at": "2026-11-15 02:18:05"
+    },
+    {
+      "url": "https://www.hotnigerianjobs.com/industry/118/",
+      "status": "pending",
+      "health": "unchecked",
+      "discovered_via": "search",
+      "created_at": "2026-11-15 02:18:05"
+    }
+  ]
+}

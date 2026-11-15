@@ -1,0 +1,11 @@
+node_modules/
+capacitor.config.json
+www/
+dist/
+.gradle/
+.android/
+*.keystore
+*.jks
+signing.properties
+.env
+

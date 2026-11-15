@@ -89,10 +89,58 @@ when their documented reuse rights apply. Rejections, revocations and staff deci
 binding. Jobs disappear when their source/checks expire or availability can no longer be
 confirmed.
 
-A missing publication date is labelled "First listed". A missing deadline is accepted only
-when a currently fetched open-vacancy index links the job and the detail contains a job-bound
-application form, with no stated closure or unresolved deadline. It displays "deadline not
-stated" and receives no guessed deadline reminder. Other ambiguous dates remain in review.
+A missing publication date is labelled "First listed". Across every collector, missing
+deadlines, employers, locations, descriptions and eligibility details no longer prevent an
+otherwise relevant announcement from appearing. The listing shows the facts available and
+links to the original announcement. Missing deadlines display "Not stated" and "Check
+availability", with no guessed deadline reminder. Explicit closure, expired deadlines,
+contradictory or ambiguous dates, source authorization and freshness checks still apply.
+
+## Continuing discovery across more websites
+
+Run these commands after configuring a working search provider:
+
+```sh
+venv/bin/python -m app.cli expand-opportunity-discovery --dry-run
+venv/bin/python -m app.cli expand-opportunity-discovery
+```
+
+This adds five six-hour searches covering federal/state government, hospitals and clinics,
+NGOs, internships/fellowships/graduate programmes, and allied healthcare. Searches rotate
+through Nigeria's regions, starting nationally. These additional searches exclude MyJobMag
+and Jobberman; the existing sources continue their own collection. General search accepts
+at most two candidates per hostname (treating `www` as the same hostname) per response.
+Rerunning setup preserves existing schedules, including manual pauses and cursors.
+
+Approved collectors also discover linked external careers portals. Up to three linked
+portals become candidates for their own checks. A linked candidate cannot expand recursively,
+and discovery does not overwrite staff rejection or grant approval automatically. All
+collectors use the same missing-information rules. Search results and registered sources
+are not counts of available vacancies; measure the public feed with `vacancy-coverage`.
+
+## Persistent local search service
+
+The previous temporary SearXNG process did not survive restart. The local setup now uses
+the pinned upstream revision `3a3dd15bfafcb645a1b45c2c6c0798a8f786aaaf`, its pinned
+dependencies and Granian WSGI server in an independent environment under `.local-tools/`.
+The installer checks the source archive's SHA-256, generates a private secret on first
+installation, and preserves existing search settings when repeated.
+
+```sh
+bash deploy/install-local-search.sh
+install -m 644 deploy/systemd/nurse-ng-search.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable --now nurse-ng-search.service
+systemctl --user restart nurse-ng-workers.service
+systemctl --user is-active nurse-ng-search.service nurse-ng-workers.service
+```
+
+The supplied service assumes this checkout is at `~/nurse-ng`; adjust its paths otherwise.
+It binds only `127.0.0.1:8888`, restarts after failure, and starts with the user service
+manager. Set `NURSE_NG_RECRUITMENT_SEARXNG_URLS=http://127.0.0.1:8888` in the app's `.env`.
+The machine and user service manager must be running. Search engines may still return
+rate limits, CAPTCHAs or incomplete results; direct source collection runs independently.
+Inspect service failures with `journalctl --user -u nurse-ng-search.service`.
 
 ## Local verification — 9 November 2026
 
@@ -103,7 +151,7 @@ stated" and receives no guessed deadline reminder. Other ambiguous dates remain 
 - Migration `b715a203ce46` was checked on a database clone and applied locally with all original rows preserved, no foreign-key violations and no metadata drift. Private backup: `/tmp/nurse-notifications-migration-cslmxexi/backup.sqlite`.
 - The full pytest suite passed. Focused checks cover the final queue/change-tracking refinements. Isolated browser journeys passed at 320, 390 and 1280px, including saves, reminders, matching, worker-generated alerts and the coverage screen. Browser artifacts: `/tmp/nurse-opportunities-browser-_oelkysp/`.
 
-The running local SearXNG process is a development verification service, not a supervised
+At the 9 November verification, the local SearXNG process was a development service, not a supervised
 production deployment. Docker is installed but this user lacks daemon access, so the supplied
 container configuration has not been launched here. Production still needs persistent service
 hosting/supervision, a tested image pin, appropriate network access controls, monitoring and

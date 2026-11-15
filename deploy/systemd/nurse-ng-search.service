@@ -1,0 +1,22 @@
+[Unit]
+Description=Nurse.ng private recruitment search
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=10
+
+[Service]
+Type=simple
+WorkingDirectory=%h/nurse-ng/.local-tools/searxng/searxng-3a3dd15bfafcb645a1b45c2c6c0798a8f786aaaf
+Environment=PYTHONUNBUFFERED=1
+Environment=SEARXNG_SETTINGS_PATH=%h/nurse-ng/.local-tools/searxng/settings.yml
+ExecStart=%h/nurse-ng/.local-tools/searxng/venv/bin/granian --interface wsgi --host 127.0.0.1 --port 8888 --workers 1 --blocking-threads 4 searx.webapp:app
+Restart=on-failure
+RestartSec=5
+KillMode=control-group
+TimeoutStopSec=35
+NoNewPrivileges=true
+UMask=0077
+
+[Install]
+WantedBy=default.target

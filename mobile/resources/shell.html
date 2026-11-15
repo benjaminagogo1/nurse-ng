@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#073c40">
+  <title>Nurse.ng</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; min-height: 100dvh; display: grid;
+      place-items: center; background: #f3faf8; color: #123d40;
+      padding: max(28px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right))
+        max(28px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+      font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    main { max-width: 390px; text-align: center; }
+    svg { width: 84px; height: 84px; }
+    h1 { font-size: 1.75rem; line-height: 1.2; letter-spacing: -.03em; }
+    p { color: #466966; }
+    .note { font-size: .9rem; }
+    .button { display: inline-block; padding: 13px 25px; border-radius: 12px;
+      background: #00766b; color: white; text-decoration: none; font-weight: 600; }
+    .button:focus-visible { outline: 3px solid #00766b; outline-offset: 4px; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #09282c; color: #ecf9f5; } p { color: #b1cdc7; }
+    }
+  </style>
+</head>
+<body><main>{{ICON}}<h1>{{TITLE}}</h1><p>{{BODY}}</p>{{ACTION}}</main></body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "nurse-ng-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Android and iPhone application for Nurse.ng",
+  "type": "module",
+  "scripts": {
+    "configure": "node scripts/configure.mjs",
+    "sync": "npm run configure && cap sync",
+    "android:preview": "node scripts/build-android.mjs",
+    "android:release": "node scripts/build-android.mjs --release",
+    "ios:release": "node scripts/configure.mjs --release && cap sync ios",
+    "open:android": "cap open android",
+    "open:ios": "cap open ios",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.6.2",
+    "@capacitor/core": "8.6.2",
+    "@capacitor/ios": "8.6.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.6.2"
+  },
+  "engines": { "node": ">=22" }
+}

@@ -1,0 +1,23 @@
+{
+  "pages": [
+    {
+      "path": "/healthz",
+      "status": 200
+    },
+    {
+      "path": "/readyz",
+      "status": 200
+    },
+    {
+      "path": "/jobs",
+      "status": 200
+    },
+    {
+      "path": "/jobs/01a1da8f-e0be-766a-83a6-246b266291c3",
+      "status": 200,
+      "title": "Nursing Officer (Cardiothoracic) at Lagos State Ministry of Health",
+      "missing_details_displayed": true,
+      "original_publisher": "www.myjobmag.com"
+    }
+  ]
+}

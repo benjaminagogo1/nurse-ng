@@ -4,6 +4,8 @@ A professional platform for nurses and healthcare employers, beginning in Nigeri
 
 ## Documents
 
+- [Android and iPhone app projects](mobile/README.md) — preview builds, signing,
+  hosting requirements and the signed-in install entry.
 - [Video likes, visibility and administrator management](docs/ENGAGEMENT_AND_ADMIN.md).
 - [Employer approval and private evidence operations](docs/EMPLOYER_AND_EVIDENCE_OPERATIONS.md) — required migration, scanner, retention timer and legacy review.
 - [Offline reading, drafts and sync](docs/OFFLINE.md) — supported actions, resumable Reel uploads, storage limits and setup.
@@ -16,6 +18,8 @@ A professional platform for nurses and healthcare employers, beginning in Nigeri
 - [User analytics, unique IDs and daily activity](docs/MEMBER_ANALYTICS.md).
 
 - [Nigerian opportunity coverage, saves and alerts](docs/NIGERIAN_OPPORTUNITIES.md).
+- [Search across recruitment websites](docs/SEARCH_DISCOVERY.md) — ongoing government,
+  hospital, NGO and programme discovery, incomplete listings and persistent local search.
 
 - [Notifications and messaging](docs/NOTIFICATIONS.md) — inbox, preferences, live conversations and email-worker operations.
 

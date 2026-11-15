@@ -1,0 +1,20 @@
+{
+  "apk": "mobile/dist/nurse-ng-preview.apk",
+  "bytes": 4702227,
+  "sha256": "3cb0840984bf1c9c6a89fe8bd58f26adeaecfb4267c112d0d8699e8f791faeed",
+  "offline_bundle_bytes": 948738,
+  "offline_bundle_sha256": "3b16c1b54ee2ed187115673da7e8854433b7ae0af78f3cecbe677f304b0965f9",
+  "android_and_ios_bundle_match": true,
+  "server_configured": false,
+  "package": "com.nurseng.app.preview",
+  "version": "0.1.0-preview",
+  "build": "npm run android:preview",
+  "build_result": "BUILD SUCCESSFUL",
+  "signature_verified": true,
+  "signature_scheme": "v2",
+  "signer": "Android Debug",
+  "android_device_execution": false,
+  "ios_assets_synced": true,
+  "ios_xcode_build": false,
+  "ios_device_execution": false
+}

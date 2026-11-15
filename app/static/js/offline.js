@@ -19,8 +19,9 @@
     }
     return store.init(scope, authoritative);
   })();
-  let network = navigator.onLine ? "online" : "offline",
+  let network = navigator.onLine && !window.NurseNativeOffline ? "online" : "offline",
     failures = 0,
+    checking = false,
     timer;
   let pending = 0,
     failed = 0,
@@ -81,13 +82,19 @@
   }
   async function check() {
     clearTimeout(timer);
+    if (checking) return;
+    checking = true;
     if (!document.hidden && navigator.onLine) {
       try {
         await fetchWithTimeout("/offline/ping", {}, 5000);
+        // The bundled shell has no server-rendered identity. Learn revocation
+        // on reconnect even if this workspace only contains unsent drafts.
+        if (shell && store.available) await window.NurseOffline.session?.();
       } catch {
         /* Quiet indicator. */
       }
     }
+    checking = false;
     timer = setTimeout(
       check,
       Math.min(120000, 30000 * 2 ** Math.min(failures, 2)),
@@ -102,7 +109,10 @@
     paint();
   });
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) check();
+    if (!document.hidden) {
+      check();
+      document.dispatchEvent(new Event("nurse:sync-request"));
+    }
   });
   navigator.serviceWorker?.addEventListener("message", (event) => {
     if (event.data?.type === "nurse:sync-ready")
@@ -133,7 +143,7 @@
     if (message)
       message.textContent = enabled
         ? "Save your work here. Queued changes send when you reopen the app and reconnect."
-        : "Sign in while connected to prepare this browser for offline use. Device storage must be available.";
+        : `Sign in while connected to prepare this ${window.NurseNativeOffline ? "device" : "browser"} for offline use. Device storage must be available.`;
     if (store.error) window.NurseOffline.notice(store.error, "warning");
     document
       .querySelector("[data-offline-clear]")
@@ -149,8 +159,9 @@
         }
       });
     document.dispatchEvent(new Event("nurse:offline-ready"));
+    if (shell && enabled) check();
   });
-  if ("serviceWorker" in navigator && window.isSecureContext) {
+  if (!window.NurseNativeOffline && "serviceWorker" in navigator && window.isSecureContext) {
     navigator.serviceWorker.register("/service-worker.js").catch(() => {
       if (shell)
         window.NurseOffline.notice(

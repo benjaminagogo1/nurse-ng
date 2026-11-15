@@ -61,6 +61,8 @@ class Settings(BaseSettings):
     avatar_max_bytes: int = Field(default=5 * 1024 * 1024, ge=1024, le=10 * 1024 * 1024)
     # Email links use a configured origin, never the request's Host header.
     public_base_url: str = "http://127.0.0.1:8000"
+    android_app_download_url: str = ""
+    ios_app_download_url: str = ""
     google_client_id: str = ""
     google_client_secret: str = Field(default="", repr=False)
     linkedin_client_id: str = ""
@@ -189,6 +191,16 @@ class Settings(BaseSettings):
         self.recruitment_searxng_urls = ",".join(dict.fromkeys(endpoints))
 
         base = urlsplit(self.public_base_url)
+        for value in (self.android_app_download_url, self.ios_app_download_url):
+            if not value:
+                continue
+            download = urlsplit(value)
+            if (any(char.isspace() for char in value) or "\\" in value
+                    or download.username or download.password
+                    or not ((download.scheme == "https" and download.hostname)
+                            or (value.startswith("/") and not value.startswith("//")
+                                and not download.scheme and not download.netloc))):
+                raise ValueError("Mobile app download links must use HTTPS or a local site path.")
         if (
             base.scheme not in {"http", "https"}
             or not base.hostname

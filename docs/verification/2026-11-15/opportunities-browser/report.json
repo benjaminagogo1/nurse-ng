@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "widths": [
+    320,
+    390,
+    1280
+  ],
+  "flows": [
+    "save and remove",
+    "reminder controls",
+    "interest matching",
+    "email opt-in",
+    "actual worker match and deadline alerts",
+    "coverage dashboard"
+  ],
+  "original_artifacts": "/tmp/nurse-opportunities-browser-9u25x9ef"
+}

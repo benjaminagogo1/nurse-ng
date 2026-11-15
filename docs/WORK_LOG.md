@@ -1454,3 +1454,71 @@ This is the pre-hardening result: the previously documented 89 cases plus 14 com
   records still require missing facts or a relevance decision; they were not
   bulk-published. Worker supervision improves local operation; the web server
   remains the existing development server.
+
+## 15 November 2026 — Resume incomplete listings and broader source discovery
+
+- Recovered the interrupted 14 November request: list useful opportunities with
+  available facts and expand discovery across government, hospitals, NGOs,
+  internships/programmes and allied healthcare. The implementation was committed
+  in `9a2bcf0`; its recurring searches had not been activated.
+- Restored the unavailable local SearXNG service in a persistent project-local
+  environment and enabled `nurse-ng-search.service` on localhost. Added the pinned
+  installer and user service definition, then restarted the worker supervisor.
+- After a private backup, enabled all five six-hour searches. Their first round
+  completed with 85 additional source pages registered for inspection. At
+  02:22:39 UTC the public feed still had 30 eligible opportunities across nine
+  publisher hostnames; candidate pages are not counts of available jobs.
+- The focused 103-test run and opportunity browser journey passed. Fixed a stale
+  browser assertion to verify persisted delivery status instead of worker log
+  wording. Live Jobs, partial-listing detail and health/readiness checks returned
+  HTTP 200. Installation, dependency, lint and configuration checks passed.
+- Final full regression: **789 passed**. A subsequent MyJobMag source timeout
+  temporarily reduced public eligibility to 21; its normal retry is queued.
+  The final report records the count and both failed attempts explicitly.
+- Detailed results, receipts and continuing collection status are in
+  [the recovery report](verification/2026-11-15/README.md). Tests use isolated data
+  and local mailboxes. No new schema migration or production deployment was needed.
+
+## 15 November 2026 — Android and iPhone app preparation
+
+- Added a signed-in **Install the app** entry, settings link and `/app` download
+  page. Real release links are configurable; unavailable releases are described
+  honestly. Existing website features and sign-in methods remain available.
+- Prepared Capacitor Android and iOS projects using the existing Nurse.ng brand,
+  native navigation, a configurable server origin and a connection retry screen.
+  Documented signing/hosting steps and added a manual preview-build workflow.
+- Built `mobile/dist/nurse-ng-preview.apk` successfully and verified its Android
+  development signature, metadata and ZIP contents. The 4,122,802-byte artifact
+  is a disconnected preview: no public server exists yet. It has not been tested
+  on a physical phone or emulator. The iPhone project has not been built with
+  Xcode or signed; Apple credentials and a Mac are still required.
+- Verification: **54 targeted Python tests passed**, native configuration checks
+  passed, and browser journeys passed at 320, 390 and 1280 pixels including
+  large-text/dark layouts. Native detection was simulated. Lint, template/plist
+  parsing and diff checks passed. No worker service was disabled, and no store
+  release or deployment was performed.
+- [Mobile verification report](verification/2026-11-15/mobile-app/README.md)
+  records the APK digest, screenshots, tested behavior and release limitations.
+
+## 15 November 2026 — Offline access in the native apps
+
+- Bundled the existing neutral Offline & sync workspace with its styles, fonts,
+  icons and scripts. Android and iOS now recover failed same-site navigation at
+  the configured site's origin, preserving encrypted records, drafts and queued
+  changes across closure without depending on a cached website/service worker.
+- Added foreground sync triggers and identity checks for draft-only workspaces
+  after reconnection. Reused the existing consent, conflict, upload and duplicate
+  receipt checks. No website feature or sign-in method was disabled.
+- The browser journey verified two complete offline restarts with the server
+  stopped and caches removed, saved job/profile/draft recovery, queued edits,
+  automatic reconnect, lost-response duplicate prevention, account isolation and
+  session revocation. It tests the bundled document using Chrome interception;
+  it does not execute the native Android/iOS document loaders.
+- Targeted Python checks: **30 passed**; final bundle checks: **5 passed**;
+  native Node checks: **4 passed**. Android compilation/packaging and development
+  signature verification passed. iOS assets were synchronized; no Xcode build or
+  physical-device verification was possible here. Lint and syntax checks passed.
+- The updated preview APK includes an offline workspace entry but no server or
+  member data. Hosting and initial connected sign-in remain necessary; public
+  distribution and iPhone signing remain outstanding. Detailed receipts and
+  screenshots: [native offline report](verification/2026-11-15/mobile-offline/README.md).

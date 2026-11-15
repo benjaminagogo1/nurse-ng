@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "widths": [
+    320,
+    390,
+    1280
+  ],
+  "native_detection": "simulated Capacitor API",
+  "artifacts": "/tmp/nurse-mobile-app-browser-b2odf40n"
+}

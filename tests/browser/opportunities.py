@@ -43,9 +43,11 @@ os.environ.update(
 )
 from alembic import command
 from alembic.config import Config
+from sqlalchemy import select
 from websockets.sync.client import connect
 
 from app.db.session import SessionLocal
+from app.models.notifications import Notification
 from app.models.user import User
 from app.services.auth import register_user
 from tests.helpers import approve_test_employer
@@ -278,7 +280,14 @@ try:
         timeout=40,
     )
     (artifacts / "worker.log").write_text(result.stdout + result.stderr)
-    assert result.returncode == 0 and result.stdout.count("state=sent") == 2
+    assert result.returncode == 0, result.stdout + result.stderr
+    with SessionLocal() as db:
+        delivered = list(db.scalars(select(Notification).where(
+            Notification.recipient_id == member_id,
+            Notification.category == "opportunities",
+        )))
+        assert len(delivered) == 2
+        assert all(notice.email_state == "sent" for notice in delivered)
     assert len(list((artifacts / "mail").glob("*.eml"))) == 2
     navigate("/notifications?category=opportunities")
     assert js('document.querySelectorAll(".notice-item").length === 2')

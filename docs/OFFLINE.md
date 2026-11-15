@@ -8,6 +8,12 @@ the assessment and synchronization contract.
 
 ## Using it
 
+The Android and iPhone projects now bundle this workspace and its assets for
+native cold-start recovery. They reuse the configured site's encrypted storage;
+they do not require a service-worker installation to show the workspace.
+See [native offline setup and verification limits](../mobile/README.md#offline-access).
+Member data must first be prepared inside the mobile app while connected.
+
 1. Sign in while connected. Visit the profile, opportunities and notifications you
    want available, and open any message, application, post, reply or Reel form you
    will need. On Learning, explicitly download the original application checklist.

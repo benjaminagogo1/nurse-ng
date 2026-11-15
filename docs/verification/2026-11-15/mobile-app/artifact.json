@@ -1,0 +1,59 @@
+{
+  "artifact": {
+    "apk": "mobile/dist/nurse-ng-preview.apk",
+    "bytes": 4122802,
+    "sha256": "cca88ceae1a7f1f2ea9ae2137302ffab4461269ba4d4d5e2b1ec5a69f88ea690",
+    "bundled_config": {
+      "appId": "com.nurseng.app",
+      "appName": "Nurse.ng",
+      "webDir": "www",
+      "backgroundColor": "#073c40",
+      "android": {
+        "allowMixedContent": false,
+        "webContentsDebuggingEnabled": true
+      },
+      "ios": {
+        "contentInset": "automatic",
+        "webContentsDebuggingEnabled": true
+      }
+    },
+    "offline_preview_verified": true
+  },
+  "android": {
+    "package": "com.nurseng.app.preview",
+    "label": "Nurse.ng Preview",
+    "version": "0.1.0-preview",
+    "minimum_sdk": 24,
+    "target_sdk": 36,
+    "build": "npm run android:preview",
+    "build_result": "BUILD SUCCESSFUL",
+    "signature_verified": true,
+    "signature_scheme": "v2",
+    "signing_identity": "Android Debug",
+    "certificate_sha256": "654154cfd3de95f02ee940007c38b014409432f82fdb13ce99c35851e9d2630a",
+    "device_installation_tested": false
+  },
+  "ios": {
+    "project_prepared": true,
+    "xcode_build_performed": false,
+    "signed_release": false
+  },
+  "checks": {
+    "focused_pytest_passed": 54,
+    "node_configuration_suite": "passed",
+    "browser_widths": [
+      320,
+      390,
+      1280
+    ],
+    "native_detection": "simulated Capacitor API",
+    "lint": "passed",
+    "diff_check": "passed"
+  },
+  "availability": {
+    "hosted_server": false,
+    "public_android_release": false,
+    "public_iphone_release": false,
+    "existing_website_features_disabled": false
+  }
+}

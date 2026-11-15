@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% from '_icons.html' import icon %}
+{% block content %}
+<section class="mobile-app-page" aria-labelledby="mobile-app-heading">
+  <img class="mobile-app-logo" src="/static/img/favicon.svg" width="72" height="72" alt="Nurse.ng" />
+  <p class="eyebrow">Your community, in your pocket</p>
+  <h1 id="mobile-app-heading">Get the Nurse.ng app</h1>
+  <p class="lede">Find opportunities, stay connected and keep your nursing journey moving.</p>
+  <div class="mobile-downloads">
+    <section class="mobile-download-card" aria-labelledby="android-app-heading">
+      <h2 id="android-app-heading">Android</h2>
+      <p>Nurse.ng on your Android phone.</p>
+      {% if android_download %}
+      <a class="btn btn-primary" href="{{ android_download }}" data-android-download>Download for Android {{ icon('arrow', 16) }}</a>
+      {% else %}
+      <p class="mobile-release-status">The Android download is being prepared.</p>
+      {% endif %}
+    </section>
+    <section class="mobile-download-card" aria-labelledby="iphone-app-heading">
+      <h2 id="iphone-app-heading">iPhone</h2>
+      <p>Nurse.ng on your iPhone.</p>
+      {% if ios_download %}
+      <a class="btn btn-primary" href="{{ ios_download }}" data-ios-download>Get the iPhone app {{ icon('arrow', 16) }}</a>
+      {% else %}
+      <p class="mobile-release-status">The iPhone release is being prepared.</p>
+      {% endif %}
+    </section>
+  </div>
+  <p class="mobile-web-link">Your account, jobs and community are also available here on the web.</p>
+  <a class="btn btn-secondary" href="{{ '/auth/dashboard' if user else '/auth/login' }}">{{ 'Back to your dashboard' if user else 'Sign in on the web' }}</a>
+</section>
+{% endblock %}

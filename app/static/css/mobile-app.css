@@ -1,0 +1,35 @@
+.mobile-install-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--fg);
+}
+.mobile-install-card img { flex: none; }
+.mobile-install-card > div { flex: 1; min-width: 0; }
+.mobile-install-card p { margin: 4px 0 0; color: var(--muted); }
+.mobile-install-card .btn { flex: none; min-height: 44px; }
+.mobile-app-page { max-width: 860px; margin: 20px auto 48px; text-align: center; }
+.mobile-app-logo { margin-bottom: 16px; }
+.mobile-app-page .lede { max-width: 580px; margin: 16px auto 28px; }
+.mobile-downloads { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.mobile-download-card { padding: 28px; border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg); background: var(--surface); }
+.mobile-download-card h2 { margin-top: 0; }
+.mobile-download-card p { color: var(--muted); }
+.mobile-release-status { font-weight: 600; }
+.mobile-web-link { margin-top: 28px; color: var(--muted); }
+@media (max-width: 650px) {
+  .mobile-install-card { flex-wrap: wrap; padding: 16px; margin: 18px 18px 24px; }
+  .mobile-install-card .btn { width: 100%; }
+  .mobile-app-page { padding-inline: 18px; }
+  .mobile-downloads { grid-template-columns: 1fr; }
+  .mobile-download-card { padding: 22px 16px; }
+}
+@media (display-mode: standalone) {
+  .mobile-install-card { display: none; }
+}

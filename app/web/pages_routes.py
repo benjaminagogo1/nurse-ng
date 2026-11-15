@@ -3,6 +3,7 @@
 from fastapi import APIRouter, Depends, Form, Request, Response
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.db.session import get_db
 from app.models.user import User
 from app.services.account_mail import mail_available
@@ -69,6 +70,15 @@ def settings_page(request: Request, user: User = Depends(require_user)) -> Respo
         "title": "Account settings", "user": user,
         "values": {"full_name": user.full_name, "email": user.email or ""},
         "mail_available": mail_available(),
+    })
+
+
+@router.get("/app")
+def mobile_app_page(request: Request, user: User | None = Depends(get_current_user)) -> Response:
+    return render(request, "pages/mobile_app.html", {
+        "title": "Get the Nurse.ng app", "user": user,
+        "android_download": settings.android_app_download_url,
+        "ios_download": settings.ios_app_download_url,
     })
 
 

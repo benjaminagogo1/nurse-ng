@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "loader": "Chrome document interception at the site origin; native loader not executed",
+  "service_worker": "bypassed and caches cleared",
+  "checks": [
+    "first use",
+    "saved jobs/profile/draft",
+    "two full offline browser restarts",
+    "offline profile edit and post queue",
+    "automatic sync",
+    "lost acknowledgement with no duplicate",
+    "logout and account isolation",
+    "draft-only session revocation"
+  ],
+  "widths": [
+    320,
+    390,
+    1280
+  ],
+  "artifacts": "/tmp/nurse-native-offline-h01z0i10"
+}
