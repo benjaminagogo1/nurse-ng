@@ -1,0 +1,316 @@
+[
+  {
+    "requested_path": "/",
+    "width": 390,
+    "large_text": false,
+    "path": "/",
+    "title": "Nurse.ng \u2014 Better careers. Stronger nurses.",
+    "overflow": false,
+    "violations": [],
+    "passes": 23
+  },
+  {
+    "requested_path": "/auth/login",
+    "width": 390,
+    "large_text": false,
+    "path": "/auth/login",
+    "title": "Sign in \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "targets": [
+          [
+            ".in"
+          ]
+        ]
+      }
+    ],
+    "passes": 25
+  },
+  {
+    "requested_path": "/auth/register",
+    "width": 390,
+    "large_text": false,
+    "path": "/auth/register",
+    "title": "Create your account \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "targets": [
+          [
+            ".in"
+          ]
+        ]
+      }
+    ],
+    "passes": 25
+  },
+  {
+    "requested_path": "/jobs",
+    "width": 390,
+    "large_text": false,
+    "path": "/jobs",
+    "title": "Job opportunities \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 24
+  },
+  {
+    "requested_path": "/topics",
+    "width": 390,
+    "large_text": false,
+    "path": "/topics",
+    "title": "Offline & sync \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 24
+  },
+  {
+    "requested_path": "/nurses",
+    "width": 390,
+    "large_text": false,
+    "path": "/nurses",
+    "title": "Offline & sync \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 24
+  },
+  {
+    "requested_path": "/learning",
+    "width": 390,
+    "large_text": false,
+    "path": "/learning",
+    "title": "Learning \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 18
+  },
+  {
+    "requested_path": "/resources",
+    "width": 390,
+    "large_text": false,
+    "path": "/resources",
+    "title": "Resources \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 20
+  },
+  {
+    "requested_path": "/events",
+    "width": 390,
+    "large_text": false,
+    "path": "/events",
+    "title": "Community events \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 18
+  },
+  {
+    "requested_path": "/reels",
+    "width": 390,
+    "large_text": false,
+    "path": "/reels",
+    "title": "Reels \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 21
+  },
+  {
+    "requested_path": "/offline",
+    "width": 390,
+    "large_text": false,
+    "path": "/offline",
+    "title": "Offline & sync \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 24
+  },
+  {
+    "requested_path": "/app",
+    "width": 390,
+    "large_text": false,
+    "path": "/app",
+    "title": "Get the Nurse.ng app \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 23
+  },
+  {
+    "requested_path": "/",
+    "width": 1280,
+    "large_text": false,
+    "path": "/",
+    "title": "Nurse.ng \u2014 Better careers. Stronger nurses.",
+    "overflow": false,
+    "violations": [],
+    "passes": 25
+  },
+  {
+    "requested_path": "/auth/login",
+    "width": 1280,
+    "large_text": false,
+    "path": "/auth/login",
+    "title": "Sign in \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "targets": [
+          [
+            ".in"
+          ]
+        ]
+      }
+    ],
+    "passes": 27
+  },
+  {
+    "requested_path": "/auth/register",
+    "width": 1280,
+    "large_text": false,
+    "path": "/auth/register",
+    "title": "Create your account \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "targets": [
+          [
+            ".in"
+          ]
+        ]
+      }
+    ],
+    "passes": 27
+  },
+  {
+    "requested_path": "/jobs",
+    "width": 1280,
+    "large_text": false,
+    "path": "/jobs",
+    "title": "Job opportunities \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 27
+  },
+  {
+    "requested_path": "/topics",
+    "width": 1280,
+    "large_text": false,
+    "path": "/topics",
+    "title": "Community \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 21
+  },
+  {
+    "requested_path": "/nurses",
+    "width": 1280,
+    "large_text": false,
+    "path": "/nurses",
+    "title": "Find colleagues \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "requested_path": "/learning",
+    "width": 1280,
+    "large_text": false,
+    "path": "/learning",
+    "title": "Learning \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 20
+  },
+  {
+    "requested_path": "/resources",
+    "width": 1280,
+    "large_text": false,
+    "path": "/resources",
+    "title": "Resources \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 22
+  },
+  {
+    "requested_path": "/events",
+    "width": 1280,
+    "large_text": false,
+    "path": "/events",
+    "title": "Community events \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 20
+  },
+  {
+    "requested_path": "/reels",
+    "width": 1280,
+    "large_text": false,
+    "path": "/reels",
+    "title": "Reels \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 23
+  },
+  {
+    "requested_path": "/offline",
+    "width": 1280,
+    "large_text": false,
+    "path": "/offline",
+    "title": "Offline & sync \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "requested_path": "/app",
+    "width": 1280,
+    "large_text": false,
+    "path": "/app",
+    "title": "Get the Nurse.ng app \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 25
+  },
+  {
+    "requested_path": "/auth/register",
+    "width": 320,
+    "large_text": true,
+    "path": "/auth/register",
+    "title": "Create your account \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "requested_path": "/auth/login",
+    "width": 320,
+    "large_text": true,
+    "path": "/auth/login",
+    "title": "Sign in \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "requested_path": "/app",
+    "width": 320,
+    "large_text": true,
+    "path": "/app",
+    "title": "Get the Nurse.ng app \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 24
+  }
+]

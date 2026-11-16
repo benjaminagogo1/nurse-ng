@@ -1,0 +1,33 @@
+{
+  "provenance": "Completed runner results recorded during this assessment; original artifact directories retained separately.",
+  "quality": {
+    "passed": true,
+    "audited_states": 25,
+    "artifacts": "/tmp/nurse-quality-browser-256mkl9n"
+  },
+  "notifications_messages": {
+    "passed": true,
+    "email_delivery": "private file mailbox only",
+    "artifacts": "/tmp/nurse-notifications-browser-ei8n1eem"
+  },
+  "offline": {
+    "passed": true,
+    "artifacts": "/tmp/nurse-offline-browser-v1bz76n6"
+  },
+  "reels": {
+    "passed": true,
+    "artifacts": "/tmp/nurse-reels-browser-g26fdt6j"
+  },
+  "discovery": {
+    "repository_runner_passed": false,
+    "repository_failure": "tests/browser/member_discovery.py:276; exact raw heading text includes template whitespace",
+    "temporary_diagnosis_passed": true,
+    "temporary_change": "Trim heading text with .textContent.trim(); fixed ROOT for temporary script location.",
+    "repository_artifacts": "/tmp/nurse-discovery-browser-o40q50nc",
+    "diagnosis_artifacts": "/tmp/nurse-discovery-browser-87tj_atd"
+  },
+  "native_node_tests": {
+    "passed": 4,
+    "physical_device_run": false
+  }
+}

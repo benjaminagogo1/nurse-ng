@@ -99,16 +99,17 @@ def test_supervisor_restarts_worker_with_stale_progress(db_session, monkeypatch)
     assert len(spawned) == 1 and child.instance != 'c' * 32
 
 
-def test_real_supervisor_recovers_a_killed_idle_worker(tmp_path):
+@pytest.mark.parametrize("role", ["recruitment", "notifications"])
+def test_real_supervisor_recovers_a_killed_idle_worker(tmp_path, role):
     """No schedules, external requests, SMTP or live database are involved."""
     url = f"sqlite:///{tmp_path / 'worker.db'}"
     engine = create_engine(url)
     Base.metadata.create_all(engine)
     env = {**os.environ, 'NURSE_NG_DATABASE_URL': url, 'NURSE_NG_ACCOUNT_MAIL_BACKEND': 'disabled',
-           'NURSE_NG_REQUIRED_WORKERS': 'recruitment'}
+           'NURSE_NG_REQUIRED_WORKERS': role}
     log = (tmp_path / 'supervisor.log').open('w')
     process = subprocess.Popen(
-        [sys.executable, '-m', 'app.cli', 'workers', '--roles', 'recruitment'],
+        [sys.executable, '-m', 'app.cli', 'workers', '--roles', role],
         env=env, stdout=log, stderr=log, start_new_session=True,
     )
     children = set()
@@ -145,3 +146,32 @@ def test_real_supervisor_recovers_a_killed_idle_worker(tmp_path):
                 pass
         log.close()
         engine.dispose()
+
+
+def test_required_notification_worker_controls_readiness(client, db_session, monkeypatch):
+    monkeypatch.setattr(settings, 'required_workers', 'recruitment,reels,notifications')
+    now = datetime.now(UTC)
+    for role in ['recruitment', 'reels']:
+        report(db_session, role, 'a' * 32, 'idle', started_at=now)
+    assert client.get('/readyz').status_code == 503
+    report(db_session, 'notifications', 'b' * 32, 'idle', started_at=now)
+    assert client.get('/readyz').status_code == 200
+    report(db_session, 'notifications', 'b' * 32, 'idle', started_at=now,
+           at=now - timedelta(minutes=2))
+    assert client.get('/readyz').status_code == 503
+
+
+@pytest.mark.parametrize('configured, expected', [
+    ('', 'recruitment,reels,notifications'),
+    ('recruitment,reels', 'recruitment,reels'),
+])
+def test_supervisor_default_includes_notifications_and_respects_explicit_roles(
+    monkeypatch, configured, expected,
+):
+    from app.cli import main
+
+    monkeypatch.setattr(settings, 'required_workers', configured)
+    roles = []
+    monkeypatch.setattr(runtime, 'run_supervisor', lambda value: roles.append(value) or 0)
+    assert main(['workers']) == 0
+    assert roles == [expected]

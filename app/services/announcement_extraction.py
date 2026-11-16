@@ -8,7 +8,11 @@ from urllib.parse import urljoin, urlsplit
 from app.services.opportunities import NURSING, relevant_opportunity
 from app.services.recruitment_fetch import in_scope, public_url, url_key
 from app.services.vacancy_extraction import normalize
-from app.services.vacancy_quality import announcement_intent, non_vacancy_reason
+from app.services.vacancy_quality import (
+    announcement_intent,
+    canonical_vacancy_url,
+    non_vacancy_reason,
+)
 
 
 class AnnouncementHTML(HTMLParser):
@@ -155,7 +159,7 @@ def announcement_links(
 ) -> list[str]:
     parsed = AnnouncementHTML()
     parsed.feed(body.decode("utf-8", errors="replace"))
-    result, seen = [], {url_key(url)}
+    result, seen = [], {url_key(canonical_vacancy_url(url))}
     priority = {}
     links = parsed.links
     if include_channels:
@@ -181,7 +185,7 @@ def announcement_links(
         ):
             continue
         try:
-            target = public_url(target)
+            target = canonical_vacancy_url(public_url(target))
         except ValueError:
             continue
         if (

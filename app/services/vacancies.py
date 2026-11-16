@@ -33,7 +33,11 @@ from app.services.vacancy_extraction import (
     parse_date,
     validation_issues,
 )
-from app.services.vacancy_quality import canonical_vacancy_url, non_vacancy_reason
+from app.services.vacancy_quality import (
+    canonical_vacancy_record,
+    canonical_vacancy_url,
+    non_vacancy_reason,
+)
 
 FRESHNESS = timedelta(hours=48)
 COLLECTORS = {
@@ -270,7 +274,7 @@ def _publish(db, record, timestamp):
                 select(VacancyRecord).where(
                     VacancyRecord.job_id == job.id,
                     VacancyRecord.id != record.id,
-                    VacancyRecord.state != "rejected",
+                    VacancyRecord.state.not_in(["rejected", "duplicate"]),
                 )
             )
         )
@@ -369,10 +373,10 @@ def ingest_page(db: Session, source, result: dict, timestamp):
         )
         return {"records": 0, "published": 0, "pending": 0, "error": str(exc)}
     keys = [_record_key(raw) for raw in rows]
-    # The same JSON-LD object may be embedded twice. Only differing copies conflict.
+    # Comment/tracking aliases of one object are also duplicates, not conflicting facts.
     versions = {}
     for raw, key in zip(rows, keys, strict=True):
-        versions.setdefault(key, set()).add(digest(raw))
+        versions.setdefault(key, set()).add(digest(canonical_vacancy_record(raw)))
     duplicated = {key for key, hashes in versions.items() if len(hashes) > 1}
     seen, published, pending = set(), 0, 0
     for raw, key in zip(rows, keys, strict=True):

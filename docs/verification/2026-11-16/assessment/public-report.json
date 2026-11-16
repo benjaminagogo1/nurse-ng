@@ -1,0 +1,8 @@
+{
+  "local_base": "http://127.0.0.1:8000",
+  "inspected_states": 27,
+  "states_with_violations": 4,
+  "states_with_horizontal_overflow": 0,
+  "javascript_errors": [],
+  "artifacts": "/tmp/nurse-app-public-inspection-5raq4_g0"
+}

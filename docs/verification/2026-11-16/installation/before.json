@@ -1,0 +1,39 @@
+{
+  "manifest": {
+    "url": "http://127.0.0.1:8000/manifest.webmanifest",
+    "errors": [],
+    "data": "{\"name\":\"Nurse.ng\",\"short_name\":\"Nurse.ng\",\"start_url\":\"/\",\"scope\":\"/\",\"display\":\"standalone\",\"background_color\":\"#f5f8f8\",\"theme_color\":\"#073c40\",\"icons\":[{\"src\":\"/static/img/favicon.svg\",\"sizes\":\"any\",\"type\":\"image/svg+xml\",\"purpose\":\"any\"}]}",
+    "parsed": {
+      "scope": "http://127.0.0.1:8000/"
+    },
+    "manifest": {
+      "backgroundColor": "rgba(245,248,248,1)",
+      "display": "kStandalone",
+      "icons": [
+        {
+          "url": "http://127.0.0.1:8000/static/img/favicon.svg",
+          "sizes": "0x0",
+          "type": "image/svg+xml"
+        }
+      ],
+      "id": "http://127.0.0.1:8000/",
+      "name": "Nurse.ng",
+      "orientation": "DEFAULT",
+      "preferRelatedApplications": false,
+      "scope": "http://127.0.0.1:8000/",
+      "startUrl": "http://127.0.0.1:8000/",
+      "themeColor": "rgba(7,60,64,1)"
+    }
+  },
+  "installability": {
+    "installabilityErrors": []
+  },
+  "page": {
+    "secure": true,
+    "title": "Get the Nurse.ng app \u2014 Nurse.ng",
+    "installButtons": 0,
+    "androidDownloads": 0,
+    "iphoneDownloads": 0
+  },
+  "artifacts": "/tmp/nurse-install-inspect-fvwszshk"
+}

@@ -1,0 +1,206 @@
+[
+  {
+    "requested_path": "/auth/login",
+    "width": 390,
+    "theme": "light",
+    "large_text": false,
+    "path": "/auth/login",
+    "title": "Sign in \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 25,
+    "linkedin": {
+      "foreground": "rgb(10, 102, 194)",
+      "background": "rgb(237, 243, 247)",
+      "font_size": "16px",
+      "contrast_ratio": 5.081763256741598
+    }
+  },
+  {
+    "requested_path": "/auth/register",
+    "width": 390,
+    "theme": "light",
+    "large_text": false,
+    "path": "/auth/register",
+    "title": "Create your account \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 25,
+    "linkedin": {
+      "foreground": "rgb(10, 102, 194)",
+      "background": "rgb(237, 243, 247)",
+      "font_size": "16px",
+      "contrast_ratio": 5.081763256741598
+    }
+  },
+  {
+    "requested_path": "/auth/login",
+    "width": 1280,
+    "theme": "light",
+    "large_text": false,
+    "path": "/auth/login",
+    "title": "Sign in \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 27,
+    "linkedin": {
+      "foreground": "rgb(10, 102, 194)",
+      "background": "rgb(237, 243, 247)",
+      "font_size": "16px",
+      "contrast_ratio": 5.081763256741598
+    }
+  },
+  {
+    "requested_path": "/auth/register",
+    "width": 1280,
+    "theme": "light",
+    "large_text": false,
+    "path": "/auth/register",
+    "title": "Create your account \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 27,
+    "linkedin": {
+      "foreground": "rgb(10, 102, 194)",
+      "background": "rgb(237, 243, 247)",
+      "font_size": "16px",
+      "contrast_ratio": 5.081763256741598
+    }
+  },
+  {
+    "requested_path": "/auth/login",
+    "width": 320,
+    "theme": "light",
+    "large_text": true,
+    "path": "/auth/login",
+    "title": "Sign in \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 26,
+    "linkedin": {
+      "foreground": "rgb(10, 102, 194)",
+      "background": "rgb(237, 243, 247)",
+      "font_size": "16px",
+      "contrast_ratio": 5.081763256741598
+    }
+  },
+  {
+    "requested_path": "/auth/register",
+    "width": 320,
+    "theme": "light",
+    "large_text": true,
+    "path": "/auth/register",
+    "title": "Create your account \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 26,
+    "linkedin": {
+      "foreground": "rgb(10, 102, 194)",
+      "background": "rgb(237, 243, 247)",
+      "font_size": "16px",
+      "contrast_ratio": 5.081763256741598
+    }
+  },
+  {
+    "requested_path": "/auth/login",
+    "width": 390,
+    "theme": "dark",
+    "large_text": false,
+    "path": "/auth/login",
+    "title": "Sign in \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 25,
+    "linkedin": {
+      "foreground": "rgb(130, 186, 255)",
+      "background": "rgb(34, 53, 67)",
+      "font_size": "16px",
+      "contrast_ratio": 6.281543521454042
+    }
+  },
+  {
+    "requested_path": "/auth/register",
+    "width": 390,
+    "theme": "dark",
+    "large_text": false,
+    "path": "/auth/register",
+    "title": "Create your account \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 25,
+    "linkedin": {
+      "foreground": "rgb(130, 186, 255)",
+      "background": "rgb(34, 53, 67)",
+      "font_size": "16px",
+      "contrast_ratio": 6.281543521454042
+    }
+  },
+  {
+    "requested_path": "/auth/login",
+    "width": 1280,
+    "theme": "dark",
+    "large_text": false,
+    "path": "/auth/login",
+    "title": "Sign in \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 27,
+    "linkedin": {
+      "foreground": "rgb(130, 186, 255)",
+      "background": "rgb(34, 53, 67)",
+      "font_size": "16px",
+      "contrast_ratio": 6.281543521454042
+    }
+  },
+  {
+    "requested_path": "/auth/register",
+    "width": 1280,
+    "theme": "dark",
+    "large_text": false,
+    "path": "/auth/register",
+    "title": "Create your account \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 27,
+    "linkedin": {
+      "foreground": "rgb(130, 186, 255)",
+      "background": "rgb(34, 53, 67)",
+      "font_size": "16px",
+      "contrast_ratio": 6.281543521454042
+    }
+  },
+  {
+    "requested_path": "/auth/login",
+    "width": 320,
+    "theme": "dark",
+    "large_text": true,
+    "path": "/auth/login",
+    "title": "Sign in \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 26,
+    "linkedin": {
+      "foreground": "rgb(130, 186, 255)",
+      "background": "rgb(34, 53, 67)",
+      "font_size": "16px",
+      "contrast_ratio": 6.281543521454042
+    }
+  },
+  {
+    "requested_path": "/auth/register",
+    "width": 320,
+    "theme": "dark",
+    "large_text": true,
+    "path": "/auth/register",
+    "title": "Create your account \u2014 Nurse.ng",
+    "overflow": false,
+    "violations": [],
+    "passes": 26,
+    "linkedin": {
+      "foreground": "rgb(130, 186, 255)",
+      "background": "rgb(34, 53, 67)",
+      "font_size": "16px",
+      "contrast_ratio": 6.281543521454042
+    }
+  }
+]

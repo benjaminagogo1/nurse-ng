@@ -163,6 +163,10 @@
       "external_video_url",
       "community_name",
       "in_reply_to_id",
+      "post_kind",
+      "title",
+      "activity_format",
+      "activity_starts_at",
     ]
       .map((name) => form.elements.namedItem(name))
       .filter(Boolean);
@@ -177,13 +181,13 @@
       Object.fromEntries(fields.map((field) => [field.name, field.value]));
     const hasText = (values) =>
       fields.some((field) =>
-        field.name === "topic_id"
+        ["topic_id", "post_kind", "activity_format"].includes(field.name)
           ? values[field.name] !== defaults[field.name]
           : values[field.name].trim(),
       );
     const clearForm = () => {
       fields.forEach((field) => {
-        field.value = field.name === "topic_id" ? defaults[field.name] : "";
+        field.value = ["topic_id", "post_kind"].includes(field.name) ? defaults[field.name] : "";
       });
       form.querySelectorAll('input[type="file"]').forEach((field) => {
         field.value = "";
@@ -340,7 +344,8 @@
     form.addEventListener("submit", (event) => {
       // Enhanced forms announce when validation passes and a request actually starts.
       if (enabled) save(!form.hasAttribute("data-feedback-form"));
-      if (fields.some((field) => field.disabled)) event.preventDefault();
+      // Activity-only fields are intentionally disabled on ordinary conversations.
+      if (ended) event.preventDefault();
     });
     form.addEventListener("nurse:submission-started", () => save(true));
     form.addEventListener("nurse:offline-draft-saved", () => save());

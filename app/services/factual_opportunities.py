@@ -17,7 +17,11 @@ from app.services.announcement_extraction import (
 from app.services.opportunities import EARLY_CAREER, relevant_opportunity
 from app.services.recruitment_fetch import FetchError, in_scope, origin, require_success
 from app.services.vacancy_extraction import extract_records, normalize
-from app.services.vacancy_quality import non_vacancy_reason
+from app.services.vacancy_quality import (
+    canonical_vacancy_record,
+    canonical_vacancy_url,
+    non_vacancy_reason,
+)
 from app.services.vacancy_salary import salary_from_text
 
 
@@ -124,9 +128,11 @@ def factual_records(page, evidence, *, listed_on=""):
         rows = extract_records(page.body)
     except FetchError:
         rows = []
-    # Some sites embed identical JobPosting objects more than once. They still
-    # describe one job; differing objects must keep the multi-job salary safeguard.
-    rows = list({json.dumps(row, sort_keys=True): row for row in rows}.values())
+    # URL aliases still describe one job; differing facts keep the multi-job salary safeguard.
+    unique = {}
+    for row in rows:
+        unique.setdefault(json.dumps(canonical_vacancy_record(row), sort_keys=True), row)
+    rows = list(unique.values())
     structured = bool(rows)
     if not rows:
         rows = extract_announcements(page.body, page.url)
@@ -297,11 +303,12 @@ def collect_index(payload, page, fetcher, evidence):
     if channel:
         if not in_scope(channel, evidence["scope"]):
             raise FetchError("scope_blocked", "The selected channel is outside approved scope.")
-        if channel != page.url:
+        channel = canonical_vacancy_url(channel)
+        if channel != canonical_vacancy_url(page.url):
             # A current recruitment channel can be more useful than the publisher's
             # original discovery page. It uses one of the existing four requests.
             pending.insert(0, (channel, 0, "", True))
-    seen = {page.url}
+    seen = {canonical_vacancy_url(page.url)}
     checked = 0
     while pending and checked < 4:
         target, depth, listed_on, selected_channel = pending.pop(0)
@@ -313,6 +320,7 @@ def collect_index(payload, page, fetcher, evidence):
             child = fetcher.get(
                 target, allowed_origin=origin(page.url), allowed_url_prefix=evidence["scope"]
             )
+            seen.add(canonical_vacancy_url(child.url))
             result["detail_pages"].append(page_facts(child, evidence, listed_on=listed_on))
             discover_portals(child)
             if depth < 2:

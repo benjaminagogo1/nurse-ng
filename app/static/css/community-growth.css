@@ -1,0 +1,64 @@
+/* Shared-interest communities use the same spacing, palette and controls as the app. */
+.community-share [hidden], .community-activity-fields[hidden] { display: none !important; }
+.community-directory { overflow-wrap: anywhere; }
+.community-heading-actions { display: flex; flex-wrap: wrap; gap: 12px; min-width: 0; }
+.conversation-space .page-heading-row > .community-heading-actions { flex: 0 1 auto; }
+.community-examples { margin-block: 28px; overflow-wrap: anywhere;
+  scroll-margin-top: calc(var(--header-h, 90px) + 20px); }
+.community-examples h2 { font-size: 1.3rem; }
+.community-examples p { line-height: 1.65; }
+.community-example-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.community-example { display: grid; gap: 8px; min-width: 0; padding: 16px;
+  border: 1px solid var(--line); border-radius: 14px; background: var(--surface);
+  color: var(--fg); text-decoration: none; }
+.community-example span { color: var(--accent-text); font-size: .9rem; }
+.community-example:hover { border-color: var(--accent-text); }
+#community-details { scroll-margin-top: calc(var(--header-h, 90px) + 20px); }
+.community-discovery-filter { display: flex; align-items: end; flex-wrap: wrap; gap: 14px;
+  padding: 20px; margin: 24px 0; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 18px; }
+.community-discovery-filter label { flex: 1 1 220px; min-width: 0; display: grid; gap: 8px; }
+.community-discovery-filter input, .community-discovery-filter select { width: 100%; min-width: 0; }
+.community-discovery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px; margin: 24px 0; }
+.community-discovery-card { min-width: 0; padding: 24px; border: 1px solid var(--line);
+  border-radius: 18px; background: var(--surface); color: var(--fg); }
+.community-discovery-card h2 { font-size: 1.3rem; margin: 0 0 12px; }
+.community-discovery-card p { line-height: 1.65; }
+.community-discovery-card .eyebrow { margin-top: 0; }
+.community-membership-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px;
+  padding-block: 12px; }
+.community-membership-bar p, .community-membership-bar form, .reply-actions form { margin: 0; }
+.community-page .btn, .community-share .btn { max-width: 100%; white-space: normal;
+  overflow-wrap: anywhere; }
+.community-share { display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+  margin-block: 16px 6px; }
+.community-share-status { width: 100%; margin: 0; color: var(--muted); font-size: .9rem; }
+.community-share-status:empty { display: none; }
+.community-share-fallback { display: grid; width: 100%; min-width: 0; gap: 8px; }
+.community-share-fallback input { width: 100%; min-width: 0; }
+.community-welcome { border: 1px solid var(--line); border-radius: 14px; margin: 20px 0;
+  padding: 16px 18px; background: var(--surface); }
+.community-welcome summary { cursor: pointer; font-weight: 600; }
+.community-welcome p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.65; }
+.community-post-kind { display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+  margin: 14px 0; font-size: .9rem; }
+.community-kind-badge { display: inline-block; border: 1px solid var(--line);
+  background: var(--accent-surface); color: var(--accent-text); padding: 5px 10px;
+  border-radius: 8px; font-size: .9rem; overflow-wrap: anywhere; }
+.community-post-title { margin: 16px 0; font-size: 1.35rem; line-height: 1.45;
+  overflow-wrap: anywhere; }
+.community-activity-fields { display: grid; gap: 10px; min-width: 0; padding: 18px;
+  border: 1px solid var(--line); border-radius: 14px; background: var(--soft-surface); }
+.community-activity-fields input, .community-activity-fields select { width: 100%; min-width: 0; }
+.community-activity-fields label { display: block; }
+.community-answer-note { width: min(100%, 480px); box-sizing: border-box; padding: 14px 16px;
+  margin: 18px auto; border: 1px solid var(--line); border-radius: 14px;
+  background: var(--accent-surface); color: var(--accent-text); line-height: 1.6; }
+.reply-actions { flex-wrap: wrap; }
+.community-page .reply-actions form { max-width: 100%; }
+@media (max-width: 650px) {
+  .community-example-grid { grid-template-columns: 1fr; }
+  .community-discovery-grid { grid-template-columns: 1fr; }
+  .community-discovery-card, .community-discovery-filter { padding: 18px; }
+}

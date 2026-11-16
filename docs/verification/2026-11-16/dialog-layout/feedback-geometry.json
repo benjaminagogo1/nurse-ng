@@ -1,0 +1,310 @@
+[
+  {
+    "image": "photo-error-mobile.png",
+    "width": 390,
+    "scrollY": 203,
+    "active": "action-feedback action-feedback--error",
+    "mainPadding": "20px",
+    "header": {
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "bottom": 65,
+      "width": 390
+    },
+    "panel": {
+      "left": 20,
+      "right": 370,
+      "top": 81.0625,
+      "bottom": 183.015625,
+      "width": 350
+    },
+    "hidden": false
+  },
+  {
+    "image": "offline-mobile.png",
+    "width": 390,
+    "scrollY": 203,
+    "active": "action-feedback action-feedback--error",
+    "mainPadding": "20px",
+    "header": {
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "bottom": 65,
+      "width": 390
+    },
+    "panel": {
+      "left": 20,
+      "right": 370,
+      "top": 81.0625,
+      "bottom": 183.015625,
+      "width": 350
+    },
+    "hidden": false
+  },
+  {
+    "image": "upload-pending-mobile.png",
+    "width": 390,
+    "scrollY": 1233,
+    "active": "is-app",
+    "mainPadding": "20px",
+    "header": {
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "bottom": 65,
+      "width": 390
+    },
+    "panel": {
+      "left": 0,
+      "right": 0,
+      "top": 0,
+      "bottom": 0,
+      "width": 0
+    },
+    "hidden": true
+  },
+  {
+    "image": "settings-light-mobile.png",
+    "width": 390,
+    "scrollY": 203,
+    "active": "action-feedback action-feedback--success",
+    "mainPadding": "20px",
+    "header": {
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "bottom": 65,
+      "width": 390
+    },
+    "panel": {
+      "left": 20,
+      "right": 370,
+      "top": 81.0625,
+      "bottom": 183.015625,
+      "width": 350
+    },
+    "hidden": false
+  },
+  {
+    "image": "settings-dark-mobile.png",
+    "width": 390,
+    "scrollY": 203,
+    "active": "action-feedback action-feedback--success",
+    "mainPadding": "20px",
+    "header": {
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "bottom": 65,
+      "width": 390
+    },
+    "panel": {
+      "left": 20,
+      "right": 370,
+      "top": 81.0625,
+      "bottom": 183.015625,
+      "width": 350
+    },
+    "hidden": false
+  },
+  {
+    "image": "feedback-large-text-320.png",
+    "width": 320,
+    "scrollY": 337,
+    "active": "action-feedback action-feedback--success",
+    "mainPadding": "20px",
+    "header": {
+      "left": 0,
+      "right": 320,
+      "top": 0,
+      "bottom": 99.671875,
+      "width": 320
+    },
+    "panel": {
+      "left": 20,
+      "right": 300,
+      "top": 114.078125,
+      "bottom": 288.6875,
+      "width": 280
+    },
+    "hidden": false
+  },
+  {
+    "image": "photo-success-desktop.png",
+    "width": 1280,
+    "scrollY": 62,
+    "active": "action-feedback action-feedback--success",
+    "mainPadding": "20px",
+    "header": {
+      "left": 0,
+      "right": 1265,
+      "top": 0,
+      "bottom": 79,
+      "width": 1265
+    },
+    "panel": {
+      "left": 508.5,
+      "right": 988.5,
+      "top": 240.0625,
+      "bottom": 324.328125,
+      "width": 480
+    },
+    "hidden": false
+  },
+  {
+    "image": "connection-interrupted-mobile.png",
+    "width": 390,
+    "scrollY": 203,
+    "active": "action-feedback action-feedback--error",
+    "mainPadding": "20px",
+    "header": {
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "bottom": 65,
+      "width": 390
+    },
+    "panel": {
+      "left": 20,
+      "right": 370,
+      "top": 81.0625,
+      "bottom": 204.703125,
+      "width": 350
+    },
+    "hidden": false
+  },
+  {
+    "image": "email-verified-mobile.png",
+    "width": 390,
+    "scrollY": 203,
+    "active": "action-feedback action-feedback--success",
+    "mainPadding": "20px",
+    "header": {
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "bottom": 65,
+      "width": 390
+    },
+    "panel": {
+      "left": 20,
+      "right": 370,
+      "top": 81.0625,
+      "bottom": 204.703125,
+      "width": 350
+    },
+    "hidden": false
+  },
+  {
+    "image": "reset-mobile.png",
+    "width": 390,
+    "scrollY": 0,
+    "active": "is-app",
+    "mainPadding": "20px",
+    "header": {
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "bottom": 65,
+      "width": 390
+    },
+    "panel": {
+      "left": 0,
+      "right": 0,
+      "top": 0,
+      "bottom": 0,
+      "width": 0
+    },
+    "hidden": true
+  },
+  {
+    "image": "password-error-mobile.png",
+    "width": 390,
+    "scrollY": 203,
+    "active": "action-feedback action-feedback--error",
+    "mainPadding": "20px",
+    "header": {
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "bottom": 65,
+      "width": 390
+    },
+    "panel": {
+      "left": 20,
+      "right": 370,
+      "top": 81.0625,
+      "bottom": 183.015625,
+      "width": 350
+    },
+    "hidden": false
+  },
+  {
+    "image": "password-updated-mobile.png",
+    "width": 390,
+    "scrollY": 2,
+    "active": "action-feedback action-feedback--success",
+    "mainPadding": "20px",
+    "header": {
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "bottom": 99.203125,
+      "width": 390
+    },
+    "panel": {
+      "left": 20,
+      "right": 370,
+      "top": 115.203125,
+      "bottom": 260.53125,
+      "width": 350
+    },
+    "hidden": false
+  },
+  {
+    "image": "settings-desktop.png",
+    "width": 1280,
+    "scrollY": 0,
+    "active": "is-app",
+    "mainPadding": "20px",
+    "header": {
+      "left": 0,
+      "right": 1265,
+      "top": 0,
+      "bottom": 79,
+      "width": 1265
+    },
+    "panel": {
+      "left": 0,
+      "right": 0,
+      "top": 0,
+      "bottom": 0,
+      "width": 0
+    },
+    "hidden": true
+  },
+  {
+    "image": "delete-desktop.png",
+    "width": 1280,
+    "scrollY": 0,
+    "active": "is-app",
+    "mainPadding": "20px",
+    "header": {
+      "left": 0,
+      "right": 1265,
+      "top": 0,
+      "bottom": 79,
+      "width": 1265
+    },
+    "panel": {
+      "left": 0,
+      "right": 0,
+      "top": 0,
+      "bottom": 0,
+      "width": 0
+    },
+    "hidden": true
+  }
+]

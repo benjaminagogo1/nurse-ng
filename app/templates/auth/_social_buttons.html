@@ -8,6 +8,7 @@
     data-native-submit
   >
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <input type="hidden" name="next" value="{{ next|default('') }}" />
     <button class="btn-social" type="submit">
       <span class="social-mark {{ 'g' if provider == 'google' else 'in' }}"
         >{{ mark }}</span

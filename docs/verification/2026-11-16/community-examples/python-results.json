@@ -1,0 +1,15 @@
+{
+  "command": "venv/bin/python -m pytest tests/test_community_growth.py tests/test_community.py tests/test_discussions.py tests/test_member_discovery.py -q --tb=short",
+  "exit_code": 0,
+  "passed": 92,
+  "failures": 0,
+  "stdout": "........................................................................ [ 78%]\n....................                                                     [100%]\n",
+  "scope": [
+    "Six example GET requests prefill editable fields without creating communities or membership",
+    "Ordinary member customizes an example or creates an arbitrary community, hosts it, joins it and posts there",
+    "Unknown example leaves a blank form",
+    "Creation is discoverable in the feed, composer and onboarding",
+    "Generic composer has no selected community; explicit community links retain selection",
+    "Existing community, discussion and member discovery behavior"
+  ]
+}

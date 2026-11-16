@@ -11,6 +11,7 @@ from app.models.jobs import Job
 from app.models.opportunities import SavedOpportunity
 from app.models.user import User
 from app.services import opportunity_watch as watch
+from app.services.job_aliases import retained_job
 from app.services.jobs import JOB_TYPE_LABELS, JobError, job_card, open_job_condition
 from app.services.recruitment_fetch import in_scope
 from app.services.vacancies import collector_authorized
@@ -157,13 +158,13 @@ def save(
     _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
 ):
-    job = db.scalar(select(Job).where(Job.id == job_id, open_job_condition()))
-    if not job:
+    job = retained_job(db, db.get(Job, job_id))
+    if not job or not db.scalar(select(Job.id).where(Job.id == job.id, open_job_condition())):
         raise HTTPException(status_code=404, detail="This opportunity is no longer available.")
     watch.save_job(db, user, job, remind=remind)
     return redirect_feedback(
         request,
-        f"/jobs/{job_id}",
+        f"/jobs/{job.id}",
         message(
             "Opportunity saved",
             "Find it in Saved opportunities."
@@ -200,7 +201,8 @@ def reminder(
     _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
 ):
-    item = db.get(SavedOpportunity, (user.id, job_id))
+    job = retained_job(db, db.get(Job, job_id))
+    item = db.get(SavedOpportunity, (user.id, job.id if job else job_id))
     if item is None:
         raise HTTPException(status_code=404)
     item.remind = remind

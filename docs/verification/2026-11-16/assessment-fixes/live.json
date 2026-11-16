@@ -1,0 +1,35 @@
+{
+  "checked_at_utc": "2026-11-16T13:55:37.459602+00:00",
+  "required_workers": "recruitment,reels,notifications",
+  "ready": true,
+  "workers": [
+    {
+      "name": "recruitment",
+      "healthy": true,
+      "state": "idle",
+      "last_seen_at": "2026-11-16 13:55:33.755579"
+    },
+    {
+      "name": "reels",
+      "healthy": true,
+      "state": "idle",
+      "last_seen_at": "2026-11-16 13:55:36.913663"
+    },
+    {
+      "name": "notifications",
+      "healthy": true,
+      "state": "idle",
+      "last_seen_at": "2026-11-16 13:55:34.885924"
+    }
+  ],
+  "web_readyz": {
+    "status": "ready"
+  },
+  "database_integrity": "ok",
+  "foreign_key_violations": 0,
+  "migration_revision": "e6480f6b2183",
+  "saved_opportunities_on_retired_aliases": 0,
+  "notification_email_states": {
+    "skipped": 20
+  }
+}

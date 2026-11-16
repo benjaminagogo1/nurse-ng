@@ -9,7 +9,7 @@
   </p>
   {% if not topics %}
   <p class="form-notice">
-    Posting is currently unavailable. Please try again later.
+    <a href="/communities/new">Create a community</a> to start the first conversation.
   </p>
   {% endif %} {% if error %}
   <p class="form-error" role="alert">{{ error }}</p>
@@ -25,7 +25,7 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     {% include "community/_draft_controls.html" %} {% if not user.community_name
     %}
-    <label for="community-name">Your public community name</label>
+    <label for="community-name">Your public display name</label>
     <input
       id="community-name"
       name="community_name"
@@ -44,7 +44,22 @@
       Posting as <strong>{{ user.community_name }}</strong>
     </p>
     {% endif %}
-    <label for="body">Your question or message</label>
+    <label for="post-kind">What would you like to share?</label>
+    <select id="post-kind" name="post_kind" data-community-post-kind>
+      {% for value, label in post_kind_labels.items() %}<option value="{{ value }}" {% if values.get('post_kind', 'question') == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <label for="post-title">Title <span class="optional" data-title-optional>(optional for conversations)</span></label>
+    <input id="post-title" name="title" maxlength="160" value="{{ values.get('title', '') }}" data-activity-title />
+    <fieldset class="community-activity-fields" data-activity-fields {% if values.get('post_kind') != 'activity' %}hidden{% endif %}>
+      <legend>Learning activity</legend>
+      <label for="activity-format">Format</label><select id="activity-format" name="activity_format"><option value="">Choose a format</option>
+        {% for value, label in activity_formats.items() %}<option value="{{ value }}" {% if values.get('activity_format') == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+      <label for="activity-starts">Start date and time <span class="optional">(optional, Nigeria time)</span></label>
+      <input id="activity-starts" type="datetime-local" name="activity_starts_at" value="{{ values.get('activity_starts_at', '') }}" />
+      <p class="field-hint">Add the practice question, case discussion or Q&amp;A invitation below. Members participate through replies and can follow the discussion for updates.</p>
+    </fieldset>
+    <label for="body">Your question, message or activity instructions</label>
     <textarea
       id="body"
       name="body"
@@ -56,11 +71,12 @@
 {{ values.body }}</textarea>
     <p class="field-hint" id="post-text-hint">
       A little context helps others respond. Include a place, hospital, or date
-      when it is useful. Text is optional if you attach media or a video link.
+      when it is useful. Learning activities need written instructions; other
+      posts can use text, media or a video link.
     </p>
-    <label for="topic-id">Topic</label>
-    <select id="topic-id" name="topic_id" required>
-      <option value="">Choose a topic</option>
+    <label for="topic-id">Community</label>
+    <select id="topic-id" name="topic_id" required aria-describedby="topic-id-hint">
+      <option value="">Choose a community</option>
       {% for topic in topics %}
       <option
         value="{{ topic.id }}"
@@ -72,6 +88,7 @@
       </option>
       {% endfor %}
     </select>
+    <p class="field-hint" id="topic-id-hint">Need a different space? <a href="/communities/new">Create a community</a> for your colleagues, with examples to help you get started.</p>
     <details
       class="conversation-attachments"
       {%

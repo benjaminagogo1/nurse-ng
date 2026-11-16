@@ -1,10 +1,15 @@
 # nurse-ng
 
-A professional platform for nurses and healthcare employers, beginning in Nigeria.
+An inclusive community for nurses at every career stage, beginning in Nigeria.
+The current priority is community growth: helping members connect, share
+opportunities and support one another's professional development. Employer
+capabilities are a later expansion once the community is established and trusted.
 
 ## Documents
 
-- [Android and iPhone app projects](mobile/README.md) — preview builds, signing,
+- [Community growth direction and expansion scope](docs/COMMUNITY_EXPANSION.md).
+- [Joinable communities, useful answers, learning activities and invitations](docs/COMMUNITY_ENGAGEMENT.md).
+- [Android and iPhone app projects](mobile/README.md) — browser installation, preview builds, signing,
   hosting requirements and the signed-in install entry.
 - [Video likes, visibility and administrator management](docs/ENGAGEMENT_AND_ADMIN.md).
 - [Employer approval and private evidence operations](docs/EMPLOYER_AND_EVIDENCE_OPERATIONS.md) — required migration, scanner, retention timer and legacy review.
@@ -94,6 +99,12 @@ The recruitment dashboard links directly to pending vacancy reviews and shows
 worker health separately from historical task failures. Factual collection now
 captures explicitly stated remuneration and holds repeated announcements as one
 review; existing review queues can be reconciled with an audited cleanup command.
+
+Comment-reply and advertising links now identify the same vacancy while job-specific
+query parameters remain distinct. Operators can preview existing published aliases
+with `venv/bin/python -m app.cli consolidate-duplicate-vacancies --dry-run`.
+See [duplicate consolidation](docs/LOCAL_OPERATIONS.md#duplicate-vacancy-consolidation)
+for the maintenance procedure and preserved history.
 
 Nigerian opportunities take priority in the jobs feed, source registry and worker queue. Coverage includes government/private health roles and Nigerian youth fellowships, internships and graduate programmes across sectors; international opportunities remain accessible. Repeat `recruitment-init` to add pending local starter sites and update the original worldwide directory schedule from daily to weekly. Source registration does not establish a current opening; structured vacancy and source evidence checks still apply.
 

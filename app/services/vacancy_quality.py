@@ -31,7 +31,7 @@ def announcement_intent(title: str, text: str = "", url: str = "") -> bool:
 
 
 def canonical_vacancy_url(value: str) -> str:
-    """Ignore known advertising tags, retaining every parameter that may identify a job."""
+    """Ignore advertising/comment navigation, retaining parameters that may identify a job."""
     try:
         parts = urlsplit(public_url(value))
     except ValueError:
@@ -40,11 +40,19 @@ def canonical_vacancy_url(value: str) -> str:
     query = []
     for part in parts.query.split("&"):
         name = unquote(part.split("=", 1)[0]).casefold()
-        if name.startswith("utm_") or name in {"gclid", "fbclid", "msclkid"}:
+        if name.startswith("utm_") or name in {"gclid", "fbclid", "msclkid", "replytocom"}:
             continue
         if part:
             query.append(part)
     return urlunsplit((parts.scheme, parts.netloc, parts.path, "&".join(query), ""))
+
+
+def canonical_vacancy_record(raw: dict) -> dict:
+    """Compare URL aliases without changing the original source evidence."""
+    comparable = dict(raw)
+    if isinstance(comparable.get("url"), str):
+        comparable["url"] = canonical_vacancy_url(comparable["url"])
+    return comparable
 
 
 def non_vacancy_reason(title: str, url: str = "") -> str:

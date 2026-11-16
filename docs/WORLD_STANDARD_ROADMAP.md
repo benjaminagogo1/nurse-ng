@@ -2,6 +2,21 @@
 
 Recorded: 8 November 2026, following the user's request to preserve the seven-point assessment.
 
+## Current direction — 16 November 2026
+
+The immediate product goal is an inclusive nursing community and sustained
+community growth. Nurses across career stages should be able to belong,
+connect, exchange opportunities and support professional development. Current
+recommendations prioritize joining, first meaningful participation, sharing,
+invitations and reasons to return.
+
+Employer capabilities are a later expansion once the community is established
+and trusted. Staff MFA remains explicitly deferred by the user. It is pending
+work, rather than the next immediate product priority. The seven engineering
+priorities below remain a reference; the delivery sequence at the end follows
+this updated direction. See [community growth and authorized expansion
+scope](COMMUNITY_EXPANSION.md).
+
 Nurse.ng has a functional foundation: accounts, professional profiles, opportunities,
 applications, community discussions, messaging and Reels. The main remaining work is
 dependable operation, trustworthy opportunities and a smoother experience that gives
@@ -30,7 +45,8 @@ Remaining work:
 
 ## 2. Stronger trust and account protection
 
-**Priority: before public launch.**
+**Priority: support community trust throughout growth; employer requirements
+apply before employer expansion. Staff MFA is deferred by the user.**
 
 Email verification, password recovery, authenticated password changes, account deletion and
 session invalidation after password reset are implemented. Employer registration currently
@@ -39,9 +55,9 @@ legitimacy.
 
 Remaining work:
 
-- Check employer organisations and their representatives before they can receive applicant
-  details, and define how approval and revocation affect job publishing and applications.
-- Require two-factor authentication for staff accounts.
+- Maintain and extend employer organization/representative checks and approval
+  boundaries when expanding job publishing, applications and applicant-data access.
+- Track staff two-factor authentication as deferred work for a later hardening phase.
 - Give members device/session management and controls to block other users.
 - Keep email verification, document review and confirmed professional credentials clearly
   distinguished in labels and explanations.
@@ -153,18 +169,24 @@ application outcomes and support performance still need their own evidence.
 
 Remaining work:
 
-- Run a small pilot with nurses, students, opportunity seekers and legitimate employers.
-- Measure relevant opportunity discovery, completed applications, employer responses and whether members return.
+- Run a community pilot with nurses across career stages, students and opportunity seekers.
+- Measure first meaningful participation, useful exchanges, opportunity discovery,
+  returning members and invitations that result in participation. Establish baselines
+  and add missing instrumentation before treating these as measured outcomes.
 - Observe where people abandon tasks or need help, and use those findings to set priorities.
 - Establish who handles support, reports, appeals and failed uploads, with clear response targets.
 - Set pilot targets and a measurement period before evaluating the results.
 
 ## Recommended sequence
 
-1. Address public hosting/recovery and employer trust before opening the app publicly.
-2. Prioritise member discovery and notifications as the next visible product improvements.
-3. Continue expanding Nigerian opportunity coverage and improving experience quality.
-4. Use a supported pilot to validate the full journey and decide which improvements matter most.
+1. Prioritize community growth: easy joining, relevant discovery, a first useful
+   exchange and convenient sharing/invitations.
+2. Give members reasons to return through conversations, replies, opportunities
+   and professional development, with controlled notifications and moderation.
+3. Use a supported community pilot and participation/retention evidence to guide
+   improvements and market penetration. Maintain dependable operation throughout.
+4. Introduce employer capabilities gradually once the community is established
+   and trusted, with their required approval, access and operational protections.
 
 This sequence is a recommendation, not a claim that the remaining items are completed.
 Some older build-plan tracker entries predate the account and Reels work; update their

@@ -756,3 +756,23 @@ Separate verified publisher identity from full-content reuse rights. Automatical
   preferences and cascades deletion with the account. The local upgrade preserved
   all existing rows after backup and clone verification. See
   [the onboarding guide](ONBOARDING_TOUR.md) and the work log for validation.
+
+## L93 — Community growth before employer expansion (16 November 2026)
+
+- **User direction:** Nurse.ng should first grow an inclusive community where
+  nurses at all levels belong, interact, share opportunities and support
+  professional development. Community growth and market penetration guide
+  immediate product priorities.
+- **Current focus:** joining, relevant member/community discovery, first useful
+  exchanges, mobile sharing/invitations and continued participation. Evaluate
+  growth through activation, active contributors, returning members and peer
+  invitations that lead to participation, with measured baselines.
+- **Later phase:** gradually introduce employer capabilities once the community
+  is established and trusted, with the protections those workflows require.
+  Staff MFA remains explicitly deferred and pending; it should not automatically
+  become the next recommended product task.
+- **Scope:** the community expansion items authorized on 15 November remain the
+  delivery backlog. This decision records priority and sequencing; existing
+  account, privacy and authorization protections continue to support the community.
+- **Records:** [community direction and expansion scope](COMMUNITY_EXPANSION.md)
+  and [updated roadmap](WORLD_STANDARD_ROADMAP.md).

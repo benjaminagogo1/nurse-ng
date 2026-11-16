@@ -143,10 +143,32 @@ No existing website sign-in method is switched off by the mobile setup.
 
 ## Website install entry
 
-Signed-in website users see **Install the app**, linking to `/app`. The entry
-is present even before releases are available; it is hidden inside the native
-app where installation has already happened. Account settings also links to it.
-The app page keeps the normal web application accessible throughout preparation.
+Signed-in website users see **Install the app**. When Chrome or Edge offers
+browser installation, clicking it opens that prompt directly. Otherwise it opens
+`/app`, where both the Android and iPhone panels reveal working installation
+instructions. The entry is hidden in a native host or standalone app. Account
+settings also links to the app page.
+
+The reminder has a close button. Dismissal is saved in this browser, so it stays
+hidden across pages and later visits. Starting installation, cancelling an OS
+prompt, or opening installation help from the reminder also suppresses further
+reminders. Settings and `/app` remain available for manual installation. If local
+storage is unavailable, the preference falls back to session storage; if both
+are blocked, dismissal still works for the current page.
+
+Android uses Chrome's install prompt or its **Install app / Add to Home screen**
+menu. iPhone/iPad uses Safari's **Share → Add to Home Screen** flow; websites
+cannot trigger that iOS confirmation directly. Desktop steps cover Chrome and
+Edge. Dismissed or failed prompts show menu instructions, and repeated clicks
+cannot reuse a consumed prompt. The web manifest keeps a stable identity and
+includes 192/512-pixel PNG icons; Apple uses the 180-pixel touch icon.
+
+Browser installation uses the existing website and offline storage/synchronization
+flows. Sign in in the installed app while connected, then prepare saved offline
+content there: devices and browsers do not necessarily share local storage.
+Phone installation needs a reachable HTTPS site. Localhost works for a browser
+on this computer; ordinary LAN HTTP does not satisfy browser installation and
+offline storage requirements.
 
 After releases exist, set these on the server:
 
@@ -155,9 +177,11 @@ NURSE_NG_ANDROID_APP_DOWNLOAD_URL=https://your-hosted-site.example/downloads/nur
 NURSE_NG_IOS_APP_DOWNLOAD_URL=https://apps.apple.com/app/your-real-app-id
 ```
 
-TestFlight links and same-site download paths are also supported. Missing links
-are presented honestly as releases being prepared, without fake download links
-or disabled buttons. No existing application feature is turned off.
+TestFlight links and same-site download paths are also supported. These optional
+native downloads appear only when configured; missing releases do not disable
+browser installation. The disconnected preview APK is not advertised as a
+working download. Native signing, hosting and store distribution remain separate
+from installing the web app.
 
 ## Branding and checks
 

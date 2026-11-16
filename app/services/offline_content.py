@@ -82,7 +82,11 @@ def _name(db, user, value):
 
 
 def post(db, user, payload):
-    fields(payload, "topic_id body community_name external_video_url")
+    extra = {"post_kind", "title", "activity_format", "activity_starts_at"}
+    base = {"topic_id", "body", "community_name", "external_video_url"}
+    if not base.issubset(payload) or not set(payload).issubset(base | extra):
+        raise SyncError("The saved form is incomplete. Reopen it while connected.")
+    fields(payload, " ".join(payload))
     limit(user, "post")
     _name(db, user, payload["community_name"])
     item = community.create_post(
@@ -91,6 +95,9 @@ def post(db, user, payload):
         topic_id=UUID(payload["topic_id"]),
         body=payload["body"],
         external_video_url=payload["external_video_url"],
+        post_kind=payload.get("post_kind", "discussion"), title=payload.get("title", ""),
+        activity_format=payload.get("activity_format", ""),
+        activity_starts_at=payload.get("activity_starts_at", ""),
     )
     return {"path": f"/posts/{item.id}", "message": "Conversation published.", "id": str(item.id)}
 

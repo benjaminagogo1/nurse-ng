@@ -1,0 +1,182 @@
+[
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/communities",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/communities/new",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/communities/new?example=local-network#community-details",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/feed",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/posts/new",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/welcome/discover",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/communities",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/communities/new",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/communities/new?example=local-network#community-details",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/feed",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/posts/new",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/welcome/discover",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/communities",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/communities/new",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/communities/new?example=local-network#community-details",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/feed",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/posts/new",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/welcome/discover",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  }
+]

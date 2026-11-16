@@ -1,0 +1,38 @@
+{
+  "/healthz": {
+    "status": 200
+  },
+  "/readyz": {
+    "status": 200,
+    "response": {
+      "status": "ready"
+    }
+  },
+  "/communities": {
+    "status": 200
+  },
+  "/feed/unanswered": {
+    "status": 200
+  },
+  "/activities": {
+    "status": 200
+  },
+  "/feed": {
+    "status": 200
+  },
+  "/learning": {
+    "status": 200
+  },
+  "/auth/login": {
+    "status": 200
+  },
+  "/auth/register": {
+    "status": 200
+  },
+  "/app": {
+    "status": 200
+  },
+  "/jobs": {
+    "status": 200
+  }
+}

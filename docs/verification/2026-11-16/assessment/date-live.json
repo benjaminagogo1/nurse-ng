@@ -1,0 +1,26 @@
+{
+  "checked_at_utc": "2026-11-16T13:26:44.697785+00:00",
+  "jobs_status": 200,
+  "public_count": 32,
+  "visible_deadlines": [
+    "Nov 30, 2026",
+    "Dec 16, 2026",
+    "Dec 16, 2026",
+    "Dec 14, 2026",
+    "Dec 14, 2026",
+    "Dec 14, 2026",
+    "Dec 13, 2026",
+    "Jan 12, 2027",
+    "Jan 12, 2027",
+    "Jan 10, 2027",
+    "Dec 10, 2026",
+    "Jan 9, 2027",
+    "Jan 9, 2027",
+    "Dec 9, 2026",
+    "Dec 9, 2026",
+    "Jan 8, 2027"
+  ],
+  "all_deadlines_readable": true,
+  "detail_status": 200,
+  "example_deadline": "Nov 30, 2026"
+}

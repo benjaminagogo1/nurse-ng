@@ -11,6 +11,7 @@ from app.core.config import settings
 from app.web.account_routes import router as account_router
 from app.web.activity_routes import router as activity_router
 from app.web.auth_routes import router as auth_router
+from app.web.community_growth_routes import router as community_growth_router
 from app.web.community_routes import router as community_router
 from app.web.employer_routes import router as employer_router
 from app.web.engagement_routes import router as engagement_router
@@ -74,6 +75,7 @@ def create_app() -> FastAPI:
     app.include_router(review_router)
     app.include_router(recruitment_router)
     app.include_router(vacancy_router)
+    app.include_router(community_growth_router)
     app.include_router(community_router)
     app.include_router(reel_router)
     app.include_router(moderation_router)

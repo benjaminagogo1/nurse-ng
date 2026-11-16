@@ -1,0 +1,282 @@
+[
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/auth/register",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/auth/login",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value"
+    ],
+    "path": "/events",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/profile/edit",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/profile/sharing",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/profile/verification",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-prohibited-attr",
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/settings",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast",
+      "link-in-text-block"
+    ],
+    "path": "/settings/social",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/jobs",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/applications",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/notifications",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/network",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/messages",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/posts/new",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/events",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast",
+      "link-in-text-block"
+    ],
+    "path": "/events/new",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast",
+      "link-in-text-block"
+    ],
+    "path": "/events/01a1e46e-8756-7848-b893-a18f7ed76443",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast",
+      "link-in-text-block"
+    ],
+    "path": "/events/01a1e46e-8756-7848-b893-a18f7ed76443/edit",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/jobs/new",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/review",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/moderation",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/recruitment",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast",
+      "link-in-text-block"
+    ],
+    "path": "/recruitment/vacancies?state=pending",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast",
+      "link-in-text-block"
+    ],
+    "path": "/recruitment/vacancies?state=duplicate",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value"
+    ],
+    "path": "/events",
+    "width": 1280,
+    "large": false,
+    "overflow": []
+  }
+]

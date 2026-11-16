@@ -1,5 +1,6 @@
 /* Shared color and accessibility overrides; loaded after component layouts. */
 :root {
+  --page-gutter: 20px;
   color-scheme: light;
   --muted: #526879;
   --line-strong: #7d91a1;
@@ -14,6 +15,41 @@
   --info-fg: #255b9a;
   --violet-bg: #f0eafb;
   --violet-fg: #6b4595;
+}
+/* Apply the page gutter once; content panels keep their own inner padding. */
+#main {
+  padding-inline: var(--page-gutter);
+  box-sizing: border-box;
+}
+#main > :is(
+  .db,
+  .jb,
+  .community-page,
+  .profile-page,
+  .jobs-page,
+  .pf,
+  .vf,
+  .offline-workspace,
+  .welcome-page,
+  .welcome-discover,
+  .mobile-app-page,
+  .reels-page,
+  .analytics-page,
+  .admin-page,
+  .section,
+  .feedback-slot
+) {
+  padding-inline: 0;
+}
+#main > :is(.form-page, .auth-split) {
+  width: 100%;
+  box-sizing: border-box;
+  margin-inline: auto;
+}
+.site-header .site-header-inner,
+.site-footer,
+.is-app .site-footer {
+  padding-inline: var(--page-gutter);
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
@@ -48,6 +84,9 @@
   --success-bg: #173d30;
   --shadow: 0 4px 18px #00000020;
   --logo-line: #101a24;
+}
+:root[data-theme="dark"] .social-mark.in {
+  color: #82baff;
 }
 html {
   font-size: 87.5%;
@@ -379,8 +418,14 @@ input[type="file"]::file-selector-button {
   color: var(--on-action);
 }
 .toast {
+  width: max-content;
+  max-width: min(480px, calc(100% - var(--page-gutter) * 2));
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border-radius: 14px;
   background: var(--fg);
   color: var(--bg);
+  overflow-wrap: anywhere;
 }
 
 /* Controls retain a visible outline in both themes and in forced-color mode. */
@@ -503,12 +548,14 @@ body:has(dialog[open]) {
   background: #245853;
 }
 .display-dialog {
-  width: min(490px, calc(100% - 32px));
-  max-height: calc(100dvh - 32px);
+  max-height: calc(100dvh - var(--page-gutter) * 2);
   margin: auto;
   padding: 28px;
   border-radius: 16px;
   box-shadow: var(--shadow-lg);
+}
+dialog:is(.display-dialog, .reel-dialog) {
+  width: min(480px, calc(100% - var(--page-gutter) * 2));
 }
 .display-heading {
   display: flex;
@@ -719,7 +766,7 @@ body:has(dialog[open]) {
   }
   .site-header-inner,
   .is-app .site-header-inner {
-    padding-inline: 12px;
+    padding-inline: var(--page-gutter);
     gap: 8px;
   }
   .header-hint {
@@ -729,7 +776,7 @@ body:has(dialog[open]) {
     gap: 0 6px;
   }
   .auth-header .site-header-inner {
-    padding-inline: 12px;
+    padding-inline: var(--page-gutter);
     gap: 10px;
     height: auto;
     min-height: var(--header-h);

@@ -29,6 +29,7 @@ class SocialAuthAttempt(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     user_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     auth_version: Mapped[int | None] = mapped_column(Integer)
+    return_to: Mapped[str] = mapped_column(String(240), default="", server_default="")
 
 
 class SocialEnrollment(Base):
@@ -41,3 +42,4 @@ class SocialEnrollment(Base):
     email: Mapped[str] = mapped_column(String(254))
     full_name: Mapped[str] = mapped_column(String(120))
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    return_to: Mapped[str] = mapped_column(String(240), default="", server_default="")

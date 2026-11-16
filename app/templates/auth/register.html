@@ -6,7 +6,7 @@ Nurse.ng{% endblock %} {% block header %}
     <a class="brand" href="/">{{ icon('logo', 31) }}<span>Nurse.ng</span></a>
     <p class="header-hint">
       Already have an account?
-      <a href="/auth/login">Sign in {{ icon('arrow', 15) }}</a>
+      <a href="{{ login_url|default('/auth/login') }}">Sign in {{ icon('arrow', 15) }}</a>
     </p>
     {{ display_button() }}
   </div>
@@ -56,6 +56,8 @@ Nurse.ng{% endblock %} {% block header %}
         id="register-form"
       >
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <input type="hidden" name="next" value="{{ next|default('') }}" />
+        {% if next %}<p class="field-hint">Create your account to join the shared community conversation.</p>{% endif %}
         <div class="role-tabs" role="radiogroup" aria-label="I am joining as">
           {% for value, label in [('nurse', "I'm a Nurse"), ('employer', "I'm an Employer"), ('partner', "I'm a Partner")] %}
           <label
@@ -144,7 +146,7 @@ Nurse.ng{% endblock %} {% block header %}
       </p>
       {% include 'auth/_social_buttons.html' %}
       <p class="form-alt">
-        Already part of the community? <a href="/auth/login">Sign in</a>
+        Already part of the community? <a href="{{ login_url|default('/auth/login') }}">Sign in</a>
       </p>
     </div>
   </div>

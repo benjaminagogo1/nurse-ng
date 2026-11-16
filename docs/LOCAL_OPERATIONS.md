@@ -169,3 +169,48 @@ does not require applicants to be registered nurses. At 14:13 UTC on 14 November
 the public Jobs predicate returned **6 opportunities**, up from **3** before this
 configuration. See the [channel collection report](verification/2026-11-14/COLLECTION_CHANNELS.md)
 for the measurement and validation.
+
+## Duplicate vacancy consolidation
+
+Comment-reply links such as `?replytocom=231#respond` and known advertising tags
+now share one vacancy identity. Parameters such as `job_id`, `id`, `page` and
+`lang` remain part of the identity. Collection retains the original source
+records and snapshots, and differing facts still require review.
+
+Preview existing published aliases:
+
+```sh
+venv/bin/python -m app.cli consolidate-duplicate-vacancies --dry-run
+```
+
+The preview reports proposed groups, retired listings and conflicts, then rolls
+back all changes. Consolidation requires matching facts and availability evidence
+across published records. Conflicting facts, staff corrections, rejected records
+and unavailable jobs are left for review.
+
+For a local SQLite database, take a private consistent backup and pause collection
+and notification delivery before applying. Stop the supervisor and any manually
+started workers; avoid simultaneous member save/reminder edits. If the supervisor
+was running, restore it afterward:
+
+```sh
+systemctl --user stop nurse-ng-workers.service
+venv/bin/python -m app.cli consolidate-duplicate-vacancies
+systemctl --user start nurse-ng-workers.service
+```
+
+The command commits one transaction and retains every job and vacancy record,
+snapshot and prior event. Saved opportunities move to the retained job. If a
+member saved multiple aliases, one bookmark remains with the oldest saved time;
+any reminder opt-out is retained. Already-generated reminder progress and
+sent/read notification history prevent another notice for the same deadline.
+Redundant notification records remain retained but stop appearing or delivering.
+Retired detail URLs and old saved-page form actions resolve to the retained job
+using current permission and member-ownership checks.
+
+The preview includes moved/merged bookmarks and retargeted/suppressed notices.
+Re-running also repairs history left on aliases by earlier consolidation runs;
+once repaired, it is a no-op. Audit events record aggregate repair counts without
+member identifiers. Verify database integrity, old links and worker health after
+application. SMTP retains its existing at-least-once retry limitation; this repair
+does not promise exactly-once email across a provider-acceptance crash.

@@ -21,7 +21,7 @@
   </div>
   <div class="opportunity-card-pay">
     <strong>{% if job.salary != 'Salary not stated' %}Salary: {% endif %}{{ job.salary }}</strong>{% if job.closing_date %}<span
-      >{{ icon('calendar', 15) }} Closes {{ job.closing_date }}</span
+      >{{ icon('calendar', 15) }} Closes {{ job.closing_date|display_date }}</span
     >{% elif job.external %}<span>{{ icon('calendar', 15) }} Closing date not stated</span>{% endif %}
   </div>
   <div class="opportunity-card-footer">

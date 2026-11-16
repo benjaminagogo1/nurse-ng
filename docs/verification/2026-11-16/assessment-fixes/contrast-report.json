@@ -1,0 +1,9 @@
+{
+  "local_base": "http://127.0.0.1:8000",
+  "inspected_states": 12,
+  "linkedin_contrast_passed": true,
+  "states_with_violations": 0,
+  "states_with_horizontal_overflow": 0,
+  "javascript_errors": [],
+  "artifacts": "/tmp/nurse-auth-contrast-fixes-okvoqghv"
+}

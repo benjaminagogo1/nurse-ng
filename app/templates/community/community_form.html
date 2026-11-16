@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — Nurse.ng{% endblock %}
+{% block content %}
+<section class="form-page">
+  <a class="text-link" href="{{ '/topics/' + topic.slug if topic else '/communities' }}">← Back to communities</a>
+  <p class="eyebrow">Bring colleagues together</p><h1>{{ title }}</h1>
+  <p class="lede">Choose who your community is for and what you want to do together: a specialty, location, study goal, career stage or another shared need.</p>
+  {% if not topic %}{% include "community/_examples.html" %}{% endif %}
+  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+  <form id="community-details" class="stacked-form" method="post" action="{{ '/communities/' + topic.slug + '/edit' if topic else '/communities' }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    {% if not user.community_name and not topic %}<label for="community-name">Your public display name</label>
+      <input id="community-name" name="community_name" minlength="2" maxlength="80" required value="{{ values.get('community_name', '') }}" />
+      <p class="field-hint">This name appears with your contributions. Your professional profile stays private.</p>{% endif %}
+    <label for="circle-name">Community name</label><input id="circle-name" name="name" required minlength="2" maxlength="80" value="{{ values.get('name', '') }}" />
+    <label for="circle-description">Who is this community for?</label><textarea id="circle-description" name="description" required maxlength="500" rows="3">{{ values.get('description', '') }}</textarea>
+    <label for="circle-interest">Professional interest <span class="optional">(optional)</span></label>
+    <select id="circle-interest" name="interest" aria-describedby="circle-interest-hint"><option value="">No interest category</option>
+      {% for option in interest_options %}<option value="{{ option }}" {% if values.get('interest') == option %}selected{% endif %}>{{ option }}</option>{% endfor %}
+    </select>
+    <p class="field-hint" id="circle-interest-hint">An optional category helps colleagues find your community. You choose its name and purpose even if no category fits.</p>
+    <label for="circle-welcome">Welcome message <span class="optional">(optional)</span></label><textarea id="circle-welcome" name="welcome_text" maxlength="1000" rows="3">{{ values.get('welcome_text', '') }}</textarea>
+    <label for="circle-rules">Community guidelines</label><textarea id="circle-rules" name="rules" required maxlength="2000" rows="4" placeholder="How can members keep conversations respectful, useful and welcoming?">{{ values.get('rules', '') }}</textarea>
+    <p class="field-hint">Community discussions are public. You host this community, and Nurse.ng staff can review reported content.</p>
+    <button class="btn btn-primary" type="submit">{{ 'Save community' if topic else 'Create community' }}</button>
+  </form>
+</section>
+{% endblock %}

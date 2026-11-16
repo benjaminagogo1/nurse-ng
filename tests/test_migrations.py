@@ -7,7 +7,7 @@ from types import SimpleNamespace
 import pytest
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import MetaData, Table, create_engine, inspect, text
+from sqlalchemy import MetaData, Table, create_engine, inspect, select, text
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -15,7 +15,6 @@ from app.db.session import enable_sqlite_foreign_keys
 from app.models.community import (
     CommunityPost,
     CommunityReply,
-    CommunityTopic,
     ContentReport,
     DiscussionFollow,
     DiscussionReplyRead,
@@ -33,10 +32,39 @@ def historical_user(db, **values):
     """Seed the selected old schema without inserting columns introduced later."""
     identifier = uuid.uuid4()
     users = Table("users", MetaData(), autoload_with=db.connection())
-    db.execute(users.insert().values(
-        id=identifier.hex, status="active", phone_verified=False, mfa_enabled=False,
-        is_active=True, is_staff=False, **values,
-    ))
+    db.execute(
+        users.insert().values(
+            id=identifier.hex,
+            status="active",
+            phone_verified=False,
+            mfa_enabled=False,
+            is_active=True,
+            is_staff=False,
+            **values,
+        )
+    )
+    return SimpleNamespace(id=identifier)
+
+
+def historical_topic(db):
+    topics = Table("community_topics", MetaData(), autoload_with=db.connection())
+    row = db.execute(select(topics)).one()
+    return SimpleNamespace(id=uuid.UUID(str(row.id)))
+
+
+def historical_post(db, *, author_id, topic_id, body):
+    identifier = uuid.uuid4()
+    posts = Table("community_posts", MetaData(), autoload_with=db.connection())
+    db.execute(
+        posts.insert().values(
+            id=identifier.hex,
+            author_id=author_id.hex,
+            topic_id=topic_id.hex,
+            body=body,
+            status="published",
+            removal_reason="",
+        )
+    )
     return SimpleNamespace(id=identifier)
 
 
@@ -96,6 +124,85 @@ def test_fresh_and_dual_head_upgrades_preserve_accounts(tmp_path, monkeypatch):
     engine.dispose()
 
 
+def test_community_growth_upgrade_preserves_content_and_auth_handshakes(tmp_path, monkeypatch):
+    from app.models.community import CommunityMembership, HelpfulReply
+    from app.models.social_auth import SocialAuthAttempt, SocialEnrollment
+    from app.services import community_growth as growth
+
+    url = f"sqlite:///{tmp_path / 'community-growth.db'}"
+    monkeypatch.setattr(settings, "database_url", url)
+    config = Config("alembic.ini")
+    command.upgrade(config, "e6480f6b2183")
+    engine = create_engine(url)
+    enable_sqlite_foreign_keys(engine)
+    with Session(engine) as db:
+        owner = historical_user(
+            db,
+            phone="+2348999000201",
+            hashed_password="unused",
+            community_name="Host",
+            community_name_key="host",
+        )
+        peer = historical_user(
+            db,
+            phone="+2348999000202",
+            hashed_password="unused",
+            community_name="Peer",
+            community_name_key="peer",
+        )
+        topic = historical_topic(db)
+        post = historical_post(
+            db, author_id=owner.id, topic_id=topic.id, body="Existing discussion"
+        )
+        reply = CommunityReply(post_id=post.id, author_id=peer.id, body="Existing response")
+        db.add(reply)
+        db.flush()
+        replies = reply.id
+        for table_name, data in [
+            ("social_auth_attempts", dict(token_hash="a" * 64, nonce="n" * 64, verifier="v" * 64)),
+            (
+                "social_enrollments",
+                dict(
+                    token_hash="b" * 64,
+                    subject="subject",
+                    email="fixture@example.org",
+                    full_name="Fixture",
+                ),
+            ),
+        ]:
+            table = Table(table_name, MetaData(), autoload_with=db.connection())
+            db.execute(
+                table.insert().values(
+                    browser_hash="c" * 64, provider="google", expires_at=datetime.now(UTC), **data
+                )
+            )
+        db.commit()
+    command.upgrade(config, "head")
+    command.check(config)
+    with Session(engine) as db:
+        old = db.get(CommunityPost, post.id)
+        assert (old.body, old.post_kind, old.title) == ("Existing discussion", "discussion", "")
+        assert db.get(CommunityReply, replies).body == "Existing response"
+        assert db.get(SocialAuthAttempt, "a" * 64).return_to == ""
+        assert db.get(SocialEnrollment, "b" * 64).return_to == ""
+        user = db.get(User, owner.id)
+        growth.membership(db, user, old.topic, joined=True)
+        growth.recognize_reply(db, user, replies, marked=True)
+        assert db.get(CommunityMembership, (user.id, topic.id))
+        assert db.get(HelpfulReply, (user.id, replies))
+        assert db.execute(text("PRAGMA foreign_key_check")).all() == []
+    command.downgrade(config, "e6480f6b2183")
+    with engine.connect() as connection:
+        assert connection.execute(text("SELECT body FROM community_posts")).scalar_one() == (
+            "Existing discussion"
+        )
+        assert connection.execute(text("SELECT count(*) FROM community_replies")).scalar_one() == 1
+        assert connection.execute(text("PRAGMA foreign_key_check")).all() == []
+    command.upgrade(config, "head")
+    command.check(config)
+    engine.dispose()
+
+
 def test_reply_read_upgrade_preserves_existing_follow_cutoff(tmp_path, monkeypatch):
     database_url = f"sqlite:///{tmp_path / 'reply_reads.db'}"
     monkeypatch.setattr(settings, "database_url", database_url)
@@ -104,19 +211,22 @@ def test_reply_read_upgrade_preserves_existing_follow_cutoff(tmp_path, monkeypat
     engine = create_engine(database_url)
     cutoff = datetime.now(UTC)
     with Session(engine, expire_on_commit=False) as db:
-        author = historical_user(db,
+        author = historical_user(
+            db,
             phone="+2348111111111",
             hashed_password="unused",
             community_name="Author",
             community_name_key="author",
         )
         member = historical_user(
-            db, phone="+2348222222222", hashed_password="unused", community_name="Reader",
+            db,
+            phone="+2348222222222",
+            hashed_password="unused",
+            community_name="Reader",
         )
-        topic = db.query(CommunityTopic).one()
+        topic = historical_topic(db)
         db.flush()
-        post = CommunityPost(author_id=author.id, topic_id=topic.id, body="Existing question")
-        db.add(post)
+        post = historical_post(db, author_id=author.id, topic_id=topic.id, body="Existing question")
         db.flush()
         subscription = DiscussionFollow(user_id=member.id, post_id=post.id, last_read_at=cutoff)
         db.add(subscription)
@@ -209,16 +319,18 @@ def test_reply_context_migration_preserves_replies_reports_and_read_records(tmp_
     engine = create_engine(database_url)
     enable_sqlite_foreign_keys(engine)
     with Session(engine, expire_on_commit=False) as db:
-        author = historical_user(db,
+        author = historical_user(
+            db,
             phone="+2348111111111",
             hashed_password="unused",
             community_name="Author",
             community_name_key="author",
         )
         db.flush()
-        topic = db.query(CommunityTopic).one()
-        post = CommunityPost(author_id=author.id, topic_id=topic.id, body="Keep this discussion")
-        db.add(post)
+        topic = historical_topic(db)
+        post = historical_post(
+            db, author_id=author.id, topic_id=topic.id, body="Keep this discussion"
+        )
         db.flush()
         original_id = uuid.uuid4()
         historical_replies = Table("community_replies", MetaData(), autoload_with=db.connection())

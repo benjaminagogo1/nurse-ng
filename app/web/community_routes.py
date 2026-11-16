@@ -27,6 +27,7 @@ from app.models.community import CommunityReply, Connection, ConnectionStatus, C
 from app.models.profile import NurseProfile, ProfileStatus
 from app.models.reels import Reel
 from app.models.user import User
+from app.services import community_growth as growth
 from app.services.community import (
     REPORT_REASON_LABELS,
     CommunityError,
@@ -62,6 +63,7 @@ from app.services.community import (
     unfollow_profile,
     users_by_id,
 )
+from app.services.community_sharing import auth_context, invitation_url, share_preview
 from app.services.member_interests import INTEREST_OPTIONS
 from app.services.profiles import (
     PROFESSIONAL_STATUS_LABELS,
@@ -107,6 +109,10 @@ def _post_context(
         "posts": posts,
         "profile_ids": public_profile_ids(db, author_ids),
         "summaries": discussion_summaries(db, posts, user),
+        "answer_summaries": growth.answer_summaries(db, posts),
+        "post_kind_labels": growth.POST_KINDS,
+        "activity_formats": growth.ACTIVITY_FORMATS,
+        "post_share_urls": {post.id: invitation_url(f"/posts/{post.id}") for post in posts},
     }
 
 
@@ -156,6 +162,13 @@ def _conversation_context(
             db, {post.author_id, *(reply.author_id for reply in reply_page.replies)},
         ),
         "report_reasons": REPORT_REASON_LABELS.items(),
+        "answer_summaries": growth.answer_summaries(db, [post]),
+        "helpful_summaries": growth.helpful_summaries(db, reply_page.replies, user),
+        "post_kind_labels": growth.POST_KINDS, "activity_formats": growth.ACTIVITY_FORMATS,
+        "post_share_urls": {post.id: invitation_url(f"/posts/{post.id}")},
+        **auth_context(db, f"/posts/{post.id}#reply-form"),
+        **share_preview(f"/posts/{post.id}", post.title or f"Conversation in {post.topic.name}",
+                        post.body or "Join this public nursing conversation on Nurse.ng."),
         **extra,
     }
 
@@ -167,16 +180,15 @@ def _new_post_context(
     error: str | None = None,
 ) -> dict[str, object]:
     topics = list_topics(db)
-    default_topic = next((topic for topic in topics if topic.slug == "general-nursing"), None)
-    if len(topics) == 1:
-        default_topic = topics[0]
     return {
         "title": "Ask or share",
         "topics": topics,
         "values": values
-        or {"topic_id": str(default_topic.id) if default_topic else "", "body": "",
+        or {"topic_id": "", "body": "",
             "external_video_url": "", "community_name": ""},
         "error": error,
+        "post_kind_labels": growth.POST_KINDS,
+        "activity_formats": growth.ACTIVITY_FORMATS,
         "image_max_mb": max(1, settings.community_image_max_bytes // (1024 * 1024)),
         "video_max_mb": max(1, settings.community_video_max_bytes // (1024 * 1024)),
         "video_max_minutes": max(1, settings.community_video_max_seconds // 60),
@@ -309,6 +321,12 @@ def topic_page(
             "title": topic.name,
             "user": user,
             "topic": topic,
+            "community_summary": growth.community_summaries(db, [topic], user)[topic.id],
+            "can_manage_community": growth.can_manage_community(user, topic),
+            "community_share_url": invitation_url(f"/topics/{topic.slug}"),
+            **auth_context(db, f"/topics/{topic.slug}"),
+            **share_preview(f"/topics/{topic.slug}", topic.name,
+                            topic.description or "A public community for nurses at every stage."),
             **_listing_context(request, db, user, q, page, topic_id=topic.id),
         },
         headers={"Cache-Control": "no-store"},
@@ -362,12 +380,14 @@ def save_community_settings(
 def new_post_form(
     request: Request,
     topic: str = Query(""),
+    kind: str = Query("question"),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ) -> Response:
     context = _new_post_context(db)
     if any(str(item.id) == topic for item in context["topics"]):
         context["values"]["topic_id"] = topic
+    context["values"]["post_kind"] = kind if kind in growth.POST_KINDS else "question"
     return render(
         request,
         "community/post_form.html",
@@ -383,6 +403,10 @@ def publish_post(
     community_name: str = Form(""),
     external_video_url: str = Form(""),
     draft_version: str = Form(""),
+    post_kind: str = Form("discussion"),
+    title: str = Form(""),
+    activity_format: str = Form(""),
+    activity_starts_at: str = Form(""),
     images: list[UploadFile] | None = File(None),
     video: UploadFile | None = File(None),
     user: User = Depends(require_user),
@@ -394,6 +418,8 @@ def publish_post(
         "body": body,
         "external_video_url": external_video_url,
         "community_name": community_name,
+        "post_kind": post_kind, "title": title, "activity_format": activity_format,
+        "activity_starts_at": activity_starts_at,
     }
     retry_after = _retry_after(_post_limiter, user)
     if retry_after:
@@ -426,6 +452,8 @@ def publish_post(
                 user,
                 topic_id=parsed_topic_id,
                 body=body,
+                post_kind=post_kind, title=title, activity_format=activity_format,
+                activity_starts_at=activity_starts_at,
                 external_video_url=external_video_url,
                 images=[_stream_upload(item) for item in uploaded_images],
                 video=(

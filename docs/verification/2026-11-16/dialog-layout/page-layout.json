@@ -1,0 +1,402 @@
+[
+  {
+    "path": "/auth/register",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "auth-split",
+          "width": 280,
+          "padding": "0px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/auth/login",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "auth-split auth-split-login",
+          "width": 280,
+          "padding": "0px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/events",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "community-page",
+          "width": 280,
+          "padding": "0px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/profile/edit",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "profile-page profile-editor",
+          "width": 280,
+          "padding": "0px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/profile/sharing",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "form-page",
+          "width": 280,
+          "padding": "22px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/profile/verification",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "vf",
+          "width": 280,
+          "padding": "0px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/settings",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "form-page account-settings",
+          "width": 280,
+          "padding": "22px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/settings/social",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "form-page",
+          "width": 280,
+          "padding": "22px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/jobs",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "jobs-page",
+          "width": 280,
+          "padding": "0px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/applications",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "jb",
+          "width": 280,
+          "padding": "0px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/notifications",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "community-page notice-page",
+          "width": 280,
+          "padding": "0px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/network",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "community-page network-page",
+          "width": 280,
+          "padding": "0px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/messages",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "community-page",
+          "width": 280,
+          "padding": "0px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/posts/new",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "form-page conversation-composer",
+          "width": 280,
+          "padding": "22px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/events",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "community-page",
+          "width": 280,
+          "padding": "0px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/events/new",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "form-page",
+          "width": 280,
+          "padding": "22px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/events/01a1e4ee-7255-7cf5-bf5a-029d17e5563f",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "form-page event-detail",
+          "width": 280,
+          "padding": "22px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/events/01a1e4ee-7255-7cf5-bf5a-029d17e5563f/edit",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "form-page",
+          "width": 280,
+          "padding": "22px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/jobs/new",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "form-page",
+          "width": 280,
+          "padding": "22px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/review",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "form-page",
+          "width": 280,
+          "padding": "22px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/moderation",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "form-page",
+          "width": 280,
+          "padding": "22px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/recruitment",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "form-page recruitment-page",
+          "width": 280,
+          "padding": "22px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/recruitment/vacancies?state=pending",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "form-page recruitment-page",
+          "width": 280,
+          "padding": "22px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/recruitment/vacancies?state=duplicate",
+    "width": 320,
+    "large": true,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "form-page recruitment-page",
+          "width": 280,
+          "padding": "22px"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/events",
+    "width": 1280,
+    "large": false,
+    "violations": 0,
+    "layout": {
+      "gutter": "20px",
+      "content": [
+        {
+          "classes": "community-page",
+          "width": 993,
+          "padding": "0px"
+        }
+      ]
+    }
+  }
+]

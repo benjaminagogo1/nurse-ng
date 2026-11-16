@@ -1,0 +1,18 @@
+{
+  "python_distinct_cases": 265,
+  "python_failures": 0,
+  "python_errors": 0,
+  "python_seconds": 863.505,
+  "final_auth_recheck": 2,
+  "browser_audits": 27,
+  "browser_javascript_errors": 0,
+  "draft_and_reply_context_browser": "passed",
+  "migration_existing_rows_preserved": 11609,
+  "migration_existing_tables_preserved": 50,
+  "migration_head": "e6480g7c3294",
+  "live_readiness": "ready",
+  "scope": "local and uncommitted",
+  "native_node_cases": 4,
+  "native_node_failures": 0,
+  "native_node_seconds": 15.290652
+}

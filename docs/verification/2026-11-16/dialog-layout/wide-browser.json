@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "artifacts": "/tmp/nurse-quality-browser-4fq7h5w4",
+  "audited_states": 25,
+  "checks": [
+    "profile offline/slow/lost-response",
+    "community drafts and replies",
+    "keyboard dialogs",
+    "job validation and duplicate prevention",
+    "event publishing and RSVP",
+    "vacancy review, source URL and worker navigation",
+    "320px at 200% text",
+    "axe accessibility"
+  ]
+}

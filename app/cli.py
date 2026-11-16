@@ -24,6 +24,7 @@ from app.core.validators import normalize_phone
 from app.db.session import SessionLocal
 from app.models.user import User
 from app.services.community import reconcile_community_media
+from app.services.worker_health import WORKERS
 
 
 def _set_staff(phone: str, *, enabled: bool) -> int:
@@ -90,7 +91,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     notices.add_argument("--max-tasks", type=int, default=20)
 
     supervised = subparsers.add_parser("workers", help="Supervise and restart background workers.")
-    supervised.add_argument("--roles", default=settings.required_workers or "recruitment,reels")
+    supervised.add_argument("--roles", default=settings.required_workers or ",".join(WORKERS))
     health = subparsers.add_parser("worker-status", help="Check database and worker progress.")
     health.add_argument("--json", action="store_true")
     quality = subparsers.add_parser(
@@ -99,6 +100,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     quality.add_argument("--dry-run", action="store_true")
     quality.add_argument("--exclude-unrelated", action="store_true",
                          help="Also exclude unreviewed, unrelated factual-index adverts.")
+    duplicates = subparsers.add_parser(
+        "consolidate-duplicate-vacancies",
+        help="Consolidate published URL aliases, retaining history.",
+    )
+    duplicates.add_argument("--dry-run", action="store_true")
     reassess = subparsers.add_parser(
         "reassess-incomplete-vacancies", help="List fresh adverts with missing optional details."
     )
@@ -212,6 +218,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             result = reconcile_pending_quality(db, dry_run=args.dry_run,
                                                exclude_unrelated=args.exclude_unrelated)
         print(json.dumps({"dry_run": args.dry_run, **result}))
+        return 0
+    if args.command == "consolidate-duplicate-vacancies":
+        from app.services.vacancy_duplicates import consolidate_duplicate_vacancies
+
+        with SessionLocal() as db:
+            result = consolidate_duplicate_vacancies(db, dry_run=args.dry_run)
+        print(json.dumps({"dry_run": args.dry_run, **result}, indent=2))
         return 0
     if args.command in {"recruitment-worker", "reels-worker", "notification-worker"}:
         from app.services.worker_runtime import COMMANDS, run_worker

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Find your communities — Nurse.ng{% endblock %}
+{% block content %}
+<section class="community-page community-directory">
+  <div class="page-heading-row">
+    <div><p class="eyebrow">Your people. Your community.</p>
+      <h1>Find where you belong.</h1>
+      <p class="lede">Connect through shared interests, everyday challenges and professional growth, at every stage of nursing.</p>
+    </div>
+    <a class="btn btn-primary" href="/communities/new">Create a community</a>
+  </div>
+  <nav class="section-tabs" aria-label="Community views">
+    <a href="/communities" {% if not mine %}aria-current="page"{% endif %}>Explore communities</a>
+    {% if user %}<a href="/communities?mine=true" {% if mine %}aria-current="page"{% endif %}>My communities</a>{% endif %}
+    <a href="/feed">Conversations</a><a href="/feed/unanswered">Questions needing replies</a>
+    <a href="/activities">Learning together</a>
+  </nav>
+  <form class="community-discovery-filter" action="/communities" method="get" role="search">
+    {% if mine %}<input type="hidden" name="mine" value="true" />{% endif %}
+    <label>Find a community<input type="search" name="q" value="{{ search_query }}" maxlength="120" placeholder="A specialty, interest or community name" /></label>
+    <label>Professional interest<select name="interest"><option value="">All interests</option>
+      {% for option in interest_options %}<option value="{{ option }}" {% if selected_interest == option %}selected{% endif %}>{{ option }}</option>{% endfor %}
+    </select></label><button class="btn btn-primary" type="submit">Find communities</button>
+  </form>
+  <p class="field-hint">Discussions are public. Joining adds a community to your personal feed; your membership choices and private profile stay private.</p>
+  <div class="community-discovery-grid">
+    {% for topic in topics %}{% set state = community_summaries[topic.id] %}
+    <article class="community-discovery-card">
+      <p class="eyebrow">{{ topic.interest or 'Nursing community' }}{% if state.joined %} · Joined{% endif %}</p>
+      <h2><a href="/topics/{{ topic.slug }}">{{ topic.name }}</a></h2>
+      <p>{{ topic.description or 'Share questions, experiences and opportunities with colleagues.' }}</p>
+      <p class="field-hint">{{ state.members }} {{ 'member' if state.members == 1 else 'members' }} · Public discussions</p>
+      <a class="btn btn-secondary" href="/topics/{{ topic.slug }}">Explore community</a>
+    </article>
+    {% else %}<div class="empty-state"><h2>{{ 'Choose your communities' if mine else 'Find your next conversation' }}</h2>
+      <p>{{ 'Join a community to keep its conversations together here.' if mine else 'Try another interest or search. You can also bring colleagues together around a shared professional interest.' }}</p>
+      {% if user %}<a class="btn btn-secondary" href="{{ '/communities' if mine else '/communities/new' }}">{{ 'Explore communities' if mine else 'Create a community' }}</a>{% endif %}
+    </div>{% endfor %}
+  </div>
+  {% include "community/_pagination.html" %}
+  {% include "community/_examples.html" %}
+</section>
+{% endblock %}

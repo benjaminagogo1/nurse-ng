@@ -1,0 +1,9 @@
+{
+  "checked_at_utc": "2026-11-16T13:30:35.010707+00:00",
+  "ruff": "passed",
+  "jinja_templates_parsed": 81,
+  "javascript_files_checked": 21,
+  "diff_whitespace": "passed",
+  "clamav_version": "1.5.4",
+  "clamav_signatures": "28185"
+}

@@ -1,0 +1,13 @@
+<section class="community-examples" aria-labelledby="community-examples-heading">
+  <h2 id="community-examples-heading">Start with an example</h2>
+  <p>Build a community around what you and your colleagues need. Use an example and edit its name, purpose and guidelines, or <a href="/communities/new#community-details">start with your own idea</a>.</p>
+  <div class="community-example-grid">
+    {% for key, example in community_examples.items() %}
+    <a class="community-example" href="/communities/new?example={{ key }}#community-details">
+      <strong>{{ example.name }}</strong>
+      <span>Use this example →</span>
+    </a>
+    {% endfor %}
+  </div>
+  <p class="field-hint">These are ideas for communities you can create. Choose any name and purpose that suit your members.</p>
+</section>

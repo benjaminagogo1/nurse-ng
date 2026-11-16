@@ -1,0 +1,7 @@
+{
+  "command": "venv/bin/python tests/browser/community_drafts.py",
+  "exit_code": 0,
+  "status": "passed",
+  "stdout": "Reply-context and draft browser checks passed: response selection across pages, changed/removed targets, linked publication, restore, validation, offline submission, confirmation, history, error-page preservation, tab/discussion isolation, discard, expiry, malformed/blocked storage, logout across tabs, account switch, and mobile/desktop reflow.",
+  "source_artifacts": "/tmp/nurse-ng-draft-browser-szttmchx"
+}

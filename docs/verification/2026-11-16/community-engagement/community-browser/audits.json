@@ -1,0 +1,265 @@
+[
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/communities",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/communities/new",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/topics/critical-care-colleagues",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/posts/01a1e64e-bb78-702b-8424-756ce04d7e89",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/feed/unanswered",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/feed/communities",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/activities",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/posts/new?kind=activity",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/posts/01a1e64f-0a01-78d8-8647-0c3173c54516",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/communities",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/communities/new",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/topics/critical-care-colleagues",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/posts/01a1e64e-bb78-702b-8424-756ce04d7e89",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/feed/unanswered",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/feed/communities",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/activities",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/posts/new?kind=activity",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/posts/01a1e64f-0a01-78d8-8647-0c3173c54516",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/communities",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/communities/new",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/topics/critical-care-colleagues",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/posts/01a1e64e-bb78-702b-8424-756ce04d7e89",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/feed/unanswered",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/feed/communities",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/activities",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/posts/new?kind=activity",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/posts/01a1e64f-0a01-78d8-8647-0c3173c54516",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  }
+]

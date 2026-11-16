@@ -21,6 +21,7 @@ from app.services.auth import (
     register_user,
 )
 from app.services.community import list_connections, list_received_requests, list_topics
+from app.services.community_sharing import auth_context, community_destination
 from app.services.events import local_time, upcoming
 from app.services.jobs import open_job_condition
 from app.services.member_discovery import suggested_opportunities, suggested_people
@@ -89,15 +90,19 @@ def register_form(
     request: Request,
     role: str = "nurse",
     user: User | None = Depends(get_current_user),
+    next: str = "",
+    db: Session = Depends(get_db),
 ) -> Response:
+    continuation = auth_context(db, next)
     if user is not None:
-        return RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(continuation["next"] or "/", status_code=303)
     return render(
         request,
         "auth/register.html",
         {
             "title": "Create your account",
             "role": role if role in {item.value for item in AccountType} else "nurse",
+            **continuation,
         },
     )
 
@@ -111,6 +116,7 @@ def register(
     full_name: str = Form(""),
     email: str = Form(""),
     role: str = Form("nurse"),
+    next: str = Form("", max_length=240),
     _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
 ) -> Response:
@@ -120,6 +126,7 @@ def register(
         "full_name": full_name,
         "email": email,
         "role": role if role in {item.value for item in AccountType} else "nurse",
+        **auth_context(db, next),
     }
     ip = _client_ip(request)
     if _register_ip_limiter.is_limited(ip):
@@ -163,11 +170,13 @@ def register(
         )
 
     _start_session(request, user, db)
+    destination = community_destination(db, next)
     return redirect_feedback(
-        request, "/welcome",
+        request, destination or "/welcome",
         message(
             'Account created',
-            'Choose your interests to get started.',
+            'You can now take part in this community.'
+            if destination else 'Choose your interests to get started.',
         ),
     )
 
@@ -176,10 +185,13 @@ def register(
 def login_form(
     request: Request,
     user: User | None = Depends(get_current_user),
+    next: str = "",
+    db: Session = Depends(get_db),
 ) -> Response:
+    continuation = auth_context(db, next)
     if user is not None:
-        return RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
-    return render(request, "auth/login.html", {"title": "Sign in"})
+        return RedirectResponse(continuation["next"] or "/", status_code=303)
+    return render(request, "auth/login.html", {"title": "Sign in", **continuation})
 
 
 @router.post("/login")
@@ -187,16 +199,18 @@ def login(
     request: Request,
     phone: str = Form(""),
     password: str = Form(""),
+    next: str = Form("", max_length=240),
     _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
 ) -> Response:
+    continuation = auth_context(db, next)
     ip = _client_ip(request)
     if _login_ip_limiter.is_limited(ip):
         retry_after = _login_ip_limiter.retry_after(ip)
         return _render_rate_limited(
             request,
             "auth/login.html",
-            {"title": "Sign in", "phone": phone},
+            {"title": "Sign in", "phone": phone, **continuation},
             message=(
                 "Too many sign-in attempts from this connection. "
                 f"Try again in {_minutes(retry_after)} minute(s)."
@@ -210,7 +224,7 @@ def login(
         return _render_rate_limited(
             request,
             "auth/login.html",
-            {"title": "Sign in", "phone": phone},
+            {"title": "Sign in", "phone": phone, **continuation},
             message=(
                 "Too many unsuccessful attempts. "
                 f"Try again in {_minutes(exc.retry_after_seconds)} minute(s)."
@@ -227,13 +241,14 @@ def login(
                 "title": "Sign in",
                 "phone": phone,
                 "error": "The phone number or password is incorrect.",
+                **continuation,
             },
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
 
     _start_session(request, user, db)
     return redirect_feedback(
-        request, "/",
+        request, community_destination(db, next) or "/",
         message(
             'Signed in',
             'Welcome back.',

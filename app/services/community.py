@@ -301,13 +301,25 @@ def create_post(
     *,
     topic_id: UUID,
     body: str,
-    external_video_url: str,
+    external_video_url: str = "",
     images: Sequence[CommunityUpload] = (),
     video: CommunityUpload | None = None,
     reel: "Reel | None" = None,
+    post_kind: str = "discussion",
+    title: str = "",
+    activity_format: str = "",
+    activity_starts_at: str = "",
 ) -> CommunityPost:
     """Run synchronous checks, store media, and publish one topic post."""
     _require_community_name(user)
+    from app.services.community_growth import post_details
+
+    details = post_details(post_kind=post_kind, title=title, activity_format=activity_format,
+                           activity_starts_at=activity_starts_at)
+    if post_kind == "activity" and not (body or "").strip():
+        raise CommunityError("Add your activity instructions.")
+    if reel is not None and post_kind != "discussion":
+        raise CommunityError("Reels use the conversation format.")
     if reel is not None and (video is None or images or external_video_url):
         raise CommunityError("A reel needs one uploaded video.")
     topic = db.get(CommunityTopic, topic_id)
@@ -329,6 +341,7 @@ def create_post(
         body=clean_body,
         external_video_url=clean_url,
         status=ContentStatus.PROCESSING if reel is not None else ContentStatus.PUBLISHED,
+        **details,
     )
     db.add(post)
     stored_names: list[str] = []
@@ -402,10 +415,35 @@ def list_published_posts(
     offset: int = 0,
     query: str = "",
     discussion_follower_id: UUID | None = None,
+    community_member_id: UUID | None = None,
+    post_kind: str | None = None,
+    unanswered: bool = False,
 ) -> list[CommunityPost]:
     statement = select(CommunityPost).where(
-        CommunityPost.status == ContentStatus.PUBLISHED
+        CommunityPost.status == ContentStatus.PUBLISHED,
+        CommunityPost.topic.has(CommunityTopic.is_active.is_(True)),
     )
+    if community_member_id is not None:
+        from app.models.community import CommunityMembership
+
+        statement = statement.join(CommunityMembership,
+                                  CommunityMembership.topic_id == CommunityPost.topic_id).where(
+                                      CommunityMembership.user_id == community_member_id)
+    if post_kind:
+        statement = statement.where(CommunityPost.post_kind == post_kind)
+    if unanswered:
+        from app.models.community import CommunityAnswer
+
+        response = select(CommunityReply.id).where(
+            CommunityReply.post_id == CommunityPost.id,
+            CommunityReply.status == ContentStatus.PUBLISHED,
+            CommunityReply.author_id != CommunityPost.author_id).exists()
+        accepted = select(CommunityAnswer.post_id).join(
+            CommunityReply, CommunityReply.id == CommunityAnswer.reply_id).where(
+                CommunityAnswer.post_id == CommunityPost.id,
+                CommunityReply.post_id == CommunityPost.id,
+                CommunityReply.status == ContentStatus.PUBLISHED).exists()
+        statement = statement.where(CommunityPost.post_kind == "question", ~response, ~accepted)
     if topic_id is not None:
         statement = statement.where(CommunityPost.topic_id == topic_id)
     if author_ids is not None:
@@ -420,6 +458,7 @@ def list_published_posts(
         ).exists()
         statement = statement.where(or_(
             CommunityPost.body.icontains(word, autoescape=True),
+            CommunityPost.title.icontains(word, autoescape=True),
             CommunityPost.topic.has(CommunityTopic.name.icontains(word, autoescape=True)),
             matching_reply,
         ))
@@ -621,6 +660,7 @@ def get_published_post(db: Session, post_id: UUID) -> CommunityPost | None:
         .where(
             CommunityPost.id == post_id,
             CommunityPost.status == ContentStatus.PUBLISHED,
+            CommunityPost.topic.has(CommunityTopic.is_active.is_(True)),
         )
         .options(*_post_load_options(replies=False))
         .execution_options(populate_existing=True)

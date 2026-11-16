@@ -18,7 +18,7 @@ Revision `e6480d3fb942` adds the worker progress table. Configure the roles need
 by this instance in its environment or local `.env`:
 
 ```dotenv
-NURSE_NG_REQUIRED_WORKERS=recruitment,reels
+NURSE_NG_REQUIRED_WORKERS=recruitment,reels,notifications
 ```
 
 Then run:
@@ -28,14 +28,17 @@ venv/bin/python -m app.cli workers
 venv/bin/python -m app.cli worker-status --json
 ```
 
-The supervisor defaults to recruitment and Reels when the setting is empty.
+The supervisor defaults to recruitment, Reels and notifications when the setting is empty.
 `--roles recruitment,reels` can select the processes explicitly, but readiness
 always uses `NURSE_NG_REQUIRED_WORKERS`. Restart the web process after changing
 that setting so its readiness check uses the same configuration.
 
-The `notifications` role generates opportunity alerts and delivers opted-in email
-through the configured transport. Add it only when notification delivery is
-intended and configured. It is not included in the default supervisor roles.
+The `notifications` role generates opportunity matches and saved-deadline alerts,
+including in-app notifications when email transport is disabled. It delivers
+email only for recipients with a verified address and the corresponding email
+preference enabled. It is included in the default supervisor roles. For an
+instance intentionally running fewer features, explicitly select its required
+roles; both the supervisor and web readiness must use that selection.
 
 The individual `recruitment-worker`, `reels-worker`, and `notification-worker`
 commands remain available, including bounded `--once --max-tasks N` operation.

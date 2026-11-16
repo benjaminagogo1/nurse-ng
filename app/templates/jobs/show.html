@@ -79,7 +79,7 @@ content %}
           <div>
             <dt>Closing date</dt>
             <dd>
-              {{ job.closing_date or 'Not stated' }}{% if
+              {{ job.closing_date|display_date or 'Not stated' }}{% if
               job.closing_date|length == 10 %}<small
                 >{{ job.deadline_timezone }}</small
               >{% endif %}

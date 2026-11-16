@@ -91,6 +91,7 @@ def service_worker():
 def manifest():
     return JSONResponse(
         {
+            "id": "/",
             "name": "Nurse.ng",
             "short_name": "Nurse.ng",
             "start_url": "/",
@@ -99,6 +100,18 @@ def manifest():
             "background_color": "#f5f8f8",
             "theme_color": "#073c40",
             "icons": [
+                {
+                    "src": "/static/img/app-icon-192.png",
+                    "sizes": "192x192",
+                    "type": "image/png",
+                    "purpose": "any",
+                },
+                {
+                    "src": "/static/img/app-icon-512.png",
+                    "sizes": "512x512",
+                    "type": "image/png",
+                    "purpose": "any",
+                },
                 {
                     "src": "/static/img/favicon.svg",
                     "sizes": "any",

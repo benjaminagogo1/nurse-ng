@@ -1,0 +1,7 @@
+{
+  "url": "http://127.0.0.1:8000/communities",
+  "status": 200,
+  "editable_examples_visible": true,
+  "updated_styles": true,
+  "note": "Read-only check of the running local app. The final CSS/cache versions advanced again after improving screenshot anchor positioning."
+}

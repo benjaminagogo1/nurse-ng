@@ -10,6 +10,7 @@ from app.models.jobs import Job
 from app.models.notifications import Notification
 from app.models.opportunities import OpportunityPreference, SavedOpportunity
 from app.models.user import User, UserStatus
+from app.services.job_aliases import retained_job
 from app.services.jobs import JOB_TYPE_LABELS, JobError, open_job_condition
 from app.services.notifications import emit
 from app.services.recruitment import utc
@@ -32,7 +33,8 @@ def saved_ids(db, user, ids):
 
 
 def save_job(db, user, job, *, remind=True):
-    if not db.scalar(select(Job.id).where(Job.id == job.id, open_job_condition())):
+    job = retained_job(db, job)
+    if not job or not db.scalar(select(Job.id).where(Job.id == job.id, open_job_condition())):
         raise JobError("This opportunity is no longer available to save.")
     statement = insert_for(db)(SavedOpportunity).values(
         user_id=user.id, job_id=job.id, remind=remind
@@ -47,9 +49,11 @@ def save_job(db, user, job, *, remind=True):
 
 
 def remove_saved(db, user, job_id):
+    job = retained_job(db, db.get(Job, job_id))
+    ids = {job_id, job.id} if job else {job_id}
     db.execute(
         delete(SavedOpportunity).where(
-            SavedOpportunity.user_id == user.id, SavedOpportunity.job_id == job_id
+            SavedOpportunity.user_id == user.id, SavedOpportunity.job_id.in_(ids)
         )
     )
     db.commit()

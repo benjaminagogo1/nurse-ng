@@ -6,23 +6,49 @@
   <p class="eyebrow">Your community, in your pocket</p>
   <h1 id="mobile-app-heading">Get the Nurse.ng app</h1>
   <p class="lede">Find opportunities, stay connected and keep your nursing journey moving.</p>
+  <section class="mobile-browser-install" aria-labelledby="browser-install-heading">
+    <h2 id="browser-install-heading">Install on this device</h2>
+    <p>Add Nurse.ng to your home screen or computer’s apps for quick access. Sign in while connected and save the work you want to use offline.</p>
+    <button class="btn btn-primary" type="button" data-web-install hidden>Install Nurse.ng {{ icon('arrow', 16) }}</button>
+    <p class="mobile-install-status" data-install-status role="status" aria-live="polite">Choose your device below for installation steps.</p>
+    <details class="mobile-computer-steps" data-install-help="desktop">
+      <summary>Installing on a computer</summary>
+      <ol>
+        <li>Open Nurse.ng in Chrome or Edge.</li>
+        <li>Use the install icon in the address bar or open the browser menu and choose <strong>Install Nurse.ng</strong> or <strong>Install this site as an app</strong>.</li>
+        <li>Confirm <strong>Install</strong>, then open Nurse.ng from your apps.</li>
+      </ol>
+    </details>
+  </section>
   <div class="mobile-downloads">
     <section class="mobile-download-card" aria-labelledby="android-app-heading">
       <h2 id="android-app-heading">Android</h2>
-      <p>Nurse.ng on your Android phone.</p>
+      <p>Open Nurse.ng from your phone’s home screen.</p>
+      <details class="mobile-install-steps" data-install-help="android">
+        <summary class="btn btn-primary" data-install-platform="android">Install on Android {{ icon('arrow', 16) }}</summary>
+        <ol>
+          <li>Open Nurse.ng in Chrome on your Android phone.</li>
+          <li>Tap <strong>Install Nurse.ng</strong> above if it appears. You can also open Chrome’s three-dot menu and choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>
+          <li>Confirm <strong>Install</strong> or <strong>Add</strong>, then open Nurse.ng from your home screen.</li>
+        </ol>
+      </details>
       {% if android_download %}
-      <a class="btn btn-primary" href="{{ android_download }}" data-android-download>Download for Android {{ icon('arrow', 16) }}</a>
-      {% else %}
-      <p class="mobile-release-status">The Android download is being prepared.</p>
+      <p><a class="btn btn-secondary" href="{{ android_download }}" data-android-download>Download for Android {{ icon('arrow', 16) }}</a></p>
       {% endif %}
     </section>
     <section class="mobile-download-card" aria-labelledby="iphone-app-heading">
       <h2 id="iphone-app-heading">iPhone</h2>
-      <p>Nurse.ng on your iPhone.</p>
+      <p>Add Nurse.ng using Safari’s Share menu.</p>
+      <details class="mobile-install-steps" data-install-help="apple">
+        <summary class="btn btn-primary" data-install-platform="apple">Install on iPhone {{ icon('arrow', 16) }}</summary>
+        <ol>
+          <li>Open Nurse.ng in <strong>Safari</strong> on your iPhone or iPad.</li>
+          <li>Tap <strong>Share</strong> and choose <strong>Add to Home Screen</strong>. Scroll through the Share menu if needed.</li>
+          <li>If <strong>Open as Web App</strong> appears, turn it on. Tap <strong>Add</strong>, then open Nurse.ng from your home screen.</li>
+        </ol>
+      </details>
       {% if ios_download %}
-      <a class="btn btn-primary" href="{{ ios_download }}" data-ios-download>Get the iPhone app {{ icon('arrow', 16) }}</a>
-      {% else %}
-      <p class="mobile-release-status">The iPhone release is being prepared.</p>
+      <p><a class="btn btn-secondary" href="{{ ios_download }}" data-ios-download>Get the iPhone app {{ icon('arrow', 16) }}</a></p>
       {% endif %}
     </section>
   </div>

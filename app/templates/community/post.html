@@ -5,7 +5,7 @@
   <div class="page-heading-row conversation-heading">
     <div>
       <p class="eyebrow">{{ post.topic.name }}</p>
-      <h1>Join the conversation</h1>
+      <h1>{{ 'Join the learning activity' if post.post_kind == 'activity' else 'Join the conversation' }}</h1>
     </div>
     {% if user %} {% set following = summaries[post.id].following %}
     <form
@@ -25,7 +25,9 @@
     new replies in <a href="/feed/discussions">Following discussions</a>.{% else
     %}Follow this discussion to find it again and see new replies.{% endif %}
   </p>
-  {% endif %} {% include "community/_post_card.html" %} {% if user and user.id
+  {% endif %}
+  {% if post.post_kind == 'question' and answer_summaries[post.id].answered %}<p class="community-answer-note">The question’s author selected an answer. <a href="/posts/{{ post.id }}/replies/{{ answer_summaries[post.id].answer_id }}">Read the selected answer</a></p>{% endif %}
+  {% include "community/_post_card.html" %} {% if user and user.id
   != post.author_id %}
   <details class="report-panel" id="report">
     <summary>Report this post</summary>
@@ -103,6 +105,16 @@
         {% endif %}
         <div class="post-body">{{ reply.body }}</div>
         <div class="reply-actions">
+          {% set helpful = helpful_summaries[reply.id] %}
+          {% if user and user.id != reply.author_id %}<form method="post" action="/replies/{{ reply.id }}/helpful">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" /><input type="hidden" name="action" value="{{ 'remove' if helpful.marked else 'mark' }}" />
+            <button class="btn btn-secondary btn-sm" type="submit" aria-pressed="{{ 'true' if helpful.marked else 'false' }}">Helpful{% if helpful.count %} · {{ helpful.count }}{% endif %}</button>
+          </form>{% elif helpful.count %}<span class="field-hint">{{ helpful.count }} {{ 'member found' if helpful.count == 1 else 'members found' }} this helpful</span>{% endif %}
+          {% if post.post_kind == 'question' and answer_summaries[post.id].answer_id == reply.id %}<span class="community-kind-badge">Selected answer</span>{% endif %}
+          {% if user and user.id == post.author_id and post.post_kind == 'question' %}<form method="post" action="/replies/{{ reply.id }}/answer">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" /><input type="hidden" name="action" value="{{ 'remove' if answer_summaries[post.id].answer_id == reply.id else 'select' }}" />
+            <button class="btn btn-secondary btn-sm" type="submit">{{ 'Remove selected answer' if answer_summaries[post.id].answer_id == reply.id else 'Choose as answer' }}</button>
+          </form>{% endif %}
           {% if user %}<a
             class="text-link"
             href="/posts/{{ post.id }}?page={{ reply_page.number }}&amp;reply_to={{ reply.id }}#reply-form"
@@ -243,8 +255,8 @@
       {% else %}
       <h2>Have something to add?</h2>
       <p>
-        <a href="/auth/login">Sign in</a> or
-        <a href="/auth/register">create an account</a> to reply and follow this
+        <a href="{{ login_url }}">Sign in</a> or
+        <a href="{{ register_url }}">create an account</a> to reply and follow this
         discussion.
       </p>
       {% endif %}

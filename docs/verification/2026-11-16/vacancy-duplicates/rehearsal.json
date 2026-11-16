@@ -1,0 +1,112 @@
+{
+  "mode": "private_rehearsal",
+  "checked_at": "2026-11-16T12:08:43.454219+00:00",
+  "private_backup": "/tmp/nurse-vacancy-duplicates-2x50up6k/before.db",
+  "before": {
+    "eligible_listings": 45,
+    "unique_opportunities": 36,
+    "duplicate_listings": 9,
+    "total_job_rows": 56
+  },
+  "after": {
+    "eligible_listings": 36,
+    "unique_opportunities": 36,
+    "duplicate_listings": 0,
+    "total_job_rows": 56
+  },
+  "cleanup": {
+    "groups": 3,
+    "retired_jobs": 9,
+    "duplicate_records": 9,
+    "conflicts": 0,
+    "merges": [
+      {
+        "canonical_url": "https://enugustate.gov.ng/2024/06/16/recruitment-of-health-workers-by-the-state-ministry-of-health-and-enugu-state-primary-health-care-development-agency/",
+        "job_id": "01a1dd1c-60d8-718c-9e62-d37f9da8932e",
+        "retired_job_ids": [
+          "01a1dd1c-6121-7af1-b6f8-c193ea94c89f",
+          "01a1dd1c-616b-7780-a7c5-9a7d4a2d7f0c",
+          "01a1dd1c-61b5-7083-adbf-0a142d4105e6",
+          "01a1e1aa-5c4a-7226-9cfd-dd8bd7132bc1"
+        ]
+      },
+      {
+        "canonical_url": "https://adamawastate.gov.ng/adamawa-begins-recruitment-of-doctors-consultants-to-boost-healthcare/",
+        "job_id": "01a1df98-dd06-71c4-9c3a-db60577431e8",
+        "retired_job_ids": [
+          "01a1df98-dd20-7273-8f7a-ee8c40d0ed71",
+          "01a1df98-dd2f-720e-8321-fe1318bbabbf",
+          "01a1df98-dd3f-7135-b202-e9deb256c014"
+        ]
+      },
+      {
+        "canonical_url": "https://adamawastate.gov.ng/fintiris-government-opens-recruitment-for-junior-community-health-workers-across-21-lgas/",
+        "job_id": "01a1df9b-820b-7485-91cc-14116a52d423",
+        "retired_job_ids": [
+          "01a1df9b-8245-74ec-8f3d-8a8c145d44ef",
+          "01a1df9b-825d-7e7b-b163-6f33c75f6123"
+        ]
+      }
+    ]
+  },
+  "verification": {
+    "preview_preserved_all_tables": true,
+    "repeat_was_noop": true,
+    "original_facts_and_observation_times_preserved": true,
+    "job_and_vacancy_record_counts_preserved": true,
+    "protected_tables_unchanged": [
+      "account_file_deletions",
+      "account_tokens",
+      "alembic_version",
+      "community_connections",
+      "community_events",
+      "community_follows",
+      "community_media",
+      "community_post_likes",
+      "community_posts",
+      "community_replies",
+      "community_topics",
+      "content_reports",
+      "credential_claims",
+      "direct_messages",
+      "discussion_follows",
+      "discussion_reply_reads",
+      "employer_memberships",
+      "employer_organizations",
+      "employer_review_events",
+      "event_attendance",
+      "evidence_accesses",
+      "evidence_documents",
+      "field_visibilities",
+      "job_applications",
+      "notification_preferences",
+      "notifications",
+      "nurse_profiles",
+      "offline_operations",
+      "offline_uploads",
+      "opportunity_preferences",
+      "recruitment_discovery_schedules",
+      "recruitment_discovery_tasks",
+      "recruitment_organizations",
+      "recruitment_source_events",
+      "recruitment_sources",
+      "reel_saves",
+      "reels",
+      "saved_opportunities",
+      "social_auth_attempts",
+      "social_enrollments",
+      "social_identities",
+      "staff_role_events",
+      "user_daily_activity",
+      "user_tours",
+      "users",
+      "vacancy_snapshots",
+      "verification_cases",
+      "worker_heartbeats"
+    ],
+    "events_before": 314,
+    "events_after": 327,
+    "sqlite_integrity": "ok",
+    "foreign_key_violations": 0
+  }
+}

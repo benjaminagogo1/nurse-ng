@@ -3,6 +3,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request, Response, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -10,6 +11,7 @@ from app.models.jobs import Job, JobApplication, JobStatus
 from app.models.opportunities import SavedOpportunity
 from app.models.user import AccountType, User
 from app.services.employers import approved_organizations, authorized
+from app.services.job_aliases import retained_job
 from app.services.jobs import (
     APPLICATION_STATUS_LABELS,
     JOB_TYPE_LABELS,
@@ -201,7 +203,7 @@ def employers_page(
 
 
 def _job(db: Session, identifier: UUID, user: User | None) -> Job:
-    job = db.get(Job, identifier)
+    job = retained_job(db, db.get(Job, identifier))
     if job and job.source_id:
         if collector_authorized(job.source) and job.status in {"open", "unconfirmed", "closed"}:
             return job
@@ -256,7 +258,10 @@ def job_detail(
     user: User | None = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> Response:
-    return _detail(request, db, user, _job(db, job_id, user))
+    job = _job(db, job_id, user)
+    if job.id != job_id:
+        return RedirectResponse(f"/jobs/{job.id}", status_code=307)
+    return _detail(request, db, user, job)
 
 
 @router.post("/jobs/{job_id}/apply")

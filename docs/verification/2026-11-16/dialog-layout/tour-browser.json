@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "artifacts": "/tmp/nurse-tour-browser-05w4x78j",
+  "flows": [
+    "first invitation",
+    "keyboard focus",
+    "delayed save",
+    "repeated input",
+    "pause during save",
+    "resume saved progress"
+  ]
+}

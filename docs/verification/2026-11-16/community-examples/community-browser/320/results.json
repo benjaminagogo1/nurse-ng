@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "audits": 6,
+  "javascript_errors": [],
+  "scope": "editable community examples",
+  "journeys": [
+    "editable example and own blank idea",
+    "no community created by viewing an example",
+    "ordinary member creation and automatic membership",
+    "post in chosen community",
+    "generic composer blank, explicit link selected",
+    "draft restores chosen community, discard restores blank choice",
+    "creation links in feed, composer and onboarding"
+  ]
+}

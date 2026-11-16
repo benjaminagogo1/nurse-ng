@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "audits": 18,
+  "widths": [
+    390,
+    320,
+    1280
+  ],
+  "violations": 0,
+  "horizontal_overflow": 0,
+  "scope": "editable community examples, member creation, explicit choice, draft recovery and creation entry points",
+  "note": "The six 390px states were completed and recorded before the longer process was interrupted. Separate 320px and 1280px runs completed successfully."
+}

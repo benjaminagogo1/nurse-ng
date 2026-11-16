@@ -3,7 +3,9 @@
 from app.models.account import AccountToken, FileDeletion
 from app.models.activity import UserDailyActivity
 from app.models.community import (
+    CommunityAnswer,
     CommunityMedia,
+    CommunityMembership,
     CommunityPost,
     CommunityReply,
     CommunityTopic,
@@ -12,6 +14,7 @@ from app.models.community import (
     DiscussionFollow,
     DiscussionReplyRead,
     Follow,
+    HelpfulReply,
 )
 from app.models.employers import EmployerMembership, EmployerOrganization, EmployerReviewEvent
 from app.models.engagement import PostLike
@@ -40,6 +43,9 @@ from app.models.verification import EvidenceAccess, EvidenceDocument, Verificati
 from app.models.workers import WorkerHeartbeat
 
 __all__ = [
+    "CommunityAnswer",
+    "CommunityMembership",
+    "HelpfulReply",
     "PostLike",
     "StaffRoleEvent",
     "EmployerMembership",

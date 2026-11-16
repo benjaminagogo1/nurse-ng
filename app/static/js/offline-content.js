@@ -27,7 +27,7 @@
   const specs = {
     message: ["body", "client_key"],
     application: ["cover_note", "consent"],
-    post: ["topic_id", "body", "community_name", "external_video_url"],
+    post: ["topic_id", "body", "community_name", "external_video_url", "post_kind", "title", "activity_format", "activity_starts_at"],
     reply: ["body", "community_name", "in_reply_to_id"],
     connection: [],
     reel: [
@@ -276,6 +276,21 @@
       if (field.max) control.maxLength = field.max;
       form.append(control);
     }
+    if (draft.kind === "post" && form.elements.post_kind?.type === "select-one") {
+      const refreshActivity = () => {
+        const activity = form.elements.post_kind.value === "activity";
+        form.elements.title.required = activity;
+        for (const name of ["activity_format", "activity_starts_at"]) {
+          const control = form.elements[name];
+          control.disabled = !activity;
+          control.hidden = !activity;
+          if (control.labels?.[0]) control.labels[0].hidden = !activity;
+        }
+        form.elements.activity_format.required = activity;
+      };
+      form.addEventListener("change", refreshActivity);
+      refreshActivity();
+    }
     if (draft.kind === "reel") {
       form.append(
         app.node(
@@ -361,7 +376,7 @@
         ),
         app.node(
           "p",
-          (draft.payload.body || draft.payload.cover_note || "").slice(0, 300),
+          (draft.payload.title || draft.payload.body || draft.payload.cover_note || "").slice(0, 300),
         ),
       );
       if (draft.fileName)

@@ -1,5 +1,6 @@
 {% from "_avatar.html" import avatar with context %}
 {% from "_like_button.html" import like_button %}
+{% from "community/_share.html" import share_actions %}
 <article class="community-card">
   <header class="community-card-header">
     {{ avatar(post.author, post.author.community_name) }}
@@ -21,6 +22,13 @@
     </div>
   </header>
 
+  {% if post_kind_labels %}<div class="community-post-kind">
+    <span class="community-kind-badge">{{ post_kind_labels.get(post.post_kind, 'Conversation') }}</span>
+    {% if post.post_kind == 'question' and answer_summaries[post.id].answered %}<span class="community-kind-badge">Selected answer</span>{% endif %}
+    {% if post.post_kind == 'activity' %}<span>{{ activity_formats.get(post.activity_format, '') }}</span>{% endif %}
+  </div>{% endif %}
+  {% if post.title %}<h2 class="community-post-title">{% if conversation_detail %}{{ post.title }}{% else %}<a href="/posts/{{ post.id }}">{{ post.title }}</a>{% endif %}</h2>{% endif %}
+  {% if post.activity_starts_at %}<p class="field-hint">Starts {{ post.activity_starts_at|community_activity_time }}</p>{% endif %}
   {% if post.body %}
   <div class="post-body">
     {% if conversation_detail %}{{ post.body }}{% else %}{{
@@ -78,4 +86,5 @@
       >Latest reply {{ summary.last_reply_at.strftime('%d %b %Y') }}</span
     >{% endif %}
   </footer>
+  {% if post_share_urls %}{{ share_actions(post_share_urls[post.id], (post.title or 'A conversation in ' + post.topic.name) + ' — Nurse.ng') }}{% endif %}
 </article>

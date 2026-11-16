@@ -6,7 +6,7 @@ endblock %} {% block header %}
     <a class="brand" href="/">{{ icon('logo', 31) }}<span>Nurse.ng</span></a>
     <p class="header-hint">
       New to Nurse.ng?
-      <a href="/auth/register">Get started {{ icon('arrow', 15) }}</a>
+      <a href="{{ register_url|default('/auth/register') }}">Get started {{ icon('arrow', 15) }}</a>
     </p>
     {{ display_button() }}
   </div>
@@ -49,6 +49,8 @@ endblock %} {% block header %}
 
       <form method="post" action="/auth/login" class="stacked-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <input type="hidden" name="next" value="{{ next|default('') }}" />
+        {% if next %}<p class="field-hint">After sign-in, you’ll return to the shared community conversation.</p>{% endif %}
         <label for="phone">Phone number</label>
         <div class="input-affix">
           <span class="affix-left"
@@ -97,7 +99,7 @@ endblock %} {% block header %}
         {{ icon('lock', 14) }} A secure space for your professional journey.
       </p>
       <p class="form-alt">
-        New here? <a href="/auth/register">Create an account</a>
+        New here? <a href="{{ register_url|default('/auth/register') }}">Create an account</a>
       </p>
     </div>
   </div>

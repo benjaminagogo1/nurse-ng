@@ -1522,3 +1522,260 @@ This is the pre-hardening result: the previously documented 89 cases plus 14 com
   member data. Hosting and initial connected sign-in remain necessary; public
   distribution and iPhone signing remain outstanding. Detailed receipts and
   screenshots: [native offline report](verification/2026-11-15/mobile-offline/README.md).
+
+## 16 November 2026 — Resume and complete duplicate vacancy repair
+
+- Recovered the interrupted work from recent task records and the unchanged
+  working tree. Comment-reply aliases such as `?replytocom=231#respond` were
+  multiplying three government announcements into 12 public listings.
+- Completed URL normalization across discovery, structured-record comparison
+  and collection. Job-specific query parameters retain separate identities;
+  differing facts still require review. Original source records/snapshots remain.
+- Added the audited `consolidate-duplicate-vacancies` command, preview rollback
+  and old job redirects. Archived duplicates no longer block a real update to
+  the retained job. Cleanup skips contradictory evidence and staff corrections.
+- The preceding session's **223-case regression passed**, including 20 new tests.
+  Implementation and tests were unchanged since that report; recovery did not
+  repeat the run. Current Ruff and whitespace checks passed. A fresh private
+  rehearsal confirmed rollback, preserved history, idempotence and integrity.
+- At 12:13 UTC, paused the local worker supervisor, created a new private SQLite
+  backup and consolidated nine duplicate public listings across three groups.
+  Public eligibility changed from 45 listings to 36 distinct opportunities.
+  All 56 historical job rows, vacancy rows, snapshots, saved opportunities,
+  original facts and observation times were retained. Added 13 audit events;
+  no conflicting group was merged. Restarted the worker supervisor successfully.
+- At 12:17 UTC, the Jobs feed and all retained details returned HTTP 200. All
+  nine old links redirected correctly and their retired IDs were absent from
+  the feed. Liveness/readiness returned HTTP 200. SQLite integrity and foreign-key
+  checks passed; public eligibility remained 36 with zero duplicate identities.
+- [Verification and receipts](verification/2026-11-16/vacancy-duplicates/README.md)
+  record the rehearsal, cleanup, existing regression and live checks. Private
+  backup: `/tmp/nurse-vacancy-duplicates-ci48wop3/before.db`. Documented the operator
+  procedure in `LOCAL_OPERATIONS.md`. Changes remain local and uncommitted;
+  no schema migration was required.
+
+## 16 November 2026 — Repair the installation page
+
+- The member reported that the Android/iPhone page had nothing clickable.
+  Confirmed that both native release URLs were unset and that Chrome already
+  considered the site installable, but the page had no browser install action.
+- Replaced the release-only placeholders with clickable Android/iPhone
+  installation steps. Connected the page and member banner to Chrome/Edge's
+  actual install event; iPhone uses Safari's Share → Add to Home Screen flow.
+  Missing native releases no longer block installation from the browser.
+- Added dismissal/error fallbacks, protection against duplicate prompts and
+  standalone/native suppression. Added existing-brand PNG/touch icons, a stable
+  manifest ID and an updated public offline cache. Preserved optional native
+  download links and the existing account/offline flows.
+- **60 related Python checks passed**. The isolated browser journey passed at
+  320, 390 and 1280 pixels, including large-text/dark layout, device instructions,
+  Android/iPhone emulation, prompt acceptance/dismissal/error, repeated clicks,
+  banner installation and installed-state detection. Chrome offered its real
+  install event; OS choices and native/standalone flags were simulated.
+- Confirmed the running local `/app` page has an enabled browser install action
+  and both device actions, with zero Chrome manifest/installability errors.
+  Ruff, JavaScript syntax and whitespace checks passed. Screenshots were inspected.
+- [Installation verification](verification/2026-11-16/installation/README.md)
+  retains before/after diagnostics, tests and screenshots. No physical phone or
+  Safari installation was verified. Phone use requires reachable HTTPS hosting;
+  native signing/store distribution remains separate. No schema migration or
+  deployment was performed; changes remain local and uncommitted.
+
+## 16 November 2026 — Whole-app assessment and readable deadlines
+
+- Completed the requested assessment of the current working tree and running
+  local app. The pre-date-change full regression passed **823 tests** in
+  1,621.06 seconds. Quality (25 audited states), notifications/messages,
+  offline recovery and Reels browser journeys passed using isolated storage
+  and disabled/file-only email. Native Node checks passed four cases.
+- The member-discovery repository runner failed a whitespace-sensitive heading
+  comparison. A temporary `.textContent.trim()` diagnosis completed the entire
+  journey; the repository runner was not changed and is still failing.
+- Anonymous inspection covered 27 public page states with no JavaScript errors
+  or horizontal overflow. Four login/registration states reported insufficient
+  dark-theme contrast on the LinkedIn mark. Screenshots were inspected.
+- Reproduced a latent consolidation defect: bookmarks remain on retired jobs,
+  the retained detail offers Save again, and generated reminders dropped from
+  one to zero. The live snapshot had no saved opportunities, so no actual member
+  reminder loss was observed. Also recorded the inactive notification worker,
+  misleading publisher wording, metadata issues and remaining release gaps.
+  Staff MFA and authoritative NMCN verification remain previously deferred.
+- Implemented the requested deadline display: ISO dates/timestamps render as
+  **Nov 30, 2026** on job cards/details, preserving their stated day and stored
+  ISO/form values. All **13 final targeted checks passed**. The initial new form
+  test omitted Request context; replaced it with an HTTP recovery check. Earlier
+  interrupted targeted runs are not counted as passing. The 823-case suite was
+  completed before this edit and was not repeated.
+- At 13:26 UTC, the local feed/detail returned HTTP 200 and displayed the exact
+  requested example; all 16 visible deadlines were readable. Feed eligibility
+  was then 32, compared with 34 at the 12:57 aggregate snapshot while collection
+  continued. Database integrity/foreign keys and migration head were correct.
+- Ruff/dependency checks passed; 81 templates and 21 JavaScript files parsed.
+  ClamAV version/signature check passed. No real email, source/account decisions,
+  notification activation, deployment or schema migration occurred during the
+  assessment. Changes remain local and uncommitted.
+- [Full assessment](APPLICATION_ASSESSMENT_2026-11-16.md) and
+  [retained evidence](verification/2026-11-16/assessment/README.md) distinguish
+  verified journeys, reproduced findings, earlier restoration evidence and
+  untested physical-device/production/provider behavior.
+
+## 16 November 2026 — Implement the three requested assessment fixes
+
+- Fixed saved/reminder continuity during vacancy consolidation. Canonical
+  bookmarks retain saved time, opt-outs and reminder progress; notification
+  targets retain sent/read history and suppress redundant delivery/display.
+  Old saved-page actions resolve aliases with current ownership/permission
+  checks. Invalid markers cannot redirect to another announcement.
+- The maintenance command also repairs earlier alias history, supports complete
+  preview rollback, audits aggregate repair counts and is idempotent. Local
+  preview found no stranded history or new duplicate groups to repair, so no
+  live vacancy/bookmark changes were required.
+- Added notifications to the supervisor default and required-role example;
+  updated the local `.env`, restarted the existing user supervisor and reloaded
+  web readiness. At 13:55 UTC all three workers were healthy and `/readyz` was
+  HTTP 200. The worker generated 20 matching records with email skipped; there
+  were no verified opted-in email preferences at activation. No real email was
+  sent during verification.
+- Corrected LinkedIn mark contrast in dark theme and advanced CSS/offline-cache
+  versions. Twelve browser states passed in both themes, including 320-pixel
+  enlarged text. Measured contrast: dark **6.28:1**, light **5.08:1**. No selected
+  axe violations, horizontal overflow or JavaScript errors; screenshots inspected.
+- Related regression passed **87 cases**; final duplicate/date checks passed
+  **39 cases**, covering **102 distinct cases** across the two runs. Tests include
+  actual notification-worker crash recovery, ownership, opt-outs, sent/read
+  deduplication, corrupt aliases, and one queued reminder delivered once to a
+  private file mailbox. Ruff, whitespace, 81 templates and service-worker syntax
+  passed. SQLite integrity/foreign keys and migration head were correct.
+- [Verification](verification/2026-11-16/assessment-fixes/README.md) retains test,
+  browser and runtime receipts. Source wording and deferred MFA remain outside
+  this increment. No schema migration or deployment; changes are uncommitted.
+
+## 16 November 2026 — Stop repeated installation reminders
+
+- The member reported that the home-screen installation card stayed on every
+  page. It had no close control and only remembered installation until navigation.
+- Added an accessible close button and durable browser-local dismissal. Starting
+  installation, cancelling its prompt or opening installation help from the card
+  also suppresses future reminders. Explicit installation remains in Settings
+  and `/app`; installed native/standalone use is remembered. Storage failures
+  preserve immediate dismissal, with session storage as the first fallback.
+- Advanced the card CSS/script and service-worker cache versions. Nine related
+  Python checks passed. The isolated installation browser journey passed at
+  320/390/1280 pixels, including keyboard focus, navigation/reload, saved suppression,
+  browser install actions, iPhone help, blocked storage and large-text layouts.
+  The keyboard fixture was corrected to send Enter's text/keypress as well as its
+  keydown. Final JavaScript/server logs were clean; screenshots inspected.
+- [Verification](verification/2026-11-16/install-reminder/README.md) retains the
+  successful test report, browser receipt and screenshots. No deployment, real
+  account/mail changes or schema migration; changes remain uncommitted.
+
+## 16 November 2026 — Center notices and standardize page gutters
+
+- Implemented the requested 20px side spacing in the shared page wrapper,
+  removing duplicate outer padding from transparent page layouts. Header/footer
+  spacing follows the same gutter; boxed forms retain their inner padding and
+  centered width limits.
+- Centered feedback, tour invitations and installation reminders with a 480px
+  width limit, softer borders, rounded corners and subtle shadows. Compact
+  feedback stops at 400px. Legacy form/Reels notices, toasts and native dialogs
+  are bounded. The mobile installation card gives its copy the full row width.
+- Reproduced enlarged-text feedback sitting behind a taller header. A guarded
+  resize handler now keeps the focused notice visible after header/text/viewport
+  changes, preserving normal form focus, validation and dismissal.
+- Thirteen related Python checks passed. Existing browser journeys passed
+  account feedback at 320/390/1280px, 25 axe/reflow page states, installation
+  actions/dismissal and the focused tour invitation/keyboard/pause/resume checks.
+  All 25 page states measured 20px gutters; no axe violations or horizontal
+  overflow. Feedback body contrast: light 5.81:1, dark 8.40:1.
+- Screenshots were inspected. Asset/cache versions were advanced; final
+  JavaScript syntax, template parsing and whitespace checks passed. No tests
+  were added for the cosmetic changes. Diagnostic output retained existing
+  assertions; interrupted/initial failing runs are documented separately.
+- [Verification](verification/2026-11-16/dialog-layout/README.md) retains receipts,
+  geometry measurements and screenshots. All browser data/mail was isolated;
+  no deployment or live schema migration. Changes remain local and uncommitted.
+
+## 16 November 2026 — Record community growth as the immediate priority
+
+- Recorded the user's direction: build an inclusive community for nurses at all
+  career stages, with belonging, interaction, shared opportunities and professional
+  development supporting community growth and market penetration.
+- Updated the README, community expansion plan, roadmap sequence and decision
+  L93 so future recommendations prioritize joining, meaningful participation,
+  sharing/invitations and returning members. Preserved the previously authorized
+  community delivery scope.
+- Employer capabilities belong to a gradual later expansion once the community
+  is established and trusted. Staff MFA remains intentionally deferred and pending.
+  Existing account/privacy/access protections continue to support community use.
+- Documentation changes only; proposed growth measures are not claimed as newly
+  instrumented features or achieved results. Checked the diff and local links;
+  no application behavior or data changed.
+
+## 16 November 2026 — Complete the four community engagement features
+
+- Recovered and completed the interrupted implementation across every nursing
+  career stage: joinable shared-interest communities with hosts/welcome/rules,
+  unanswered questions and Helpful/selected answers, shareable learning
+  activities, and WhatsApp/native/copy invitations with password and social
+  sign-in/registration continuation to the original public conversation.
+- Added private joined feeds, interest-based onboarding suggestions, public
+  aggregate counts and useful share metadata. Membership does not restrict
+  public reading/posting or publish a private profile. Existing reporting,
+  discussion follows and reply notifications remain in use.
+- Learning activities support practice challenges, case discussions and peer
+  Q&As, optional WAT schedules and ordinary replies. Titles and activity metadata
+  survive tab recovery and offline editing/synchronization. No communities or
+  contributions were seeded into the live database.
+- Fixed compatibility for omitted video links, historical-schema migration
+  fixtures, and two browser-discovered defects: intentionally disabled activity
+  controls blocked normal publishing, and same-document action redirects left
+  old reply/answer state visible. Signed-out protection remains enforced; same
+  page actions now reload saved state. Advanced the public offline cache to v31.
+- **265 related Python cases passed** in 863.505 seconds. Two final auth checks
+  passed after refining signup feedback; they are included in that distinct
+  count. Both full Chrome journeys passed after the final JavaScript fix,
+  including invitation signup, answer actions, offline activity synchronization,
+  cross-tab logout, account changes, draft/history recovery and storage failure.
+- **27 axe/reflow states passed** at 390px/light, 320px/dark with enlarged text,
+  and 1280px/light: zero selected violations, overflow or JavaScript errors.
+  Screenshots were inspected. Final native Node bundle checks passed four cases;
+  Ruff, JavaScript syntax, 84 templates and whitespace checks passed.
+- Rehearsed upgrade/downgrade/upgrade on a private SQLite copy. At 21:19 UTC,
+  paused the existing supervisor, took a fresh private backup, applied
+  `e6480g7c3294` and restarted workers. All 11,609 existing rows across 50 tables
+  retained their original data; integrity, foreign keys and metadata checks
+  passed. The final eleven local HTTP checks returned 200 and readiness was
+  healthy; recruitment, Reels and notification roles were healthy.
+- [Delivery guide](COMMUNITY_ENGAGEMENT.md) and
+  [verification evidence](verification/2026-11-16/community-engagement/README.md)
+  retain the passing results, migration receipts and inspected screenshots.
+  The local app is available at `/communities`, `/feed/unanswered` and
+  `/activities`. Provider/device checks used isolated transports; no real
+  invitations or test email were sent. No public deployment or commit occurred.
+
+## 16 November 2026 — Let members shape communities with editable examples
+
+- Addressed the user's concern that everything appeared under General nursing.
+  Made member creation visible in the feed, composer and onboarding, with six
+  editable starting points on the directory and creation form: critical care,
+  new-nurse support, local networks, exam preparation, school/alumni and research.
+- Selecting an example fills the form through GET and creates no records.
+  Members can edit every suggested field or start with their own name and
+  purpose. Clarified that the interest category is optional and renamed the
+  account alias label to “Your public display name”.
+- Removed automatic selection of General nursing or the only community from
+  fresh generic posts. Explicit links and saved drafts preserve member choices.
+  Existing communities and conversations remain intact; no live examples were
+  seeded and no migration was needed.
+- **92 related Python checks passed.** The full draft browser journey passed.
+  **18 axe/reflow states passed** across 390px/light, 320px/dark with enlarged
+  text, and 1280px/light; zero selected violations or horizontal overflow.
+  Completed viewport runs verified ordinary-member hosting/posting and draft
+  recovery. Corrected the browser fixture's detached-ID and theme-transition
+  assumptions; interrupted long runs are documented separately.
+- Inspected screenshots and retained
+  [verification evidence](verification/2026-11-16/community-examples/README.md).
+  Ruff, five Python files, 85 templates, JavaScript syntax and whitespace checks
+  passed. Advanced community CSS to v3 and the offline shell cache to v33.
+  The local directory returned HTTP 200 with the example section. No test
+  accounts/mail, deployment, commit or push; changes remain local.

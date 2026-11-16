@@ -5,27 +5,31 @@
   <div class="page-heading-row">
     <div>
       <h1>
-        {% if feed_view == 'discussions' %}Discussions you follow{% elif
+        {% if feed_view == 'unanswered' %}Questions needing replies{% elif feed_view == 'activities' %}Learn and grow together{% elif feed_view == 'communities' %}From my communities{% elif feed_view == 'discussions' %}Discussions you follow{% elif
         feed_view == 'people' %}From colleagues you follow{% else
         %}Conversations with other nurses{% endif %}
       </h1>
       <p class="lede">
-        {% if feed_view == 'discussions' %}Return to your conversations. New
+        {% if feed_view == 'unanswered' %}Share what you know or a useful resource. A thoughtful reply can help a colleague move forward.{% elif feed_view == 'activities' %}Practice challenges, case discussions and peer Q&amp;As for every stage of nursing.{% elif feed_view == 'communities' %}Keep up with the conversations in communities you chose to join.{% elif feed_view == 'discussions' %}Return to your conversations. New
         replies from others are highlighted here.{% else %}Ask for help, share
         what you know, and talk about life in nursing.{% endif %}
       </p>
     </div>
+    <div class="community-heading-actions">
+    {% if user %}<a class="btn btn-secondary" href="/communities/new">Create a community</a>{% endif %}
     {% if posts or search_query or page_number > 1 or feed_view != 'all' %}<a
       class="btn btn-primary"
-      href="{% if user %}/posts/new{% else %}/auth/register{% endif %}"
-      >{{ icon('plus', 17) }} Ask or share</a
+      href="{% if user %}/posts/new{% if feed_view == 'activities' %}?kind=activity{% endif %}{% else %}/auth/register{% endif %}"
+      >{{ icon('plus', 17) }} {{ 'Host an activity' if feed_view == 'activities' else 'Ask or share' }}</a
     >{% endif %}
+    </div>
   </div>
   <nav class="section-tabs conversation-tabs" aria-label="Conversation views">
     <a href="/feed" {% if feed_view == 'all' %}aria-current="page" {% endif %}
       >All conversations</a
     >
     {% if user %}
+    <a href="/feed/communities" {% if feed_view == 'communities' %}aria-current="page"{% endif %}>My communities</a>
     <a
       href="/feed/discussions"
       {% if feed_view == 'discussions' %}aria-current="page"
@@ -43,7 +47,9 @@
       >Colleagues I follow</a
     >
     {% endif %}
-    <a href="/topics">Browse topics</a>
+    <a href="/communities">Explore communities</a>
+    <a href="/feed/unanswered" {% if feed_view == 'unanswered' %}aria-current="page"{% endif %}>Questions needing replies</a>
+    <a href="/activities" {% if feed_view == 'activities' %}aria-current="page"{% endif %}>Learning together</a>
     <a href="/reels">Reels</a>
   </nav>
   {% include "community/_search.html" %} {% if not user %}
@@ -64,6 +70,9 @@
       {% elif page_number > 1 %}
       <h2>No more conversations here</h2>
       <p>Go back to the previous page to continue reading.</p>
+      {% elif feed_view == 'unanswered' %}<h2>No questions needing replies</h2><p>New unanswered questions will appear here. Explore conversations or start a question of your own.</p><a class="btn btn-secondary" href="/feed">Explore conversations</a>
+      {% elif feed_view == 'activities' %}<h2>Start learning together</h2><p>Bring colleagues together around a practice question, case discussion or peer Q&amp;A.</p>{% if user %}<a class="btn btn-primary" href="/posts/new?kind=activity">Host a learning activity</a>{% endif %}
+      {% elif feed_view == 'communities' %}<h2>Find your communities</h2><p>Join communities that match your interests to see their conversations here.</p><a class="btn btn-secondary" href="/communities">Explore communities</a>
       {% elif feed_view == 'discussions' %}
       <h2>Keep a conversation close</h2>
       <p>

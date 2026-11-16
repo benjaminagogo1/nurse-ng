@@ -1,0 +1,726 @@
+{
+  "checked_at_utc": "2026-11-16T12:57:28.061282+00:00",
+  "database": {
+    "integrity": "ok",
+    "foreign_key_violations": 0,
+    "migration_revision": [
+      "e6480f6b2183"
+    ],
+    "table_counts": {
+      "account_file_deletions": 0,
+      "account_tokens": 1,
+      "alembic_version": 1,
+      "community_connections": 0,
+      "community_events": 0,
+      "community_follows": 0,
+      "community_media": 3,
+      "community_post_likes": 1,
+      "community_posts": 1,
+      "community_replies": 2,
+      "community_topics": 1,
+      "content_reports": 0,
+      "credential_claims": 0,
+      "direct_messages": 0,
+      "discussion_follows": 0,
+      "discussion_reply_reads": 0,
+      "employer_memberships": 0,
+      "employer_organizations": 0,
+      "employer_review_events": 0,
+      "event_attendance": 0,
+      "evidence_accesses": 1,
+      "evidence_documents": 2,
+      "field_visibilities": 0,
+      "job_applications": 0,
+      "jobs": 56,
+      "notification_preferences": 5,
+      "notifications": 0,
+      "nurse_profiles": 2,
+      "offline_operations": 1,
+      "offline_uploads": 0,
+      "opportunity_preferences": 1,
+      "recruitment_discovery_schedules": 8,
+      "recruitment_discovery_tasks": 3235,
+      "recruitment_organizations": 526,
+      "recruitment_source_events": 5184,
+      "recruitment_sources": 862,
+      "reel_saves": 0,
+      "reels": 1,
+      "saved_opportunities": 0,
+      "social_auth_attempts": 0,
+      "social_enrollments": 0,
+      "social_identities": 0,
+      "staff_role_events": 0,
+      "user_daily_activity": 10,
+      "user_tours": 2,
+      "users": 3,
+      "vacancy_events": 327,
+      "vacancy_records": 177,
+      "vacancy_snapshots": 1047,
+      "verification_cases": 1,
+      "worker_heartbeats": 40
+    }
+  },
+  "configuration": {
+    "environment": "development",
+    "debug": true,
+    "public_base_url": "http://127.0.0.1:8000",
+    "session_https_only": false,
+    "account_mail_backend": "smtp",
+    "google_configured": false,
+    "linkedin_configured": false,
+    "android_download_configured": false,
+    "iphone_download_configured": false,
+    "required_workers": "recruitment,reels"
+  },
+  "workers": {
+    "ready": true,
+    "workers": [
+      {
+        "name": "recruitment",
+        "healthy": true,
+        "state": "idle",
+        "last_seen_at": "2026-11-16 12:57:26.371700"
+      },
+      {
+        "name": "reels",
+        "healthy": true,
+        "state": "idle",
+        "last_seen_at": "2026-11-16 12:57:26.439639"
+      },
+      {
+        "name": "notifications",
+        "healthy": false,
+        "state": "missing",
+        "last_seen_at": null
+      }
+    ]
+  },
+  "notification_email_states": {},
+  "evidence_scan_states": {
+    "missing": 2
+  },
+  "backup_manifests": [
+    {
+      "created_at": "2026-11-14T23:04:48.123752+00:00",
+      "expires_at": "2026-11-21T23:04:48.123752+00:00"
+    },
+    {
+      "created_at": "2026-11-15T02:08:48.883066+00:00",
+      "expires_at": "2026-11-22T02:08:48.883066+00:00"
+    },
+    {
+      "created_at": "2026-11-14T14:55:09.496684+00:00",
+      "expires_at": "2026-11-21T14:55:09.496684+00:00"
+    },
+    {
+      "created_at": "2026-11-14T12:43:35.906437+00:00",
+      "expires_at": "2026-11-21T12:43:35.906437+00:00"
+    },
+    {
+      "created_at": "2026-11-14T12:39:07.771538+00:00",
+      "expires_at": "2026-11-21T12:39:07.771538+00:00"
+    },
+    {
+      "created_at": "2026-11-14T14:10:27.197647+00:00",
+      "expires_at": "2026-11-21T14:10:27.197647+00:00"
+    },
+    {
+      "created_at": "2026-11-15T23:04:45.204967+00:00",
+      "expires_at": "2026-11-22T23:04:45.204967+00:00"
+    },
+    {
+      "created_at": "2026-11-14T12:24:34.353391+00:00",
+      "expires_at": "2026-11-21T12:24:34.353391+00:00"
+    }
+  ],
+  "active_staff_accounts": 1,
+  "staff_with_mfa_flag": 0,
+  "saved_opportunities_on_retired_aliases": 0,
+  "coverage": {
+    "measured_at_utc": "2026-11-16T12:57:26.531565+00:00",
+    "eligibility_method": "Full application open_job_condition(), including employer approval",
+    "sources_by_approval": {
+      "approved": 165,
+      "pending": 697
+    },
+    "approved_sources_by_health": {
+      "timeout": 5,
+      "healthy": 108,
+      "http_error": 4,
+      "dns_error": 9,
+      "redirect_limit": 11,
+      "tls_error": 4,
+      "scope_blocked": 6,
+      "connection_error": 11,
+      "policy_blocked": 5,
+      "access_blocked": 1,
+      "rate_limited": 1
+    },
+    "collector_authorized_sources": 165,
+    "vacancies_by_state": {
+      "duplicate": 19,
+      "pending": 3,
+      "published": 55,
+      "rejected": 100
+    },
+    "publicly_eligible_jobs": 34,
+    "public_jobs": [
+      {
+        "title": "Medical Laboratory Scientist - Lagos",
+        "organization": "eHealth Africa",
+        "country": "NG"
+      },
+      {
+        "title": "People and Culture Intern",
+        "organization": "eHealth Africa",
+        "country": "NG"
+      },
+      {
+        "title": "Office Assistant / IT Trainee",
+        "organization": "Desol Medical Solutions Limited",
+        "country": "NG"
+      },
+      {
+        "title": "Registered Nurse",
+        "organization": "St Dominic Catholic Hospital",
+        "country": "NG"
+      },
+      {
+        "title": "Internship Based on Projects",
+        "organization": "Nightingales Medical Trust",
+        "country": ""
+      },
+      {
+        "title": "Internship Based on Profession",
+        "organization": "Nightingales Medical Trust",
+        "country": ""
+      },
+      {
+        "title": "Internships",
+        "organization": "Premier Health Care",
+        "country": ""
+      },
+      {
+        "title": "Medical Assistant Openings \u2022 Patients First",
+        "organization": "Patients First",
+        "country": ""
+      },
+      {
+        "title": "Graduate Trainee Opportunities",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Healthcare Recruitment",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "IV Therapy Nurse",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Pharmacist",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Medical Officer",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Pharmacist Intern",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Pharmacy Intern",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Pharmacist",
+        "organization": "eHealth Africa",
+        "country": "NG"
+      },
+      {
+        "title": "Dental Assistant - Lagos",
+        "organization": "eHealth Africa",
+        "country": "NG"
+      },
+      {
+        "title": "Central Bank of Nigeria (CBN) Recruitment \u2014 Graduate Trainees & Specialists",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Physician Opportunities",
+        "organization": "OhioHealth",
+        "country": ""
+      },
+      {
+        "title": "First Bank Recruitment 2026/2027: Graduate Trainee & Experienced Hire Guide",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Recruitment of Health Workers by the State Ministry of Health, and Enugu State Primary Health Care Development Agency",
+        "organization": "ENUGU STATE GOVERNMENT \u2013 Tomorrow is Here",
+        "country": ""
+      },
+      {
+        "title": "Pharmacist",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Medical Officer",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Senior Medical Officer",
+        "organization": "Synapse Services",
+        "country": "NG"
+      },
+      {
+        "title": "Adamawa Begins Recruitment of Doctors, Consultants to Boost Healthcare",
+        "organization": "Adamawa State Government \u2013 Highest Peak of the NationHumidityPressureWindWind GustCloudsVisibilitySunriseSunset",
+        "country": ""
+      },
+      {
+        "title": "Fintiri\u2019s Government Opens Recruitment for Junior Community Health Workers Across 21 LGAs",
+        "organization": "Adamawa State Government \u2013 Highest Peak of the NationHumidityPressureWindWind GustCloudsVisibilitySunriseSunset",
+        "country": ""
+      },
+      {
+        "title": "Pharmacy Technician",
+        "organization": "St Dominic Catholic Hospital",
+        "country": "NG"
+      },
+      {
+        "title": "Pharmacist",
+        "organization": "",
+        "country": "NG"
+      },
+      {
+        "title": "Registered Nurse / Registered Midwife",
+        "organization": "Bergstein Hospital",
+        "country": "NG"
+      },
+      {
+        "title": "Registered Nurse / Ophthalmic Nurse",
+        "organization": "Ladkem Eye Hospital",
+        "country": "NG"
+      },
+      {
+        "title": "Auxiliary Nurse",
+        "organization": "Reverse Aesthetics Limited",
+        "country": "NG"
+      },
+      {
+        "title": "Nurses",
+        "organization": "Sterling Health HMO",
+        "country": "NG"
+      },
+      {
+        "title": "Territory Sales Officer - Healthcare (Lagos)",
+        "organization": "Sovereign Quint Iddeas Limited",
+        "country": "NG"
+      },
+      {
+        "title": "Territory Sales Officer - Healthcare (Port Harcourt)",
+        "organization": "Sovereign Quint Iddeas Limited",
+        "country": "NG"
+      }
+    ],
+    "pending_issue_counts": {
+      "employer": 3,
+      "closing_date": 3
+    },
+    "pending_without_stored_issues": 0
+  },
+  "public_job_facts": [
+    {
+      "title": "Medical Laboratory Scientist - Lagos",
+      "organization": "eHealth Africa",
+      "announcement_url": "https://erp.eha.ng/jobs/medical-laboratory-scientist-lagos-576",
+      "publication_date": "",
+      "closing_date": "",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": true
+    },
+    {
+      "title": "People and Culture Intern",
+      "organization": "eHealth Africa",
+      "announcement_url": "https://erp.eha.ng/jobs/people-and-culture-intern-583",
+      "publication_date": "",
+      "closing_date": "",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": true
+    },
+    {
+      "title": "Office Assistant / IT Trainee",
+      "organization": "Desol Medical Solutions Limited",
+      "announcement_url": "https://www.myjobmag.com/job/office-assistant-it-trainee-desol-medical-solutions-limited",
+      "publication_date": "2026-11-14T06:29:43+00:00",
+      "closing_date": "2026-12-14T23:59:59+00:00",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Registered Nurse",
+      "organization": "St Dominic Catholic Hospital",
+      "announcement_url": "https://www.myjobmag.com/job/registered-nurse-st-dominic-catholic-hospital-7",
+      "publication_date": "2026-11-14T06:29:52+00:00",
+      "closing_date": "2026-12-14T23:59:59+00:00",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Internship Based on Projects",
+      "organization": "Nightingales Medical Trust",
+      "announcement_url": "https://www.nightingaleseldercare.com/internship-projects",
+      "publication_date": "",
+      "closing_date": "",
+      "status_label": "Check availability",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Internship Based on Profession",
+      "organization": "Nightingales Medical Trust",
+      "announcement_url": "https://www.nightingaleseldercare.com/internship-profession",
+      "publication_date": "",
+      "closing_date": "",
+      "status_label": "Check availability",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Internships",
+      "organization": "Premier Health Care",
+      "announcement_url": "https://www.yai.org/intern",
+      "publication_date": "",
+      "closing_date": "",
+      "status_label": "Check availability",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Medical Assistant Openings \u2022 Patients First",
+      "organization": "Patients First",
+      "announcement_url": "https://patientsfirst.com/ma-openings/",
+      "publication_date": "",
+      "closing_date": "",
+      "status_label": "Check availability",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Graduate Trainee Opportunities",
+      "organization": "",
+      "announcement_url": "https://recruitmentblueprints.com/category/graduate-trainee-opportunities/",
+      "publication_date": "",
+      "closing_date": "",
+      "status_label": "Check availability",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Healthcare Recruitment",
+      "organization": "",
+      "announcement_url": "https://recruitmentblueprints.com/category/recruitments/healthcare-recruitment/",
+      "publication_date": "2026-07-04T07:06:10+00:00",
+      "closing_date": "",
+      "status_label": "Check availability",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "IV Therapy Nurse",
+      "organization": "",
+      "announcement_url": "https://www.jobberman.com/listings/iv-therapy-nurse-erwejk",
+      "publication_date": "2026-11-10T00:00:00.000000Z",
+      "closing_date": "2027-01-09T00:00:00.000000Z",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Pharmacist",
+      "organization": "",
+      "announcement_url": "https://www.jobberman.com/listings/full-tme-pharmacist-gm8x69",
+      "publication_date": "2026-11-13T00:00:00.000000Z",
+      "closing_date": "2027-01-12T00:00:00.000000Z",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Medical Officer",
+      "organization": "",
+      "announcement_url": "https://www.jobberman.com/listings/onco-medical-officer-erw095",
+      "publication_date": "2026-11-13T00:00:00.000000Z",
+      "closing_date": "2027-01-12T00:00:00.000000Z",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Pharmacist Intern",
+      "organization": "",
+      "announcement_url": "https://www.jobberman.com/listings/pharmacist-intern-0kdd7x",
+      "publication_date": "2026-10-23T00:00:00.000000Z",
+      "closing_date": "2026-12-22T00:00:00.000000Z",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Pharmacy Intern",
+      "organization": "",
+      "announcement_url": "https://www.jobberman.com/listings/pharmacy-intern-erwk8d",
+      "publication_date": "2026-11-09T00:00:00.000000Z",
+      "closing_date": "2027-01-08T00:00:00.000000Z",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Pharmacist",
+      "organization": "eHealth Africa",
+      "announcement_url": "https://erp.eha.ng/jobs/pharmacist-546",
+      "publication_date": "",
+      "closing_date": "",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": true
+    },
+    {
+      "title": "Dental Assistant - Lagos",
+      "organization": "eHealth Africa",
+      "announcement_url": "https://erp.eha.ng/jobs/dental-assistant-lagos-585",
+      "publication_date": "",
+      "closing_date": "",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": true
+    },
+    {
+      "title": "Central Bank of Nigeria (CBN) Recruitment \u2014 Graduate Trainees & Specialists",
+      "organization": "",
+      "announcement_url": "https://currentaffairs.com.ng/recruitment/cbn-recruitment",
+      "publication_date": "",
+      "closing_date": "",
+      "status_label": "Check availability",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Physician Opportunities",
+      "organization": "OhioHealth",
+      "announcement_url": "https://careers.ohiohealth.com/physician-opportunities/",
+      "publication_date": "",
+      "closing_date": "",
+      "status_label": "Check availability",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "First Bank Recruitment 2026/2027: Graduate Trainee & Experienced Hire Guide",
+      "organization": "",
+      "announcement_url": "https://recruitmentblueprints.com/first-bank-recruitment/",
+      "publication_date": "2026-07-04T06:56:56+00:00",
+      "closing_date": "",
+      "status_label": "Check availability",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Recruitment of Health Workers by the State Ministry of Health, and Enugu State Primary Health Care Development Agency",
+      "organization": "ENUGU STATE GOVERNMENT \u2013 Tomorrow is Here",
+      "announcement_url": "https://enugustate.gov.ng/2024/06/16/recruitment-of-health-workers-by-the-state-ministry-of-health-and-enugu-state-primary-health-care-development-agency/",
+      "publication_date": "",
+      "closing_date": "",
+      "status_label": "Check availability",
+      "source_identity_basis": "government_domain",
+      "accepting_applications": false
+    },
+    {
+      "title": "Pharmacist",
+      "organization": "",
+      "announcement_url": "https://www.jobberman.com/listings/post-nysc-pharmacist-qz608j",
+      "publication_date": "2026-11-11T00:00:00.000000Z",
+      "closing_date": "2027-01-10T00:00:00.000000Z",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Medical Officer",
+      "organization": "",
+      "announcement_url": "https://www.jobberman.com/listings/medical-officer-rr7eg9",
+      "publication_date": "2026-11-10T00:00:00.000000Z",
+      "closing_date": "2027-01-09T00:00:00.000000Z",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Senior Medical Officer",
+      "organization": "Synapse Services",
+      "announcement_url": "https://www.myjobmag.com/job/senior-medical-officer-synapse-services-1",
+      "publication_date": "2026-11-13T14:19:39+00:00",
+      "closing_date": "2026-12-13T23:59:59+00:00",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Adamawa Begins Recruitment of Doctors, Consultants to Boost Healthcare",
+      "organization": "Adamawa State Government \u2013 Highest Peak of the NationHumidityPressureWindWind GustCloudsVisibilitySunriseSunset",
+      "announcement_url": "https://adamawastate.gov.ng/adamawa-begins-recruitment-of-doctors-consultants-to-boost-healthcare/",
+      "publication_date": "",
+      "closing_date": "",
+      "status_label": "Check availability",
+      "source_identity_basis": "government_domain",
+      "accepting_applications": false
+    },
+    {
+      "title": "Fintiri\u2019s Government Opens Recruitment for Junior Community Health Workers Across 21 LGAs",
+      "organization": "Adamawa State Government \u2013 Highest Peak of the NationHumidityPressureWindWind GustCloudsVisibilitySunriseSunset",
+      "announcement_url": "https://adamawastate.gov.ng/fintiris-government-opens-recruitment-for-junior-community-health-workers-across-21-lgas/",
+      "publication_date": "",
+      "closing_date": "",
+      "status_label": "Check availability",
+      "source_identity_basis": "government_domain",
+      "accepting_applications": false
+    },
+    {
+      "title": "Pharmacy Technician",
+      "organization": "St Dominic Catholic Hospital",
+      "announcement_url": "https://www.myjobmag.com/job/pharmacy-technician-st-dominic-catholic-hospital-14",
+      "publication_date": "2026-11-14T06:29:52+00:00",
+      "closing_date": "2026-12-14T23:59:59+00:00",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Pharmacist",
+      "organization": "",
+      "announcement_url": "https://www.jobberman.com/listings/pharmacist-qz6rn6",
+      "publication_date": "2026-11-09T00:00:00.000000Z",
+      "closing_date": "2027-01-08T00:00:00.000000Z",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Registered Nurse / Registered Midwife",
+      "organization": "Bergstein Hospital",
+      "announcement_url": "https://www.myjobmag.com/job/registered-nurse-registered-midwife-bergstein-hospital",
+      "publication_date": "2026-11-10T13:45:38+00:00",
+      "closing_date": "2026-12-10T23:59:59+00:00",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Registered Nurse / Ophthalmic Nurse",
+      "organization": "Ladkem Eye Hospital",
+      "announcement_url": "https://www.myjobmag.com/job/registered-nurse-ophthalmic-nurse-ladkem-eye-hospital",
+      "publication_date": "2026-11-09T12:29:12+00:00",
+      "closing_date": "2026-12-09T23:59:59+00:00",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Auxiliary Nurse",
+      "organization": "Reverse Aesthetics Limited",
+      "announcement_url": "https://www.myjobmag.com/job/auxiliary-nurse-reverse-aesthetics-limited",
+      "publication_date": "2026-11-09T07:41:36+00:00",
+      "closing_date": "2026-12-09T23:59:59+00:00",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Nurses",
+      "organization": "Sterling Health HMO",
+      "announcement_url": "https://www.myjobmag.com/job/nurses-sterling-health-hmo-3",
+      "publication_date": "2026-11-16T07:06:47+00:00",
+      "closing_date": "2026-11-30T23:59:59+00:00",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Territory Sales Officer - Healthcare (Lagos)",
+      "organization": "Sovereign Quint Iddeas Limited",
+      "announcement_url": "https://www.myjobmag.com/job/territory-sales-officer-healthcare-lagos-sovereign-quint-iddeas-limited-1",
+      "publication_date": "2026-11-16T06:53:10+00:00",
+      "closing_date": "2026-12-16T23:59:59+00:00",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    },
+    {
+      "title": "Territory Sales Officer - Healthcare (Port Harcourt)",
+      "organization": "Sovereign Quint Iddeas Limited",
+      "announcement_url": "https://www.myjobmag.com/job/territory-sales-officer-healthcare-port-harcourt-sovereign-quint-iddeas-limited",
+      "publication_date": "2026-11-16T06:52:18+00:00",
+      "closing_date": "2026-12-16T23:59:59+00:00",
+      "status_label": "Open",
+      "source_identity_basis": "staff_selection",
+      "accepting_applications": false
+    }
+  ],
+  "public_status_labels": {
+    "Open": 22,
+    "Check availability": 12
+  },
+  "duplicate_public_announcement_urls": 0,
+  "routes": [
+    {
+      "path": "/openapi.json",
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "name": "openapi"
+    },
+    {
+      "path": "/docs",
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "name": "swagger_ui_html"
+    },
+    {
+      "path": "/docs/oauth2-redirect",
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "name": "swagger_ui_redirect"
+    },
+    {
+      "path": "/redoc",
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "name": "redoc_html"
+    }
+  ]
+}

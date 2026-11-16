@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "artifacts": "/tmp/nurse-account-feedback-3u78x_6o",
+  "flows": [
+    "photo success/error/preview",
+    "offline entry preservation",
+    "pending and duplicate submission",
+    "lost response without false success",
+    "email verification",
+    "password validation and success",
+    "account deletion"
+  ],
+  "widths": [
+    320,
+    390,
+    1280
+  ],
+  "notice_contrast": [
+    {
+      "theme": "light",
+      "ratio": 5.809146784831262
+    },
+    {
+      "theme": "dark",
+      "ratio": 8.399837649109598
+    }
+  ]
+}

@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.user import User
+from app.services.community_growth import community_summaries, suggested_communities
 from app.services.member_discovery import (
     finish_onboarding,
     suggested_opportunities,
@@ -95,6 +96,7 @@ def skip_welcome(
 @router.get("/discover")
 def discover(request: Request, user: User = Depends(require_user), db: Session = Depends(get_db)):
     jobs, personalised_jobs = suggested_opportunities(db, user, limit=6)
+    topics = suggested_communities(db, user)
     return render(
         request,
         "onboarding/discover.html",
@@ -106,5 +108,7 @@ def discover(request: Request, user: User = Depends(require_user), db: Session =
             "jobs": jobs,
             "personalised_jobs": personalised_jobs,
             "profile": get_profile_for_user(db, user.id),
+            "topics": topics,
+            "community_summaries": community_summaries(db, topics, user),
         },
     )

@@ -13,6 +13,22 @@
       window.scrollY + panel.getBoundingClientRect().top - headerBottom - 16;
     window.scrollTo({ top: Math.max(0, top), behavior: "instant" });
   };
+  // Enlarged text and rotation can change the header after a notice is focused.
+  const keepFocusedPanelVisible = () => {
+    if (panel.hidden || document.activeElement !== panel) return;
+    const bounds = panel.getBoundingClientRect();
+    const headerBottom =
+      document.querySelector(".site-header")?.getBoundingClientRect().bottom || 0;
+    if (bounds.top < headerBottom + 12 || bounds.bottom > window.innerHeight - 12)
+      focusPanel();
+  };
+  window.addEventListener("resize", keepFocusedPanelVisible);
+  if ("ResizeObserver" in window) {
+    const observer = new ResizeObserver(keepFocusedPanelVisible);
+    observer.observe(panel);
+    const header = document.querySelector(".site-header");
+    if (header) observer.observe(header);
+  }
   const show = (notice) => {
     const tone = ["success", "info", "error"].includes(notice.tone)
       ? notice.tone
@@ -78,6 +94,16 @@
   // Controls named "action" can mask the form.action DOM property.
   const formAction = (form) =>
     new URL(form.getAttribute("action") || location.href, document.baseURI);
+  const navigateAfterAction = (destination) => {
+    const target = new URL(destination, location.origin);
+    if (target.pathname === location.pathname && target.search === location.search) {
+      // A fragment-only navigation does not fetch the newly saved conversation.
+      history.replaceState(history.state, "", target.href);
+      window.location.reload();
+    } else {
+      window.location.assign(target.href);
+    }
+  };
   const forms = [...document.querySelectorAll('form[method="post" i]')].filter(
     (form) =>
       !form.matches(
@@ -243,7 +269,7 @@
           new URL(response.url).origin === location.origin
         ) {
           navigating = true;
-          window.location.assign(response.url);
+          navigateAfterAction(response.url);
           return;
         }
         let result = {};
@@ -261,7 +287,7 @@
             document.dispatchEvent(new CustomEvent("nurse:signed-out"));
           }
           navigating = true;
-          window.location.assign(destination.href);
+          navigateAfterAction(destination.href);
           return;
         }
         if (result.feedback) {

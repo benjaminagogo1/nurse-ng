@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "widths": [
+    320,
+    390,
+    1280
+  ],
+  "browser_installability": {
+    "installabilityErrors": []
+  },
+  "device_steps": [
+    "android",
+    "apple",
+    "desktop"
+  ],
+  "real_browser_prompt_offered": true,
+  "prompt_choices": "simulated acceptance, dismissal, failure and overlapping clicks",
+  "device_detection": "Android/iPhone user agent emulation and simulated iOS standalone",
+  "banner_prompt": true,
+  "reminder_dismissal": "keyboard action, navigation, reload and storage failure",
+  "reminder_suppression": "accepted installation, appinstalled and Safari help-link navigation",
+  "native_detection": "simulated Capacitor API",
+  "artifacts": "/tmp/nurse-mobile-app-browser-x1oen7g_"
+}

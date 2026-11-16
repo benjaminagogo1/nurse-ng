@@ -1,0 +1,35 @@
+[
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/offline",
+    "width": 320,
+    "large": true,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/offline",
+    "width": 390,
+    "large": false,
+    "overflow": []
+  },
+  {
+    "violations": [],
+    "manual": [
+      "aria-valid-attr-value",
+      "color-contrast"
+    ],
+    "path": "/offline",
+    "width": 1280,
+    "large": false,
+    "overflow": []
+  }
+]

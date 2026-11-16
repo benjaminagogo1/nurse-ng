@@ -62,6 +62,9 @@ class CommunityTopic(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     slug: Mapped[str] = mapped_column(String(80), unique=True, index=True)
     name: Mapped[str] = mapped_column(String(80), unique=True)
     description: Mapped[str] = mapped_column(String(500), default="")
+    welcome_text: Mapped[str] = mapped_column(String(1000), default="", server_default="")
+    rules: Mapped[str] = mapped_column(String(2000), default="", server_default="")
+    interest: Mapped[str] = mapped_column(String(80), default="", server_default="")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     created_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), nullable=True
@@ -80,21 +83,21 @@ class CommunityPost(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         ForeignKey("community_topics.id", ondelete="RESTRICT"), index=True
     )
     body: Mapped[str] = mapped_column(Text, default="")
-    external_video_url: Mapped[str | None] = mapped_column(
-        String(2048), nullable=True
+    post_kind: Mapped[str] = mapped_column(
+        String(20), default="discussion", server_default="discussion", index=True
     )
-    status: Mapped[str] = mapped_column(
-        String(20), default=ContentStatus.PUBLISHED, index=True
-    )
+    title: Mapped[str] = mapped_column(String(160), default="", server_default="")
+    activity_format: Mapped[str] = mapped_column(String(20), default="", server_default="")
+    activity_starts_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    external_video_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default=ContentStatus.PUBLISHED, index=True)
     published_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), index=True
     )
     removed_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
-    removed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    removed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     removal_reason: Mapped[str] = mapped_column(Text, default="")
 
     author: Mapped[User] = relationship(foreign_keys=[author_id])
@@ -112,6 +115,59 @@ class CommunityPost(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     __table_args__ = (
         Index("community_post_topic_status_idx", "topic_id", "status"),
+        CheckConstraint(
+            "post_kind IN ('discussion','question','experience','activity')",
+            name="community_post_kind",
+        ),
+        CheckConstraint(
+            "post_kind != 'activity' OR "
+            "(title != '' AND activity_format IN ('discussion','practice','q-and-a'))",
+            name="community_activity_details",
+        ),
+    )
+
+
+class CommunityMembership(Base):
+    """A member's private choice to join a public community."""
+
+    __tablename__ = "community_memberships"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    topic_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("community_topics.id", ondelete="CASCADE"), primary_key=True, index=True
+    )
+    joined_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class HelpfulReply(Base):
+    """One helpful recognition per member/response; not a credential claim."""
+
+    __tablename__ = "community_helpful_replies"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    reply_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("community_replies.id", ondelete="CASCADE"), primary_key=True, index=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CommunityAnswer(Base):
+    """A question author's selected answer, separate from peer recognition."""
+
+    __tablename__ = "community_answers"
+
+    post_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("community_posts.id", ondelete="CASCADE"), primary_key=True
+    )
+    reply_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("community_replies.id", ondelete="CASCADE"), unique=True
+    )
+    selected_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
     )
 
 
@@ -143,18 +199,15 @@ class CommunityReply(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     in_reply_to_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("community_replies.id", ondelete="SET NULL", name="fk_community_reply_parent"),
-        nullable=True, index=True,
+        nullable=True,
+        index=True,
     )
     body: Mapped[str] = mapped_column(Text)
-    status: Mapped[str] = mapped_column(
-        String(20), default=ContentStatus.PUBLISHED, index=True
-    )
+    status: Mapped[str] = mapped_column(String(20), default=ContentStatus.PUBLISHED, index=True)
     removed_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
-    removed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    removed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     removal_reason: Mapped[str] = mapped_column(Text, default="")
 
     post: Mapped[CommunityPost] = relationship(back_populates="replies")
@@ -162,8 +215,9 @@ class CommunityReply(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     __table_args__ = (
         Index("community_reply_activity_idx", "post_id", "status", "created_at"),
-        CheckConstraint("in_reply_to_id IS NULL OR in_reply_to_id != id",
-                        name="community_reply_not_self"),
+        CheckConstraint(
+            "in_reply_to_id IS NULL OR in_reply_to_id != id", name="community_reply_not_self"
+        ),
     )
 
 
@@ -180,9 +234,7 @@ class DiscussionFollow(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     last_read_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
-    __table_args__ = (
-        UniqueConstraint("user_id", "post_id", name="uniq_discussion_follow"),
-    )
+    __table_args__ = (UniqueConstraint("user_id", "post_id", name="uniq_discussion_follow"),)
 
 
 class DiscussionReplyRead(Base):
@@ -216,15 +268,11 @@ class ContentReport(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     reason: Mapped[str] = mapped_column(String(30))
     details: Mapped[str] = mapped_column(Text, default="")
-    status: Mapped[str] = mapped_column(
-        String(20), default=ReportStatus.OPEN, index=True
-    )
+    status: Mapped[str] = mapped_column(String(20), default=ReportStatus.OPEN, index=True)
     reviewed_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
-    reviewed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     review_note: Mapped[str] = mapped_column(Text, default="")
     # Present only while open. A unique key closes the race between two
     # duplicate report submissions from the same member (DECISIONS L69).
@@ -275,12 +323,8 @@ class Connection(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     recipient_user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
-    status: Mapped[str] = mapped_column(
-        String(20), default=ConnectionStatus.PENDING, index=True
-    )
-    responded_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    status: Mapped[str] = mapped_column(String(20), default=ConnectionStatus.PENDING, index=True)
+    responded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     # Canonical unordered user pair. Requester/recipient still record direction.
     pair_key: Mapped[str] = mapped_column(String(65))
 

@@ -13,6 +13,7 @@ from app.models.user import User
 from app.services import social_auth as social
 from app.services.accounts import verify_current_password
 from app.services.auth import AuthError, LoginLockedError, authenticate_user, register_user
+from app.services.community_sharing import auth_context, community_destination
 from app.web.auth_routes import (
     _client_ip,
     _login_ip_limiter,
@@ -40,14 +41,17 @@ def _browser(request):
 def start(
     provider: str,
     request: Request,
+    next: str = Form("", max_length=240),
     user: User | None = Depends(get_current_user),
     _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
 ):
+    continuation = auth_context(db, next)
     try:
         social.credentials(provider)
     except social.SocialAuthError as exc:
-        return _failure(request, str(exc), "/settings/social" if user else "/auth/login")
+        return _failure(request, str(exc),
+                        "/settings/social" if user else continuation["login_url"])
     if _login_ip_limiter.is_limited(_client_ip(request)):
         raise HTTPException(429, "Too many sign-in attempts. Please try again in a few minutes.")
     _login_ip_limiter.record(_client_ip(request))
@@ -72,6 +76,7 @@ def start(
             expires_at=now + timedelta(minutes=10),
             user_id=user.id if user else None,
             auth_version=user.auth_version if user else None,
+            return_to=continuation["next"] if user is None else "",
         )
     )
     db.commit()
@@ -108,6 +113,7 @@ def callback(
             SocialAuthAttempt.auth_version,
             SocialAuthAttempt.nonce,
             SocialAuthAttempt.verifier,
+            SocialAuthAttempt.return_to,
         )
     ).one_or_none()
     db.commit()  # A callback can be used once, including denied and failed attempts.
@@ -115,7 +121,8 @@ def callback(
         return _failure(
             request, "This sign-in has expired or belongs to another browser. Start again."
         )
-    destination = "/settings/social" if attempt.user_id else "/auth/login"
+    destination = ("/settings/social" if attempt.user_id
+                   else auth_context(db, attempt.return_to)["login_url"])
     if error or not code or len(code) > 8192:
         return _failure(
             request, "Sign-in was cancelled or could not finish. You can try again.", destination
@@ -145,7 +152,8 @@ def callback(
                 raise social.SocialAuthError("This account cannot sign in.")
             _start_session(request, member, db)
             return redirect_feedback(
-                request, "/", message("Signed in", "Welcome back to Nurse.ng.")
+                request, community_destination(db, attempt.return_to) or "/",
+                message("Signed in", "Welcome back to Nurse.ng.")
             )
         ticket = social.new_secret()
         db.add(
@@ -155,6 +163,7 @@ def callback(
                 provider=provider,
                 **claims,
                 expires_at=datetime.now(UTC) + timedelta(minutes=10),
+                return_to=community_destination(db, attempt.return_to),
             )
         )
         db.commit()
@@ -212,6 +221,7 @@ def complete(
     item = _enrollment(request, db)
     if user:
         raise HTTPException(400, "You are already signed in. Connect a provider from Settings.")
+    return_to = community_destination(db, item.return_to)
     limiter = _register_ip_limiter if mode == "new" else _login_ip_limiter
     if limiter.is_limited(_client_ip(request)):
         raise HTTPException(429, "Too many attempts. Please try again later.")
@@ -261,7 +271,7 @@ def complete(
     _start_session(request, member, db)
     return redirect_feedback(
         request,
-        "/welcome" if mode == "new" else "/",
+        community_destination(db, return_to) or ("/welcome" if mode == "new" else "/"),
         message(
             "Sign-in connected",
             "You can use this provider or your phone and password next time.",

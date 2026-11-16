@@ -1,0 +1,19 @@
+{
+  "isolation": "in-memory database, synthetic accounts, outgoing mail disabled",
+  "unapproved_employer_publication_blocked": true,
+  "password_only_staff_access_with_mfa_flag": {
+    "/review": 200,
+    "/recruitment": 200,
+    "/staff/users": 200
+  },
+  "duplicate_saved_opportunity": {
+    "consolidated_groups": 1,
+    "old_link_status": 307,
+    "redirected_detail_status": 200,
+    "reminders_before_cleanup": 1,
+    "reminders_after_cleanup": 0,
+    "old_bookmark_retained": true,
+    "retained_job_recognized_as_saved": false,
+    "redirected_detail_shows_save_form": true
+  }
+}

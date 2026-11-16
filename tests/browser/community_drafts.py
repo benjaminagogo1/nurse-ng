@@ -32,6 +32,7 @@ os.environ.update(
         "NURSE_NG_SESSION_SAME_SITE": "lax",
         "NURSE_NG_DATABASE_URL": f"sqlite:///{artifacts / 'browser.db'}",
         "NURSE_NG_COMMUNITY_MEDIA_DIR": str(artifacts / "media"),
+        "NURSE_NG_ACCOUNT_MAIL_BACKEND": "disabled",
     }
 )
 
@@ -54,6 +55,7 @@ with SessionLocal() as db:
     set_community_name(db, peer, "Bola Browser")
     peer_id = peer.id
     topic = db.scalar(select(CommunityTopic))
+    draft_topic_id = str(topic.id)
     for index in range(23):
         db.add(
             CommunityPost(
@@ -244,6 +246,8 @@ try:
         lambda: evaluate('location.pathname === "/" && !!document.querySelector(".db")'), "login"
     )
     navigate("/posts/new", "#body")
+    assert evaluate('document.querySelector("#topic-id").value') == ""
+    fill("#topic-id", draft_topic_id)
     draft_text = "Which hospitals are accepting interns? <script>never execute</script>"
     fill("#community-name", "Draft Nurse")
     fill("#body", draft_text)
@@ -612,6 +616,7 @@ window.fetch = (...args) => String(args[0]).endsWith('/posts')
         'document.querySelector("[data-draft-status]").textContent.includes("unavailable")'
     )
     fill("#body", "Ordinary form still works when browser storage is blocked.")
+    fill("#topic-id", draft_topic_id)
     submit('form[action="/posts"]')
     wait_for(
         lambda: evaluate(
