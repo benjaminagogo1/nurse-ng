@@ -22,6 +22,7 @@ from app.web.community_routes import _listing_context
 from app.web.deps import get_current_user, require_user, verify_csrf
 from app.web.feedback import message, redirect_feedback
 from app.web.templating import render
+from app.web.urls import page_url
 
 router = APIRouter(tags=["community participation"])
 _creation_limit = FixedWindowLimiter(3, 3600)
@@ -53,10 +54,10 @@ def community_directory(
             "interest_options": INTEREST_OPTIONS,
             "community_examples": growth.COMMUNITY_EXAMPLES,
             "page_number": page,
-            "next_page": str(request.url.include_query_params(page=page + 1))
+            "next_page": page_url(request, page=page + 1)
             if len(rows) > 20
             else None,
-            "previous_page": str(request.url.include_query_params(page=page - 1))
+            "previous_page": page_url(request, page=page - 1)
             if page > 1
             else None,
         },

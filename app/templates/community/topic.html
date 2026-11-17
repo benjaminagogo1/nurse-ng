@@ -27,7 +27,13 @@
     {% if can_manage_community %}<a class="text-link" href="/communities/{{ topic.slug }}/edit">Edit community</a>{% endif %}
   </div>
   <p class="field-hint">Joining adds conversations to <a href="/feed/communities">My communities</a>. Your membership choices stay private.</p>
-  {{ share_actions(community_share_url, 'Join ' + topic.name + ' on Nurse.ng') }}
+  <section aria-labelledby="community-invite-heading">
+    <h2 id="community-invite-heading" class="community-post-title">Invite colleagues</h2>
+    {% if community_share_url %}
+      <p class="field-hint">Bring a colleague into this community. They can read it and sign in to join the conversation.</p>
+      {{ share_actions(community_share_url, 'Join ' + topic.name + ' on Nurse.ng') }}
+    {% else %}<p class="field-hint">Invitations will be available when this community is online.</p>{% endif %}
+  </section>
   <details class="community-welcome"><summary>Welcome and community guidelines</summary>
     {% if topic.welcome_text %}<p>{{ topic.welcome_text }}</p>{% endif %}
     <p>{{ topic.rules or 'Treat colleagues respectfully, protect personal privacy and add useful context to your contributions.' }}</p>

@@ -11,6 +11,7 @@ from email.message import EmailMessage
 from sqlalchemy import and_, or_, select, update
 
 from app.core.config import settings
+from app.core.public_urls import public_url
 from app.models.notifications import Notification
 from app.models.user import UserStatus
 from app.services.account_mail import MailUnavailable, deliver_mail
@@ -51,12 +52,11 @@ def deliver_notification(notice, identifier):
     mail["To"] = notice.email_to
     mail["Subject"] = "You have a new Nurse.ng notification"
     mail["Message-ID"] = f"<notification-{identifier.hex}@nurse.ng>"
-    base = settings.public_base_url.rstrip("/")
     mail.set_content(
         "There is new activity in your professional network.\n\n"
-        f"Sign in to view your notifications: {base}/notifications\n\n"
+        f"Sign in to view your notifications: {public_url('/notifications')}\n\n"
         "Private messages and application details are available after signing in.\n"
-        f"Manage or turn off these emails: {base}/notifications/preferences\n"
+        f"Manage or turn off these emails: {public_url('/notifications/preferences')}\n"
     )
     try:
         deliver_mail(mail)

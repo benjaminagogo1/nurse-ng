@@ -1,0 +1,8 @@
+{
+  "command": "npm test --prefix mobile",
+  "status": "passed",
+  "tests": 4,
+  "failures": 0,
+  "duration_ms": 31910.644868,
+  "scope": "public release origin validation and native offline bundle generation"
+}

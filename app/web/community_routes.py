@@ -75,6 +75,7 @@ from app.services.profiles import (
 from app.web.deps import get_current_user, require_user, verify_csrf
 from app.web.feedback import message, redirect_feedback
 from app.web.templating import confirm_published_draft, render
+from app.web.urls import page_url
 
 router = APIRouter(tags=["community"])
 
@@ -128,9 +129,9 @@ def _listing_context(request: Request, db: Session, user: User | None,
         "search_query": query,
         "listing_path": request.url.path,
         "page_number": page_number,
-        "next_page": str(request.url.include_query_params(page=page_number + 1))
+        "next_page": page_url(request, page=page_number + 1)
         if len(posts) > page_size else None,
-        "previous_page": str(request.url.include_query_params(page=page_number - 1))
+        "previous_page": page_url(request, page=page_number - 1)
         if page_number > 1 else None,
     }
 

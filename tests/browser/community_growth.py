@@ -31,6 +31,7 @@ def free_port():
 
 web_port, chrome_port = free_port(), free_port()
 base = f"http://127.0.0.1:{web_port}"
+public_origin = "https://members.nurse.example"
 os.environ.update(
     {
         "NURSE_NG_ENVIRONMENT": "development",
@@ -39,7 +40,7 @@ os.environ.update(
         "NURSE_NG_ALLOWED_HOSTS": "127.0.0.1,localhost",
         "NURSE_NG_SESSION_HTTPS_ONLY": "0",
         "NURSE_NG_SESSION_SAME_SITE": "lax",
-        "NURSE_NG_PUBLIC_BASE_URL": base,
+        "NURSE_NG_PUBLIC_BASE_URL": public_origin,
         "NURSE_NG_DATABASE_URL": f"sqlite:///{artifacts / 'browser.db'}",
         "NURSE_NG_ACCOUNT_MAIL_BACKEND": "disabled",
         "NURSE_NG_REQUIRED_WORKERS": "",
@@ -114,15 +115,19 @@ def js(expression):
     return result.get("result", {}).get("value")
 
 
-def navigate(path, selector="main"):
+def navigate(path, selector="main", *, expected_path=None):
+    # Route the test's public links to its isolated transport; do not rewrite shared URLs.
+    if path.startswith(public_origin + "/"):
+        path = path[len(public_origin):]
     url = base + path if path.startswith("/") else path
+    expected_path = expected_path or urlsplit(url).path
     js("window.communityBrowserNavigation = true")
     cdp("Page.navigate", {"url": url})
     wait_for(
         lambda: js(
             '!window.communityBrowserNavigation && document.readyState === "complete" && '
             f"!!document.querySelector({json.dumps(selector)}) && "
-            f"location.pathname === {json.dumps(urlsplit(url).path)}"
+            f"location.pathname === {json.dumps(expected_path)}"
         ),
         path,
     )
@@ -330,7 +335,7 @@ try:
     logout()
 
     print("Invitation signup returns to the question; colleague replies", flush=True)
-    cdp("Page.navigate", {"url": post_invite})
+    navigate(post_invite, expected_path=post_path)
     wait_for(
         lambda: js(
             f"location.pathname==={json.dumps(post_path)} && !!document.querySelector('main')"

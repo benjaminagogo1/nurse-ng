@@ -40,7 +40,6 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["created_by_user_id"], ["users.id"], ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("name"),
-        sa.UniqueConstraint("slug"),
     )
     op.create_index(op.f("ix_community_topics_created_at"), "community_topics", ["created_at"], unique=False)
     op.create_index(op.f("ix_community_topics_is_active"), "community_topics", ["is_active"], unique=False)

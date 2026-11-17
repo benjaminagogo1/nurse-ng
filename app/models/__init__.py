@@ -25,6 +25,21 @@ from app.models.notifications import Notification, NotificationPreference
 from app.models.offline import OfflineOperation
 from app.models.offline_upload import OfflineUpload
 from app.models.opportunities import OpportunityPreference, SavedOpportunity
+from app.models.participation import (
+    ActivityAttendance,
+    ActivityOccurrence,
+    ActivitySeries,
+    CommunityIntroduction,
+    DigestPreference,
+    MemberJourney,
+    MemberReferral,
+    MentorOffer,
+    MentorReport,
+    Mentorship,
+    ReferralInvitation,
+    ReferralVisit,
+    WeeklyDigest,
+)
 from app.models.profile import CredentialClaim, FieldVisibility, NurseProfile
 from app.models.recruitment import (
     DiscoverySchedule,
@@ -43,6 +58,9 @@ from app.models.verification import EvidenceAccess, EvidenceDocument, Verificati
 from app.models.workers import WorkerHeartbeat
 
 __all__ = [
+    "ActivityAttendance", "ActivityOccurrence", "ActivitySeries", "CommunityIntroduction",
+    "DigestPreference", "MemberJourney", "MemberReferral", "MentorOffer", "MentorReport",
+    "Mentorship", "ReferralInvitation", "ReferralVisit", "WeeklyDigest",
     "CommunityAnswer",
     "CommunityMembership",
     "HelpfulReply",

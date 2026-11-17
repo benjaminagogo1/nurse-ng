@@ -35,7 +35,7 @@ def upgrade() -> None:
             sa.Column(
                 "community_name_locked",
                 sa.Boolean(),
-                server_default=sa.text("0"),
+                server_default=sa.false(),
                 nullable=False,
             )
         )

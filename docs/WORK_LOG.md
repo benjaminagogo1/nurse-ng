@@ -1779,3 +1779,50 @@ This is the pre-hardening result: the previously documented 89 cases plus 14 com
   passed. Advanced community CSS to v3 and the offline shell cache to v33.
   The local directory returned HTTP 200 with the example section. No test
   accounts/mail, deployment, commit or push; changes remain local.
+
+## 17 November 2026 — Prepare public hosting and remove loopback sharing
+
+- Centralized public URLs for invitations, profile sharing, account recovery,
+  verification emails, notification emails and Google/LinkedIn callbacks.
+  Production requires an explicit public HTTPS origin, a matching allowed host,
+  a durable database and safe session settings. Local configurations no longer
+  offer external loopback invitations or send SMTP links to a local address.
+- Added a visible **Invite colleagues** section to community pages. Sharing
+  uses the public origin, while page assets, pagination and staff refresh links
+  remain on the browser's origin behind an HTTPS proxy. Personal referral
+  attribution remains unimplemented; destination invitations do not identify
+  an inviter.
+- Production process configuration ignores local `.env` files. PostgreSQL
+  provider URLs select the pinned psycopg driver. Added bounded proxy trust,
+  portable web/worker startup with provider `PORT`, configuration-only preflight,
+  a non-root container and a production environment example. Private environment
+  variants are Git-ignored. Storage mounts, scanner signatures and provider
+  services are documented explicitly.
+- The PostgreSQL rehearsal found and fixed integer Boolean defaults in three
+  historical migrations, percent interpolation in database URLs and redundant
+  slug uniqueness. The existing unique index remains. Fresh PostgreSQL migrations
+  and metadata agreement now pass; no live database was migrated or changed.
+- Fixed the native offline bundler's router-only URL generation after switching
+  templates to relative URLs. Configured mobile bundles link to the actual
+  HTTPS site and contain no disconnected-preview messaging. Advanced the public
+  offline cache to v34.
+- **961 Python tests passed** across six isolated groups, with no failures,
+  errors or skips. An earlier long run was terminated before a full report;
+  the final groups cover all collected cases. Updated the profile-sharing fixture
+  to verify its configured public domain. **Four native Node tests passed**;
+  the full Chrome community journey and **36 accessibility/reflow states passed**
+  across phone, enlarged-text dark and desktop layouts, with no JavaScript
+  exceptions. Retained screenshots were inspected. Ruff, dependency consistency
+  and whitespace checks passed.
+- An isolated PostgreSQL 18.6 cluster passed fresh migration, no schema drift,
+  encoded credential URLs, registration, community creation/membership, question,
+  public invitation, signup continuation, reply, readiness and Secure cookies.
+  Mail was disabled and the cluster was removed after checking. CI adds a
+  PostgreSQL 16 journey, mobile checks, Docker build and container preflight.
+- Docker verification was blocked by local daemon permissions even after
+  sandbox escalation. Its build and the remote CI workflow have not run here.
+  Actual hosted HTTPS, SMTP/provider callbacks, native device behavior and
+  persistent mounts still need deployment validation. Staff MFA remains deferred.
+  No public deployment, real invitations, email, commit or push occurred.
+- Added [hosting setup](HOSTING.md), updated the production/community/worker/mobile
+  guides, and retained [hosting readiness evidence](verification/2026-11-17/hosting-readiness/README.md).

@@ -1,0 +1,356 @@
+[
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/communities",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/communities/new",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/communities/new?example=local-network#community-details",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/feed",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/welcome/discover",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/topics/critical-care-colleagues",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/posts/01a1e6ff-11b6-714f-8bd0-17f23fbb5e58",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/feed/unanswered",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/feed/communities",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/activities",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/posts/new?kind=activity",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/posts/01a1e6ff-93ff-77e1-8460-d63a1a0c1119",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/communities",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/communities/new",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/communities/new?example=local-network#community-details",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/feed",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/welcome/discover",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/topics/critical-care-colleagues",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/posts/01a1e6ff-11b6-714f-8bd0-17f23fbb5e58",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/feed/unanswered",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/feed/communities",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/activities",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/posts/new?kind=activity",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/posts/01a1e6ff-93ff-77e1-8460-d63a1a0c1119",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/communities",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/communities/new",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/communities/new?example=local-network#community-details",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/feed",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/welcome/discover",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/topics/critical-care-colleagues",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/posts/01a1e6ff-11b6-714f-8bd0-17f23fbb5e58",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/feed/unanswered",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/feed/communities",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/activities",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/posts/new?kind=activity",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/posts/01a1e6ff-93ff-77e1-8460-d63a1a0c1119",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  }
+]

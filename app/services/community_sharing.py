@@ -8,6 +8,7 @@ from itsdangerous import BadSignature, URLSafeSerializer
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.public_urls import public_site_ready, public_url
 from app.services.community import get_published_post, get_topic_by_slug
 
 
@@ -50,12 +51,14 @@ def auth_context(db: Session, destination: str) -> dict:
 
 
 def share_preview(path: str, title: str, description: str) -> dict:
+    if not public_site_ready():
+        return {}
     return {
         "share_preview": {
-            "url": settings.public_base_url.rstrip("/") + path,
+            "url": public_url(path),
             "title": title[:160] + " — Nurse.ng",
             "description": " ".join(description.split())[:240],
-            "image": settings.public_base_url.rstrip("/") + "/static/img/app-icon-512.png",
+            "image": public_url("/static/img/app-icon-512.png"),
         }
     }
 
@@ -65,8 +68,10 @@ def _signer():
 
 
 def invitation_url(path: str) -> str:
+    if not public_site_ready():
+        return ""
     token = _signer().dumps({"path": path})
-    return settings.public_base_url.rstrip("/") + "/join/" + token
+    return public_url("/join/" + token)
 
 
 def invitation_destination(db: Session, token: str) -> str:

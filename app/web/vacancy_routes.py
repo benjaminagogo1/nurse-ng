@@ -15,6 +15,7 @@ from app.web.deps import require_staff, verify_csrf
 from app.web.feedback import message, redirect_feedback
 from app.web.recruitment_routes import _load
 from app.web.templating import render
+from app.web.urls import page_url
 
 router = APIRouter(prefix="/recruitment/vacancies", tags=["vacancy review"])
 
@@ -75,10 +76,10 @@ def index(
             "total": total,
             "state": state,
             "source_id": source_id,
-            "previous_url": str(request.url.include_query_params(page=page - 1))
+            "previous_url": page_url(request, page=page - 1)
             if page > 1
             else "",
-            "next_url": str(request.url.include_query_params(page=page + 1))
+            "next_url": page_url(request, page=page + 1)
             if page * 25 < total
             else "",
         },

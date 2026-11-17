@@ -1,4 +1,5 @@
 {% macro share_actions(url, title) %}
+{% if url %}
 <div class="community-share" data-share-url="{{ url }}" data-share-title="{{ title }}">
   <a class="btn btn-secondary btn-sm" href="https://wa.me/?text={{ (title + '\n' + url)|urlencode }}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
   <button class="btn btn-secondary btn-sm" type="button" data-native-share hidden>Share</button>
@@ -6,4 +7,5 @@
   <p class="community-share-status" role="status" aria-live="polite" data-share-status></p>
   <label class="community-share-fallback" hidden data-share-fallback>Invitation link<input type="text" readonly value="{{ url }}" /></label>
 </div>
+{% endif %}
 {% endmacro %}

@@ -1,11 +1,16 @@
+import os
 import re
 import secrets
 from functools import lru_cache
-from ipaddress import ip_address
+from ipaddress import ip_address, ip_network
 from typing import Literal, Self
 
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.engine import make_url
+from sqlalchemy.exc import ArgumentError
+
+from app.core.public_urls import normalize_origin
 
 _DEVELOPMENT_KEYS = frozenset({"insecure-dev-key-change-me", "change-me-in-development"})
 _HOST_LABEL = re.compile(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?")
@@ -38,7 +43,7 @@ class Settings(BaseSettings):
     debug: bool = False
     # Never ship a shared signing key. Development can generate an ephemeral one.
     secret_key: str = Field(default="", repr=False)
-    database_url: str = "sqlite:///./nurse_ng.db"
+    database_url: str = Field(default="sqlite:///./nurse_ng.db", repr=False)
     allowed_hosts: str = ""
 
     session_cookie_name: str = "nurse_ng_session"
@@ -59,8 +64,10 @@ class Settings(BaseSettings):
 
     avatar_dir: str = "media/avatars"
     avatar_max_bytes: int = Field(default=5 * 1024 * 1024, ge=1024, le=10 * 1024 * 1024)
-    # Email links use a configured origin, never the request's Host header.
-    public_base_url: str = "http://127.0.0.1:8000"
+    # Every externally shared link uses this origin, including background workers.
+    # Production has no implicit development address.
+    public_base_url: str = ""
+    trusted_proxy_ips: str = ""
     android_app_download_url: str = ""
     ios_app_download_url: str = ""
     google_client_id: str = ""
@@ -160,6 +167,17 @@ class Settings(BaseSettings):
         for host in hosts:
             _validate_host(host)
         self.allowed_hosts = ",".join(dict.fromkeys(hosts))
+        proxies = [value.strip() for value in self.trusted_proxy_ips.split(",") if value.strip()]
+        for value in proxies:
+            try:
+                if ip_network(value, strict=False).prefixlen == 0:
+                    raise ValueError
+            except ValueError:
+                raise ValueError(
+                    "NURSE_NG_TRUSTED_PROXY_IPS must contain exact IPs or bounded CIDR networks; "
+                    "wildcards and all-address networks are not allowed."
+                ) from None
+        self.trusted_proxy_ips = ",".join(dict.fromkeys(proxies))
         from urllib.parse import urlsplit
 
         endpoints = [
@@ -190,7 +208,33 @@ class Settings(BaseSettings):
                 ) from None
         self.recruitment_searxng_urls = ",".join(dict.fromkeys(endpoints))
 
+        if not production and not self.public_base_url:
+            self.public_base_url = "http://127.0.0.1:8000"
+        self.public_base_url = normalize_origin(self.public_base_url, public=production)
         base = urlsplit(self.public_base_url)
+        if production and base.hostname not in hosts:
+            raise ValueError(
+                "The public site hostname must be included in NURSE_NG_ALLOWED_HOSTS."
+            )
+        if production and "database_url" not in self.model_fields_set:
+            raise ValueError(
+                "Set NURSE_NG_DATABASE_URL explicitly for the production database."
+            )
+        try:
+            database = make_url(self.database_url)
+            if database.drivername in {"postgres", "postgresql"}:
+                database = database.set(drivername="postgresql+psycopg")
+            if database.get_backend_name() not in {"sqlite", "postgresql"}:
+                raise ValueError
+            if production and database.get_backend_name() == "sqlite" and (
+                not database.database or database.database == ":memory:"
+            ):
+                raise ValueError
+            self.database_url = database.render_as_string(hide_password=False)
+        except (ArgumentError, ValueError):
+            raise ValueError(
+                "NURSE_NG_DATABASE_URL must identify PostgreSQL or a persistent SQLite database."
+            ) from None
         for value in (self.android_app_download_url, self.ios_app_download_url):
             if not value:
                 continue
@@ -201,18 +245,13 @@ class Settings(BaseSettings):
                             or (value.startswith("/") and not value.startswith("//")
                                 and not download.scheme and not download.netloc))):
                 raise ValueError("Mobile app download links must use HTTPS or a local site path.")
-        if (
-            base.scheme not in {"http", "https"}
-            or not base.hostname
-            or base.username
-            or base.password
-            or base.query
-            or base.fragment
-            or base.path not in {"", "/"}
-        ):
-            raise ValueError("NURSE_NG_PUBLIC_BASE_URL must be an HTTP(S) origin.")
-        if production and self.account_mail_backend != "disabled" and base.scheme != "https":
-            raise ValueError("Account email requires an HTTPS PUBLIC_BASE_URL in production.")
+            if download.scheme:
+                try:
+                    normalize_origin(f"{download.scheme}://{download.netloc}", public=True)
+                except ValueError:
+                    raise ValueError(
+                        "Mobile app download links must use public HTTPS or a local site path."
+                    ) from None
         if production and self.account_mail_backend == "file":
             raise ValueError("The file email backend is only available in development.")
         if self.account_mail_backend == "smtp" and (
@@ -232,6 +271,9 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
+    # Hosting configuration comes from the process environment, never a copied local .env.
+    if os.environ.get("NURSE_NG_ENVIRONMENT") == "production":
+        return Settings(_env_file=None)
     return Settings()
 
 

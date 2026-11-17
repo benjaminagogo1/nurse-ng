@@ -17,6 +17,7 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.public_urls import public_site_ready, public_url
 from app.db.session import get_db
 from app.models.profile import NurseProfile, ProfessionalStatus, ProfileStatus, Visibility
 from app.models.user import User
@@ -105,8 +106,8 @@ def _show_context(
     visibility = get_visibility_map(db, profile)
     is_active = profile.status == ProfileStatus.ACTIVE
     share_url = (
-        str(request.url_for("public_profile", public_id=str(profile.public_id)))
-        if is_active
+        public_url(f"/p/{profile.public_id}")
+        if is_active and public_site_ready()
         else None
     )
     return {

@@ -3,6 +3,7 @@
 import pytest
 from sqlalchemy import select
 
+from app.core.config import settings
 from app.models.profile import FieldVisibility, NurseProfile, ProfileStatus
 from app.services.profiles import ProfileError, save_sharing_settings
 from tests.helpers import csrf_from, register_and_sign_in
@@ -56,7 +57,8 @@ def test_activation_requires_sign_in(client):
     assert response.headers["location"] == "/auth/login"
 
 
-def test_activation_turns_on_a_share_link(client, db_session):
+def test_activation_turns_on_a_share_link(client, db_session, monkeypatch):
+    monkeypatch.setattr(settings, "public_base_url", "https://members.nurse.example")
     register_and_sign_in(client)
     save_profile(client)
     save_sharing(client, display_name="public")
@@ -73,7 +75,7 @@ def test_activation_turns_on_a_share_link(client, db_session):
 
     page = client.get("/profile")
     assert "Public profile" in page.text
-    assert f"/p/{profile.public_id}" in page.text
+    assert f"https://members.nurse.example/p/{profile.public_id}" in page.text
 
 
 def test_activation_requires_a_csrf_token(client, db_session):

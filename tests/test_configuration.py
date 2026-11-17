@@ -37,6 +37,8 @@ def production_settings(**overrides):
     values = {
         "secret_key": secrets.token_urlsafe(32),
         "allowed_hosts": "nurse.example,www.nurse.example",
+        "public_base_url": "https://nurse.example",
+        "database_url": "sqlite:////var/lib/nurse-ng/nurse_ng.db",
     }
     values.update(overrides)
     return Settings(_env_file=None, **values)
@@ -198,6 +200,8 @@ def test_fresh_process_startup_defaults_to_production(tmp_path, configured):
         env.update({
             "NURSE_NG_SECRET_KEY": secrets.token_urlsafe(32),
             "NURSE_NG_ALLOWED_HOSTS": "nurse.example",
+            "NURSE_NG_PUBLIC_BASE_URL": "https://nurse.example",
+            "NURSE_NG_DATABASE_URL": f"sqlite:///{tmp_path / 'database.db'}",
         })
     result = subprocess.run(
         [sys.executable, "-c", "from app.main import app; print('application initialized')"],
@@ -219,6 +223,7 @@ def test_operator_configuration_check_does_not_expose_secrets_or_connect_to_data
         "PYTHONPATH": str(REPO_ROOT),
         "NURSE_NG_SECRET_KEY": key,
         "NURSE_NG_ALLOWED_HOSTS": "nurse.example",
+        "NURSE_NG_PUBLIC_BASE_URL": "https://nurse.example",
         # This directory does not exist, so opening the DB would fail.
         "NURSE_NG_DATABASE_URL": f"sqlite:///{tmp_path / 'absent' / 'database.db'}",
     })

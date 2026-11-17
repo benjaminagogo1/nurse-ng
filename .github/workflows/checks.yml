@@ -6,6 +6,40 @@ on:
 permissions:
   contents: read
 jobs:
+  hosting:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: nurse_ng_hosting_test
+          POSTGRES_USER: nurse_test
+          POSTGRES_PASSWORD: isolated-ci-pass%word
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nurse_test -d nurse_ng_hosting_test"
+          --health-interval 5s --health-timeout 5s --health-retries 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install -r requirements.lock
+      - run: python tests/hosting/postgres_journey.py
+        env:
+          NURSE_NG_TEST_POSTGRES_URL: postgresql://nurse_test:isolated-ci-pass%25word@127.0.0.1:5432/nurse_ng_hosting_test
+      - run: docker build -t nurse-ng:hosting-check .
+      - name: Check production container startup configuration
+        run: >-
+          docker run --rm
+          -e NURSE_NG_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+          -e NURSE_NG_PUBLIC_BASE_URL=https://nurse.example
+          -e NURSE_NG_ALLOWED_HOSTS=nurse.example
+          -e NURSE_NG_DATABASE_URL=postgresql://fixture:fixture@unreachable.invalid/nurse
+          nurse-ng:hosting-check web --check
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -20,6 +54,10 @@ jobs:
           cache: pip
       - run: python -m pip install -r requirements.lock
       - run: ruff check app tests
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm test --prefix mobile
       - run: python -m pytest --junitxml=test-results.xml
       - uses: actions/upload-artifact@v4
         if: always()

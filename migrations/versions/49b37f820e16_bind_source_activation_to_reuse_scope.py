@@ -25,7 +25,7 @@ def upgrade() -> None:
     )
     for name in ("allow_collection", "allow_snapshot_retention", "allow_republication"):
         op.add_column(
-            "recruitment_sources", sa.Column(name, sa.Boolean(), nullable=False, server_default="0")
+            "recruitment_sources", sa.Column(name, sa.Boolean(), nullable=False, server_default=sa.false())
         )
 
 

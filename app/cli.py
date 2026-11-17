@@ -246,6 +246,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"Configuration valid: environment={settings.environment}")
         print(f"Allowed hosts: {settings.allowed_hosts}")
         print(f"Secure cookies: {settings.session_https_only}; debug: {settings.debug}")
+        from app.core.public_urls import public_site_ready
+
+        print(f"Public site: {settings.public_base_url}")
+        print(f"External sharing ready: {public_site_ready()}")
+        print(f"Trusted proxies: {settings.trusted_proxy_ips or 'none'}")
         return 0
     if args.command == "set-staff":
         return _set_staff(args.phone, enabled=True)

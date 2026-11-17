@@ -13,6 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from app.core.config import settings
+from app.core.public_urls import public_url
 from app.models.social_auth import SocialIdentity
 from app.models.user import User
 
@@ -43,7 +44,7 @@ def digest(value):
 
 
 def callback_url(provider):
-    return settings.public_base_url.rstrip("/") + f"/auth/social/{provider}/callback"
+    return public_url(f"/auth/social/{provider}/callback")
 
 
 def credentials(provider):

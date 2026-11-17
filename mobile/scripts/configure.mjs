@@ -12,12 +12,17 @@ export function serverURL(value, release = false) {
     if (release) throw new Error('Set NURSE_NG_MOBILE_URL to the hosted HTTPS site before a release.');
     return null;
   }
+  if (typeof value !== 'string' || /[\s\\]/.test(value)) {
+    throw new Error('Use a site origin without whitespace or backslashes.');
+  }
   const url = new URL(value);
   if (url.username || url.password || url.search || url.hash || url.pathname !== '/') {
     throw new Error('Use the site origin without credentials, paths, queries or fragments.');
   }
-  const host = url.hostname.toLowerCase();
-  const local = host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local')
+  const host = url.hostname.toLowerCase().replace(/\.$/, '');
+  const local = host === 'localhost'
+    || ['.localhost', '.local', '.localdomain', '.internal', '.lan', '.home.arpa']
+      .some(suffix => host.endsWith(suffix))
     || /^127\./.test(host) || /^10\./.test(host) || /^192\.168\./.test(host)
     || /^172\.(1[6-9]|2\d|3[01])\./.test(host) || host === '[::1]';
   if (!['https:', 'http:'].includes(url.protocol)
@@ -49,9 +54,11 @@ export async function configure({ release = false, value = process.env.NURSE_NG_
     .replace('{{ICON}}', icon).replace('{{TITLE}}', title)
     .replace('{{BODY}}', body).replace('{{ACTION}}', action);
   await writeFile(resolve(output, 'www/index.html'), page(
-    'Nurse.ng mobile preview',
-    'The Android and iPhone app projects are ready. Nurse.ng is not online yet, so this preview cannot sign in or load opportunities.',
-    '<p class="note">This is a development preview, not a public release.</p>'
+    origin ? 'Nurse.ng' : 'Nurse.ng mobile preview',
+    origin ? 'Open your community or continue saved work offline.'
+      : 'The Android and iPhone app projects are ready. Nurse.ng is not online yet, so this preview cannot sign in or load opportunities.',
+    (origin ? `<a class="button" href="${origin}">Open Nurse.ng</a>`
+      : '<p class="note">This is a development preview, not a public release.</p>')
       + '<a class="button" href="offline.html">Open offline workspace</a>',
   ));
   const localPython = resolve(root, '../venv/bin/python');

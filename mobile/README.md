@@ -50,6 +50,11 @@ not expose the local database or server on a network automatically.
 
 Once a public HTTPS site is available:
 
+Configure the server using [hosting setup](../docs/HOSTING.md). Use the same
+public origin for the server's `NURSE_NG_PUBLIC_BASE_URL` and the mobile build's
+`NURSE_NG_MOBILE_URL`; release setup rejects local/internal origins. A configured
+bundle links to the actual site and retains the offline workspace.
+
 ```sh
 NURSE_NG_MOBILE_URL=https://your-hosted-site.example npm run sync
 ```

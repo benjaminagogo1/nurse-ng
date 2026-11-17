@@ -7,6 +7,7 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.db.session import get_db
 from app.main import app
 from app.models.community import ContentStatus
@@ -17,6 +18,11 @@ from app.services.community import create_post, set_community_name
 from tests.helpers import csrf_from, has_element, register_payload
 from tests.test_community import create_topic
 from tests.test_social_auth import providers  # noqa: F401 - shared isolated provider fixture
+
+
+@pytest.fixture(autouse=True)
+def hosted_public_address(monkeypatch):
+    monkeypatch.setattr(settings, "public_base_url", "https://nurse.example")
 
 
 @pytest.fixture

@@ -8,6 +8,13 @@ processes as well, including network checks and video processing.
 
 ## Setup
 
+For a hosted installation, use [hosting setup](HOSTING.md) and run
+`venv/bin/python deploy/start.py workers` as a managed service alongside
+`venv/bin/python deploy/start.py web`. Both need the same production environment,
+database, signing key and persistent file mounts. The production entry validates
+required worker roles; `workers --check` validates settings without a database
+connection. Production process settings ignore the local development `.env`.
+
 Back up the database before upgrading, then run from the repository root:
 
 ```sh

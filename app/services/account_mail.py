@@ -7,6 +7,7 @@ from email.message import EmailMessage
 from pathlib import Path
 
 from app.core.config import settings
+from app.core.public_urls import public_site_ready, public_url
 
 
 class MailUnavailable(ValueError):
@@ -14,7 +15,7 @@ class MailUnavailable(ValueError):
 
 
 def mail_available() -> bool:
-    return settings.account_mail_backend == "smtp" or (
+    return (settings.account_mail_backend == "smtp" and public_site_ready()) or (
         settings.account_mail_backend == "file" and settings.environment == "development"
     )
 
@@ -24,7 +25,7 @@ def send_account_mail(recipient: str, purpose: str, token: str) -> None:
         raise MailUnavailable("Email delivery is unavailable. Please try again later.")
     reset = purpose == "reset"
     path = "reset-password" if reset else "verify-email"
-    link = f"{settings.public_base_url.rstrip('/')}/auth/{path}#token={token}"
+    link = public_url(f"/auth/{path}#token={token}")
     message = EmailMessage()
     message["From"] = settings.smtp_from or "Nurse.ng <no-reply@localhost>"
     message["To"] = recipient

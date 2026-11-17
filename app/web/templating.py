@@ -10,6 +10,7 @@ from uuid import UUID
 from fastapi import Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
+from jinja2 import pass_context
 from sqlalchemy.orm import object_session
 
 from app.services.activity import record_visit
@@ -20,6 +21,15 @@ from app.web.feedback import enhanced, message, pending_feedback
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+
+
+@pass_context
+def relative_url_for(context, name: str, **parameters) -> str:
+    request = context["request"]
+    return request.url_for(name, **parameters).path
+
+
+templates.env.globals["url_for"] = relative_url_for
 
 
 def display_date(value: date | str | None) -> str:

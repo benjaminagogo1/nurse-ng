@@ -53,10 +53,16 @@ are limited to current public community and conversation pages. Invites do not
 automatically join a community or grant additional access. Sharing requires a
 member action; development checks do not send invitations to real people.
 
-Phone access and meaningful external invitation links require the existing
-`NURSE_NG_PUBLIC_BASE_URL` to identify a reachable hosted HTTPS origin. The local
-pilot uses `http://127.0.0.1:8000`. Native operating-system share sheets and live
-provider callbacks need device/provider validation for a public release.
+Phone access and external invitation links require `NURSE_NG_PUBLIC_BASE_URL`
+to identify a reachable public HTTPS origin. **Invite colleagues** appears on
+each community page. Sharing controls are available when that origin is
+configured; a local setup shows availability guidance and produces no loopback
+invitation links. Invitation, email and provider callback origins use the same
+configuration. See [hosting setup](HOSTING.md). Native operating-system share
+sheets and live provider callbacks need device/provider validation for release.
+
+These destination invitations do not track personal referrals or signup
+attribution. Referral rewards and attribution have not been implemented.
 
 Learning activities are discussions, not a quiz engine, scoring system, meeting
 host or recurring-event scheduler. Delegated community moderators, group push,

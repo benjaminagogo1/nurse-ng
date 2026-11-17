@@ -7,6 +7,8 @@ capabilities are a later expansion once the community is established and trusted
 
 ## Documents
 
+- [Hosting setup](docs/HOSTING.md) — public HTTPS links, PostgreSQL, persistent
+  storage, web/worker services, containers and verification after deployment.
 - [Community growth direction and expansion scope](docs/COMMUNITY_EXPANSION.md).
 - [Joinable communities, useful answers, learning activities and invitations](docs/COMMUNITY_ENGAGEMENT.md).
 - [Android and iPhone app projects](mobile/README.md) — browser installation, preview builds, signing,
@@ -148,7 +150,12 @@ LSHSC TLS compatibility added on 8 November 2026: a verified intermediate certif
 
 ## Production configuration
 
-Startup defaults to production and refuses a missing, short, or known development signing key, an empty host list, debug mode, or cookies without the Secure flag. Set the following values in the deployment environment; the signing key belongs in the deployment's secret storage:
+Use [the hosting guide](docs/HOSTING.md) and
+[production environment example](deploy/production.env.example) for a new host.
+Startup defaults to production and requires a public HTTPS origin, an explicit
+persistent database, a random signing key, an exact host list, disabled debug
+mode and Secure cookies. Production process settings ignore the local `.env`.
+Set these values in the provider's environment:
 
 ```dotenv
 NURSE_NG_ENVIRONMENT=production
@@ -156,11 +163,34 @@ NURSE_NG_DEBUG=0
 NURSE_NG_SESSION_HTTPS_ONLY=1
 NURSE_NG_SESSION_SAME_SITE=lax
 NURSE_NG_ALLOWED_HOSTS=nurse.ng,www.nurse.ng
+NURSE_NG_PUBLIC_BASE_URL=https://nurse.ng
+NURSE_NG_REQUIRED_WORKERS=recruitment,reels,notifications
+# Supply NURSE_NG_DATABASE_URL and NURSE_NG_SECRET_KEY through secret storage.
 ```
 
 Supply `NURSE_NG_SECRET_KEY` as a cryptographically random value of at least 32 characters, shared by every worker. For example, Python's `secrets.token_urlsafe(32)` generates a suitable value; a length check alone cannot establish randomness. Rotating the key invalidates existing sessions. There is no fallback to the previous development keys.
 
-Allowed hosts are comma-separated exact DNS names or IP addresses; schemes, ports, paths, and wildcards are rejected. Write IPv6 addresses without brackets in the setting. Host checks apply to every route, including health and static files. Configure proxies and health probes to send an allowed Host header. Serve production traffic over HTTPS; trusting proxy addresses and configuring TLS remain deployment work.
+Allowed hosts are comma-separated exact DNS names or IP addresses; schemes,
+ports, paths and wildcards are rejected. Write IPv6 without brackets. Host checks
+apply to health and static routes too. Configure proxies/probes with an allowed
+Host header. Set `NURSE_NG_TRUSTED_PROXY_IPS` to the actual proxy IPs or bounded
+CIDRs; otherwise the supplied entry point disables forwarded headers. Configure
+public TLS on the host and share persistent files between web and workers.
+
+Run migrations once before starting services:
+
+```sh
+venv/bin/python deploy/start.py web --check
+venv/bin/alembic upgrade head
+venv/bin/python deploy/start.py web
+# Run as a separate managed service with the same configuration:
+venv/bin/python deploy/start.py workers
+```
+
+The web entry binds the provider's `PORT` on `0.0.0.0`. Invitations, email links,
+profile sharing and provider callbacks use `NURSE_NG_PUBLIC_BASE_URL`; page assets
+and pagination stay on the browser origin. Local configurations do not offer
+external invitations or send SMTP links pointing at localhost.
 
 Run `./venv/bin/python -m app.cli check-config` in the actual deployment environment before startup. It validates settings and reports the environment, allowed hosts, Secure-cookie flag, and debug flag without displaying the signing key or database URL, and without connecting to the database. Verify the public HTTPS response's cookie flags and host rejection there as well; local tests do not establish the live proxy configuration.
 

@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "audits": 36,
+  "javascript_errors": [],
+  "community_invitation": "https://members.nurse.example/join/eyJwYXRoIjoiL3RvcGljcy9jcml0aWNhbC1jYXJlLWNvbGxlYWd1ZXMifQ.DIQVbFuVhY7QAkTrGlQ4uWVA1PA",
+  "journeys": [
+    "editable examples and blank own idea",
+    "member host creation",
+    "explicit community selection and draft restoration",
+    "join and personal feed",
+    "question queue",
+    "helpful and answer",
+    "invite signup continuation",
+    "activity drafts and WAT",
+    "WhatsApp URL",
+    "copy and fallback",
+    "native share and cancellation",
+    "offline activity editing and synchronization"
+  ]
+}

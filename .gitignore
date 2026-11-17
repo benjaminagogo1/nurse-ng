@@ -10,6 +10,8 @@ db.sqlite3-journal
 *.db
 nurse_ng.db
 .env
+.env.*
+!.env.example
 staticfiles/
 media/
 # Private document-review evidence; never commit (DECISIONS L48).

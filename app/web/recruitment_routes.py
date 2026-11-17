@@ -18,6 +18,7 @@ from app.services.vacancies import activation_blockers, configure_collector
 from app.web.deps import require_staff, verify_csrf
 from app.web.feedback import message, redirect_feedback
 from app.web.templating import render
+from app.web.urls import page_url
 
 router = APIRouter(prefix="/recruitment", tags=["recruitment sources"])
 
@@ -87,10 +88,10 @@ def _dashboard(
             "status": status,
             "country": country,
             "page_number": page,
-            "previous_url": str(request.url.include_query_params(page=page - 1))
+            "previous_url": page_url(request, page=page - 1)
             if page > 1
             else "",
-            "next_url": str(request.url.include_query_params(page=page + 1))
+            "next_url": page_url(request, page=page + 1)
             if page * 25 < total
             else "",
             "search_enabled": bool(

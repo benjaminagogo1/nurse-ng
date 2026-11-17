@@ -16,6 +16,12 @@ test('a release uses only its explicitly configured public HTTPS origin', () => 
     'https://nurse.example/?token=private', 'https://nurse.example/#private']) {
     assert.throws(() => serverURL(input, true));
   }
+  for (const input of ['https://nurse.internal', 'https://nurse.localdomain',
+    'https://nurse.lan', 'https://nurse.home.arpa', 'https://localhost.',
+    'https://2130706433', 'https://127.1', 'https://[::ffff:127.0.0.1]',
+    ' https://nurse.example', 'https://nurse.example\\path']) {
+    assert.throws(() => serverURL(input, true));
+  }
 });
 test('local device and emulator previews can connect to development', () => {
   assert.equal(serverURL('http://10.0.2.2:8000'), 'http://10.0.2.2:8000');
@@ -33,6 +39,9 @@ test('native builds bundle the workspace without moving member storage to an err
   assert.equal(config.server.errorPath, undefined);
   assert.equal(config.android.webContentsDebuggingEnabled, false);
   assert.equal(config.ios.webContentsDebuggingEnabled, false);
+  const releasePage = await readFile(join(output, 'www/index.html'), 'utf8');
+  assert.match(releasePage, /href="https:\/\/nurse.example"/);
+  assert.doesNotMatch(releasePage, /development preview|not online yet/);
   const bundle = await readFile(join(output, 'www/offline.html'), 'utf8');
   assert.match(bundle, /data-offline-shell="true"/);
   assert.match(bundle, /data-draft-scope=""/);

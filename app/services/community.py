@@ -309,9 +309,12 @@ def create_post(
     title: str = "",
     activity_format: str = "",
     activity_starts_at: str = "",
+    commit: bool = True,
 ) -> CommunityPost:
     """Run synchronous checks, store media, and publish one topic post."""
     _require_community_name(user)
+    if not commit and (images or video or reel):
+        raise CommunityError("Transactional publishing supports text contributions only.")
     from app.services.community_growth import post_details
 
     details = post_details(post_kind=post_kind, title=title, activity_format=activity_format,
@@ -382,7 +385,10 @@ def create_post(
         if reel is not None:
             reel.post = post
             db.add(reel)
-        db.commit()
+        if commit:
+            db.commit()
+        else:
+            db.flush()
     except (CommunityStorageError, CommunityError, SQLAlchemyError) as exc:
         db.rollback()
         for storage_name in stored_names:

@@ -17,7 +17,7 @@ def upgrade():
     op.add_column("users", sa.Column("email_verified_at", sa.DateTime(timezone=True)))
     op.add_column("users", sa.Column("account_mail_requested_at", sa.DateTime(timezone=True)))
     op.add_column("users", sa.Column("photo_storage_name", sa.String(32), nullable=False, server_default=""))
-    op.add_column("users", sa.Column("photo_public", sa.Boolean(), nullable=False, server_default="0"))
+    op.add_column("users", sa.Column("photo_public", sa.Boolean(), nullable=False, server_default=sa.false()))
     op.create_table(
         "account_tokens",
         sa.Column("id", sa.Uuid(), primary_key=True),

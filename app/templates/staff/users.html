@@ -17,7 +17,7 @@
       ><a
         class="btn btn-secondary"
         data-analytics-fallback
-        href="{{ request.url }}"
+        href="{{ request.url.path }}{% if request.url.query %}?{{ request.url.query }}{% endif %}"
         >{{ icon('clock', 17) }} Refresh view</a
       ><button
         type="button"

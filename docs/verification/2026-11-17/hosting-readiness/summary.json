@@ -1,0 +1,55 @@
+{
+  "python_tests": 961,
+  "python_failures": 0,
+  "python_errors": 0,
+  "python_skipped": 0,
+  "groups": [
+    {
+      "tests": 139,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "group": 1
+    },
+    {
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "group": 2
+    },
+    {
+      "tests": 163,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "group": 3
+    },
+    {
+      "tests": 153,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "group": 4
+    },
+    {
+      "tests": 199,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "group": 5
+    },
+    {
+      "tests": 190,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "group": 6
+    }
+  ],
+  "mobile_tests": 4,
+  "browser_audits": 36,
+  "postgresql": "18.6",
+  "public_deployment_verified": false,
+  "docker_build_verified": false
+}
