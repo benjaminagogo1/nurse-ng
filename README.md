@@ -94,6 +94,8 @@ records staff source selection; full-description reuse remains a separate approv
 Keep the recruitment worker running so collection, validation and publication can
 complete. See [the combined approval workflow](docs/RECRUITMENT_SOURCE_OPERATIONS.md#approve-and-start-collection--10-november-2026).
 
+
+
 Use the [worker supervisor and readiness checks](docs/WORKER_OPERATIONS.md) for
 continuous collection and Reels processing. Run `venv/bin/alembic upgrade head`
 before starting the supervisor; revision `e6480d3fb942` records worker progress.
@@ -101,6 +103,9 @@ The recruitment dashboard links directly to pending vacancy reviews and shows
 worker health separately from historical task failures. Factual collection now
 captures explicitly stated remuneration and holds repeated announcements as one
 review; existing review queues can be reconciled with an audited cleanup command.
+
+
+
 
 Comment-reply and advertising links now identify the same vacancy while job-specific
 query parameters remain distinct. Operators can preview existing published aliases
@@ -112,7 +117,12 @@ Nigerian opportunities take priority in the jobs feed, source registry and worke
 
 Previous verification on 7 November 2026: **298 tests pass**, plus isolated Chrome checks of source review and vacancy publication. Reuse scope is enforced before collection; reapproval requires collector reconfiguration. LSHSC remains pending.
 
+
+
+
 After migrating, run `./venv/bin/python -m app.cli recruitment-init` once, then keep `./venv/bin/python -m app.cli recruitment-worker` running in a separate terminal alongside Uvicorn. The initialisation command is repeatable and creates pending records only. Source review accepts a documented legal basis, published terms or written authorization; a separate licence is not compulsory. Live activation enforces the recorded reuse scope. See the [LSHSC activation review](docs/LSHSC_ACTIVATION_REVIEW.md). Upgrade to schema `6a21d8e40c93` for automatic activation. Existing staff decisions are preserved; pending candidates are assessed by the worker.
+
+
 
 Python 3.12 is required. The verified environment is `venv/`, which is not tracked.
 
@@ -132,9 +142,13 @@ python3.12 -m venv venv
 
 Start the development server from the repository root after configuring `.env`:
 
+
+
 ```bash
 ./venv/bin/python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
+
+
 
 Open <http://127.0.0.1:8000>, or <http://127.0.0.1:8000/feed> for community. Keep the terminal open; press Ctrl+C to stop. If startup reports an invalid signing key, check the `.env` setup above; without that file or explicit environment variables, the application defaults to production configuration.
 
