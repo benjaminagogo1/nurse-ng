@@ -9,7 +9,7 @@
   {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
   {% if record.issues %}<ul>{% for issue in record.issues %}<li>{{ issue }}</li>{% endfor %}</ul>{% endif %}
   {% if record.state == 'duplicate' and record.normalized.get('_duplicate_of') %}<p>This announcement is also recorded from another source. <a href="/recruitment/vacancies/{{ record.normalized['_duplicate_of'] }}">Open the record to review</a>. Both original source records are retained.</p>{% endif %}
-  <p class="field-hint">Last observed {{ record.last_seen_at.strftime('%Y-%m-%d %H:%M') }} UTC. A published processing state does not guarantee current availability: source approval, health, freshness and deadlines also govern public visibility.</p>
+  <p class="field-hint">Last observed {{ record.last_seen_at|display_datetime }}. A published processing state does not guarantee current availability: source approval, health, freshness and deadlines also govern public visibility.</p>
   {% if record.job_id %}<p><a href="/jobs/{{ record.job_id }}">View public vacancy</a> (may be unavailable when its source is no longer approved).</p>{% endif %}
   <p><a href="/recruitment/vacancies/{{ record.id }}/original">Download original source snapshot as text</a></p>
   <details class="source-card"><summary>Original extracted record</summary><pre class="source-evidence">{{ record.raw_record|tojson(indent=2) }}</pre></details>
@@ -28,7 +28,7 @@
     <div class="button-row"><button class="button-primary" name="action" value="publish" type="submit">Publish with recorded evidence</button><button class="button-secondary" name="action" value="reject" type="submit">Reject record</button></div>
   </form>
   <h2 id="history">Change and decision history</h2>
-  {% for entry in history %}<article class="source-card"><h3>{{ entry.action|capitalize }}</h3><p class="field-hint">{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }} UTC · {{ 'Staff review' if entry.actor_id else 'Automatic collection' }}</p><p><a href="/recruitment/vacancies/snapshots/{{ entry.snapshot_id }}/original">Original page for this change</a></p><pre class="source-evidence">{{ entry.details|tojson(indent=2) }}</pre></article>{% endfor %}
+  {% for entry in history %}<article class="source-card"><h3>{{ entry.action|capitalize }}</h3><p class="field-hint">{{ entry.created_at|display_datetime }} · {{ 'Staff review' if entry.actor_id else 'Automatic collection' }}</p><p><a href="/recruitment/vacancies/snapshots/{{ entry.snapshot_id }}/original">Original page for this change</a></p><pre class="source-evidence">{{ entry.details|tojson(indent=2) }}</pre></article>{% endfor %}
   <nav class="source-actions" aria-label="History pages">{% if history_page > 1 %}<a href="?history_page={{ history_page - 1 }}#history">Newer</a>{% endif %}{% if has_more %}<a href="?history_page={{ history_page + 1 }}#history">Older</a>{% endif %}</nav>
 </section>
 {% endblock %}

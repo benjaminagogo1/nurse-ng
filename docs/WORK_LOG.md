@@ -1826,3 +1826,96 @@ This is the pre-hardening result: the previously documented 89 cases plus 14 com
   No public deployment, real invitations, email, commit or push occurred.
 - Added [hosting setup](HOSTING.md), updated the production/community/worker/mobile
   guides, and retained [hosting readiness evidence](verification/2026-11-17/hosting-readiness/README.md).
+
+## 17 November 2026 — Recover community growth direction after shutdown
+
+- The user clarified the intended audience: from a student's first day in
+  nursing school through clinical practice, leadership, research, nursing
+  education and professorship. Increased market penetration and high adoption
+  are the immediate goals within the wider app vision.
+- Inspected saved plans and implementation. The four community engagement
+  journeys are delivered; mentorship, recurring activities, introductions,
+  personal referral attribution and weekly digests have model/migration
+  foundations only. No corresponding member-facing services, routes or templates
+  were found, so these features are recorded as unfinished.
+- Updated [community direction and recovery checkpoint](COMMUNITY_EXPANSION.md)
+  to preserve the clarified audience, growth priorities and accurate restart
+  point. Documentation only; no application behavior, database or deployment
+  changed, and no new feature verification is claimed.
+
+## 17 November 2026 — Complete participation across every nursing stage
+
+- Completed the five saved foundations at the user's request: voluntary peer
+  support and private requests; recurring learning discussions and private
+  attendance; optional goals, introductions and host welcome queues; personal
+  invitations with owner-only aggregate adoption counts; and verified-email,
+  opt-in weekly digests. Members can choose public Helpful recognition. These
+  journeys support nursing students, practitioners, leaders, researchers,
+  educators and professors, with adoption and sustained participation as the
+  immediate product priorities.
+- Added member screens, navigation, dashboard reminders, signup/provider
+  attribution, private inbox notices, staff report review and notification-worker
+  scheduling. Participation uses actual contributions and attendance; it does
+  not seed examples, fabricate welcomes or expose referred member identities.
+  Advanced the public offline cache to v35; private management forms require
+  online access.
+- Added migration `e6480i9e5416`, fixed PostgreSQL Boolean defaults in the
+  unfinished foundation, and preserved existing loggers during Alembic checks
+  so recovery-email verification remains observable.
+- **271 distinct Python cases passed**: 50 final feature cases and 221 related
+  authentication, notification, worker, growth, hosting, account, sharing and
+  migration cases. The original combined run had one overly broad staff-name
+  assertion; its corrected feature suite passed in full. Raw and extracted
+  receipts are retained without counting overlapping reruns twice. Four native
+  Node tests passed outside the sandbox. The
+  complete Chrome member journey and **36 selected accessibility/reflow states
+  passed**, covering phone, enlarged-text dark and desktop layouts, with no
+  recorded JavaScript errors. Screenshots were inspected. Ruff, all 101 templates
+  and whitespace checks passed.
+- Isolated PostgreSQL 18.6 passed migration/schema agreement, the existing
+  hosted community/signup journey, concurrent support capacity acceptance,
+  recurring worker passes and digest claims, welcome/attendance, referral
+  contribution and returning-use counts, and unsubscribe. CI invokes that
+  journey against PostgreSQL 16; remote CI and hosted device/provider checks
+  remain unrun.
+- Rehearsed upgrade/downgrade/upgrade on a private SQLite copy, backed up the
+  local installation and upgraded to `e6480i9e5416`. All **13,589 existing rows
+  across 53 tables** retained their data; integrity and foreign keys passed.
+  Restarted web/workers, with readiness and eleven local HTTP checks passing.
+  The local entry page is `/community/start`.
+- Added the [participation operating guide](COMMUNITY_PARTICIPATION.md) and
+  [delivery evidence](verification/2026-11-17/community-participation/README.md).
+  Public sharing still requires configured HTTPS hosting, and actual digests
+  require mail configuration and verified-email opt-in. No public deployment,
+  real invitations, real-member email, commit or push occurred. Backups and
+  runtime logs remain private in `.local-backups`; changes remain local.
+
+## 17 November 2026 — Improve private conversations and use AM/PM across pages
+
+- Reviewed the private message page at phone and desktop sizes. Its installation
+  banner and expanded offline actions pushed the composer below the screen.
+  Replaced the large heading with a compact layout, clearer incoming/outgoing
+  bubbles and a bounded, scrollable history. Kept the message box visible and
+  placed local saving and queued sending under **Save for later**. The mobile
+  conversation heading and input also reflow with enlarged text.
+- Centralized displayed timestamps as `17 Nov 2026 08:33 AM` or `08:33 PM`
+  throughout member and staff pages, including live messages and offline records.
+  Removed the UTC timestamp suffix and inconsistent browser-local message
+  formatting. Stored timestamps, existing event/activity timezone conversions,
+  calendar dates, form values and calendar exports retain their meanings.
+- **174 related Python cases and four native Node cases passed.** The complete
+  live-message browser journey passed, including 128-message history, draft
+  preservation, stable reading position, offline/lost-response retry, read
+  acknowledgement and revoked access. Mail used an isolated private file capture.
+- **Eight selected accessibility/reflow states passed** across phone, desktop,
+  dark and enlarged-text layouts with draft controls both collapsed and expanded;
+  no selected violations, overflow or recorded JavaScript errors. Visually
+  inspected before/after screenshots and checked saved/live timestamps plus
+  midnight/noon boundaries. The final visual review followed the final phone
+  spacing adjustment. Ruff, 101 templates, JavaScript syntax and whitespace
+  checks passed.
+- Restarted the local web process and verified readiness and six HTTP endpoints.
+  No database migration was needed. Advanced the public asset cache to v37.
+  [Verification evidence](verification/2026-11-17/conversation-times/README.md)
+  retains the receipts and inspected screenshots. No real member messages/email,
+  public deployment, commit or push occurred; changes remain local.

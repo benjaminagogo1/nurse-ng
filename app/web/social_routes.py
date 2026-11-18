@@ -245,6 +245,10 @@ def complete(
         else:
             raise AuthError("Choose an existing or new account.")
         social.link(db, member, item.provider, item.subject)
+        if mode == "new":
+            from app.services.member_invitations import attribute_signup
+
+            attribute_signup(db, request, member)
         consumed = db.execute(
             delete(SocialEnrollment).where(
                 SocialEnrollment.token_hash == item.token_hash,

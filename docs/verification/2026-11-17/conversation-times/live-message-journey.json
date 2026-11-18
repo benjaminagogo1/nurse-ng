@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "runner": "tests/browser/notifications.py",
+  "checks": [
+    "inbox and unread badge",
+    "preferences",
+    "automatic arrival and draft preservation",
+    "128-message history",
+    "no scroll jumps",
+    "offline and lost-response retry",
+    "revoked access",
+    "isolated worker file delivery",
+    "clean server and JavaScript logs"
+  ]
+}

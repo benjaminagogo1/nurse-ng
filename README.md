@@ -7,10 +7,15 @@ capabilities are a later expansion once the community is established and trusted
 
 ## Documents
 
+- [AI integration review and proposal](docs/AI_INTEGRATION_PROPOSAL_2026-11-17.md) —
+  practical uses, recommended first pilot, architecture, costs and decisions for discussion.
+- [Private conversation files](docs/PRIVATE_MESSAGE_FILES.md) — supported types,
+  sending, retries, private storage, scanning and cleanup.
 - [Hosting setup](docs/HOSTING.md) — public HTTPS links, PostgreSQL, persistent
   storage, web/worker services, containers and verification after deployment.
 - [Community growth direction and expansion scope](docs/COMMUNITY_EXPANSION.md).
 - [Joinable communities, useful answers, learning activities and invitations](docs/COMMUNITY_ENGAGEMENT.md).
+- [Peer support, recurring learning, newcomer welcomes, personal invitations and weekly digests](docs/COMMUNITY_PARTICIPATION.md).
 - [Android and iPhone app projects](mobile/README.md) — browser installation, preview builds, signing,
   hosting requirements and the signed-in install entry.
 - [Video likes, visibility and administrator management](docs/ENGAGEMENT_AND_ADMIN.md).

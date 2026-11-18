@@ -15,7 +15,7 @@ endblock %} {% block content %}
     <article class="moderation-card">
       <p>
         <strong>{{ reason_labels.get(report.reason, report.reason) }}</strong> ·
-        {{ report.created_at.strftime('%d %b %Y, %H:%M') }}
+        {{ report.created_at|display_datetime }}
       </p>
       {% if report.details %}
       <p>{{ report.details }}</p>

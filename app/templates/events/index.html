@@ -14,7 +14,7 @@ endblock %} {% block content %}
     <h2><a href="/events/{{ event.id }}">{{ event.title }}</a></h2>
     <p>
       <time datetime="{{ event.starts_at.isoformat() }}"
-        >{{ local_time(event.starts_at).strftime('%d %B %Y, %H:%M') }} WAT</time
+        >{{ local_time(event.starts_at)|display_datetime }}</time
       >
       · {{ event.location }}
     </p>

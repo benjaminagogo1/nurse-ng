@@ -50,8 +50,10 @@
     <a href="/communities">Explore communities</a>
     <a href="/feed/unanswered" {% if feed_view == 'unanswered' %}aria-current="page"{% endif %}>Questions needing replies</a>
     <a href="/activities" {% if feed_view == 'activities' %}aria-current="page"{% endif %}>Learning together</a>
+    {% if user %}<a href="/community/start">My next step</a><a href="/mentorship">Peer support</a><a href="/invitations">Invite colleagues</a>{% endif %}
     <a href="/reels">Reels</a>
   </nav>
+  {% if user and feed_view == 'activities' %}<p><a class="btn btn-secondary" href="/activities/series/new">Host a regular learning session</a> <a href="/activities/series">Manage my regular sessions</a></p>{% endif %}
   {% include "community/_search.html" %} {% if not user %}
   <p class="field-hint">
     Anyone can read. <a href="/auth/register">Create an account</a> or

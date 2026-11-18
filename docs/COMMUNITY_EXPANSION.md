@@ -1,12 +1,16 @@
 # Community expansion
 
-## Current product direction — 16 November 2026
+## Current product direction — clarified 17 November 2026
 
-Nurse.ng's immediate goal is to grow an inclusive nursing community. Nurses at
-all career stages should find a place to belong, interact, share opportunities,
-talk with peers and develop professionally through the forms of participation
-that suit them. Community growth and market penetration guide current product
-priorities and recommendations.
+Nurse.ng's immediate goal is increased market penetration, high adoption and
+sustained participation in an inclusive nursing community. The audience begins
+with a student's first day in nursing school and extends through newly qualified
+and experienced nurses, specialists, leaders, researchers, nursing educators
+and professors of nursing. Members at every stage should find a place to belong,
+interact, share opportunities, talk with peers and develop professionally through
+the forms of participation that suit them. These immediate growth goals guide
+current product priorities and recommendations; the wider app vision remains
+in place.
 
 Members create communities around their own needs. Editable examples help them
 get started with a specialty, local network, school, study goal, career stage or
@@ -34,6 +38,32 @@ Evaluate growth through acquisition, first meaningful participation, active
 contributors, returning members and invitations that lead to participation.
 Establish baselines and instrument missing measurements before drawing growth
 conclusions. Registration counts alone do not establish an active community.
+
+## Recovery checkpoint and completed next increment — 17 November 2026
+
+The implemented foundation includes member-created and joinable communities,
+interest-based suggestions, unanswered questions, Helpful and selected answers,
+learning discussions, and WhatsApp/native/copy invitations with sign-in
+continuation. See the [delivery guide](COMMUNITY_ENGAGEMENT.md) for behavior and
+verification. Public hosting and real-device/provider validation remain necessary
+for a public rollout.
+
+At recovery, the next increment had models in `app/models/participation.py` and
+migration `e6480h8d4305` only. Following the user's instruction to complete it,
+those foundations now have services, routes, member screens, worker integration
+and verification. The [participation delivery guide](COMMUNITY_PARTICIPATION.md)
+covers:
+
+- Voluntary mentorship and peer support across career stages.
+- Recurring learning activities and attendance.
+- New-member goals, introductions and host welcomes.
+- Personal invitation attribution and referral participation measurement.
+- Optional weekly digests and contribution recognition preferences.
+
+Growth measures distinguish joining from a published first contribution and
+returning use. Delivered features and isolated checks do not establish actual
+market penetration or retention; a public rollout and real member participation
+remain necessary for those outcomes.
 
 Existing authentication, privacy and access controls support this community
 experience. Employer expansion has its own later requirements for organization

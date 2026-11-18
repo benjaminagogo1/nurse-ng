@@ -52,7 +52,7 @@
         {{ event.actor.full_name or event.actor.community_name or 'Administrator' if event.actor else 'Deleted account' }}
         {{ 'granted administrator access to' if event.action == 'granted' else 'removed administrator access from' }}
         {{ event.target.full_name or event.target.community_name or 'member' if event.target else 'a deleted account' }}.
-        <time datetime="{{ event.created_at.isoformat() }}">{{ event.created_at.strftime('%d %b %Y, %H:%M') }} UTC</time>
+        <time datetime="{{ event.created_at.isoformat() }}">{{ event.created_at|display_datetime }}</time>
       </li>{% endfor %}
     </ol>{% else %}<p class="admin-help">Changes made here will appear in this history.</p>{% endif %}
   </section>

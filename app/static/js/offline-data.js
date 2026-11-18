@@ -462,7 +462,7 @@
           node("h3", record.title),
           node(
             "p",
-            "Last saved: " + new Date(record.retrieved_at).toLocaleString(),
+            "Last saved: " + window.NurseTime.format(record.retrieved_at),
             "offline-meta",
           ),
         );

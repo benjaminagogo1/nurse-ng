@@ -51,7 +51,7 @@
   <article class="source-card">
     <h3>{{ schedule.name }}</h3>
     <p>{{ schedule.provider|upper }} · {{ schedule.country_code or 'Worldwide' }} · Every {{ schedule.interval_hours }} hours · {{ 'Enabled' if schedule.enabled else 'Paused' }}</p>
-    <p class="field-hint">Next run: {{ schedule.next_run_at.strftime('%Y-%m-%d %H:%M') }} UTC · Page {{ schedule.next_page }}</p>
+    <p class="field-hint">Next run: {{ schedule.next_run_at|display_datetime }} · Page {{ schedule.next_page }}</p>
     {% if schedule.query %}<p>{{ schedule.query }}</p>{% endif %}
     <form method="post" action="/recruitment/schedules/{{ schedule.id }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -76,13 +76,13 @@
   </details>
 
   <h2 id="worker-health">Worker health and activity</h2>
-  {% for worker in workers %}<article class="source-card"><h3>{{ worker.name|capitalize }} worker · {{ 'Healthy' if worker.healthy else 'Needs attention' }}</h3><p>{% if worker.state == 'idle' %}Running and waiting for eligible work.{% elif worker.state == 'working' %}Processing a task.{% elif worker.state in ['missing', 'stopped'] %}No active worker is reporting. Start the worker supervisor.{% elif worker.state == 'stale' %}Progress has stopped. The supervisor should restart this worker.{% else %}The latest worker pass failed. The worker will retry.{% endif %}</p>{% if worker.last_seen_at %}<p class="field-hint">Last progress: {{ worker.last_seen_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</p>{% endif %}</article>{% else %}<p>Worker health is unavailable. Check the database upgrade and worker configuration.</p>{% endfor %}
+  {% for worker in workers %}<article class="source-card"><h3>{{ worker.name|capitalize }} worker · {{ 'Healthy' if worker.healthy else 'Needs attention' }}</h3><p>{% if worker.state == 'idle' %}Running and waiting for eligible work.{% elif worker.state == 'working' %}Processing a task.{% elif worker.state in ['missing', 'stopped'] %}No active worker is reporting. Start the worker supervisor.{% elif worker.state == 'stale' %}Progress has stopped. The supervisor should restart this worker.{% else %}The latest worker pass failed. The worker will retry.{% endif %}</p>{% if worker.last_seen_at %}<p class="field-hint">Last progress: {{ worker.last_seen_at|display_datetime }}</p>{% endif %}</article>{% else %}<p>Worker health is unavailable. Check the database upgrade and worker configuration.</p>{% endfor %}
   <p>{{ counts.get('queued', 0) }} queued · {{ counts.get('running', 0) }} running · {{ counts.get('failed', 0) }} historical failed tasks</p>
   <p class="field-hint">Queued tasks are waiting for a worker, retry delay, or collection limit. Running means a check is in progress. Failed tasks record unsuccessful attempts; later attempts may succeed. Historical failures are not the current failure rate. Times are UTC.</p>
-  {% if oldest_waiting %}<p class="field-hint">Oldest queued task: {{ oldest_waiting.strftime('%Y-%m-%d %H:%M') }} UTC.</p>{% endif %}
+  {% if oldest_waiting %}<p class="field-hint">Oldest queued task: {{ oldest_waiting|display_datetime }}.</p>{% endif %}
   {% for task in tasks %}
   <article class="source-card">
-    <p><strong>{{ task.kind|capitalize }}</strong> · {{ task.status|capitalize }} · {{ task.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+    <p><strong>{{ task.kind|capitalize }}</strong> · {{ task.status|capitalize }} · {{ task.created_at|display_datetime }}</p>
     <p>{{ task.message or 'Waiting for a worker.' }}</p>
     <p class="field-hint">{{ task.result_count }} new sources · Attempt {{ task.attempts }}{% if task.source_id %} · <a href="/recruitment/sources/{{ task.source_id }}">View source</a>{% endif %}</p>
   </article>

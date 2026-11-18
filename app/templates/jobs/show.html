@@ -135,8 +135,8 @@ content %}
           announcement.
         </p>
         <p class="jobs-caption">
-          Last checked: {{ job.confirmed_at.strftime('%Y-%m-%d %H:%M') if
-          job.confirmed_at else 'Not confirmed' }} UTC{% if job.clarified %}.
+          Last checked: {{ job.confirmed_at|display_datetime if
+          job.confirmed_at else 'Not confirmed' }}{% if job.clarified %}.
           Some fields were clarified by Nurse.ng following staff review.{% endif
           %}
         </p>

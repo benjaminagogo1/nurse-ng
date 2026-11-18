@@ -1,0 +1,5 @@
+{
+  "status": "passed",
+  "tests": 4,
+  "command": "npm test --prefix mobile"
+}

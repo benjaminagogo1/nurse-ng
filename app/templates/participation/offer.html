@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% block content %}
+<section class="form-page participation-page"><p class="eyebrow">Share what you know</p><h1>{{ title }}</h1>
+<p class="lede">Help a colleague take their next step. Choose what you can offer and the number of people you can support.</p>
+{% include "participation/_nav.html" %}
+{% if not user.community_name %}<p>First <a href="/community/settings">choose your public display name</a>. Your private profile and contact details stay under your control.</p>{% endif %}
+<form method="post" action="/mentorship/offer" class="participation-form" data-feedback-form>
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+<fieldset><legend>Topics you can help with</legend>{% for key, label in topics.items() %}<label class="participation-check"><input type="checkbox" name="topics" value="{{ key }}" {% if (key in values.get('topics', []) if error else offer and key in offer.topics.split(',')) %}checked{% endif %} />{{ label }}</label>{% endfor %}</fieldset>
+<label>Your public support introduction<textarea name="introduction" rows="4" maxlength="700" required>{{ values.get('introduction', '') if error else offer.introduction if offer else '' }}</textarea></label>
+<label>Availability<input name="availability" maxlength="200" required value="{{ values.get('availability', '') if error else offer.availability if offer else '' }}" placeholder="For example: one short conversation on weekends" /></label>
+<label>How many colleagues can you support?<input type="number" name="capacity" min="1" max="8" required value="{{ values.get('capacity', 3) if error else offer.capacity if offer else 3 }}" /></label>
+<label class="participation-check"><input type="checkbox" name="accepting" {% if (values.get('accepting') == 'on' if error else offer and offer.accepting) %}checked{% endif %} />List my offer and accept new support requests</label>
+<label class="participation-check"><input type="checkbox" name="show_completed" {% if (values.get('show_completed') == 'on' if error else offer and offer.show_completed) %}checked{% endif %} />Show my completed peer-support count with my offer</label>
+<p class="field-hint">Your display name, introduction, chosen topics and availability are visible to signed-in members while your offer is listed. Requests and goals are private to the two colleagues, with reported concerns available to staff. You can pause new requests anytime.</p>
+<button class="btn btn-primary">Save support offer</button></form></section>{% endblock %}

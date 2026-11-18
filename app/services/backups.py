@@ -42,6 +42,7 @@ def private_directory(path):
         Path(settings.community_media_dir).resolve(),
         Path(settings.avatar_dir).resolve(),
         Path(settings.evidence_dir).resolve(),
+        Path(settings.message_media_dir).resolve(),
     ]
     if any(path == root or root in path.parents for root in public):
         raise BackupError("Choose a private backup directory outside all upload/static stores.")
@@ -92,6 +93,13 @@ def referenced_files(db, at):
         result.append(("avatars", name, None, None))
     for name, size in db.execute("SELECT storage_name, size_bytes FROM community_media"):
         result.append(("community", name, size, None))
+    if db.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='message_attachments'"
+    ).fetchone():
+        for name, size, digest in db.execute(
+            "SELECT storage_name, size_bytes, sha256 FROM message_attachments"
+        ):
+            result.append(("messages", name, size, digest))
     for name, size, digest, created, decided, status in db.execute(
         "SELECT e.storage_name, e.size_bytes, e.sha256, c.created_at, c.decided_at, e.scan_status "
         "FROM evidence_documents e JOIN verification_cases c ON e.case_id=c.id "
@@ -163,7 +171,7 @@ def read_manifest(backup):
             parts = key.split("/")
             if key != "database.sqlite3" and not (
                 len(parts) == 2
-                and parts[0] in {"avatars", "community", "evidence"}
+                and parts[0] in {"avatars", "community", "evidence", "messages"}
                 and OPAQUE.fullmatch(parts[1])
             ):
                 raise ValueError()
@@ -201,6 +209,7 @@ def create_backup(*, root=None, at=None):
             "avatars": Path(settings.avatar_dir),
             "community": Path(settings.community_media_dir),
             "evidence": Path(settings.evidence_dir),
+            "messages": Path(settings.message_media_dir),
         }
         with tempfile.TemporaryDirectory(prefix=".creating-", dir=root) as temporary:
             stage = Path(temporary)
@@ -296,7 +305,7 @@ def restore_backup(backup, destination, *, at=None):
                     and digest != entry["sha256"]
                 ):
                     raise BackupError("Restored upload metadata does not match its database row.")
-            for kind in ("avatars", "community", "evidence"):
+            for kind in ("avatars", "community", "evidence", "messages"):
                 (stage / kind).mkdir(exist_ok=True, mode=0o700)
             stage.rename(destination)
     return {

@@ -1,0 +1,350 @@
+[
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/community/start",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/mentorship",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/mentorship/offer",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/mentorship/requests",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/mentorship/requests/01a1e9fa-7ce1-78bb-ad05-70643f47ed3c",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/activities/series/new",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/activities/series",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/activities/series/1d128fb0-10d4-4417-8a22-377678ba661c/sessions",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/posts/01a1e9fa-5c46-73f7-ba0b-032e682b1d1b",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/invitations",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/digest",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/communities/school-practice-and-teaching-circle/welcomes",
+    "width": 390,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/community/start",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/mentorship",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/mentorship/offer",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/mentorship/requests",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/mentorship/requests/01a1e9fa-7ce1-78bb-ad05-70643f47ed3c",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/activities/series/new",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/activities/series",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/activities/series/1d128fb0-10d4-4417-8a22-377678ba661c/sessions",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/posts/01a1e9fa-5c46-73f7-ba0b-032e682b1d1b",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/invitations",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/digest",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [
+      "color-contrast"
+    ],
+    "path": "/communities/school-practice-and-teaching-circle/welcomes",
+    "width": 320,
+    "theme": "dark",
+    "large": true,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/community/start",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/mentorship",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/mentorship/offer",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/mentorship/requests",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/mentorship/requests/01a1e9fa-7ce1-78bb-ad05-70643f47ed3c",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/activities/series/new",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/activities/series",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/activities/series/1d128fb0-10d4-4417-8a22-377678ba661c/sessions",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/posts/01a1e9fa-5c46-73f7-ba0b-032e682b1d1b",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/invitations",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/digest",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  },
+  {
+    "violations": [],
+    "manual": [],
+    "path": "/communities/school-practice-and-teaching-circle/welcomes",
+    "width": 1280,
+    "theme": "light",
+    "large": false,
+    "overflow": false
+  }
+]

@@ -26,14 +26,18 @@ def can_message(db: Session, user: User, recipient: User) -> bool:
     return connection is not None and connection.status == ConnectionStatus.ACCEPTED
 
 
-def _existing(db, user, recipient, body, client_key):
+def _existing(db, user, recipient, body, client_key, attachment_ids=()):
     old = db.scalar(
         select(DirectMessage).where(
             DirectMessage.sender_id == user.id,
             DirectMessage.client_key == client_key,
         )
     )
-    if old and (old.recipient_id != recipient.id or old.body != body):
+    if old and (
+        old.recipient_id != recipient.id
+        or old.body != body
+        or [item.id for item in old.attachments] != list(attachment_ids)
+    ):
         raise ValueError(
             "This send reference was already used. Reload before sending a new message."
         )
@@ -41,24 +45,42 @@ def _existing(db, user, recipient, body, client_key):
 
 
 def send_message(
-    db: Session, user: User, recipient: User, body: str, client_key: str | None = None
+    db: Session,
+    user: User,
+    recipient: User,
+    body: str,
+    client_key: str | None = None,
+    *,
+    attachment_ids=None,
+    auth_version=None,
 ) -> DirectMessage:
     if not can_message(db, user, recipient):
         raise ValueError("Connect with this nurse before sending a message.")
     body = body.strip()
-    if not body or len(body) > 3000:
-        raise ValueError("Write a message between 1 and 3,000 characters.")
+    attachment_ids = list(attachment_ids or [])
+    if (not body and not attachment_ids) or len(body) > 3000:
+        raise ValueError("Write a message of up to 3,000 characters or attach a file.")
+    if attachment_ids:
+        from app.services.message_attachments import lock_participants
+
+        lock_participants(db, user, recipient, auth_version=auth_version)
     if client_key:
         try:
             client_key = str(uuid.UUID(client_key))
         except ValueError:
             raise ValueError("Invalid send reference. Reload and try again.") from None
-        old = _existing(db, user, recipient, body, client_key)
+        old = _existing(db, user, recipient, body, client_key, attachment_ids)
         if old:
             return old
     message = DirectMessage(
         sender_id=user.id, recipient_id=recipient.id, body=body, client_key=client_key or None
     )
+    if attachment_ids:
+        from app.services.message_attachments import resolve_attachments
+
+        for position, item in enumerate(resolve_attachments(db, user, recipient, attachment_ids)):
+            item.position = position
+            message.attachments.append(item)
     db.add(message)
     try:
         db.flush()
@@ -74,7 +96,7 @@ def send_message(
         db.commit()
     except IntegrityError:
         db.rollback()
-        if client_key and (old := _existing(db, user, recipient, body, client_key)):
+        if client_key and (old := _existing(db, user, recipient, body, client_key, attachment_ids)):
             return old
         raise
     db.refresh(message)
@@ -202,6 +224,8 @@ def unread_count(db: Session, user: User) -> int:
 
 
 def message_data(message, user):
+    from app.services.message_attachments import attachment_data
+
     timestamp = message.created_at
     if timestamp.tzinfo is None:
         timestamp = timestamp.replace(tzinfo=UTC)
@@ -211,4 +235,5 @@ def message_data(message, user):
         "mine": message.sender_id == user.id,
         "created_at": timestamp.isoformat(),
         "client_key": message.client_key if message.sender_id == user.id else None,
+        "attachments": [attachment_data(item) for item in message.attachments],
     }

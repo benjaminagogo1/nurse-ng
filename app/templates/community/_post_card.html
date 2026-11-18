@@ -16,9 +16,10 @@
         {% else %} {{ post.author.community_name or 'Nurse.ng member' }} {%
         endif %} ·
         <time datetime="{{ post.published_at.isoformat() }}"
-          >{{ post.published_at.strftime('%d %b %Y, %H:%M') }} UTC</time
+          >{{ post.published_at|display_datetime }}</time
         >
       </p>
+      {% if recognition_summaries and recognition_summaries.get(post.author_id) %}<p class="participation-recognition">{{ recognition_summaries[post.author_id] }} Helpful reply recognitions · Community feedback</p>{% endif %}
     </div>
   </header>
 

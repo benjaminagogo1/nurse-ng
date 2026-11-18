@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session, aliased, selectinload
 from app.models.community import (
     CommunityPost,
     CommunityReply,
+    CommunityTopic,
     Connection,
     ConnectionStatus,
     ContentStatus,
@@ -22,6 +23,8 @@ from app.models.notifications import Notification, NotificationPreference
 from app.models.user import User, UserStatus
 
 CATEGORIES = {
+    "mentorship": ("Peer support", "Private support requests and changes to their status."),
+    "community": ("Community learning", "Introductions for hosts and regular sessions you joined."),
     "replies": ("Conversations", "Replies to your posts, responses and followed discussions."),
     "connections": ("Connections", "New connection requests and accepted invitations."),
     "messages": ("Messages", "New private messages from your connections."),
@@ -198,6 +201,18 @@ def notify_connection(db: Session, connection: Connection, *, accepted: bool = F
 
 def visible_condition():
     """Recheck the source and relationship whenever listing, counting or emailing."""
+    from app.models.participation import Mentorship
+
+    support_access = select(Mentorship.id).where(
+        Mentorship.id == Notification.mentorship_id,
+        or_(Mentorship.requester_id == Notification.recipient_id,
+            Mentorship.mentor_id == Notification.recipient_id),
+    ).exists()
+    community_access = select(CommunityPost.id).join(CommunityTopic).where(
+        CommunityPost.id == Notification.post_id,
+        CommunityPost.status == ContentStatus.PUBLISHED,
+        CommunityTopic.is_active.is_(True),
+    ).exists()
     actor_active = (
         select(User.id)
         .where(
@@ -304,6 +319,8 @@ def visible_condition():
         and_(
             actor_active,
             or_(
+                and_(Notification.category == "mentorship", support_access),
+                and_(Notification.category == "community", community_access),
                 and_(Notification.category == "replies", reply_access),
                 and_(Notification.category == "connections", connection_access),
                 and_(Notification.category == "messages", message_access),
@@ -387,13 +404,27 @@ def card(db: Session, notice: Notification) -> dict:
     name = (notice.actor.community_name if notice.actor else "") or "A member"
     heading, description, path = "New activity", "", "/notifications"
     icon = {
+        "mentorship": "users",
+        "community": "chat",
         "replies": "chat",
         "connections": "users",
         "messages": "mail",
         "applications": "briefcase",
         "opportunities": "briefcase",
     }[notice.category]
-    if notice.category == "opportunities":
+    if notice.category == "mentorship":
+        heading = f"{name}: peer support {notice.kind.removeprefix('support_')}"
+        description = "Open your private support request to review its current status."
+        path = f"/mentorship/requests/{notice.mentorship_id}"
+    elif notice.category == "community":
+        post = db.get(CommunityPost, notice.post_id)
+        heading = (
+            "A new colleague is ready for a welcome" if notice.kind == "introduction"
+            else "Your next learning session is ready"
+        )
+        description = post.title or "Join the community conversation."
+        path = f"/posts/{post.id}"
+    elif notice.category == "opportunities":
         job = db.get(Job, notice.job_id)
         heading = (
             "A saved opportunity closes soon"

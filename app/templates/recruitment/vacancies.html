@@ -38,7 +38,7 @@
     </h2>
     <p>{{ record.source.organization.name }} · {{ record.state|capitalize }}</p>
     <p class="field-hint">
-      Last seen {{ record.last_seen_at.strftime('%Y-%m-%d %H:%M') }} UTC
+      Last seen {{ record.last_seen_at|display_datetime }}
     </p>
     {% if record.issues %}
     <ul>

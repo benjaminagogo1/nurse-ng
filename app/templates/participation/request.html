@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block content %}<section class="form-page participation-page">
+<a href="/mentorship/requests">← My support requests</a><h1>Peer support with {{ other_name }}</h1>
+<p class="eyebrow">{{ topics.get(item.topic, 'Peer support') }} · {{ item.status|capitalize }}</p>
+<h2>Your shared goal</h2><p class="participation-text">{{ item.goal }}</p>
+<p class="field-hint">Only the two colleagues can view this request. Staff review reported concerns.</p>
+{% if can_message %}<p><a class="btn btn-primary" href="/messages/{{ other_id }}">Open our messages</a></p>{% endif %}
+<div class="participation-actions">{% if item.status == 'pending' %}{% set actions = [('accept', 'Accept and connect'), ('decline', 'Decline')] if item.mentor_id == user.id else [('withdraw', 'Withdraw request')] %}{% elif item.status == 'accepted' %}{% set actions = [('complete', 'Mark support complete'), ('end', 'End support')] %}{% else %}{% set actions = [] %}{% endif %}
+{% for action, label in actions %}<form method="post" action="/mentorship/requests/{{ item.id }}/{{ action }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}" /><button class="btn btn-secondary">{{ label }}</button></form>{% endfor %}</div>
+{% if item.status == 'pending' and item.mentor_id == user.id %}<p class="field-hint">Accepting also creates a mutual connection for private messaging.</p>{% endif %}
+<p class="field-hint">Completing records the end of this support conversation; it is not a qualification or competence assessment. To remove the messaging connection, use <a href="/network">your network</a>.</p>
+<details class="report-panel"><summary>Report a concern</summary><form method="post" action="/mentorship/requests/{{ item.id }}/report" class="participation-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}" /><label>Reason<select name="reason" required><option value="">Choose</option>{% for value in ['harassment', 'privacy', 'misinformation', 'spam', 'other'] %}<option value="{{ value }}" {% if values.get('reason') == value %}selected{% endif %}>{{ value|capitalize }}</option>{% endfor %}</select></label><label>Details<textarea name="details" rows="3" maxlength="1000">{{ values.get('details', '') }}</textarea></label><button class="btn btn-secondary">Submit report</button></form></details>
+</section>{% endblock %}

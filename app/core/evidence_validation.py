@@ -6,13 +6,13 @@ import warnings
 from pathlib import Path
 
 
-def validate(data):
+def validate(data, *, max_pdf_pages=25):
     if data.startswith(b"%PDF-"):
         from pypdf import PdfReader
         from pypdf.generic import ArrayObject, DictionaryObject, IndirectObject, StreamObject
 
         reader = PdfReader(io.BytesIO(data), strict=True)
-        if reader.is_encrypted or not 1 <= len(reader.pages) <= 25:
+        if reader.is_encrypted or not 1 <= len(reader.pages) <= max_pdf_pages:
             raise ValueError("Encrypted or oversized PDF")
         forbidden = {"/JS", "/JavaScript", "/Launch", "/EmbeddedFiles", "/EmbeddedFile",
                      "/RichMedia", "/XFA", "/OpenAction", "/AA", "/SubmitForm",

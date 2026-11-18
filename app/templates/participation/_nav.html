@@ -1,0 +1,5 @@
+<nav class="section-tabs conversation-tabs" aria-label="Community engagement">
+  {% for path, label in [('/community/start', 'My next step'), ('/mentorship', 'Peer support'), ('/mentorship/requests', 'My support requests'), ('/activities', 'Learning together'), ('/activities/series', 'My regular sessions'), ('/invitations', 'Invite colleagues'), ('/digest', 'Weekly digest')] %}
+  <a href="{{ path }}" {% if request.url.path == path %}aria-current="page"{% endif %}>{{ label }}</a>
+  {% endfor %}
+</nav>

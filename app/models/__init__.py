@@ -20,7 +20,7 @@ from app.models.employers import EmployerMembership, EmployerOrganization, Emplo
 from app.models.engagement import PostLike
 from app.models.events import CommunityEvent, EventAttendance
 from app.models.jobs import Job, JobApplication
-from app.models.messages import DirectMessage
+from app.models.messages import DirectMessage, MessageAttachment, MessageUploadUsage
 from app.models.notifications import Notification, NotificationPreference
 from app.models.offline import OfflineOperation
 from app.models.offline_upload import OfflineUpload
@@ -86,6 +86,8 @@ __all__ = [
     "ContentReport",
     "CredentialClaim",
     "DirectMessage",
+    "MessageAttachment",
+    "MessageUploadUsage",
     "DiscoverySchedule",
     "DiscoveryTask",
     "DiscussionFollow",

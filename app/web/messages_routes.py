@@ -3,13 +3,16 @@
 import uuid
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
+from app.core.message_storage import attachment_path
 from app.core.ratelimit import FixedWindowLimiter
 from app.db.session import get_db
 from app.models.user import User, UserStatus
+from app.services import message_attachments as attachments
 from app.services.community import list_connections, users_by_id
 from app.services.messages import (
     can_message,
@@ -20,10 +23,12 @@ from app.services.messages import (
     updates,
 )
 from app.web.deps import require_user, verify_csrf
+from app.web.message_upload_limits import MessageRoute
 from app.web.templating import render
 
-router = APIRouter(tags=["messages"])
+router = APIRouter(tags=["messages"], route_class=MessageRoute)
 _send_limiter = FixedWindowLimiter(60, 3600)
+_upload_limiter = FixedWindowLimiter(40, 3600)
 
 
 def _contacts(db: Session, user: User) -> list[User]:
@@ -85,6 +90,9 @@ def _inbox(
             "error": error,
             "body": body,
             "client_key": client_key or str(uuid.uuid4()),
+            "attachment_max_files": settings.message_attachment_max_files,
+            "attachment_max_bytes": settings.message_attachment_max_bytes,
+            "attachment_total_bytes": settings.message_attachment_total_bytes,
         },
         status_code=400 if error else 200,
     )
@@ -155,6 +163,8 @@ def send(
     request: Request,
     body: str = Form(""),
     client_key: str = Form(""),
+    attachment_ids: str = Form(""),
+    files: list[UploadFile] | None = File(None),
     user: User = Depends(require_user),
     _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
@@ -162,6 +172,7 @@ def send(
     recipient = _recipient(db, user, recipient_id)
     key = str(user.id)
     enhanced = request.headers.get("x-messages") == "1"
+    auth_version = user.auth_version
     if _send_limiter.is_limited(key):
         return (
             _json({"error": "Too many messages. Please try again later."}, 429)
@@ -179,8 +190,30 @@ def send(
             )
         )
     try:
-        message = send_message(db, user, recipient, body, client_key=client_key or None)
+        identifiers = [UUID(value) for value in attachment_ids.split(",") if value]
+        files = [item for item in files or [] if item.filename]
+        if len(identifiers) + len(files) > settings.message_attachment_max_files:
+            raise ValueError(f"Choose up to {settings.message_attachment_max_files} files.")
+        for index, item in enumerate(files):
+            # The server-form fallback gets the same durable upload keys on a retry.
+            reference = str(
+                uuid.uuid5(uuid.UUID(client_key) if client_key else uuid.uuid4(), f"file:{index}")
+            )
+            asset = attachments.upload_attachment(
+                db, user, recipient, item.file, item.filename, reference, auth_version=auth_version
+            )
+            identifiers.append(asset.id)
+        message = send_message(
+            db,
+            user,
+            recipient,
+            body,
+            client_key=client_key or None,
+            attachment_ids=identifiers,
+            auth_version=auth_version,
+        )
     except ValueError as exc:
+        db.rollback()
         if enhanced:
             return _json({"error": str(exc)}, 400)
         return _inbox(
@@ -190,3 +223,75 @@ def send(
     if enhanced:
         return _json({"message": message_data(message, user)})
     return RedirectResponse(f"/messages/{recipient.id}#latest", status_code=303)
+
+
+@router.post("/messages/{recipient_id}/attachments")
+def upload_file(
+    recipient_id: UUID,
+    request: Request,
+    file: UploadFile = File(...),
+    upload_key: str = Form(""),
+    user: User = Depends(require_user),
+    _: None = Depends(verify_csrf),
+    db: Session = Depends(get_db),
+):
+    recipient = _recipient(db, user, recipient_id)
+    key = str(user.id)
+    if _upload_limiter.is_limited(key):
+        return _json({"error": "Too many file uploads. Please try again later."}, 429)
+    _upload_limiter.record(key)
+    try:
+        asset = attachments.upload_attachment(
+            db, user, recipient, file.file, file.filename or "", upload_key
+        )
+        return _json({"attachment": attachments.attachment_data(asset)})
+    except ValueError as exc:
+        db.rollback()
+        return _json({"error": str(exc)}, 400)
+
+
+@router.post("/messages/attachments/{identifier}/discard")
+def discard_file(
+    identifier: UUID,
+    user: User = Depends(require_user),
+    _: None = Depends(verify_csrf),
+    db: Session = Depends(get_db),
+):
+    try:
+        attachments.discard_attachment(db, user, identifier)
+    except ValueError as exc:
+        db.rollback()
+        return _json({"error": str(exc)}, 400)
+    return _json({"ok": True})
+
+
+@router.get("/messages/files/{identifier}")
+def message_file(
+    identifier: UUID,
+    download: bool = False,
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    asset = attachments.accessible_attachment(db, user, identifier)
+    if not asset:
+        raise HTTPException(404, "This conversation file is unavailable.")
+    try:
+        path = attachment_path(asset.storage_name)
+        if not path.is_file() or path.stat().st_size != asset.size_bytes:
+            raise ValueError
+    except (ValueError, OSError):
+        raise HTTPException(404, "This file is unavailable.") from None
+    return FileResponse(
+        path,
+        media_type=asset.content_type,
+        filename=asset.filename,
+        content_disposition_type="attachment" if download or asset.kind == "document" else "inline",
+        headers={
+            "Cache-Control": "private, no-store, max-age=0",
+            "Pragma": "no-cache",
+            "X-Content-Type-Options": "nosniff",
+            "Cross-Origin-Resource-Policy": "same-origin",
+            "Content-Security-Policy": "default-src 'none'; sandbox",
+            "Referrer-Policy": "no-referrer",
+        },
+    )

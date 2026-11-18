@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "distinct_python_cases": 271,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "method": "Final 50-case feature run plus 221 unchanged passing related cases from the combined run.",
+  "groups": [
+    {
+      "report": "features.xml",
+      "cases": 50
+    },
+    {
+      "report": "related-regressions.xml",
+      "cases": 221,
+      "source_report": "initial-combined-regression.xml"
+    }
+  ],
+  "resolved_initial_failure": "tests.test_participation.test_staff_can_review_reported_goal_and_pause_the_offer"
+}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="community-page conversation-space participation-page">
+  <p class="eyebrow">Grow together · Every stage of nursing</p><h1>{{ title }}</h1>
+  <p class="lede">From your first day at nursing school to practice, leadership, research and teaching: find a colleague who can help, or share what you know.</p>
+  {% include "participation/_nav.html" %}
+  <p><a class="btn btn-primary" href="/mentorship/offer">Offer peer support</a></p>
+  <form method="get" class="participation-filters" role="search">
+    <label>Search support introductions<input name="q" type="search" maxlength="120" value="{{ query }}" /></label>
+    <label>Support topic<select name="topic"><option value="">All topics</option>{% for key, label in topics.items() %}<option value="{{ key }}" {% if selected_topic == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+    <button class="btn btn-secondary">Find support</button>
+  </form>
+  <p class="field-hint">Offers describe voluntary peer support. They do not certify qualifications or replace supervision or clinical advice.</p>
+  <div class="participation-grid">
+  {% for card in cards %}<article class="participation-card">
+    <h2>{{ card.name }}</h2><p>{{ card.offer.introduction }}</p>
+    <ul>{% for label in card.topics %}<li>{{ label }}</li>{% endfor %}</ul>
+    <p><strong>Availability:</strong> {{ card.offer.availability }}</p>
+    <p>{{ card.places }} {{ 'place' if card.places == 1 else 'places' }} currently available</p>
+    {% if card.completed is not none %}<p>{{ card.completed }} completed peer-support {{ 'conversation' if card.completed == 1 else 'conversations' }}</p>{% endif %}
+    {% if user.id != card.offer.user_id %}<a class="btn btn-secondary" href="/mentorship/offers/{{ card.offer.user_id }}">Ask for support</a>{% else %}<a href="/mentorship/offer">Edit my offer</a>{% endif %}
+  </article>{% else %}<div class="empty-state"><h2>Help this community grow</h2><p>No matching support offers yet. Share an area where you can help a colleague, whether you are a student, a practising nurse or an educator.</p><a href="/mentorship/offer">Offer support</a></div>{% endfor %}
+  </div>{% include "community/_pagination.html" %}
+</section>{% endblock %}

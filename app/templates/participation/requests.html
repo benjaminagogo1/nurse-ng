@@ -1,0 +1,4 @@
+{% extends "base.html" %}{% block content %}<section class="community-page conversation-space participation-page">
+<h1>{{ title }}</h1>{% include "participation/_nav.html" %}
+<div class="participation-grid">{% for item in rows %}<article class="participation-card"><p class="eyebrow">{{ 'Received request' if item.mentor_id == user.id else 'My request' }}</p><h2>{{ topics.get(item.topic, 'Peer support') }}</h2><p>Status: {{ item.status|capitalize }}</p><a href="/mentorship/requests/{{ item.id }}">View private request</a></article>{% else %}<div class="empty-state"><h2>Take the next step with a colleague</h2><p>Your sent and received support requests will appear here.</p><a href="/mentorship">Find peer support</a></div>{% endfor %}</div>
+{% include "community/_pagination.html" %}</section>{% endblock %}

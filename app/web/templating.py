@@ -16,6 +16,7 @@ from sqlalchemy.orm import object_session
 from app.services.activity import record_visit
 from app.services.community_growth import activity_time
 from app.services.notifications import unread_count
+from app.services.time_display import display_datetime
 from app.services.tours import snapshot as tour_snapshot
 from app.web.feedback import enhanced, message, pending_feedback
 
@@ -46,6 +47,7 @@ def display_date(value: date | str | None) -> str:
 
 
 templates.env.filters["display_date"] = display_date
+templates.env.filters["display_datetime"] = display_datetime
 templates.env.filters["community_activity_time"] = activity_time
 
 
@@ -105,6 +107,8 @@ def render(
         section = "verification"
     elif section in {"posts", "feed"}:
         section = "feed"
+    elif path.startswith("/community/start"):
+        section = "community-start"
     elif section == "community":
         section = "settings"
     template_context: dict[str, Any] = {

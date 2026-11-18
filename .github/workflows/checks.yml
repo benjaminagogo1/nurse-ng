@@ -28,7 +28,7 @@ jobs:
           python-version: '3.12'
           cache: pip
       - run: python -m pip install -r requirements.lock
-      - run: python tests/hosting/postgres_journey.py
+      - run: python tests/hosting/message_files_journey.py
         env:
           NURSE_NG_TEST_POSTGRES_URL: postgresql://nurse_test:isolated-ci-pass%25word@127.0.0.1:5432/nurse_ng_hosting_test
       - run: docker build -t nurse-ng:hosting-check .

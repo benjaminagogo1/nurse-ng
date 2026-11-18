@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "web_restarted": true,
+  "database_migration": false,
+  "http_checks": {
+    "/readyz": 200,
+    "/messages": 200,
+    "/feed": 200,
+    "/events": 200,
+    "/static/css/messages.css?v=2": 200,
+    "/static/js/time-display.js?v=1": 200
+  }
+}

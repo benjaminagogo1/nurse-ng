@@ -27,6 +27,7 @@
   </p>
   {% endif %}
   {% if post.post_kind == 'question' and answer_summaries[post.id].answered %}<p class="community-answer-note">The question’s author selected an answer. <a href="/posts/{{ post.id }}/replies/{{ answer_summaries[post.id].answer_id }}">Read the selected answer</a></p>{% endif %}
+  {% if post.post_kind == 'activity' and activity_participation %}<section class="participation-card" aria-labelledby="activity-join"><h2 id="activity-join">Learn with colleagues</h2><p>{{ activity_participation.count }} {{ 'colleague has' if activity_participation.count == 1 else 'colleagues have' }} joined. Participation choices stay private.</p>{% if user %}<form method="post" action="/activities/{{ post.id }}/attendance"><input type="hidden" name="csrf_token" value="{{ csrf_token }}" /><input type="hidden" name="action" value="{{ 'leave' if activity_participation.attending else 'join' }}" /><button class="btn btn-primary">{{ 'Leave activity' if activity_participation.attending else 'Join activity' }}</button></form>{% endif %}{% if activity_participation.series %}<p>Repeats every {{ activity_participation.series.interval_days }} days{% if not activity_participation.series.active %} · Future sessions paused{% endif %}. <a href="/activities/series/{{ activity_participation.series.id }}/sessions">View the sessions</a>.</p>{% endif %}</section>{% endif %}
   {% include "community/_post_card.html" %} {% if user and user.id
   != post.author_id %}
   <details class="report-panel" id="report">
@@ -72,6 +73,7 @@
     <div class="reply-list">
       {% for reply in reply_page.replies %}
       <article class="reply-card" id="reply-{{ reply.id }}">
+        {% if recognition_summaries and recognition_summaries.get(reply.author_id) %}<p class="participation-recognition">{{ recognition_summaries[reply.author_id] }} Helpful reply recognitions · Community feedback</p>{% endif %}
         {{ avatar(reply.author, reply.author.community_name) }}
         <p class="post-byline">
           {% if profile_ids.get(reply.author_id) %}
@@ -81,7 +83,7 @@
           {% else %} {{ reply.author.community_name or 'Nurse.ng member' }} {%
           endif %} ·
           <time datetime="{{ reply.created_at.isoformat() }}"
-            >{{ reply.created_at.strftime('%d %b %Y, %H:%M') }} UTC</time
+            >{{ reply.created_at|display_datetime }}</time
           >
           {% if reply.author_id == post.author_id %}<span
             class="conversation-author"

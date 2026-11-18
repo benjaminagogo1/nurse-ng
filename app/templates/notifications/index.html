@@ -94,7 +94,7 @@
           </button>
         </form>
         <time datetime="{{ item.notice.created_at.isoformat() }}"
-          >{{ item.notice.created_at.strftime('%d %b · %H:%M') }} UTC</time
+          >{{ item.notice.created_at|display_datetime }}</time
         >
         {% if not item.notice.read_at %}
         <form method="post" action="/notifications/{{ item.notice.id }}/read">

@@ -117,6 +117,18 @@ class Settings(BaseSettings):
     community_malware_scan_command: str = "clamscan"
     community_malware_scan_timeout_seconds: int = 60
 
+    # Private conversation files never share the public community media store.
+    message_media_dir: str = "media/messages"
+    message_attachment_max_bytes: int = Field(
+        default=50 * 1024 * 1024, ge=1024, le=200 * 1024 * 1024
+    )
+    message_attachment_total_bytes: int = Field(
+        default=100 * 1024 * 1024, ge=1024, le=400 * 1024 * 1024
+    )
+    message_attachment_max_files: int = Field(default=4, ge=1, le=8)
+    message_upload_window_bytes: int = Field(default=500 * 1024 * 1024, ge=1024)
+    message_storage_quota_bytes: int = Field(default=1024 * 1024 * 1024, ge=1024)
+
     # Reels processing runs in a separate CLI worker, outside web requests.
     # Empty selects the pinned imageio-ffmpeg binary; operators may use a system binary.
     reels_ffmpeg: str = ""

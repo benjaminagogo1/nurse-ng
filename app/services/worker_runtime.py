@@ -43,11 +43,18 @@ def _step(name, db):
 
         return run_next(db)
     from app.services.account_mail import mail_available
+    from app.services.community_participation import run_next_activity
     from app.services.notification_worker import run_next
     from app.services.opportunity_watch import generate_alerts
+    from app.services.weekly_digest import enqueue
+    from app.services.weekly_digest import run_next as run_digest
 
     generate_alerts(db)
-    return run_next(db) if mail_available() else None
+    activity = run_next_activity(db)
+    enqueue(db)
+    if activity:
+        return activity
+    return (run_next(db) or run_digest(db)) if mail_available() else None
 
 
 def _signals(stop):
@@ -70,6 +77,7 @@ def run_worker(name, *, once=False, max_tasks=10, stop=None):
     started = datetime.now(UTC)
     failures = completed = 0
     initialized = False
+    next_file_cleanup = 0
     print(f"{name} worker started.", flush=True)
     try:
         while not stop.is_set():
@@ -79,6 +87,11 @@ def run_worker(name, *, once=False, max_tasks=10, stop=None):
                     if not initialized:
                         _startup(name, db)
                         initialized = True
+                    if name == "notifications" and time.monotonic() >= next_file_cleanup:
+                        from app.services.message_attachments import maintain_message_files
+
+                        maintain_message_files(db)
+                        next_file_cleanup = time.monotonic() + 300
                     outcome = _step(name, db)
                     report(db, name, instance, "idle", started_at=started)
                     if outcome is not None:

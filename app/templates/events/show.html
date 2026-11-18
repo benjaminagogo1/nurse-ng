@@ -10,8 +10,8 @@ endblock %} {% block content %}
   {% endif %}
   <p>
     <strong
-      >{{ local_time(event.starts_at).strftime('%d %B %Y, %H:%M') }} – {{
-      local_time(event.ends_at).strftime('%d %B %Y, %H:%M') }} WAT</strong
+      >{{ local_time(event.starts_at)|display_datetime }} – {{
+      local_time(event.ends_at)|display_datetime }}</strong
     >
   </p>
   <p>{{ event.location }}</p>

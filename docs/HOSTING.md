@@ -49,6 +49,7 @@ Mount persistent storage and set these paths for both web and workers:
 NURSE_NG_AVATAR_DIR=/var/lib/nurse-ng/avatars
 NURSE_NG_COMMUNITY_MEDIA_DIR=/var/lib/nurse-ng/community
 NURSE_NG_EVIDENCE_DIR=/var/lib/nurse-ng/evidence
+NURSE_NG_MESSAGE_MEDIA_DIR=/var/lib/nurse-ng/messages
 NURSE_NG_BACKUP_DIR=/var/lib/nurse-ng/backups
 NURSE_NG_COMMUNITY_MALWARE_SCAN_MODE=required
 NURSE_NG_EVIDENCE_SCAN_COMMAND=clamscan
@@ -56,7 +57,7 @@ NURSE_NG_EVIDENCE_SCAN_COMMAND=clamscan
 
 Web and workers need read/write access to the same files, including upload
 chunks and processed videos. Keep these directories outside static hosting;
-private evidence and photos are served through authorization checks. The
+private evidence, photos and conversation files are served through authorization checks. The
 container runs as UID/GID `10001`, which must own its writable mount. Set private
 storage directories to mode `0700`. Hosting
 plans with separate process disks need shared storage before running this
@@ -88,7 +89,7 @@ venv/bin/alembic upgrade head
 ```
 
 For an existing installation, stop writers and take a consistent backup first.
-The current migration head is `e6480g7c3294`. Fresh PostgreSQL and SQLite use
+The current migration head is `e6480j0f6527`. Fresh PostgreSQL and SQLite use
 the same migration chain. Existing SQLite databases are not automatically
 converted to PostgreSQL; switching databases needs a separate data transfer.
 

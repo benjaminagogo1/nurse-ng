@@ -1,6 +1,6 @@
 /* Only public application assets and the neutral shell belong in this cache. */
 "use strict";
-const CACHE = "nurse-offline-shell-v34";
+const CACHE = "nurse-offline-shell-v39";
 const ASSETS = [
   "/offline-shell",
   "/static/css/app.css?v=7",
@@ -9,7 +9,9 @@ const ASSETS = [
   "/static/css/feedback.css?v=4",
   "/static/css/engagement.css?v=1",
   "/static/css/community-growth.css?v=3",
+  "/static/css/participation.css?v=1",
   "/static/css/notifications.css?v=7",
+  "/static/css/messages.css?v=3",
   "/static/css/opportunities.css",
   "/static/css/discovery.css?v=7",
   "/static/css/offline.css?v=10",
@@ -18,6 +20,7 @@ const ASSETS = [
   "/static/css/mobile-app.css?v=6",
   "/static/js/mobile-app.js?v=3",
   "/static/js/display.js",
+  "/static/js/time-display.js?v=1",
   "/static/js/app.js",
   "/static/js/feedback.js?v=10",
   "/static/js/likes.js?v=1",
@@ -27,8 +30,8 @@ const ASSETS = [
   "/static/js/offline-store.js?v=6",
   "/static/js/offline.js?v=11",
   "/static/js/offline-sync.js?v=6",
-  "/static/js/offline-data.js?v=11",
-  "/static/js/offline-content.js?v=11",
+  "/static/js/offline-data.js?v=12",
+  "/static/js/offline-content.js?v=13",
   "/static/img/favicon.svg",
   "/static/img/app-icon-180.png",
   "/static/img/app-icon-192.png",

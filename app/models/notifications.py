@@ -52,6 +52,9 @@ class Notification(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         ForeignKey("jobs.id", ondelete="CASCADE"), index=True
     )
     deadline_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    mentorship_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("mentorship_requests.id", ondelete="CASCADE"), index=True
+    )
     application_status: Mapped[str] = mapped_column(String(24), default="")
     email_to: Mapped[str] = mapped_column(String(254), default="")
     email_state: Mapped[str] = mapped_column(String(16), default="skipped")

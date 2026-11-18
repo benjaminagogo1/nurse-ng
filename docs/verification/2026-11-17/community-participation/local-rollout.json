@@ -1,0 +1,27 @@
+{
+  "status": "passed",
+  "revision": "e6480i9e5416",
+  "rehearsal": "upgrade-downgrade-upgrade passed",
+  "existing_tables_preserved": 53,
+  "existing_rows_preserved": 13589,
+  "backup_private": true,
+  "backup_file": "community-participation-20261117T154847Z.db",
+  "integrity": "ok",
+  "foreign_keys": "ok",
+  "http_checks": {
+    "/healthz": 200,
+    "/readyz": 200,
+    "/communities": 200,
+    "/feed": 200,
+    "/activities": 200,
+    "/auth/login": 200,
+    "/static/css/participation.css": 200,
+    "/community/start": 200,
+    "/mentorship": 200,
+    "/digest": 200,
+    "/invitations": 200
+  },
+  "url": "http://127.0.0.1:8000/community/start",
+  "public_sharing_configured": false,
+  "mail_sent": false
+}

@@ -105,9 +105,12 @@ def _post_context(
     posts: list,
     user: User | None = None,
 ) -> dict[str, object]:
+    from app.services.community_participation import recognition_summaries
+
     author_ids = {post.author_id for post in posts}
     return {
         "posts": posts,
+        "recognition_summaries": recognition_summaries(db, author_ids),
         "profile_ids": public_profile_ids(db, author_ids),
         "summaries": discussion_summaries(db, posts, user),
         "answer_summaries": growth.answer_summaries(db, posts),
@@ -150,9 +153,14 @@ def _conversation_context(
         except ValueError:
             pass
     references = reply_references(db, post.id, target_ids)
+    from app.services.community_participation import activity_details, recognition_summaries
+
     return {
         "title": f"Conversation in {post.topic.name}", "user": user, "post": post,
         "conversation_detail": True,
+        "activity_participation": activity_details(db, post, user),
+        "recognition_summaries": recognition_summaries(
+            db, {post.author_id, *(reply.author_id for reply in reply_page.replies)}),
         "reply_page": reply_page,
         "reply_references": references,
         "reply_target": references.get(selected),

@@ -39,6 +39,7 @@
     <p>{{ topic.rules or 'Treat colleagues respectfully, protect personal privacy and add useful context to your contributions.' }}</p>
   </details>
   {% if user %}<p><a class="text-link" href="/posts/new?topic={{ topic.id }}&amp;kind=activity">Host a learning activity</a></p>{% endif %}
+  {% if user %}<p><a href="/community/start">Introduce yourself</a> · <a href="/activities/series/new">Host a regular learning session</a> · <a href="/invitations?destination={{ ('/topics/' + topic.slug)|urlencode }}">Create a personal invitation</a>{% if can_manage_community %} · <a href="/communities/{{ topic.slug }}/welcomes">Welcome new colleagues</a>{% endif %}</p>{% endif %}
   {% include "community/_search.html" %}
   <div class="community-list">
     {% for post in posts %}{% include "community/_post_card.html" %} {% else %}

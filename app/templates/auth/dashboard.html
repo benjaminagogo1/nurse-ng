@@ -2,6 +2,7 @@
 "_empty_state.html" import empty_state %} {% block title %}Dashboard —
 Nurse.ng{% endblock %} {% block content %}
 <section class="db">
+  {% if not community_progress.journey or not community_progress.journey.dismissed_at %}<aside class="discovery-next dashboard-onboarding"><div><h2>Find your next step in the nursing community</h2><p>Meet classmates and colleagues, find peer support or learn together. Your community choices are yours.</p></div><a class="btn btn-secondary" href="/community/start">Explore my next step</a></aside>{% endif %}
   {% if not user.onboarding_completed_at %}
   <aside class="discovery-next dashboard-onboarding">
     <div>
@@ -140,7 +141,7 @@ Nurse.ng{% endblock %} {% block content %}
         <article class="event-card">
           <h3><a href="/events/{{ event.id }}">{{ event.title }}</a></h3>
           <p>
-            {{ local_time(event.starts_at).strftime('%d %b, %H:%M') }} WAT · {{
+            {{ local_time(event.starts_at)|display_datetime }} · {{
             event.location }}
           </p>
         </article>

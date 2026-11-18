@@ -41,7 +41,14 @@ always uses `NURSE_NG_REQUIRED_WORKERS`. Restart the web process after changing
 that setting so its readiness check uses the same configuration.
 
 The `notifications` role generates opportunity matches and saved-deadline alerts,
-including in-app notifications when email transport is disabled. It delivers
+publishes due recurring community learning sessions, and queues optional weekly
+digests. In-app notifications and recurring publication work when email is
+disabled. Every five minutes it also expires unfinished private message uploads
+after 24 hours and retries durable file deletions. The web and workers must share
+`NURSE_NG_MESSAGE_MEDIA_DIR`. See [private message files](PRIVATE_MESSAGE_FILES.md)
+for storage, scanner and backup requirements, and
+[community participation](COMMUNITY_PARTICIPATION.md) for schedules,
+subscription eligibility and retained verification. It delivers
 email only for recipients with a verified address and the corresponding email
 preference enabled. It is included in the default supervisor roles. For an
 instance intentionally running fewer features, explicitly select its required

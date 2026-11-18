@@ -530,6 +530,10 @@
         let busy = false;
         const act = async (queued) => {
           if (busy) return;
+          if (draft.kind === "message" && Number(form.dataset.messageFiles || 0) > 0) {
+            app.notice("Send attached files while connected. Remove the files to save or queue a text-only message.", "warning");
+            return;
+          }
           busy = true;
           form.dataset.offlineSaving = "true";
           const buttons = [...controls.querySelectorAll("button")];
@@ -597,7 +601,9 @@
           }
           snapshots.set(form, prepared);
         });
-        form.append(controls);
+        const draftActions = form.querySelector("[data-message-draft-actions]");
+        (draftActions || form).append(controls);
+        if (draftActions) draftActions.closest("details").hidden = false;
       }
       repaint();
     })

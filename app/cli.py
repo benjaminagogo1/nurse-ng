@@ -54,6 +54,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         "maintain-evidence", help="Check legacy evidence and purge expired private files."
     )
     evidence.add_argument("--dry-run", action="store_true")
+    message_files = subparsers.add_parser(
+        "maintain-message-files", help="Remove unfinished conversation uploads and crash remnants."
+    )
+    message_files.add_argument("--dry-run", action="store_true")
     subparsers.add_parser("backup", help="Back up SQLite and referenced uploads privately.")
     subparsers.add_parser("prune-backups", help="Remove expired automatic backups.")
     subparsers.add_parser("vacancy-coverage",
@@ -233,6 +237,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             parser.error("--max-tasks must be between 1 and 100")
         name = next(name for name, command in COMMANDS.items() if command == args.command)
         return run_worker(name, once=args.once, max_tasks=args.max_tasks)
+    if args.command == "maintain-message-files":
+        from app.services.message_attachments import maintain_message_files
+        with SessionLocal() as db:
+            print(json.dumps(maintain_message_files(db, dry_run=args.dry_run)))
+        return 0
     if args.command == "cleanup-account-files":
         from app.services.accounts import cleanup_account_files
 

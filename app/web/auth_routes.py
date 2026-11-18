@@ -157,7 +157,7 @@ def register(
     try:
         user = register_user(
             db, phone=phone, password=password, full_name=full_name,
-            email=email, account_type=role,
+            email=email, account_type=role, commit=False,
         )
     except AuthError as exc:
         return render(
@@ -169,6 +169,10 @@ def register(
             else status.HTTP_400_BAD_REQUEST,
         )
 
+    from app.services.member_invitations import attribute_signup
+
+    attribute_signup(db, request, user)
+    db.commit()
     _start_session(request, user, db)
     destination = community_destination(db, next)
     return redirect_feedback(
@@ -279,6 +283,8 @@ def dashboard(
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ) -> Response:
+    from app.services.community_participation import progress
+
     profile = get_profile_for_user(db, user.id)
     jobs, personalised_jobs = suggested_opportunities(db, user)
     completion_fields = (
@@ -301,6 +307,7 @@ def dashboard(
         "auth/dashboard.html",
         {
             "title": "Dashboard",
+            "community_progress": progress(db, user),
             "page": "dashboard",
             "user": user,
             "mail_available": mail_available(),

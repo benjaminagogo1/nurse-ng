@@ -164,8 +164,10 @@ def suggested_communities(db: Session, user: User, *, limit: int = 4):
 
 
 def activity_time(value: datetime) -> str:
+    from app.services.time_display import display_datetime
+
     current = value if value.tzinfo else value.replace(tzinfo=UTC)
-    return current.astimezone(ZoneInfo("Africa/Lagos")).strftime("%b %d, %Y · %H:%M WAT")
+    return display_datetime(current.astimezone(ZoneInfo("Africa/Lagos")))
 
 
 def _active(user: User) -> None:

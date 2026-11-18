@@ -35,7 +35,7 @@
   </article>
   {% else %}<p>No employer requests.</p>{% endfor %}
   <h2>Recent decisions</h2>
-  <ul>{% for event in events %}<li>{{ event.created_at.strftime('%d %B %Y %H:%M') }} ·
+  <ul>{% for event in events %}<li>{{ event.created_at|display_datetime }} ·
     {{ event.action|replace('_', ' ') }} · {{ event.note }}</li>
     {% else %}<li>No decisions yet.</li>{% endfor %}</ul>
 </section>

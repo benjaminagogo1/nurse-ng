@@ -45,7 +45,7 @@ Recover their originals from another copy or request replacement documents.
 `python -m app.cli backup` creates a private directory in
 `.local-backups/automatic/`. It reserves SQLite's writer lock while taking a
 consistent database snapshot and copying referenced avatars, community media
-(including Reel variants), and private evidence. Keep this operation on a small
+(including Reel variants), private evidence, and private conversation files. Keep this operation on a small
 local pilot database: the writer reservation briefly delays writes and is not a
 large-database backup strategy.
 
@@ -73,7 +73,7 @@ venv/bin/python -m app.cli restore-backup \
 ```
 
 The restored layout is `database.sqlite3`, `avatars/`, `community/`, and
-`evidence/`. The command verifies integrity, foreign keys, migration revision,
+`evidence/`, and `messages/`. The command verifies integrity, foreign keys, migration revision,
 all table counts and referenced file digests before publishing the destination.
 The [completed isolated restoration](verification/2026-11-14/restore-drill.json)
 recovered the database and five existing media/photo files; the two previously

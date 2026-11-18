@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "audits": 8,
+  "javascript_errors": [],
+  "checks": [
+    "matching saved and arriving AM/PM timestamps",
+    "phone and desktop composer visibility",
+    "dark and enlarged-text reflow",
+    "collapsed and expanded draft controls"
+  ]
+}

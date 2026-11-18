@@ -1,0 +1,12 @@
+{% if message.attachments %}
+<div class="message-files">
+  {% for file in message.attachments %}
+  <div class="message-file-card">
+    {% if file.kind == 'image' %}<a href="/messages/files/{{ file.id }}" target="_blank" rel="noopener"><img class="message-file-image" src="/messages/files/{{ file.id }}" alt="{{ file.filename }}" loading="lazy" /></a>
+    {% elif file.kind == 'audio' %}<audio controls preload="none" aria-label="{{ file.filename }}"><source src="/messages/files/{{ file.id }}" type="{{ file.content_type }}" /></audio>
+    {% elif file.kind == 'video' %}<video controls playsinline preload="none" aria-label="{{ file.filename }}"><source src="/messages/files/{{ file.id }}" type="{{ file.content_type }}" /></video>{% endif %}
+    <div class="message-file-meta"><span class="message-file-copy"><strong>{{ file.filename }}</strong><small>{{ file.kind|capitalize }} · {% if file.size_bytes >= 1048576 %}{{ '%.1f'|format(file.size_bytes / 1048576) }} MB{% else %}{{ [1, (file.size_bytes + 1023) // 1024]|max }} KB{% endif %}</small></span><a class="message-file-download" href="/messages/files/{{ file.id }}?download=1" aria-label="Download {{ file.filename }}">Download</a></div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}

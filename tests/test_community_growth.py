@@ -308,7 +308,7 @@ def test_learning_formats_timezone_and_search(db_session, members, activity_form
         activity_starts_at="2026-11-30T16:30",
     )
     assert post.activity_starts_at.replace(tzinfo=UTC) == datetime(2026, 11, 30, 15, 30, tzinfo=UTC)
-    assert growth.activity_time(post.activity_starts_at) == "Nov 30, 2026 · 16:30 WAT"
+    assert growth.activity_time(post.activity_starts_at) == "30 Nov 2026 04:30 PM"
     assert list_published_posts(db_session, post_kind="activity", query="development") == [post]
     assert list_published_posts(db_session, post_kind="question") == []
 

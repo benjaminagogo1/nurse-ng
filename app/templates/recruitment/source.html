@@ -29,12 +29,12 @@
     <dt>Discovered through</dt><dd>{{ source.discovered_via|replace('_', ' ') }} · {{ source.source_type|replace('_', ' ') }}</dd>
     <dt>Collection method</dt><dd>{{ methods.get(source.collection_method, source.collection_method) }}</dd>
     <dt>Permission status</dt><dd>{{ source.permission_status }}{% if source.access_notes %} — {{ source.access_notes }}{% endif %}</dd>
-    <dt>Last successful check (UTC)</dt><dd>{{ source.last_success_at or 'None' }}</dd>
-    <dt>Last attempt (UTC)</dt><dd>{{ source.last_attempt_at or 'None' }} · {{ source.failure_count }} consecutive failures</dd>
-    <dt>Last observed page change (UTC)</dt><dd>{{ source.last_changed_at or 'None' }}</dd>
-    <dt>Next page check (UTC)</dt><dd>{{ source.next_check_at }}</dd>
-    <dt>Approval expiry (UTC)</dt><dd>{{ source.approval_expires_at or 'No approval' }}</dd>
-    <dt>Last vacancy discovery</dt><dd>{{ source.last_vacancy_discovery_at or 'No vacancies collected' }}</dd>
+    <dt>Last successful check</dt><dd>{{ source.last_success_at|display_datetime or 'None' }}</dd>
+    <dt>Last attempt</dt><dd>{{ source.last_attempt_at|display_datetime or 'None' }} · {{ source.failure_count }} consecutive failures</dd>
+    <dt>Last observed page change</dt><dd>{{ source.last_changed_at|display_datetime or 'None' }}</dd>
+    <dt>Next page check</dt><dd>{{ source.next_check_at|display_datetime or 'Not scheduled' }}</dd>
+    <dt>Approval expiry</dt><dd>{{ source.approval_expires_at|display_datetime or 'No approval' }}</dd>
+    <dt>Last vacancy discovery</dt><dd>{{ source.last_vacancy_discovery_at|display_datetime or 'No vacancies collected' }}</dd>
   </dl>
   <p class="field-hint">The original URL is retained exactly. Observed addresses and canonical hints do not establish website ownership. Access errors do not prove that an organisation is invalid.</p>
   <section class="source-card" aria-labelledby="automatic-title">
@@ -43,7 +43,7 @@
       <p>This source is under staff control. Automatic checks will not replace the recorded decision.</p>
       {% if source.reuse_basis == 'factual_index' %}<p>Staff approved factual job listings from this source. The worker checks the pages and validates each vacancy before publication.</p>{% endif %}
     {% elif source.activation_review %}
-      <p><strong>{{ 'Automatically activated' if source.activation_review.status == 'eligible' and current_approval else 'Needs review' }}</strong> · Last assessed {{ source.activation_review.checked_at }}</p>
+      <p><strong>{{ 'Automatically activated' if source.activation_review.status == 'eligible' and current_approval else 'Needs review' }}</strong> · Last assessed {{ source.activation_review.checked_at|display_datetime }}</p>
       {% if source.activation_review.reasons %}<ul>{% for reason in source.activation_review.reasons %}<li>{{ reason }}</li>{% endfor %}</ul>{% endif %}
       {% if source.activation_review.evidence %}<dl class="source-facts">{% for key, value in source.activation_review.evidence.items() %}<dt>{{ key|replace('_', ' ')|capitalize }}</dt><dd>{{ value }}</dd>{% endfor %}</dl>{% endif %}
     {% else %}<p>Waiting for the background worker to assess this source.</p>{% endif %}
@@ -69,7 +69,7 @@
   {% endif %}
 
   <p><a href="/recruitment/vacancies?source_id={{ source.id }}&amp;state=">View collected vacancy records</a></p>
-  {% if snapshots %}<details class="source-card"><summary>Recent collection records</summary><ul>{% for snapshot in snapshots %}<li><a href="/recruitment/vacancies/snapshots/{{ snapshot.id }}/original">{{ snapshot.collected_at.strftime('%Y-%m-%d %H:%M') }} UTC — {{ 'factual record' if snapshot.adapter == 'factual_index-v1' else 'original page' }} as text</a></li>{% endfor %}</ul></details>{% endif %}
+  {% if snapshots %}<details class="source-card"><summary>Recent collection records</summary><ul>{% for snapshot in snapshots %}<li><a href="/recruitment/vacancies/snapshots/{{ snapshot.id }}/original">{{ snapshot.collected_at|display_datetime }} — {{ 'factual record' if snapshot.adapter == 'factual_index-v1' else 'original page' }} as text</a></li>{% endfor %}</ul></details>{% endif %}
   {% if source.reuse_basis == 'factual_index' %}
   <section class="source-card">
     <h2>Collection settings</h2>
@@ -156,7 +156,7 @@
   {% for entry in history %}
     <article class="source-card">
       <h3>{{ entry.kind|replace('_', ' ')|capitalize }}</h3>
-      <p class="field-hint">{{ entry.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC · {{ 'Staff action' if entry.actor_id else 'Discovery system' }}{% if entry.actor_id %} · {{ entry.actor_id }}{% endif %}</p>
+      <p class="field-hint">{{ entry.created_at|display_datetime }} · {{ 'Staff action' if entry.actor_id else 'Discovery system' }}{% if entry.actor_id %} · {{ entry.actor_id }}{% endif %}</p>
       {% if entry.reference_url %}<p class="source-url">{{ entry.reference_url }}</p>{% endif %}
       <pre class="source-evidence">{{ entry.details|tojson(indent=2) }}</pre>
     </article>

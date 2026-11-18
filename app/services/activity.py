@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.models.activity import UserDailyActivity as Activity
 from app.models.user import User, UserStatus
+from app.services.time_display import display_datetime
 
 logger = logging.getLogger(__name__)
 NIGERIA = ZoneInfo("Africa/Lagos")
@@ -53,7 +54,7 @@ def day_start(value: date) -> datetime:
 
 
 def local_time(value: datetime | None) -> str:
-    return utc(value).astimezone(NIGERIA).strftime("%d %b %Y · %H:%M WAT") if value else ""
+    return display_datetime(utc(value).astimezone(NIGERIA)) if value else ""
 
 
 def record_activity(db, user_id: UUID, auth_version: int, *, at: datetime | None = None) -> bool:

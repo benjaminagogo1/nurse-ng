@@ -221,6 +221,7 @@ def queue_file_deletion(db: Session, kind: str, name: str) -> None:
 
 
 def cleanup_account_files(db: Session, *, limit: int = 100) -> dict:
+    from app.core.message_storage import attachment_path
     removed = 0
     for item in list(
         db.scalars(select(FileDeletion).order_by(FileDeletion.created_at).limit(limit))
@@ -230,6 +231,7 @@ def cleanup_account_files(db: Session, *, limit: int = 100) -> dict:
                 "photo": avatar_path,
                 "community": community_media_path,
                 "evidence": evidence_path,
+                "message": attachment_path,
             }[item.kind]
             resolver(item.storage_name).unlink(missing_ok=True)
         except (OSError, ValueError, KeyError):
@@ -303,6 +305,11 @@ def delete_account(db: Session, user: User, *, password: str) -> None:
         db.rollback()
         raise AuthError("Your account changed. Please sign in again.")
     queue_file_deletion(db, "photo", user.photo_storage_name)
+    from app.models.messages import MessageAttachment
+    for name in db.scalars(select(MessageAttachment.storage_name).where(
+        (MessageAttachment.sender_id == user.id) | (MessageAttachment.recipient_id == user.id)
+    )):
+        queue_file_deletion(db, "message", name)
     for name in db.scalars(
         select(CommunityMedia.storage_name)
         .join(CommunityPost)

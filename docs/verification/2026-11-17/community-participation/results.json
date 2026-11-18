@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "audits": 36,
+  "javascript_errors": [],
+  "journeys": [
+    "voluntary support offer and request",
+    "recurring session creation and attendance",
+    "personal invitation signup attribution",
+    "newcomer introduction and host welcome",
+    "support acceptance and messaging connection",
+    "verified email digest opt-in"
+  ]
+}

@@ -23,11 +23,12 @@ feedback_slot -%} {%- macro nav_link(href, key, label, name, current) -%}
     <meta name="apple-mobile-web-app-title" content="Nurse.ng" />
     <link rel="apple-touch-icon" href="/static/img/app-icon-180.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <script src="/static/js/time-display.js?v=1" defer></script>
     <script src="/static/js/offline-store.js?v=6" defer></script>
     <script src="/static/js/offline.js?v=11" defer></script>
     <script src="/static/js/offline-sync.js?v=6" defer></script>
-    <script src="/static/js/offline-data.js?v=11" defer></script>
-    <script src="/static/js/offline-content.js?v=11" defer></script>
+    <script src="/static/js/offline-data.js?v=12" defer></script>
+    <script src="/static/js/offline-content.js?v=13" defer></script>
     <script src="/static/js/offline-upload.js?v=6" defer></script>
     <meta
       name="description"
@@ -98,6 +99,7 @@ feedback_slot -%} {%- macro nav_link(href, key, label, name, current) -%}
     <link rel="stylesheet" href="/static/css/jobs.css?v=2" />
     <link rel="stylesheet" href="/static/css/mobile-app.css?v=6" />
     <link rel="stylesheet" href="/static/css/community-growth.css?v=3" />
+    <link rel="stylesheet" href="/static/css/participation.css?v=1" />
     <script src="/static/js/community-growth.js?v=1" defer></script>
     <script src="/static/js/mobile-app.js?v=3" defer></script>
     {% if user %}
@@ -371,6 +373,9 @@ feedback_slot -%} {%- macro nav_link(href, key, label, name, current) -%}
           </ul>
           <p class="side-heading">Grow together</p>
           <ul class="side-list">
+            {{ nav_link('/community/start', 'community-start', 'My next step', 'users', page) }}
+            {{ nav_link('/mentorship', 'mentorship', 'Peer support', 'users', page) }}
+            {{ nav_link('/invitations', 'invitations', 'Invite colleagues', 'users', page) }}
             {{ nav_link('/feed', 'feed', 'Community', 'globe', page) }} {{
             nav_link('/reels', 'reels', 'Reels', 'play', page) }} {{
             nav_link('/feed/discussions', 'discussion-follows', 'Followed discussions', 'feed', page) }} {{ nav_link('/communities', 'communities',
@@ -395,6 +400,7 @@ feedback_slot -%} {%- macro nav_link(href, key, label, name, current) -%}
             'dashboard', page) }}{{ nav_link('/staff/admins', 'staff-admins', 'Administrators', 'shield', page) }}{{ nav_link('/review', 'review', 'Document reviews', 'review', page) }}{{ nav_link('/staff/employers', 'employer-approvals', 'Employer approvals', 'briefcase', page) }}{{ nav_link('/moderation', 'moderation',
             'Moderation', 'flag', page) }}{{ nav_link('/recruitment',
             'recruitment', 'Recruitment sources', 'building', page) }}
+            {{ nav_link('/staff/mentorship-reports', 'mentorship-reports', 'Peer support reports', 'flag', page) }}
           </ul>
           {% endif %}
         </nav>
@@ -410,7 +416,7 @@ feedback_slot -%} {%- macro nav_link(href, key, label, name, current) -%}
         tabindex="-1"
         class="{% if user %}app-main{% else %}site-main{% endif %}"
       >
-        {% if user and request.url.path != '/app' %}
+        {% if user and request.url.path != '/app' and page != 'messages' %}
         <aside class="mobile-install-card" data-mobile-install aria-labelledby="mobile-install-title" hidden>
           <img src="/static/img/favicon.svg" width="44" height="44" alt="" />
           <div><strong id="mobile-install-title">Nurse.ng, wherever you go</strong>

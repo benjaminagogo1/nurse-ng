@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block content %}
+<section class="form-page participation-page"><a href="/mentorship">← Peer support</a><h1>{{ title }}</h1>
+<h2>{{ card.name }}</h2><p>{{ card.offer.introduction }}</p><p>Availability: {{ card.offer.availability }}</p>
+{% if user.id != card.offer.user_id %}<form method="post" action="/mentorship/offers/{{ card.offer.user_id }}" class="participation-form" data-feedback-form>
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+<label>What would you like help with?<select name="topic" required><option value="">Choose a topic</option>{% for key in card.offer.topics.split(',') %}<option value="{{ key }}" {% if values.get('topic') == key %}selected{% endif %}>{{ topics[key] }}</option>{% endfor %}</select></label>
+<label>Your goal<textarea name="goal" rows="5" maxlength="1200" required>{{ values.get('goal', '') }}</textarea></label>
+<p class="field-hint">This goal is private to you and this colleague. Share no patient-identifying information. Sending a request asks to connect for peer support; acceptance creates a mutual connection so you can use Messages. Either person can end support.</p>
+<button class="btn btn-primary">Send support request</button></form>{% else %}<p>This is your own support offer. <a href="/mentorship">Find another colleague</a>.</p>{% endif %}
+</section>{% endblock %}

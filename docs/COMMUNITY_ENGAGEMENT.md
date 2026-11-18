@@ -61,11 +61,16 @@ invitation links. Invitation, email and provider callback origins use the same
 configuration. See [hosting setup](HOSTING.md). Native operating-system share
 sheets and live provider callbacks need device/provider validation for release.
 
-These destination invitations do not track personal referrals or signup
-attribution. Referral rewards and attribution have not been implemented.
+These destination invitations retain their original behavior without personal
+attribution. Members can now create separate revocable personal invitations at
+`/invitations` and view private aggregate signup, contribution and return counts.
+See [community participation](COMMUNITY_PARTICIPATION.md). Referral rewards are
+not part of this delivery.
 
-Learning activities are discussions, not a quiz engine, scoring system, meeting
-host or recurring-event scheduler. Delegated community moderators, group push,
+Learning activities remain discussions. Members can now create recurring series
+and privately join sessions; see [community participation](COMMUNITY_PARTICIPATION.md).
+Quizzes, scoring and hosted video meetings remain separate capabilities.
+Delegated community moderators, group push,
 weekly digests and other wider community-expansion items remain in the
 [separate backlog](COMMUNITY_EXPANSION.md).
 

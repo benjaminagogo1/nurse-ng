@@ -18,6 +18,7 @@ from app.web.engagement_routes import router as engagement_router
 from app.web.errors import http_error, server_error, validation_error
 from app.web.event_routes import router as event_router
 from app.web.jobs_routes import router as jobs_router
+from app.web.message_upload_limits import MessageBodyLimitMiddleware
 from app.web.messages_routes import router as messages_router
 from app.web.moderation_routes import router as moderation_router
 from app.web.notification_routes import router as notification_router
@@ -25,6 +26,7 @@ from app.web.offline_routes import router as offline_router
 from app.web.onboarding_routes import router as onboarding_router
 from app.web.opportunity_routes import router as opportunity_router
 from app.web.pages_routes import router as pages_router
+from app.web.participation_routes import router as participation_router
 from app.web.profile_routes import public_router
 from app.web.profile_routes import router as profile_router
 from app.web.recruitment_routes import router as recruitment_router
@@ -52,6 +54,7 @@ def create_app() -> FastAPI:
         same_site=settings.session_same_site,
         https_only=settings.session_https_only,
     )
+    app.add_middleware(MessageBodyLimitMiddleware)
     # Added last so invalid hosts are rejected before session handling or routes.
     app.add_middleware(
         TrustedHostMiddleware,
@@ -75,6 +78,7 @@ def create_app() -> FastAPI:
     app.include_router(review_router)
     app.include_router(recruitment_router)
     app.include_router(vacancy_router)
+    app.include_router(participation_router)
     app.include_router(community_growth_router)
     app.include_router(community_router)
     app.include_router(reel_router)
