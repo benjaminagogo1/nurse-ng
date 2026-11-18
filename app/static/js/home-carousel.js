@@ -8,7 +8,7 @@
   const pause = controls.querySelector("[data-hero-pause]");
   const status = carousel.querySelector("[data-hero-status]");
   const root = document.documentElement;
-  const interval = 10000;
+  const interval = 5000;
   let current = 0;
   let timer;
   let requested = root.dataset.motion !== "reduce";
