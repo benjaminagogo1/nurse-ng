@@ -28,9 +28,8 @@ from app.core.message_validation import DOCUMENTS
 from app.core.storage import EvidenceScanUnavailable, EvidenceStorageError
 from app.models.messages import DirectMessage, MessageAttachment, MessageUploadUsage
 from app.models.user import User
-from app.services import accounts
+from app.services import accounts, worker_runtime
 from app.services import message_attachments as files
-from app.services import worker_runtime
 from app.services.backups import create_backup, restore_backup
 from app.services.messages import message_data, send_message
 from tests.helpers import csrf_from
@@ -387,7 +386,9 @@ def test_quotas_expiry_and_discard(db_session, connected, monkeypatch):
     assert not orphan.exists() and not attachment_path(item.storage_name).exists()
 
 
-def test_notification_worker_expires_files_and_throttles_cleanup(db_session, connected, monkeypatch):
+def test_notification_worker_expires_files_and_throttles_cleanup(
+    db_session, connected, monkeypatch
+):
     first, second, _ = connected
     item = upload(db_session, first, second, b"unfinished notes", "notes.txt")
     storage = attachment_path(item.storage_name)
