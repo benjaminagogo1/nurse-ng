@@ -21,3 +21,10 @@ photograph remains available under CC BY-SA 2.0.
 
 The photograph illustrates nursing education in Nigeria. Its use does not
 imply endorsement of Nurse.ng by the people pictured or the photographer.
+
+care-team-400.webp, care-team-640.webp, care-team-1000.webp
+Source: User-supplied second.png in the repository root.
+Changes: Cropped to the patient and four healthcare professionals, resized,
+and converted to WebP. Removed the reference's printed navigation dots.
+The homepage headline, supporting message, care concepts
+and closing statement are frontend text rather than part of the image.

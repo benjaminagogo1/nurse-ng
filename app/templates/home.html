@@ -1,5 +1,16 @@
 {% extends "base.html" %} {% from "_icons.html" import icon %} {% block title
-%}Nurse.ng — Better careers. Stronger nurses.{% endblock %} {% block content %}
+%}Nurse.ng — Better careers. Stronger nurses.{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/home-carousel.css') }}?v=2" />
+<script src="{{ url_for('static', path='/js/home-carousel.js') }}?v=2" defer></script>
+{% endblock %}
+{% block content %}
+<div class="home-carousel" data-home-carousel role="region"
+     aria-roledescription="carousel" aria-label="Nurse.ng highlights">
+  <div class="home-carousel-slides">
+    <div class="home-hero-slide" id="hero-careers" data-hero-slide="careers"
+         role="group" aria-roledescription="slide"
+         aria-label="1 of 2: Better careers. Stronger nurses.">
 <section class="hero">
   <div class="hero-inner">
     <div class="hero-copy">
@@ -75,6 +86,59 @@
     >
   </div>
 </section>
+    </div>
+    <section class="care-hero home-hero-slide" id="hero-care" data-hero-slide="care"
+             role="group" aria-roledescription="slide"
+             aria-label="2 of 2: Better Care, Together.">
+      <div class="care-inner">
+        <div class="care-copy">
+          <div class="care-intro">
+            <h2 class="care-title">Better Care,<span>Together.</span></h2>
+            <p class="care-support">
+              Nurses, Doctors, Pharmacists and other health professionals working
+              together for one goal — your well-being.
+            </p>
+          </div>
+          <ul class="care-values" aria-label="Our shared approach to care">
+            <li>{{ icon('heart', 30) }}<span>Integrated Care</span></li>
+            <li>{{ icon('users', 30) }}<span>Collaborative Healthcare</span></li>
+            <li>{{ icon('shield', 30) }}<span>Better Outcomes</span></li>
+          </ul>
+          <p class="care-closing">A United Health Team. A Healthier You.</p>
+        </div>
+        <picture class="care-visual">
+          <img src="{{ url_for('static', path='/img/care-team-1000.webp') }}"
+               srcset="{{ url_for('static', path='/img/care-team-400.webp') }} 400w,
+                       {{ url_for('static', path='/img/care-team-640.webp') }} 640w,
+                       {{ url_for('static', path='/img/care-team-1000.webp') }} 1000w"
+               sizes="(max-width: 699px) calc(100vw - 44px), (max-width: 999px) 48vw, 600px"
+               width="1000" height="860" decoding="async"
+               alt="A patient at the centre of a connected circle of equally represented healthcare professionals: a nurse, doctor, pharmacist and laboratory professional." />
+        </picture>
+      </div>
+    </section>
+  </div>
+  <div class="hero-carousel-controls" data-hero-controls hidden
+       role="group" aria-label="Homepage slide controls">
+    <button type="button" class="hero-carousel-pause" data-hero-pause
+            aria-label="Pause automatic slides">
+      <span class="hero-pause-symbol" data-hero-pause-icon aria-hidden="true"></span>
+      <span data-hero-play-icon hidden>{{ icon('play', 16) }}</span>
+      <span data-hero-pause-label>Pause</span>
+    </button>
+    <button type="button" class="hero-carousel-prev" data-hero-prev
+            aria-label="Previous slide">{{ icon('chevron', 18) }}</button>
+    <button type="button" class="hero-carousel-dot" data-hero-go="0"
+            aria-controls="hero-careers" aria-label="Show slide 1: Better careers"
+            aria-current="true"><span aria-hidden="true"></span></button>
+    <button type="button" class="hero-carousel-dot" data-hero-go="1"
+            aria-controls="hero-care" aria-label="Show slide 2: Better Care, Together"
+            aria-current="false"><span aria-hidden="true"></span></button>
+    <button type="button" data-hero-next
+            aria-label="Next slide">{{ icon('chevron', 18) }}</button>
+  </div>
+  <p class="sr-only" data-hero-status role="status" aria-live="polite" aria-atomic="true"></p>
+</div>
 
 <section class="section why-section" aria-labelledby="why-title">
   <div class="section-heading">

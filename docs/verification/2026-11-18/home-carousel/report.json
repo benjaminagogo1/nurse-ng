@@ -1,0 +1,110 @@
+{
+  "baseline": false,
+  "checks": [
+    {
+      "width": 1440,
+      "first_content_preserved": true,
+      "first_height": 695.015625,
+      "stable_geometry": {
+        "height": 695.015625,
+        "nextTop": 774.015625,
+        "scrollY": 0
+      },
+      "manual_and_keyboard_navigation": true
+    },
+    {
+      "width": 1024,
+      "first_content_preserved": true,
+      "first_height": 658.234375,
+      "stable_geometry": {
+        "height": 658.234375,
+        "nextTop": 737.234375,
+        "scrollY": 0
+      },
+      "manual_and_keyboard_navigation": true
+    },
+    {
+      "width": 768,
+      "first_content_preserved": true,
+      "first_height": 721.859375,
+      "stable_geometry": {
+        "height": 721.859375,
+        "nextTop": 790.859375,
+        "scrollY": 0
+      },
+      "manual_and_keyboard_navigation": true
+    },
+    {
+      "width": 390,
+      "first_content_preserved": true,
+      "first_height": 742.890625,
+      "stable_geometry": {
+        "height": 742.890625,
+        "nextTop": 807.890625,
+        "scrollY": 0
+      },
+      "manual_and_keyboard_navigation": true
+    },
+    {
+      "width": 320,
+      "first_content_preserved": true,
+      "first_height": 798.28125,
+      "stable_geometry": {
+        "height": 798.28125,
+        "nextTop": 895.484375,
+        "scrollY": 0
+      },
+      "manual_and_keyboard_navigation": true
+    },
+    {
+      "appearance": {
+        "theme": "light"
+      },
+      "width": 1440,
+      "no_overflow": true
+    },
+    {
+      "appearance": {
+        "theme": "light"
+      },
+      "width": 390,
+      "no_overflow": true
+    },
+    {
+      "appearance": {
+        "theme": "dark",
+        "largeText": true
+      },
+      "width": 320,
+      "no_overflow": true
+    },
+    {
+      "appearance": {
+        "theme": "light",
+        "largeText": true,
+        "highContrast": true
+      },
+      "width": 768,
+      "no_overflow": true
+    },
+    {
+      "autoplay": true,
+      "pointer_does_not_stop_rotation": true,
+      "second_slide_stays_visible": true,
+      "mouse_controls_preserve_rotation": true,
+      "pause": true,
+      "resume": true,
+      "focus_stops_rotation": true
+    },
+    {
+      "system_reduced_motion": true
+    },
+    {
+      "no_javascript_fallback": true
+    }
+  ],
+  "errors": [],
+  "failed_requests": [],
+  "base_url": "http://127.0.0.1:8000",
+  "rotation_only": false
+}

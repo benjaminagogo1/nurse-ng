@@ -2,8 +2,11 @@
 
 import ssl
 import subprocess
+from datetime import UTC, datetime, timedelta
 
 import pytest
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
 
 from app.services import recruitment_tls
 
@@ -36,10 +39,30 @@ def chain(tmp_path_factory):
     openssl("x509", "-req", "-in", "intermediate.csr", "-CA", "root.pem", "-CAkey", "root.key",
             "-set_serial", "2", "-days", "2", "-extfile", "intermediate.ext",
             "-out", "intermediate.pem")
-    for name, days in (("leaf", "2"), ("expired", "-1")):
-        openssl("x509", "-req", "-in", "leaf.csr", "-CA", "intermediate.pem", "-CAkey",
-                "intermediate.key", "-set_serial", "3", "-days", days, "-extfile", "leaf.ext",
-                "-out", name + ".pem")
+    openssl("x509", "-req", "-in", "leaf.csr", "-CA", "intermediate.pem", "-CAkey",
+            "intermediate.key", "-set_serial", "3", "-days", "2", "-extfile", "leaf.ext",
+            "-out", "leaf.pem")
+    # Newer OpenSSL releases reject negative -days. Give the expired certificate
+    # a valid interval entirely in the past, with the same issuer and extensions.
+    leaf = x509.load_pem_x509_certificate((directory / "leaf.pem").read_bytes())
+    issuer_key = serialization.load_pem_private_key(
+        (directory / "intermediate.key").read_bytes(), password=None
+    )
+    now = datetime.now(UTC)
+    expired = (
+        x509.CertificateBuilder()
+        .subject_name(leaf.subject)
+        .issuer_name(leaf.issuer)
+        .public_key(leaf.public_key())
+        .serial_number(4)
+        .not_valid_before(now - timedelta(days=2))
+        .not_valid_after(now - timedelta(days=1))
+    )
+    for extension in leaf.extensions:
+        expired = expired.add_extension(extension.value, critical=extension.critical)
+    (directory / "expired.pem").write_bytes(
+        expired.sign(issuer_key, hashes.SHA256()).public_bytes(serialization.Encoding.PEM)
+    )
     (directory / "full.pem").write_text(
         (directory / "leaf.pem").read_text() + (directory / "intermediate.pem").read_text()
     )

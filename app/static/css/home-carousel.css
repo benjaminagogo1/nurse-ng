@@ -1,0 +1,303 @@
+/* Homepage-only carousel. The original hero keeps its existing styling. */
+.home-carousel {
+  position: relative;
+}
+.home-carousel.is-ready .home-carousel-slides {
+  display: grid;
+}
+.home-carousel.is-ready .home-hero-slide {
+  grid-area: 1 / 1;
+  min-width: 0;
+  opacity: 1;
+}
+.home-carousel.is-ready.is-animated .home-hero-slide {
+  transition: opacity 480ms ease;
+}
+.home-carousel.is-ready .home-hero-slide[aria-hidden="true"] {
+  opacity: 0;
+  pointer-events: none;
+}
+.home-carousel.is-ready .hero {
+  height: 100%;
+}
+.hero-carousel-controls {
+  position: absolute;
+  z-index: 2;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #fff;
+}
+.hero-carousel-controls[hidden] {
+  display: none;
+}
+.hero-carousel-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid #ffffff50;
+  border-radius: 50%;
+  background: #073b3e;
+  color: inherit;
+  cursor: pointer;
+}
+.hero-carousel-controls button:hover {
+  border-color: currentColor;
+}
+.hero-carousel-controls button:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}
+.hero-carousel-controls .hero-carousel-dot {
+  border-color: transparent;
+  background: transparent;
+}
+.hero-carousel-dot > span {
+  width: 9px;
+  height: 9px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+.hero-carousel-dot[aria-current="true"] > span {
+  background: currentColor;
+}
+.hero-carousel-controls .hero-carousel-pause {
+  padding: 8px 12px;
+  border-radius: 22px;
+  font: inherit;
+  font-size: 0.75rem;
+}
+.hero-carousel-prev .icon {
+  transform: rotate(180deg);
+}
+.home-carousel[data-active="care"] .hero-carousel-controls {
+  color: #123b79;
+}
+.home-carousel[data-active="care"] .hero-carousel-controls button {
+  background: #fff;
+  border-color: #bdd3ee;
+}
+.home-carousel[data-active="care"] .hero-carousel-controls .hero-carousel-dot {
+  background: transparent;
+  border-color: transparent;
+}
+.hero-pause-symbol {
+  display: inline-flex;
+  gap: 3px;
+}
+.hero-pause-symbol::before,
+.hero-pause-symbol::after {
+  content: "";
+  width: 3px;
+  height: 13px;
+  background: currentColor;
+  border-radius: 1px;
+}
+.hero-carousel-pause [hidden] {
+  display: none;
+}
+
+.care-hero {
+  background: #f4f9ff;
+  color: #102f70;
+  padding: 40px 36px 64px;
+  border-radius: 0 0 28px 0;
+}
+.care-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr);
+  align-items: center;
+  gap: 32px;
+  min-height: 513px;
+  max-width: 1208px;
+  margin: 0 auto;
+}
+.care-copy {
+  min-width: 0;
+}
+.care-title {
+  margin: 0 0 22px;
+  color: #102f70;
+  font-size: clamp(2.7rem, 4.5vw, 4.5rem);
+  font-weight: 750;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+.care-title > span {
+  display: block;
+  color: #075cc9;
+}
+.care-support {
+  max-width: 480px;
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.8;
+}
+.care-values {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 30px 0;
+  padding: 0;
+}
+.care-values li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 0 8px;
+  text-align: center;
+  font-size: 0.92rem;
+  font-weight: 550;
+  line-height: 1.45;
+}
+.care-values li + li {
+  border-left: 1px solid #bfd4ef;
+}
+.care-values .icon {
+  color: #075cc9;
+  flex-shrink: 0;
+}
+.care-closing {
+  margin: 0;
+  padding: 15px 18px;
+  border-left: 3px solid #075cc9;
+  background: #e6f0ff;
+  color: #102f70;
+  font-size: 1.05rem;
+  font-weight: 650;
+  line-height: 1.6;
+}
+.care-visual {
+  display: block;
+  min-width: 0;
+}
+.care-visual img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 513px;
+  margin: 0 auto;
+  object-fit: contain;
+  border-radius: 20px;
+}
+@media (max-width: 999px) {
+  .care-inner {
+    gap: 24px;
+  }
+  .care-title {
+    font-size: clamp(2.5rem, 4.5vw, 3.5rem);
+  }
+  .care-support {
+    font-size: 1rem;
+  }
+  .care-values li {
+    padding: 0 3px;
+    font-size: 0.8rem;
+  }
+  .care-closing {
+    font-size: 0.95rem;
+  }
+}
+@media (max-width: 699px) {
+  .care-hero {
+    padding: 30px 22px 64px;
+  }
+  .care-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-height: 0;
+  }
+  .care-copy {
+    display: contents;
+  }
+  .care-intro {
+    align-self: stretch;
+    order: 0;
+  }
+  .care-title {
+    font-size: clamp(2.1rem, 8.2vw, 3.5rem);
+    margin-bottom: 18px;
+  }
+  .care-support {
+    font-size: 0.98rem;
+    line-height: 1.75;
+  }
+  .care-visual {
+    order: 1;
+    width: 100%;
+    max-width: 440px;
+  }
+  .care-values {
+    order: 2;
+    width: 100%;
+    margin: 0;
+    gap: 8px;
+  }
+  .care-values li {
+    font-size: 0.86rem;
+  }
+  .care-values .icon {
+    width: 26px;
+    height: 26px;
+  }
+  .care-closing {
+    order: 3;
+    align-self: stretch;
+    font-size: 0.98rem;
+    padding: 12px 14px;
+  }
+  :root[data-text-size="large"] .care-values {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  :root[data-text-size="large"] .care-values li {
+    flex-direction: row;
+    padding: 0;
+    text-align: left;
+    border: 0;
+  }
+}
+:root[data-contrast="high"] .care-hero {
+  background: #fff;
+  color: #081f4a;
+}
+:root[data-contrast="high"] .care-closing {
+  background: #fff;
+  border: 2px solid #081f4a;
+}
+:root[data-motion="reduce"] .home-carousel .home-hero-slide {
+  transition: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-carousel .home-hero-slide {
+    transition: none !important;
+  }
+}
+@media (forced-colors: active) {
+  .hero-carousel-controls,
+  .home-carousel[data-active="care"] .hero-carousel-controls,
+  .care-hero,
+  .care-title,
+  .care-title > span,
+  .care-closing {
+    color: CanvasText;
+  }
+  .hero-carousel-controls button,
+  .home-carousel[data-active="care"] .hero-carousel-controls button,
+  .care-hero,
+  .care-closing {
+    background: Canvas;
+    border-color: ButtonText;
+  }
+}
