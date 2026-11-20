@@ -295,7 +295,8 @@ def test_emails_and_oidc_use_same_public_domain(hosted_client, monkeypatch):
         ]
 
 
-def test_hosting_preflight_uses_env_without_opening_database(tmp_path):
+@pytest.mark.parametrize("role", ["web", "all"])
+def test_hosting_preflight_uses_env_without_opening_database(tmp_path, role):
     env = {name: value for name, value in os.environ.items() if not name.startswith("NURSE_NG_")}
     key = secrets.token_urlsafe(32)
     env.update(
@@ -310,7 +311,7 @@ def test_hosting_preflight_uses_env_without_opening_database(tmp_path):
         }
     )
     result = subprocess.run(
-        [sys.executable, str(ROOT / "deploy/start.py"), "web", "--check"],
+        [sys.executable, str(ROOT / "deploy/start.py"), role, "--check"],
         cwd=tmp_path,
         env=env,
         capture_output=True,
@@ -319,6 +320,9 @@ def test_hosting_preflight_uses_env_without_opening_database(tmp_path):
     )
     assert result.returncode == 0, result.stderr
     output = json.loads(result.stdout)
-    assert output["public_site"] == ORIGIN and "32123" in output["command"]
+    command = output["command"]["web"] if role == "all" else output["command"]
+    assert output["public_site"] == ORIGIN and "32123" in command
+    if role == "all":
+        assert output["command"]["workers"][-2:] == ["app.cli", "workers"]
     assert key not in result.stdout + result.stderr
     assert "private-password" not in result.stdout + result.stderr

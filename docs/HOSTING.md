@@ -107,6 +107,111 @@ file storage before scaling. The worker supervisor runs the required recruitment
 Reels and notification roles. See [worker operations](WORKER_OPERATIONS.md).
 Schedule `python -m app.cli maintain-evidence` separately for retention and cleanup.
 
+## Manual Render deployment
+
+For a manually created **Python** web service, leave **Root Directory** empty
+and keep Python 3.12 from the repository's `.python-version`. The application
+is at the repository root; `mobile/` is the separate native mobile project.
+
+For the **free plan**, use this **Build Command**:
+
+```sh
+pip install -r requirements.lock
+```
+
+This avoids the failed APT package download and the memory needed by ClamAV's
+full signatures. Set community scanning to `required` as shown below; evidence,
+community media and private message attachments that require scanning will be
+rejected while the scanner is unavailable. Pages and text discussions work.
+
+Use this **Start Command** for one web service:
+
+```sh
+python deploy/start.py all
+```
+
+It validates production configuration, applies migrations, then runs the web
+server and required background workers together. It forwards shutdown to both
+and exits if either service stops so Render can restart the service. Keep pip
+installs, package downloads and signature downloads in the build command; a
+command ending in `deploy/clamav-local update` does not start the website.
+Choose `/healthz` as the Render health check path and check `/readyz` after
+startup to confirm database and worker readiness.
+
+Set the production variables described above in Render's **Environment** tab:
+
+```dotenv
+NURSE_NG_ENVIRONMENT=production
+NURSE_NG_DEBUG=false
+NURSE_NG_SESSION_HTTPS_ONLY=true
+NURSE_NG_PUBLIC_BASE_URL=https://YOUR-SERVICE.onrender.com
+NURSE_NG_ALLOWED_HOSTS=YOUR-SERVICE.onrender.com
+NURSE_NG_REQUIRED_WORKERS=recruitment,reels,notifications
+NURSE_NG_COMMUNITY_MALWARE_SCAN_MODE=required
+```
+
+Also supply your permanent random `NURSE_NG_SECRET_KEY` and
+`NURSE_NG_DATABASE_URL` through environment settings. Replace the service name
+with your actual hostname. For a native free service, keep the default relative
+storage paths or choose paths inside the writable checkout; the `/var/lib/nurse-ng`
+paths in the container environment example require a mounted writable disk.
+
+The repository includes [render.yaml](../render.yaml) with these build, start,
+health check and free-plan settings for a new Render Blueprint. Supply the
+database URL, public HTTPS URL and allowed hostname when prompted; the Blueprint
+generates a session secret. Existing manually created services must have their
+commands and environment updated in Render's dashboard. Push the local deployment
+changes to the branch Render builds before redeploying; `render.yaml` does not
+automatically change a manually created service.
+
+The pip upgrade notice and Node version selection are informational; neither
+caused the missing-package build failure. The Python web application does not
+require a mobile build or a pip upgrade.
+
+### Free service limits
+
+A free Render web service is suitable for a temporary preview. Its local
+filesystem is ephemeral: a local SQLite database, uploads and signature update
+state can disappear on a restart or redeploy. Use a separately hosted PostgreSQL
+database for records that must persist. Durable uploads require persistent
+storage, which is not supplied by the free web service.
+
+ClamAV with full signatures can exceed a free service's memory allowance. For
+a preview of pages and text discussions, use **Build Command**
+`pip install -r requirements.lock` and keep community scanning set to
+`required`; private and community file uploads then fail closed when the scanner
+is unavailable. Installing the scanner does not address the storage or memory
+limits. Local signatures also need a recurring update before the wrapper's
+72-hour deadline.
+
+The `all` startup option supplies the process manager and migrations in the
+single free web service, without a separate paid worker or pre-deploy step.
+Workers stop when Render spins down the idle free service; background tasks
+resume when it wakes. The existing `web` and `workers` startup options still
+support separate services on hosting plans with shared persistent storage.
+
+### Optional local scanner
+
+On a service with enough memory and storage for ClamAV, use this **Build Command**:
+
+```sh
+pip install -r requirements.lock && sh deploy/install-local-clamav.sh
+```
+
+The installer refreshes package indexes in a writable temporary directory and
+resolves the host distribution's ClamAV dependencies without root access. Do
+not hard-code `libclamav12` or `libmspack0t64`, and do not use `sudo apt-get` in
+a native build. Configure both scanner commands to use the extracted engine:
+
+```dotenv
+NURSE_NG_EVIDENCE_SCAN_COMMAND=python deploy/clamav-local scan
+NURSE_NG_COMMUNITY_MALWARE_SCAN_COMMAND=python deploy/clamav-local scan
+NURSE_NG_COMMUNITY_MALWARE_SCAN_MODE=required
+```
+
+Keep the **Start Command** as `python deploy/start.py all`. Signature downloads
+belong in the build command, and recurring updates must be scheduled separately.
+
 ## Container option
 
 Build the repository's `Dockerfile`. For Docker on a server, save the completed

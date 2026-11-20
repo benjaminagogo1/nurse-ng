@@ -1,0 +1,31 @@
+# Free preview: database credentials and the public hostname are supplied in Render.
+# Uploads requiring malware scanning are rejected until a scanner is configured.
+services:
+  - type: web
+    name: nurse-ng
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.lock
+    startCommand: python deploy/start.py all
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: NURSE_NG_ENVIRONMENT
+        value: production
+      - key: NURSE_NG_DEBUG
+        value: "false"
+      - key: NURSE_NG_SESSION_HTTPS_ONLY
+        value: "true"
+      - key: NURSE_NG_REQUIRED_WORKERS
+        value: recruitment,reels,notifications
+      - key: NURSE_NG_COMMUNITY_MALWARE_SCAN_MODE
+        value: required
+      - key: NURSE_NG_SECRET_KEY
+        generateValue: true
+      - key: NURSE_NG_DATABASE_URL
+        sync: false
+      - key: NURSE_NG_PUBLIC_BASE_URL
+        sync: false
+      - key: NURSE_NG_ALLOWED_HOSTS
+        sync: false

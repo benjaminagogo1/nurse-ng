@@ -7,17 +7,20 @@ running. Persistent timers catch up after downtime.
 
 ## Document scanning
 
-On Ubuntu 24.04, install the packages into the project and download official,
+On Debian or Ubuntu, install the packages into the project and download official,
 verified signatures:
 
 ```sh
 deploy/install-local-clamav.sh
 ```
 
-This uses `apt-get download` and `dpkg-deb -x`, not system installation. The
-packages and signatures live in ignored `.local-tools/clamav/`. Rerun after
-Ubuntu publishes ClamAV engine updates. The installer is specific to Ubuntu's
-`libclamav12`/`libmspack0t64` package layout; other systems need their supported
+This refreshes APT indexes in a temporary project directory, downloads ClamAV
+and its missing dependencies with `apt-get install --download-only`, and
+extracts them with `dpkg-deb -x`. It does not install system packages or require
+sudo. Library package names come from the host distribution, so it also works
+with native hosting images whose system package indexes are empty. Packages and
+signatures live in ignored `.local-tools/clamav/`. Rerun after the distribution
+publishes ClamAV engine updates. Other operating systems need their supported
 ClamAV package or an administrator-managed scanner.
 
 Configure the absolute command in `.env`:

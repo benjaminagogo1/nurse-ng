@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run project-local Ubuntu ClamAV packages without root or a system daemon."""
+"""Run project-local Debian/Ubuntu ClamAV without root or a system daemon."""
 import os
 import subprocess
 import sys
@@ -7,18 +7,29 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 root = Path(__file__).resolve().parent.parent / '.local-tools' / 'clamav'
+if len(sys.argv) < 2:
+    sys.exit('Usage: deploy/clamav-local update | scan [clamscan arguments]')
 mode, *arguments = sys.argv[1:]
-environment = dict(os.environ, LD_LIBRARY_PATH=str(root / 'runtime/usr/lib/x86_64-linux-gnu'),
-                   CVD_CERTS_DIR=str(root / 'runtime/etc/clamav/certs'))
+runtime = root / 'runtime'
+libraries = sorted({*runtime.glob('usr/lib/*-linux-gnu'), *runtime.glob('lib/*-linux-gnu')})
+environment = dict(os.environ, LD_LIBRARY_PATH=os.pathsep.join(map(str, libraries)))
+certificates = runtime / 'etc/clamav/certs'
+if certificates.is_dir():
+    environment['CVD_CERTS_DIR'] = str(certificates)
 data = root / 'signatures'
 stamp = data / '.updated'
 if mode == 'update':
     data.mkdir(parents=True, exist_ok=True, mode=0o700)
     config = root / 'freshclam.conf'
-    config.write_text(f'DatabaseDirectory {data}\nDatabaseMirror database.clamav.net\n'
-                      f'CVDCertsDirectory {root / "runtime/etc/clamav/certs"}\n'
-                      'DNSDatabaseInfo current.cvd.clamav.net\nConnectTimeout 10\n'
-                      'ReceiveTimeout 60\nTestDatabases yes\nForeground yes\n')
+    # CVDCertsDirectory belongs to newer engines; older distro packages use
+    # their built-in signature verification and do not recognize this option.
+    certificate_config = f'CVDCertsDirectory {certificates}\n' if certificates.is_dir() else ''
+    config.write_text(
+        f'DatabaseDirectory {data}\nDatabaseMirror database.clamav.net\n'
+        f'{certificate_config}'
+        'DNSDatabaseInfo current.cvd.clamav.net\nConnectTimeout 10\n'
+        'ReceiveTimeout 60\nTestDatabases yes\nForeground yes\n'
+    )
     result = subprocess.run([str(root / 'runtime/usr/bin/freshclam'),
                              '--config-file=' + str(config)], env=environment, check=False)
     if result.returncode == 0:
@@ -31,7 +42,8 @@ try:
     if not 0 <= age.total_seconds() <= 72 * 3600:
         raise ValueError()
 except (OSError, ValueError):
-    print('ClamAV signatures are unavailable or have not been checked in 72 hours.', file=sys.stderr)
+    print('ClamAV signatures are unavailable or have not been checked in 72 hours.',
+          file=sys.stderr)
     sys.exit(2)
 os.execve(root / 'runtime/usr/bin/clamscan',
           ['clamscan', '--database=' + str(data), *arguments], environment)
