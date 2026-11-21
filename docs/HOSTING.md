@@ -137,6 +137,8 @@ installs, package downloads and signature downloads in the build command; a
 command ending in `deploy/clamav-local update` does not start the website.
 Choose `/healthz` as the Render health check path and check `/readyz` after
 startup to confirm database and worker readiness.
+The lightweight `/healthz` endpoint accepts both GET and HEAD requests, including
+the HEAD checks sent by external HTTP uptime monitors.
 
 Set the production variables described above in Render's **Environment** tab:
 

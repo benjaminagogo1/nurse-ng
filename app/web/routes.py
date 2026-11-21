@@ -13,8 +13,9 @@ router = APIRouter()
 
 
 @router.get("/healthz")
+@router.head("/healthz", include_in_schema=False)
 def healthz() -> dict[str, str]:
-    """Liveness probe. Deliberately touches no data."""
+    """GET/HEAD liveness probe for health monitors. Deliberately touches no data."""
     return {"status": "ok"}
 
 

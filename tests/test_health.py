@@ -3,3 +3,10 @@ def test_healthz_returns_ok(client):
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+def test_healthz_accepts_head_from_uptime_monitors(client):
+    response = client.head("/healthz")
+
+    assert response.status_code == 200
+    assert response.content == b""
