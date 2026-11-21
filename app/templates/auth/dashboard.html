@@ -30,8 +30,8 @@ Nurse.ng{% endblock %} {% block content %}
     <div class="db-hello">
       <p class="eyebrow">Your career at a glance</p>
       <h1>
-        <span data-greeting>Welcome</span>{% if greeting_name %}, {{
-        greeting_name }}{% endif %}
+        <span><span data-greeting>Welcome</span>{% if greeting_name %}, {{
+        greeting_name }}{% endif %}</span>
         <span class="greeting-wave" aria-hidden="true">👋</span>
       </h1>
       <p>Keep going — you're making a difference.</p>
@@ -60,12 +60,10 @@ Nurse.ng{% endblock %} {% block content %}
       >
         <span style="width: {{ profile_completion }}%"></span>
       </div>
-      <p>
-        Small steps, more possibilities.
-        <a href="/profile/edit"
-          >Complete your profile {{ icon('arrow', 13) }}</a
-        >
-      </p>
+      <p>Small steps, more possibilities.</p>
+      <a class="completion-action text-link" href="/profile/edit"
+        >Complete your profile {{ icon('arrow', 15) }}</a
+      >
     </div>
     {% endif %}
   </div>
@@ -160,13 +158,13 @@ Nurse.ng{% endblock %} {% block content %}
         <div class="db-card-head"><h2>Quick actions</h2></div>
         <div class="quick">
           <a href="/profile/edit"
-            ><span>{{ icon('edit', 21) }}</span>Update<br />profile</a
+            ><span>{{ icon('edit', 21) }}</span>Update profile</a
           ><a href="/jobs"
-            ><span>{{ icon('search', 21) }}</span>Find<br />jobs</a
+            ><span>{{ icon('search', 21) }}</span>Find jobs</a
           ><a href="/topics"
-            ><span>{{ icon('users', 21) }}</span>Find a<br />group</a
+            ><span>{{ icon('users', 21) }}</span>Find a group</a
           ><a href="/learning"
-            ><span>{{ icon('book', 21) }}</span>Keep<br />learning</a
+            ><span>{{ icon('book', 21) }}</span>Keep learning</a
           >
         </div>
       </div>

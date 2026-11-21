@@ -35,6 +35,14 @@
   border-bottom: 1px solid var(--line);
 }
 .notice-filters a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 0;
+  max-width: 100%;
+  line-height: 1.4;
+  overflow-wrap: normal;
   border: 1px solid var(--line-strong);
   border-radius: 24px;
   padding: 8px 13px;
@@ -233,11 +241,25 @@
 }
 @media (max-width: 600px) {
   .notice-filters {
-    gap: 6px;
-    padding: 15px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 16px;
   }
   .notice-filters a {
-    padding: 8px 11px;
+    justify-content: flex-start;
+    padding: 11px 8px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+  }
+  .notice-page .page-heading-row {
+    margin-bottom: 24px;
+  }
+  .notice-page .page-heading-row > div {
+    min-width: 0;
+  }
+  .notice-page .notice-tools {
+    padding: 16px;
   }
   .notice-item {
     gap: 11px;
@@ -274,6 +296,11 @@
   }
   .message-compose button {
     margin-left: auto;
+  }
+}
+@media (max-width: 359px) {
+  :root[data-text-size="large"] .notice-filters {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 @media (forced-colors: active) {

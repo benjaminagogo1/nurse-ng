@@ -49,7 +49,7 @@ feedback_slot -%} {%- macro nav_link(href, key, label, name, current) -%}
     />
     <link
       rel="stylesheet"
-      href="{{ url_for('static', path='/css/design.css') }}?v=10"
+      href="{{ url_for('static', path='/css/design.css') }}?v=11"
     />
     <link
       rel="stylesheet"
@@ -78,7 +78,7 @@ feedback_slot -%} {%- macro nav_link(href, key, label, name, current) -%}
     ></script>
     <link
       rel="stylesheet"
-      href="{{ url_for('static', path='/css/notifications.css') }}?v=7"
+      href="{{ url_for('static', path='/css/notifications.css') }}?v=8"
     />
     {% if user %}
     <script
@@ -92,14 +92,14 @@ feedback_slot -%} {%- macro nav_link(href, key, label, name, current) -%}
     />
     <link
       rel="stylesheet"
-      href="{{ url_for('static', path='/css/discovery.css') }}?v=7"
+      href="{{ url_for('static', path='/css/discovery.css') }}?v=8"
     />
-    <link rel="stylesheet" href="/static/css/offline.css?v=10" />
-    <link rel="stylesheet" href="/static/css/profile.css?v=1" />
+    <link rel="stylesheet" href="/static/css/offline.css?v=11" />
+    <link rel="stylesheet" href="/static/css/profile.css?v=2" />
     <link rel="stylesheet" href="/static/css/jobs.css?v=2" />
     <link rel="stylesheet" href="/static/css/mobile-app.css?v=6" />
-    <link rel="stylesheet" href="/static/css/community-growth.css?v=3" />
-    <link rel="stylesheet" href="/static/css/participation.css?v=1" />
+    <link rel="stylesheet" href="/static/css/community-growth.css?v=4" />
+    <link rel="stylesheet" href="/static/css/participation.css?v=2" />
     <script src="/static/js/community-growth.js?v=1" defer></script>
     <script src="/static/js/mobile-app.js?v=3" defer></script>
     {% if user %}
@@ -322,6 +322,10 @@ feedback_slot -%} {%- macro nav_link(href, key, label, name, current) -%}
               <a href="/profile">{{ icon('user', 17) }} My profile</a>
               <a href="/welcome">{{ icon('sparkle', 17) }} My interests</a>
               <a href="/settings">{{ icon('settings', 17) }} Settings</a>
+              <a class="account-connectivity" href="/offline">
+                {{ icon('folder', 17) }}
+                <span>Offline &amp; sync<small data-connectivity>Online</small></span>
+              </a>
               <form method="post" action="/auth/logout">
                 <input
                   type="hidden"

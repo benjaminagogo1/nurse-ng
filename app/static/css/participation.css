@@ -1,6 +1,37 @@
 .participation-page { overflow-wrap: anywhere; }
 .participation-page h1 { max-width: 26ch; }
 .participation-page .section-tabs { margin-block: 1.4rem; }
+.participation-nav {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--soft-surface);
+}
+.participation-nav a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 12px;
+  margin: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--fg);
+  font-size: .9rem;
+  line-height: 1.45;
+  white-space: normal;
+}
+.participation-nav a[aria-current="page"] {
+  background: var(--accent-surface);
+  color: var(--accent-text);
+  border-color: var(--line-strong);
+}
+.participation-nav a:hover {
+  background: var(--surface);
+  color: var(--accent-text);
+}
 .participation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 20px; margin-block: 24px; }
 .participation-card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 24px; margin-block: 16px; min-width: 0; }
 .participation-grid .participation-card { margin-block: 0; }
@@ -22,4 +53,54 @@
 .participation-metrics dd { font-size: 1.7rem; font-weight: 700; margin: 4px 0 0; }
 .participation-text { white-space: pre-wrap; }
 .participation-recognition { color: var(--muted); font-size: .9rem; }
+.digest-page {
+  max-width: 1040px;
+  padding-inline: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+.digest-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
+}
+.digest-layout > .participation-card {
+  margin: 0;
+}
+.digest-preferences > h2,
+.digest-preview > h2 {
+  margin: 0 0 20px;
+  font-size: var(--font-size-section);
+}
+.digest-preferences > .field-hint {
+  margin: 0 0 20px;
+}
+.digest-save {
+  padding-top: 4px;
+}
+.digest-save .btn,
+.digest-preview .btn {
+  max-width: 100%;
+  white-space: normal;
+}
+.digest-highlight {
+  padding-block: 16px;
+  border-top: 1px solid var(--line);
+  line-height: 1.6;
+}
+.digest-highlight .eyebrow {
+  margin: 0 0 8px;
+}
+.digest-preview > p {
+  margin: 0 0 20px;
+  line-height: 1.7;
+}
+@media (max-width: 1100px) {
+  .digest-layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .digest-save .btn { width: 100%; }
+}
 @media (max-width: 480px) { .participation-card { padding: 18px; } .participation-actions .btn { white-space: normal; } }

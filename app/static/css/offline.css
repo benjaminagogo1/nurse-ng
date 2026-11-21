@@ -8,6 +8,19 @@
 .connectivity-link[data-state="poor"] {
   color: var(--warning);
 }
+.popover-content .account-connectivity {
+  display: none;
+}
+.account-connectivity small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.account-connectivity small[data-state="offline"],
+.account-connectivity small[data-state="poor"] {
+  color: var(--warning);
+}
 .offline-workspace {
   max-width: 1180px;
   margin-inline: auto;
@@ -535,5 +548,50 @@
   .site-header .connectivity-link {
     white-space: normal;
     max-width: 9rem;
+  }
+  .is-app .site-header .site-header-inner {
+    flex-wrap: nowrap;
+    gap: 8px;
+    height: var(--header-h);
+    padding-block: 0;
+  }
+  .is-app .site-header .brand {
+    width: auto;
+    flex-shrink: 0;
+    font-size: 1.15rem;
+    gap: 6px;
+  }
+  .is-app .site-header .brand .icon {
+    width: 24px;
+    height: 24px;
+  }
+  .is-app .site-header .header-actions {
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+  .is-app .site-header .header-actions > .connectivity-link {
+    display: none;
+  }
+  .popover-content .account-connectivity {
+    display: flex;
+  }
+  .is-app .account-menu .popover-content {
+    position: fixed;
+    top: calc(var(--header-h) + 8px);
+    inset-inline-end: var(--page-gutter);
+    width: min(300px, calc(100vw - var(--page-gutter) * 2));
+    max-height: calc(100dvh - var(--header-h) - 24px);
+    overflow-y: auto;
+  }
+  :root[data-text-size="large"] .is-app .site-header .brand {
+    font-size: 1rem;
+  }
+}
+@media (max-width: 359px) {
+  .is-app .site-header .site-header-inner {
+    padding-inline: 16px;
+  }
+  .is-app .site-header .brand > .icon {
+    display: none;
   }
 }

@@ -3,6 +3,79 @@
 .community-directory { overflow-wrap: anywhere; }
 .community-heading-actions { display: flex; flex-wrap: wrap; gap: 12px; min-width: 0; }
 .conversation-space .page-heading-row > .community-heading-actions { flex: 0 1 auto; }
+.community-view-nav {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  margin-block: 24px 12px;
+}
+.community-view-nav a {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  margin: 0;
+  min-height: 44px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--fg);
+  font-size: .9rem;
+  line-height: 1.45;
+  white-space: normal;
+}
+.community-view-nav a[aria-current="page"] {
+  background: var(--accent-surface);
+  color: var(--accent-text);
+  border-color: var(--line-strong);
+}
+.community-view-nav a:hover {
+  background: var(--soft-surface);
+  color: var(--accent-text);
+}
+.community-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 24px;
+}
+.community-shortcuts a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--soft-surface);
+  color: var(--accent-text);
+  font-size: .9rem;
+  line-height: 1.45;
+  text-decoration: none;
+}
+.community-shortcuts a:hover {
+  background: var(--accent-surface);
+  border-color: var(--line-strong);
+}
+.community-session-actions {
+  margin-block: 24px;
+}
+.community-discovery-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+.community-discovery-card h3,
+.community-discovery-card p {
+  margin: 0;
+}
+.community-discovery-card > .btn {
+  max-width: 100%;
+  white-space: normal;
+  margin-top: auto;
+}
 .community-examples { margin-block: 28px; overflow-wrap: anywhere;
   scroll-margin-top: calc(var(--header-h, 90px) + 20px); }
 .community-examples h2 { font-size: 1.3rem; }
@@ -61,4 +134,6 @@
   .community-example-grid { grid-template-columns: 1fr; }
   .community-discovery-grid { grid-template-columns: 1fr; }
   .community-discovery-card, .community-discovery-filter { padding: 18px; }
+  .community-session-actions > .btn { width: 100%; }
+  .community-shortcuts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

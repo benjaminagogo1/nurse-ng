@@ -76,7 +76,7 @@ Nurse.ng{% endblock %} {% block content %}
         {% endfor %}
       </select>
     </div>
-    <div class="directory-actions">
+    <div class="directory-actions button-row">
       <button type="submit" class="btn btn-primary">
         {{ icon('search', 17) }} Search</button
       >{% if has_filters and cards %}<a href="/nurses">Clear filters</a>{% endif
@@ -117,11 +117,11 @@ Nurse.ng{% endblock %} {% block content %}
     >{% endif %}
   </nav>
   {% endif %} {% if user %}
-  <p class="field-hint">
-    Want to appear here?
-    <a href="/profile">Review your profile and sharing choices</a>. Browsing
-    never publishes your profile.
-  </p>
+  <aside class="discovery-note">
+    <h2>Want to appear here?</h2>
+    <p class="field-hint">You choose which profile details to share. Browsing never publishes your profile.</p>
+    <a class="btn btn-secondary" href="/profile">Review your profile and sharing choices</a>
+  </aside>
   {% endif %}
 </section>
 {% endblock %}

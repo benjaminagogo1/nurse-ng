@@ -6,17 +6,20 @@ Nurse.ng{% endblock %} {% block content %}
     <div>
       <p class="eyebrow">Explore your community · Step 2 of 2</p>
       <h1>Suggestions for you</h1>
-      <p><a href="/community/start">Introduce yourself and choose your next community step</a> · <a href="/mentorship">Find peer support</a></p>
       <p class="lede">
         Discover communities, colleagues and opportunities for your next step.
       </p>
+      <nav class="button-row discovery-shortcuts" aria-label="Your next community step">
+        <a class="btn btn-secondary" href="/community/start">Introduce yourself</a>
+        <a class="btn btn-secondary" href="/mentorship">Find peer support</a>
+      </nav>
     </div>
     <a class="btn btn-secondary" href="/welcome">Edit my interests</a>
   </div>
   <section aria-labelledby="suggested-communities">
     <div class="discovery-results">
       <h2 id="suggested-communities">Communities to explore</h2>
-      <a href="/communities">Explore all communities {{ icon('arrow', 15) }}</a>
+      <a class="discovery-section-link" href="/communities">Explore all communities {{ icon('arrow', 15) }}</a>
     </div>
     <p class="field-hint">Open a community to join, ask a question or invite colleagues. You can also <a href="/communities/new">create a community that suits your needs</a>, using an example or your own idea.</p>
     <div class="community-discovery-grid">
@@ -36,7 +39,7 @@ Nurse.ng{% endblock %} {% block content %}
   <section aria-labelledby="suggested-people">
     <div class="discovery-results">
       <h2 id="suggested-people">Suggested colleagues</h2>
-      {% if cards %}<a href="/nurses">Find colleagues {{ icon('arrow', 15) }}</a
+      {% if cards %}<a class="discovery-section-link" href="/nurses">Find colleagues {{ icon('arrow', 15) }}</a
       >{% endif %}
     </div>
     <p class="field-hint">
@@ -52,7 +55,7 @@ Nurse.ng{% endblock %} {% block content %}
   <section class="discovery-opportunities" aria-labelledby="suggested-jobs">
     <div class="discovery-results">
       <h2 id="suggested-jobs">Opportunities to explore</h2>
-      <a href="/jobs">View all {{ icon('arrow', 15) }}</a>
+      <a class="discovery-section-link" href="/jobs">View all {{ icon('arrow', 15) }}</a>
     </div>
     <p class="field-hint">
       {% if personalised_jobs %}Based on your interests or location, with

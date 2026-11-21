@@ -1,12 +1,14 @@
 {% extends "base.html" %} {% from "_icons.html" import icon %} {% from
 "_avatar.html" import avatar with context %} {% block title %}Account settings —
 Nurse.ng{% endblock %} {% block content %}
-<section class="form-page account-settings">
-  <p class="eyebrow">Your account, your way</p>
-  <h1>Account settings</h1>
-  <p class="lede">Manage your profile, security and privacy.</p>
+<section class="account-settings" aria-labelledby="account-settings-heading">
+  <header class="account-settings-heading">
+    <p class="eyebrow">Your account, your way</p>
+    <h1 id="account-settings-heading">Account settings</h1>
+    <p class="lede">Manage your profile, security and privacy.</p>
+  </header>
 
-  <div class="settings-display">
+  <div class="settings-display button-row" role="group" aria-label="Account shortcuts">
     <button
       type="button"
       class="btn btn-secondary"
@@ -36,12 +38,14 @@ Nurse.ng{% endblock %} {% block content %}
       {{ icon('sparkle', 22) }}
     </div>
     <p class="tour-settings-status" data-tour-settings-status></p>
-    <button class="btn btn-primary" type="button" data-tour-start hidden>
-      Start tour {{ icon('arrow', 16) }}
-    </button>
-    <button class="btn btn-secondary" type="button" data-tour-resume hidden>
-      Resume tour
-    </button>
+    <div class="button-row settings-actions">
+      <button class="btn btn-primary" type="button" data-tour-start hidden>
+        Start tour {{ icon('arrow', 16) }}
+      </button>
+      <button class="btn btn-secondary" type="button" data-tour-resume hidden>
+        Resume tour
+      </button>
+    </div>
     <noscript
       ><p>
         Enable JavaScript to use the interactive tour. You can explore each
@@ -53,25 +57,27 @@ Nurse.ng{% endblock %} {% block content %}
       section from the main navigation.
     </p>
   </section>
-  <section class="settings-detail">
+  <section class="settings-detail" aria-labelledby="settings-notifications-heading">
     <div class="account-section-heading">
       <div>
-        <h2>Notifications</h2>
+        <h2 id="settings-notifications-heading">Notifications</h2>
         <p>
           Choose updates about your conversations, connections and applications.
         </p>
       </div>
       {{ icon('bell', 22) }}
     </div>
-    <a href="/notifications/preferences" class="btn btn-secondary"
-      >Manage notification preferences</a
-    >
-    <a href="/jobs/preferences" class="btn btn-secondary"
-      >Opportunity interests &amp; alerts</a
-    >
+    <div class="button-row settings-actions">
+      <a href="/notifications/preferences" class="btn btn-secondary"
+        >Manage notification preferences</a
+      >
+      <a href="/jobs/preferences" class="btn btn-secondary"
+        >Opportunity interests &amp; alerts</a
+      >
+    </div>
   </section>
   <section class="settings-detail" aria-labelledby="photo-heading">
-    <div class="account-section-heading">
+    <div class="account-section-heading account-section-heading--status">
       <div>
         <h2 id="photo-heading">Profile photo</h2>
         <p>A familiar face for your professional community.</p>
@@ -150,40 +156,44 @@ Nurse.ng{% endblock %} {% block content %}
       </button>
     </form>
     {% if user.photo_storage_name %}
-    <form
-      class="stacked-form"
-      method="post"
-      action="/settings/photo/visibility"
-      data-feedback-form
-      data-pending-label="Saving visibility…"
-    >
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-      <label class="consent-choice"
-        ><input
-          type="checkbox"
-          name="public"
-          value="true"
-          {%
-          if
-          user.photo_public
-          %}checked{%
-          endif
-          %}
-        /><span>Make my current photo publicly visible.</span></label
+    <div class="account-photo-controls">
+      <h3>Current photo controls</h3>
+      <form
+        class="stacked-form"
+        method="post"
+        action="/settings/photo/visibility"
+        data-feedback-form
+        data-pending-label="Saving visibility…"
       >
-      <button class="btn btn-secondary" type="submit">
-        Save photo visibility
-      </button>
-    </form>
-    <form
-      method="post"
-      action="/settings/photo/remove"
-      data-feedback-form
-      data-pending-label="Removing photo…"
-    >
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-      <button class="btn btn-secondary" type="submit">Remove photo</button>
-    </form>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <label class="consent-choice"
+          ><input
+            type="checkbox"
+            name="public"
+            value="true"
+            {%
+            if
+            user.photo_public
+            %}checked{%
+            endif
+            %}
+          /><span>Make my current photo publicly visible.</span></label
+        >
+        <button class="btn btn-secondary" type="submit">
+          Save photo visibility
+        </button>
+      </form>
+      <form
+        class="photo-remove-form"
+        method="post"
+        action="/settings/photo/remove"
+        data-feedback-form
+        data-pending-label="Removing photo…"
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <button class="btn btn-secondary" type="submit">Remove photo</button>
+      </form>
+    </div>
     {% endif %}
   </section>
   <section class="settings-detail" aria-labelledby="contact-heading">
@@ -240,10 +250,10 @@ Nurse.ng{% endblock %} {% block content %}
       </button>
     </form>
   </section>
-  <section class="settings-detail">
-    <div class="account-section-heading">
+  <section class="settings-detail" aria-labelledby="password-recovery-heading">
+    <div class="account-section-heading account-section-heading--status">
       <div>
-        <h2>Password recovery</h2>
+        <h2 id="password-recovery-heading">Password recovery</h2>
         <p>A secure way back into your account.</p>
       </div>
       <span
@@ -299,8 +309,8 @@ Nurse.ng{% endblock %} {% block content %}
     {% endif %}
     <a class="text-link" href="/auth/forgot-password">Reset my password</a>
   </section>
-  <div class="settings-detail">
-    <h2>Your account</h2>
+  <section class="settings-detail" aria-labelledby="your-account-heading">
+    <h2 id="your-account-heading">Your account</h2>
     <p>{{ user.phone }} · {{ user.account_type|capitalize }} account</p>
     <p id="account-id-label">Your unique user ID</p>
     <div class="account-identifier">
@@ -321,9 +331,9 @@ Nurse.ng{% endblock %} {% block content %}
       can see daily usage and your last recorded activity; these are not shown
       on your public profile.
     </p>
-  </div>
-  <div class="settings-detail">
-    <h2>Your community identity</h2>
+  </section>
+  <section class="settings-detail" aria-labelledby="community-identity-heading">
+    <h2 id="community-identity-heading">Your community identity</h2>
     <p>
       A community name is how colleagues recognize you in discussions and
       messages.
@@ -331,14 +341,14 @@ Nurse.ng{% endblock %} {% block content %}
     <a class="text-link" href="/community/settings"
       >Manage community name {{ icon('arrow', 16) }}</a
     >
-  </div>
-  <div class="settings-detail">
-    <h2>Delete account</h2>
+  </section>
+  <section class="settings-detail settings-detail--danger" aria-labelledby="delete-account-heading">
+    <h2 id="delete-account-heading">Delete account</h2>
     <p>Permanently remove your account and associated content.</p>
     <a class="text-link" href="/settings/delete-account"
       >Review account deletion</a
     >
-  </div>
+  </section>
 </section>
 <script src="{{ url_for('static', path='/js/account.js') }}" defer></script>
 {% endblock %}

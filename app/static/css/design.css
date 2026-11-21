@@ -250,6 +250,13 @@ button:disabled {
 .button-row {
   align-items: center;
 }
+.button-row > :is(a, button, form) {
+  min-width: 0;
+  max-width: 100%;
+}
+.button-row > :is(a, button) {
+  overflow-wrap: anywhere;
+}
 
 /* Navigation */
 .site-header {
@@ -1244,7 +1251,13 @@ button:disabled {
   margin-bottom: 10px;
 }
 .db-hello h1 {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   margin-bottom: 9px;
+}
+.db-hello h1 > span:first-child {
+  min-width: 0;
 }
 .db-hello > p:last-child {
   color: var(--muted);
@@ -1254,7 +1267,7 @@ button:disabled {
 .greeting-wave {
   font-size: 1.6rem;
   display: inline-block;
-  margin-left: 4px;
+  flex-shrink: 0;
 }
 .db-card {
   padding: 23px;
@@ -1325,6 +1338,16 @@ button:disabled {
 }
 .completion-card .btn {
   margin-top: 12px;
+}
+.completion-card .completion-action {
+  margin-top: 8px;
+  min-height: 44px;
+  font-size: 0.86rem;
+}
+.db-hello,
+.db-stat > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .db-stats {
   display: grid;
@@ -3226,13 +3249,42 @@ button:disabled {
     font-size: 0.7rem;
   }
   .db-stats {
-    gap: 8px;
+    gap: 12px;
     margin-bottom: 21px;
   }
-  .db-stats .db-stat {
-    flex-direction: column;
-    gap: 11px;
-    padding: 15px 12px;
+  .db .db-stats .db-stat {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px;
+  }
+  .db-stat > div {
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px 12px;
+  }
+  .db-stat > div small {
+    min-height: 0;
+    font-size: 0.94rem;
+    line-height: 1.5;
+  }
+  .db-stat > div b {
+    font-size: 1.7rem;
+    margin: 0;
+  }
+  .db-stat > div .stat-link {
+    grid-column: 1 / -1;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.86rem;
+    line-height: 1.5;
+  }
+  .db-stat > div .stat-link .icon {
+    width: 14px;
+    height: 14px;
   }
   .db-stat-icon {
     width: 33px;
@@ -3267,6 +3319,17 @@ button:disabled {
   .db-side {
     grid-template-columns: 1fr;
     gap: 17px;
+  }
+  .db .quick {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .db .quick a {
+    padding: 14px 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
   }
   .db-card {
     padding: 19px;

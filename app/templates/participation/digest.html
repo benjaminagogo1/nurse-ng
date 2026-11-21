@@ -1,10 +1,64 @@
-{% extends "base.html" %}{% block content %}<section class="form-page participation-page"><h1>{{ title }}</h1><p class="lede">A weekly reason to return: useful questions, learning sessions and opportunities you choose.</p>{% include "participation/_nav.html" %}
-{% if not user.email_verified_at %}<p><a href="/settings">Add and verify your email</a> before turning on the digest.</p>{% endif %}
-<form method="post" action="/digest" class="participation-form" data-feedback-form><input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-<label class="participation-check"><input type="checkbox" name="enabled" {% if (values.get('enabled') == 'on' if error else preference and preference.enabled) %}checked{% endif %} />Email me a weekly community digest</label>
-<fieldset><legend>What would you like to receive?</legend>{% for key, label in [('questions', 'Recent unanswered questions in my communities'), ('activities', 'Upcoming learning activities in my communities'), ('opportunities', 'Relevant opportunities, with Nigeria first')] %}<label class="participation-check"><input type="checkbox" name="{{ key }}" {% if (values.get(key) == 'on' if error else not preference or preference[key]) %}checked{% endif %} />{{ label }}</label>{% endfor %}</fieldset>
-<label>Delivery day<select name="weekday">{% for name in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}<option value="{{ loop.index0 }}" {% if (values.get('weekday', '0') == loop.index0|string if error else preference and preference.weekday == loop.index0) %}selected{% endif %}>{{ name }}</option>{% endfor %}</select></label>
-<label>Timezone<select name="timezone">{% for key, label in timezones.items() %}<option value="{{ key }}" {% if (values.get('timezone', 'Africa/Lagos') == key if error else (preference.timezone if preference else 'Africa/Lagos') == key) %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
-<p class="field-hint">Delivery is scheduled for 9am in your chosen timezone. No email is sent when there are no matching highlights. Turn it off here or use the unsubscribe link in any digest. Individual notification emails have <a href="/notifications/preferences">separate controls</a>.</p><button class="btn btn-primary">Save digest preferences</button></form>
-<section aria-labelledby="digest-preview"><h2 id="digest-preview">Current highlights</h2>{% for row in preview %}<p><span class="eyebrow">{{ row.kind }}</span><br /><a href="{{ row.path }}">{{ row.title }}</a></p>{% else %}<p>Highlights will appear as your communities post questions and upcoming activities. <a href="/communities">Find communities to join</a>.</p>{% endfor %}</section>
-</section>{% endblock %}
+{% extends "base.html" %}
+{% block content %}
+<section class="form-page participation-page digest-page">
+  <h1>{{ title }}</h1>
+  <p class="lede">A weekly reason to return: useful questions, learning sessions and opportunities you choose.</p>
+  {% include "participation/_nav.html" %}
+  <div class="digest-layout">
+    <section class="participation-card digest-preferences" aria-labelledby="digest-preferences-title">
+      <h2 id="digest-preferences-title">Digest preferences</h2>
+      {% if not user.email_verified_at %}
+      <p class="field-hint"><a href="/settings">Add and verify your email</a> before turning on the digest.</p>
+      {% endif %}
+      <form method="post" action="/digest" class="participation-form" data-feedback-form>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <label class="participation-check">
+          <input type="checkbox" name="enabled" {% if (values.get('enabled') == 'on' if error else preference and preference.enabled) %}checked{% endif %} />
+          Email me a weekly community digest
+        </label>
+        <fieldset>
+          <legend>What would you like to receive?</legend>
+          {% for key, label in [('questions', 'Recent unanswered questions in my communities'), ('activities', 'Upcoming learning activities in my communities'), ('opportunities', 'Relevant opportunities, with Nigeria first')] %}
+          <label class="participation-check">
+            <input type="checkbox" name="{{ key }}" {% if (values.get(key) == 'on' if error else not preference or preference[key]) %}checked{% endif %} />
+            {{ label }}
+          </label>
+          {% endfor %}
+        </fieldset>
+        <fieldset>
+          <legend>Delivery schedule</legend>
+          <label for="digest-weekday">Delivery day</label>
+          <select id="digest-weekday" name="weekday" aria-describedby="digest-delivery-hint">
+            {% for name in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+            <option value="{{ loop.index0 }}" {% if (values.get('weekday', '0') == loop.index0|string if error else preference and preference.weekday == loop.index0) %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+          <label for="digest-timezone">Timezone</label>
+          <select id="digest-timezone" name="timezone" aria-describedby="digest-delivery-hint">
+            {% for key, label in timezones.items() %}
+            <option value="{{ key }}" {% if (values.get('timezone', 'Africa/Lagos') == key if error else (preference.timezone if preference else 'Africa/Lagos') == key) %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <p class="field-hint" id="digest-delivery-hint">Delivery is scheduled for 9am in your chosen timezone. No email is sent when there are no matching highlights.</p>
+        </fieldset>
+        <p class="field-hint">Turn it off here or use the unsubscribe link in any digest. Individual notification emails have <a href="/notifications/preferences">separate controls</a>.</p>
+        <div class="button-row digest-save">
+          <button type="submit" class="btn btn-primary">Save digest preferences</button>
+        </div>
+      </form>
+    </section>
+    <section class="participation-card digest-preview" aria-labelledby="digest-preview">
+      <h2 id="digest-preview">Current highlights</h2>
+      {% for row in preview %}
+      <article class="digest-highlight">
+        <p class="eyebrow">{{ row.kind }}</p>
+        <a href="{{ row.path }}">{{ row.title }}</a>
+      </article>
+      {% else %}
+      <p>Highlights will appear as your communities post questions and upcoming activities.</p>
+      <a class="btn btn-secondary" href="/communities">Find communities to join</a>
+      {% endfor %}
+    </section>
+  </div>
+</section>
+{% endblock %}

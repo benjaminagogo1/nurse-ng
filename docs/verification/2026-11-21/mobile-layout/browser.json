@@ -1,0 +1,284 @@
+{
+  "checks": [
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/settings",
+      "mode": "default-no-photo"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/settings",
+      "mode": "default-photo-preview"
+    },
+    {
+      "width": 320,
+      "scrollWidth": 320,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/settings",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 320,
+      "scrollWidth": 320,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/auth/dashboard",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 320,
+      "scrollWidth": 320,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/welcome/discover",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 320,
+      "scrollWidth": 320,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/nurses",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 320,
+      "scrollWidth": 320,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/notifications",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 320,
+      "scrollWidth": 320,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/activities",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 320,
+      "scrollWidth": 320,
+      "headerHeight": 65,
+      "digestGap": 62,
+      "issues": [],
+      "path": "/digest",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/settings",
+      "mode": "default"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/auth/dashboard",
+      "mode": "default"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/welcome/discover",
+      "mode": "default"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/nurses",
+      "mode": "default"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/notifications",
+      "mode": "default"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/activities",
+      "mode": "default"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": 62,
+      "issues": [],
+      "path": "/digest",
+      "mode": "default"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/settings",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/auth/dashboard",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/welcome/discover",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/nurses",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/notifications",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/activities",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": 62,
+      "issues": [],
+      "path": "/digest",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 1440,
+      "scrollWidth": 1425,
+      "headerHeight": 79,
+      "digestGap": null,
+      "issues": [],
+      "path": "/settings",
+      "mode": "default"
+    },
+    {
+      "width": 1440,
+      "scrollWidth": 1425,
+      "headerHeight": 79,
+      "digestGap": null,
+      "issues": [],
+      "path": "/auth/dashboard",
+      "mode": "default"
+    },
+    {
+      "width": 1440,
+      "scrollWidth": 1425,
+      "headerHeight": 79,
+      "digestGap": null,
+      "issues": [],
+      "path": "/welcome/discover",
+      "mode": "default"
+    },
+    {
+      "width": 1440,
+      "scrollWidth": 1425,
+      "headerHeight": 79,
+      "digestGap": null,
+      "issues": [],
+      "path": "/nurses",
+      "mode": "default"
+    },
+    {
+      "width": 1440,
+      "scrollWidth": 1425,
+      "headerHeight": 79,
+      "digestGap": null,
+      "issues": [],
+      "path": "/notifications",
+      "mode": "default"
+    },
+    {
+      "width": 1440,
+      "scrollWidth": 1425,
+      "headerHeight": 79,
+      "digestGap": null,
+      "issues": [],
+      "path": "/activities",
+      "mode": "default"
+    },
+    {
+      "width": 1440,
+      "scrollWidth": 1425,
+      "headerHeight": 79,
+      "digestGap": -668,
+      "issues": [],
+      "path": "/digest",
+      "mode": "default"
+    }
+  ],
+  "javascriptErrors": [],
+  "functionalChecks": [
+    "photo upload",
+    "colleague search",
+    "unread filter",
+    "digest save",
+    "display settings",
+    "mobile navigation"
+  ],
+  "temporaryArtifacts": "/tmp/nurse-mobile-layout-oosbwxmj"
+}
