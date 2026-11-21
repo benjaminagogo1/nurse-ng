@@ -1,0 +1,18 @@
+{
+  "hd_dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "real_processed_track": true,
+  "quality_control": "720p capture",
+  "capture_cleanup": "all tracks ended",
+  "provider_join_disabled_without_credentials": true,
+  "audio_only_camera_stopped": true,
+  "audio_only_setup_requests_microphone_only": true,
+  "pending_capture_stopped_without_leaks": true,
+  "pending_capture_pagehide_cleanup": true,
+  "pending_room_grant_pagehide_cancelled": true,
+  "expired_sign_in_redirect_stops_capture": true,
+  "javascript_errors": [],
+  "real_provider_transport_verified": false
+}

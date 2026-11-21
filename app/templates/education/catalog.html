@@ -1,0 +1,29 @@
+{% extends "education/base.html" %}
+{% from "education/_macros.html" import course_card, session_card, empty_state with context %}
+{% block title %}Courses and live lectures — Nurse.ng{% endblock %}
+{% block education_content %}
+<header class="edu-hero">
+  <div class="edu-hero-copy"><p class="eyebrow">Professional learning · Nurse.ng</p><h1>Keep your curiosity.<br /><span>Grow your practice.</span></h1>
+    <p class="edu-lede">Learn with nursing educators through structured courses, live lectures and thoughtful conversations. Make your next step a meaningful one.</p>
+    <div class="edu-actions"><a class="btn btn-primary" href="#edu-courses">Explore courses {{ icon('arrow', 17) }}</a><a class="btn btn-secondary" href="#edu-lectures">Find a live lecture {{ icon('play', 17) }}</a></div>
+    <div class="edu-hero-points"><span>{{ icon('book', 17) }} Learn at your pace</span><span>{{ icon('users', 17) }} Ask and connect</span><span>{{ icon('check', 17) }} Follow your progress</span></div>
+  </div>
+  <div class="edu-hero-illustration" aria-hidden="true"><div class="edu-orbit edu-orbit-one"></div><div class="edu-orbit edu-orbit-two"></div><span class="edu-hero-glyph">{{ icon('cap', 83) }}</span><span class="edu-visual-label edu-visual-label-top">A new perspective</span><span class="edu-visual-label edu-visual-label-bottom">A stronger foundation</span></div>
+</header>
+<form class="edu-filter" method="get" action="/learning/live" role="search">
+  <div class="edu-search-field"><label for="edu-search">What would you like to learn?</label><div class="edu-input-icon">{{ icon('search', 19) }}<input id="edu-search" type="search" name="q" maxlength="120" value="{{ search_query|default('') }}" placeholder="Search courses, topics or lectures" /></div></div>
+  <div class="edu-field"><label for="edu-category">Topic</label><select id="edu-category" name="category"><option value="">All topics</option>{% for item in categories|default([]) %}<option value="{{ item }}"{% if category == item %} selected{% endif %}>{{ item }}</option>{% endfor %}</select></div>
+  <button class="btn btn-primary" type="submit">Find learning {{ icon('search', 17) }}</button>
+</form>
+<section id="edu-lectures" class="edu-section" aria-labelledby="edu-lecture-heading">
+  <div class="edu-section-heading"><div><p class="eyebrow">Make room for a new idea</p><h2 id="edu-lecture-heading">Upcoming and live lectures</h2></div>{% if educator and educator.status == 'approved' %}<a class="edu-text-link" href="/learning/live/sessions/new">Schedule a lecture {{ icon('plus', 17) }}</a>{% endif %}</div>
+  {% if not live_available %}<p class="edu-inline-note">{{ icon('info', 18) }} Live classrooms are not available yet. Published course lessons remain available to enrolled learners.</p>{% endif %}
+  <div class="edu-session-list">{% for session in sessions|default([]) %}{{ session_card(session) }}{% else %}{{ empty_state('The next conversation is taking shape', 'Published lectures will appear here with their educator, topic and joining details.', '/learning/live/studio' if user else none, 'Host a learning session' if user else none, 'calendar') }}{% endfor %}</div>
+</section>
+<section id="edu-courses" class="edu-section" aria-labelledby="edu-course-heading">
+  <div class="edu-section-heading"><div><p class="eyebrow">Build on what you know</p><h2 id="edu-course-heading">Explore courses</h2></div>{% if courses %}<span class="edu-result-count">{{ courses|length }} {{ 'course' if courses|length == 1 else 'courses' }}{% if search_query or category %} found{% endif %}</span>{% endif %}</div>
+  {% if courses %}<div class="edu-course-grid">{% for course in courses %}{{ course_card(course) }}{% endfor %}</div>{% else %}{{ empty_state('A place for your next chapter', 'No published courses match your search yet. Try another topic, or return as educators publish their courses.', '/learning/live' if search_query or category else '/learning/live/studio' if user else none, 'Clear filters' if search_query or category else 'Explore educator studio' if user else none) }}{% endif %}
+</section>
+<aside class="edu-teach-callout"><span class="edu-teach-icon">{{ icon('cap', 33) }}</span><div><h2>Something you know could help someone grow.</h2><p>Apply to become an educator, build a course and bring colleagues into a live classroom.</p></div><a class="btn btn-secondary" href="{{ '/learning/live/studio' if user else '/auth/login?next=/learning/live/studio' }}">Explore teaching {{ icon('arrow', 17) }}</a></aside>
+<p class="edu-disclaimer">Learning on Nurse.ng supports professional development. Course participation and completion do not establish a professional licence or replace clinical supervision.</p>
+{% endblock %}

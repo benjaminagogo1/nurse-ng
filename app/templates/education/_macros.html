@@ -1,0 +1,67 @@
+{% from "_icons.html" import icon %}
+{# Shared presentation accepts ORM course/session objects and normalized progress
+   dictionaries {completed,total,percent}. Never synthesize member/lecture counts.
+   Text is autoescaped; native form helpers preserve name/label conventions.
+   Each native form must supply its own csrf_token. Pass id_prefix for repeated
+   inline forms (such as question editors) to keep labels/hints unique while
+   retaining the backend's stable field names. #}
+
+{% macro status_badge(status) -%}
+<span class="edu-badge{% if status == 'live' %} edu-badge-live{% elif status in ['published', 'approved', 'completed'] %} edu-badge-success{% elif status in ['cancelled', 'rejected', 'suspended'] %} edu-badge-muted{% endif %}">{% if status == 'live' %}<span class="edu-live-dot" aria-hidden="true"></span>{% endif %}{{ (status or 'draft')|replace('_', ' ')|title }}</span>
+{%- endmacro %}
+
+{% macro empty_state(title, body, href=none, label=none, glyph='book') -%}
+<div class="edu-empty">
+  <span class="edu-empty-icon">{{ icon(glyph, 29) }}</span>
+  <h3>{{ title }}</h3><p>{{ body }}</p>
+  {% if href and label %}<a class="btn btn-secondary" href="{{ href }}">{{ label }} {{ icon('arrow', 16) }}</a>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro course_card(course, progress=none, manage=false) -%}
+<article class="edu-course-card">
+  <a class="edu-course-cover" href="/learning/live/courses/{{ course.id }}" tabindex="-1" aria-hidden="true">
+    <span class="edu-cover-lines"></span><span class="edu-cover-symbol">{{ icon('book', 44) }}</span>
+    <span class="edu-cover-category">{{ course.category or 'Professional learning' }}</span>
+  </a>
+  <div class="edu-course-copy">
+    <div class="edu-card-overline"><span>{{ {'all': 'All levels', 'beginner': 'Foundational', 'intermediate': 'Intermediate', 'advanced': 'Advanced'}.get(course.level, 'All levels') }}</span>{% if manage %}{{ status_badge(course.status) }}{% endif %}</div>
+    <h3><a href="/learning/live/courses/{{ course.id }}">{{ course.title }}</a></h3>
+    <p class="edu-card-description">{{ course.summary or course.description or 'Explore the course outline and learning objectives.' }}</p>
+    {% if course.educator and course.educator.display_name %}<p class="edu-card-author">{{ icon('user', 15) }} {{ course.educator.display_name }}</p>{% endif %}
+    {% if progress %}
+      <div class="edu-progress-copy"><span>{{ progress.completed|default(0) }} of {{ progress.total|default(0) }} lessons completed</span><strong>{{ progress.percent|default(0)|int }}%</strong></div>
+      <progress class="edu-progress" max="100" value="{{ progress.percent|default(0)|int }}" aria-label="{{ course.title }} progress">{{ progress.percent|default(0)|int }}%</progress>
+    {% endif %}
+    <a class="edu-card-link" href="{{ '/learning/live/courses/' ~ course.id ~ '/edit' if manage else '/learning/live/courses/' ~ course.id }}">{{ 'Manage course' if manage else 'Continue learning' if progress else 'View course' }} {{ icon('arrow', 17) }}</a>
+  </div>
+</article>
+{%- endmacro %}
+
+{% macro session_card(session, manage=false) -%}
+<article class="edu-session-card">
+  <div class="edu-session-date">{{ icon('calendar', 23) }}{% if session.starts_at %}<span>{{ local_time(session.starts_at)|display_date }}</span>{% else %}<span>Time to be announced</span>{% endif %}</div>
+  <div class="edu-session-copy"><div class="edu-card-overline">{{ status_badge(session.status) }}{% if session.course %}<span>{{ session.course.title }}</span>{% endif %}</div>
+    <h3><a href="/learning/live/sessions/{{ session.id }}">{{ session.title }}</a></h3>
+    {% if session.starts_at %}<p>{{ icon('clock', 15) }} {{ local_time(session.starts_at)|display_datetime }} WAT</p>{% endif %}
+    {% if session.educator and session.educator.display_name %}<p class="edu-card-author">With {{ session.educator.display_name }}</p>{% endif %}
+  </div>
+  <a class="btn {{ 'btn-primary' if session.status == 'live' else 'btn-secondary' }} btn-sm" href="/learning/live/sessions/{{ session.id }}">{{ 'Enter lecture' if session.status == 'live' else 'Manage lecture' if manage else 'View lecture' }} {{ icon('arrow', 15) }}</a>
+</article>
+{%- endmacro %}
+
+{% macro field(name, label, value='', type='text', required=false, hint='', maxlength=none, min=none, max=none, id_prefix='') -%}
+{% set field_id = 'edu-' ~ id_prefix ~ name %}
+<div class="edu-field"><label for="{{ field_id }}">{{ label }}{% if not required %}<span class="edu-optional">Optional</span>{% endif %}</label>
+  <input id="{{ field_id }}" name="{{ name }}" type="{{ type }}" value="{{ value or '' }}"{% if required %} required{% endif %}{% if maxlength %} maxlength="{{ maxlength }}"{% endif %}{% if min is not none %} min="{{ min }}"{% endif %}{% if max is not none %} max="{{ max }}"{% endif %}{% if hint %} aria-describedby="{{ field_id }}-hint"{% endif %} />
+  {% if hint %}<p id="{{ field_id }}-hint" class="field-hint">{{ hint }}</p>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro textarea(name, label, value='', required=false, hint='', maxlength=5000, rows=5, id_prefix='') -%}
+{% set field_id = 'edu-' ~ id_prefix ~ name %}
+<div class="edu-field"><label for="{{ field_id }}">{{ label }}{% if not required %}<span class="edu-optional">Optional</span>{% endif %}</label>
+  <textarea id="{{ field_id }}" name="{{ name }}" rows="{{ rows }}" maxlength="{{ maxlength }}"{% if required %} required{% endif %}{% if hint %} aria-describedby="{{ field_id }}-hint"{% endif %}>{{ value or '' }}</textarea>
+  {% if hint %}<p id="{{ field_id }}-hint" class="field-hint">{{ hint }}</p>{% endif %}
+</div>
+{%- endmacro %}

@@ -17,6 +17,17 @@ os.environ.update({
     "NURSE_NG_RECRUITMENT_SEARCH_KEY": "",
     "NURSE_NG_RECRUITMENT_SEARCH_PERMISSION_REFERENCE": "",
     "NURSE_NG_REQUIRED_WORKERS": "",
+    # Classroom tests must never inherit real media/storage credentials from
+    # the operator's environment or local .env. Provider tests inject fixtures.
+    "NURSE_NG_LIVEKIT_URL": "",
+    "NURSE_NG_LIVEKIT_API_KEY": "",
+    "NURSE_NG_LIVEKIT_API_SECRET": "",
+    "NURSE_NG_LEARNING_RECORDING_S3_BUCKET": "",
+    "NURSE_NG_LEARNING_RECORDING_S3_REGION": "us-east-1",
+    "NURSE_NG_LEARNING_RECORDING_S3_ENDPOINT": "",
+    "NURSE_NG_LEARNING_RECORDING_S3_ACCESS_KEY": "",
+    "NURSE_NG_LEARNING_RECORDING_S3_SECRET_KEY": "",
+    "NURSE_NG_LEARNING_RECORDING_S3_FORCE_PATH_STYLE": "true",
 })
 
 import pytest

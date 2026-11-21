@@ -16,6 +16,24 @@ from app.models.community import (
     Follow,
     HelpfulReply,
 )
+from app.models.education import (
+    EducatorProfile,
+    EducatorReview,
+    LearningAttendance,
+    LearningCourse,
+    LearningEnrollment,
+    LearningLesson,
+    LearningModule,
+    LearningRecording,
+    LearningSession,
+    LearningWebhookReceipt,
+    LessonProgress,
+    QuizAttempt,
+    QuizQuestion,
+    SessionMessage,
+    SessionModeration,
+    SessionRegistration,
+)
 from app.models.employers import EmployerMembership, EmployerOrganization, EmployerReviewEvent
 from app.models.engagement import PostLike
 from app.models.events import CommunityEvent, EventAttendance
@@ -58,6 +76,10 @@ from app.models.verification import EvidenceAccess, EvidenceDocument, Verificati
 from app.models.workers import WorkerHeartbeat
 
 __all__ = [
+    "EducatorProfile", "EducatorReview", "LearningAttendance", "LearningCourse",
+    "LearningEnrollment", "LearningLesson", "LearningModule", "LearningRecording",
+    "LearningSession", "LearningWebhookReceipt", "LessonProgress", "QuizAttempt",
+    "QuizQuestion", "SessionMessage", "SessionModeration", "SessionRegistration",
     "ActivityAttendance", "ActivityOccurrence", "ActivitySeries", "CommunityIntroduction",
     "DigestPreference", "MemberJourney", "MemberReferral", "MentorOffer", "MentorReport",
     "Mentorship", "ReferralInvitation", "ReferralVisit", "WeeklyDigest",

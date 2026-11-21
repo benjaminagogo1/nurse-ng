@@ -8,11 +8,16 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from app.core.config import settings
+from app.services.education import EducationError
+from app.services.education_live import EducationLiveError
 from app.web.account_routes import router as account_router
 from app.web.activity_routes import router as activity_router
 from app.web.auth_routes import router as auth_router
 from app.web.community_growth_routes import router as community_growth_router
 from app.web.community_routes import router as community_router
+from app.web.education_classroom_routes import router as classroom_router
+from app.web.education_errors import education_error
+from app.web.education_routes import router as education_router
 from app.web.employer_routes import router as employer_router
 from app.web.engagement_routes import router as engagement_router
 from app.web.errors import http_error, server_error, validation_error
@@ -46,6 +51,8 @@ def create_app() -> FastAPI:
     app.add_exception_handler(HTTPException, http_error)
     app.add_exception_handler(RequestValidationError, validation_error)
     app.add_exception_handler(Exception, server_error)
+    app.add_exception_handler(EducationError, education_error)
+    app.add_exception_handler(EducationLiveError, education_error)
     app.add_middleware(
         SessionMiddleware,
         secret_key=settings.secret_key,
@@ -66,6 +73,8 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(social_router)
     app.include_router(event_router)
+    app.include_router(education_router)
+    app.include_router(classroom_router)
     app.include_router(employer_router)
     app.include_router(engagement_router)
     app.include_router(staff_router)

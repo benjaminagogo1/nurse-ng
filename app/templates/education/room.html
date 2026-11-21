@@ -1,0 +1,45 @@
+{% extends "education/base.html" %}
+{% block title %}Classroom — {{ session.title }}{% endblock %}
+{% block education_class %} edu-classroom-page{% endblock %}
+{% block education_content %}
+{# The room controller owns media/participant/chat descendants. Keep these data hooks stable;
+   endpoint permissions and room credentials are checked by the server, never by this markup. #}
+<div class="edu-classroom" data-education-room data-session-id="{{ session.id }}" data-is-host="{{ 'true' if can_manage else 'false' }}" data-csrf="{{ csrf_token }}" data-token-url="/learning/live/sessions/{{ session.id }}/token" data-state-url="/learning/live/sessions/{{ session.id }}/room-state" data-chat-enabled="{{ 'true' if session.chat_enabled else 'false' }}" data-live-unavailable="{{ 'true' if not live_available or session.status != 'live' else 'false' }}">
+  <header class="edu-room-heading"><div><a class="edu-back-link" href="/learning/live/sessions/{{ session.id }}">{{ icon('chevron', 15) }} Lecture details</a><h1>{{ session.title }}</h1><p>{{ session.educator.display_name if session.educator else 'Live learning' }}{% if session.course %} · {{ session.course.title }}{% endif %}</p></div><span class="edu-room-state" data-room-status role="status" aria-live="polite">{{ 'Ready to join' if live_available and session.status == 'live' else 'Classroom is not open' }}</span></header>
+  {% if session.recording_enabled %}<div class="edu-recording-notice">{{ icon('info', 18) }}<div><p>This lecture may be recorded. Your voice, video and shared contributions may be included when you participate.</p><label class="edu-check-choice edu-recording-consent"><input type="checkbox" data-room-recording-consent /><span>I understand the recording notice and consent to my shared participation being included in the recording.</span></label></div></div>{% endif %}
+  <div class="edu-room-error" data-room-error role="alert" hidden></div>
+  {% if not live_available %}<div class="edu-notice" data-live-unavailable><p>Live classroom access is not available yet. You can return to the lecture details or continue with your course lessons.</p></div>{% elif session.status != 'live' %}<div class="edu-notice"><p>{{ 'This lecture has ended.' if session.status == 'ended' else 'This lecture has been cancelled.' if session.status == 'cancelled' else 'The educator has not opened the classroom yet. Return to the lecture details at the scheduled time.' }}</p></div>{% endif %}
+  <div class="edu-room-layout"><div class="edu-room-main">
+    <div class="edu-room-stage" data-room-stage><div class="edu-stage-welcome" data-room-welcome><span>{{ icon('monitor', 57) }}</span><h2>A good place to listen, ask and learn.</h2><p>Choose audio-only if you prefer, then join the lecture. Your camera and microphone begin under your control.</p></div></div>
+    <section class="edu-room-prejoin" aria-labelledby="edu-camera-check-heading">
+      <div class="edu-prejoin-preview"><video data-room-local-preview autoplay muted playsinline hidden aria-label="Your private camera preview"></video><div class="edu-preview-placeholder" data-room-preview-placeholder>{{ icon('user', 40) }}<span>Your private preview</span></div></div>
+      <div class="edu-prejoin-settings"><div class="edu-section-heading"><div><h2 id="edu-camera-check-heading">Look and sound your best.</h2><p>Check your setup before entering the lecture.</p></div></div>
+        <div class="edu-device-grid"><div class="edu-field"><label for="edu-camera-device">Camera</label><select id="edu-camera-device" data-room-camera-device><option value="">Default camera</option></select></div><div class="edu-field"><label for="edu-mic-device">Microphone</label><select id="edu-mic-device" data-room-mic-device><option value="">Default microphone</option></select></div><div class="edu-field"><label for="edu-video-quality">Camera quality</label><select id="edu-video-quality" data-room-quality><option value="1080" selected>1080p · High definition</option><option value="720">720p · Balanced</option><option value="360">360p · Save data</option></select></div><div class="edu-field"><label for="edu-camera-lighting">Lighting</label><select id="edu-camera-lighting" data-room-lighting><option value="neutral">Natural</option><option value="gentle">Gentle light correction</option></select></div></div>
+        <div class="edu-preview-actions"><button class="btn btn-secondary btn-sm" type="button" data-room-preview-start>Check camera and microphone {{ icon('eye', 17) }}</button><button class="btn btn-ghost btn-sm" type="button" data-room-preview-stop disabled>Stop preview</button></div>
+        <p class="edu-camera-settings" data-room-camera-settings role="status" aria-live="polite">Face a window or a soft light and keep your camera at eye level. Your preview stays private until you join with your camera.</p>
+      </div>
+    </section>
+    <div class="edu-room-toolbar" role="group" aria-label="Classroom controls">
+      <button class="edu-room-control edu-room-join" type="button" data-room-join{% if not live_available or session.status != 'live' %} disabled{% endif %}>{{ icon('play', 20) }}<span>Join lecture</span></button>
+      <button class="edu-room-control" type="button" data-room-mic aria-pressed="false" disabled>{{ icon('volume', 21) }}<span>Microphone</span></button>
+      <button class="edu-room-control" type="button" data-room-camera aria-pressed="false" disabled>{{ icon('monitor', 21) }}<span>Camera</span></button>
+      {% if can_manage %}<button class="edu-room-control" type="button" data-room-screen aria-pressed="false" disabled>{{ icon('share', 21) }}<span>Share screen</span></button>{% endif %}
+      <button class="edu-room-control" type="button" data-room-audio-only aria-pressed="false">{{ icon('volume', 21) }}<span>Audio only</span></button>
+      <button class="edu-room-control" type="button" data-room-audio hidden disabled>{{ icon('volume', 21) }}<span>Enable sound</span></button>
+      <button class="edu-room-control" type="button" data-room-hand aria-pressed="false" disabled>{{ icon('user', 21) }}<span>Raise hand</span></button>
+      <button class="edu-room-control edu-room-leave" type="button" data-room-leave disabled>{{ icon('logout', 21) }}<span>Leave</span></button>
+    </div>
+    <p class="edu-room-connection" data-room-connection>{{ icon('lock', 16) }} Only registered learners and the educator can enter this classroom.</p>
+    <section class="edu-room-participant-panel" aria-labelledby="edu-room-participants-heading"><div class="edu-section-heading"><h2 id="edu-room-participants-heading">In the room</h2><span class="edu-result-count" data-room-participant-count></span></div><div class="edu-room-participants" data-room-participants><p class="field-hint">Participants appear after you join.</p></div></section>
+  </div><aside class="edu-room-discussion" aria-label="Classroom discussion"><div class="edu-room-discussion-heading"><span>{{ icon('chat', 23) }}</span><div><h2>Bring your perspective.</h2><p>Keep questions clear and contributions considerate.</p></div></div>
+    <details class="edu-room-panel" open><summary>Questions <span data-room-question-count></span>{{ icon('chevron-down', 17) }}</summary><div class="edu-room-message-list" data-room-question-list aria-live="polite" aria-relevant="additions text"><p class="edu-room-empty">Questions will appear here when learners ask them.</p></div></details>
+    {% if session.chat_enabled %}<details class="edu-room-panel" open><summary>Conversation {{ icon('chevron-down', 17) }}</summary><div class="edu-room-message-list" data-room-chat-list aria-live="polite" aria-relevant="additions text"><p class="edu-room-empty">Classroom messages will appear here.</p></div></details>{% endif %}
+    <form class="edu-room-message-form" data-room-message-form method="post" action="/learning/live/sessions/{{ session.id }}/messages"><input type="hidden" name="csrf_token" value="{{ csrf_token }}" /><label for="edu-room-message-kind">Your contribution</label><select id="edu-room-message-kind" name="kind">{% if session.chat_enabled %}<option value="chat">Classroom message</option>{% endif %}<option value="question">Ask a question</option></select><label class="sr-only" for="edu-room-message-body">Write your message or question</label><textarea id="edu-room-message-body" name="body" rows="3" maxlength="3000" required placeholder="Add a thought or ask a clear question…"></textarea><button class="btn btn-primary" type="submit" data-room-send disabled>Send {{ icon('arrow', 17) }}</button><p class="field-hint">Keep personal, patient-identifying and sensitive information out of the classroom.</p></form>
+  </aside></div>
+  <noscript><div class="edu-notice"><p>The live classroom needs JavaScript for audio, video and discussion. Enable it in your browser or return to the course lessons.</p></div></noscript>
+</div>
+{% endblock %}
+{% block education_scripts %}
+<script src="/static/vendor/livekit-client.umd.js" defer></script>
+<script src="/static/js/education-room.js?v=1" defer></script>
+{% endblock %}

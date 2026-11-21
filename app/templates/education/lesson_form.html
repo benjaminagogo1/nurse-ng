@@ -1,0 +1,43 @@
+{% extends "education/base.html" %}
+{% from "education/_macros.html" import field, textarea with context %}
+{% block title %}{{ 'Edit' if lesson else 'Add' }} lesson — Nurse.ng{% endblock %}
+{% block education_content %}
+<a class="edu-back-link" href="/learning/live/courses/{{ course.id }}">{{ icon('chevron', 15) }} {{ course.title }}</a>
+<header class="edu-page-heading"><div><p class="eyebrow">{{ module.title }}</p><h1>{{ 'Refine this lesson.' if lesson else 'Make the next idea clear.' }}</h1><p class="edu-lede">Guide learners through a focused explanation, a useful resource or a knowledge check.</p></div></header>
+<div class="edu-form-layout"><div><form class="edu-form edu-panel" method="post" action="{{ action_url }}" data-pending-label="Saving lesson…">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+  {{ field('title', 'Lesson title', values.get('title', ''), required=true, maxlength=180) }}
+  <div class="edu-form-grid"><div class="edu-field"><label for="edu-kind">Lesson format</label><select id="edu-kind" name="kind" data-lesson-kind>{% for value, label in [('text', 'Written lesson'), ('video', 'Video lesson'), ('resource', 'Learning resource'), ('quiz', 'Knowledge check')] %}<option value="{{ value }}"{% if values.get('kind', 'text') == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>{{ field('position', 'Position in module', values.get('position', 1), type='number', required=true, min=1, max=999) }}</div>
+  {{ textarea('content', 'Lesson content and instructions', values.get('content', ''), required=false, maxlength=50000, rows=12, hint='Write the explanation, reading guidance or knowledge-check instructions. Learners see this text as written.') }}
+  {{ field('resource_url', 'Video or learning-resource URL', values.get('resource_url', ''), type='url', required=false, maxlength=2048, hint='Use a public HTTPS URL for a resource you are authorised to share.') }}
+  {{ field('duration_minutes', 'Suggested learning time in minutes', values.get('duration_minutes', ''), type='number', required=false, min=1, max=1440) }}
+  {{ field('pass_percentage', 'Knowledge-check passing score (%)', values.get('pass_percentage', 70), type='number', required=true, min=1, max=100, hint='Used for knowledge-check lessons. Learners can retry to improve their understanding.') }}
+  <div class="edu-form-actions"><button class="btn btn-primary" type="submit">{{ 'Save lesson' if lesson else 'Add lesson' }} {{ icon('check', 17) }}</button><a class="btn btn-ghost" href="/learning/live/courses/{{ course.id }}">Return to course</a></div>
+</form>
+{% if lesson %}<section class="edu-danger-panel"><div><h2>Remove this lesson</h2><p>Deleting a lesson removes its content, knowledge-check questions and learner progress. This action cannot be undone.</p></div><form method="post" action="/learning/live/lessons/{{ lesson.id }}/delete" data-pending-label="Deleting lesson…" data-education-confirm="Delete this lesson, its questions and learner progress? This action cannot be undone."><input type="hidden" name="csrf_token" value="{{ csrf_token }}" /><button class="btn btn-secondary" type="submit">Delete lesson</button></form></section>{% endif %}
+{% if lesson and lesson.kind == 'quiz' %}
+<section class="edu-panel edu-section" aria-labelledby="edu-question-authoring"><div class="edu-section-heading"><h2 id="edu-question-authoring">Knowledge-check questions</h2></div>
+  <p class="field-hint">Changing or removing questions clears completed progress for this knowledge check, so learners can review the updated material.</p>
+  {% for question in quiz_questions|default([]) %}<article class="edu-question-preview"><h3>{{ loop.index }}. {{ question.prompt }}</h3><ol type="A">{% for option in question.options %}<li>{{ option }}{% if loop.index0 == question.correct_index %} <strong class="edu-answer-key">Correct answer</strong>{% endif %}</li>{% endfor %}</ol>{% if question.explanation %}<p class="field-hint">{{ question.explanation }}</p>{% endif %}
+    <details class="edu-question-edit"><summary>Edit question {{ icon('edit', 16) }}</summary>
+      <form class="edu-form" method="post" action="/learning/live/questions/{{ question.id }}/edit" data-pending-label="Saving question…"><input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        {{ textarea('prompt', 'Question', question.prompt, required=true, maxlength=2000, rows=3, id_prefix=question.id ~ '-') }}
+        {{ textarea('options', 'Answer choices', question.options|join('\n'), required=true, maxlength=6000, rows=5, hint='Write two to six different answer choices, one per line.', id_prefix=question.id ~ '-') }}
+        <div class="edu-field"><label for="edu-{{ question.id }}-correct-index">Correct answer</label><select id="edu-{{ question.id }}-correct-index" name="correct_index" data-correct-answer-select>{% for option in question.options %}<option value="{{ loop.index0 }}"{% if loop.index0 == question.correct_index %} selected{% endif %}>Answer {{ loop.index }}: {{ option }}</option>{% endfor %}</select></div>
+        {{ textarea('explanation', 'Answer explanation', question.explanation, required=false, maxlength=3000, rows=4, id_prefix=question.id ~ '-') }}
+        <button class="btn btn-secondary" type="submit">Save question {{ icon('check', 17) }}</button>
+      </form>
+    </details>
+    <form class="edu-question-delete" method="post" action="/learning/live/questions/{{ question.id }}/delete" data-pending-label="Removing question…" data-education-confirm="Remove this question? Completed progress for this knowledge check will be cleared."><input type="hidden" name="csrf_token" value="{{ csrf_token }}" /><button class="btn btn-ghost btn-sm" type="submit">Remove question</button></form>
+  </article>{% else %}<p class="field-hint">Add a question with a clear prompt, answer choices and a useful explanation.</p>{% endfor %}
+  <form class="edu-form" method="post" action="/learning/live/lessons/{{ lesson.id }}/questions" data-pending-label="Adding question…"><input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    {{ textarea('prompt', 'Question', '', required=true, maxlength=2000, rows=3) }}
+    {{ textarea('options', 'Answer choices', '', required=true, maxlength=6000, rows=5, hint='Write two to six different answer choices, one per line, in the order learners should see them.') }}
+    <div class="edu-field"><label for="edu-correct-index">Correct answer</label><select id="edu-correct-index" name="correct_index" data-correct-answer-select><option value="0">First answer</option><option value="1">Second answer</option><option value="2">Third answer</option><option value="3">Fourth answer</option><option value="4">Fifth answer</option><option value="5">Sixth answer</option></select></div>
+    {{ textarea('explanation', 'Answer explanation', '', required=false, maxlength=3000, rows=4, hint='Help learners understand the reasoning after they submit their answers.') }}
+    <button class="btn btn-secondary" type="submit">Add question {{ icon('plus', 17) }}</button>
+  </form>
+</section>
+{% elif not lesson %}<p class="edu-inline-note">{{ icon('info', 18) }} Save the lesson first. You can then add questions to a knowledge check.</p>{% endif %}
+</div><aside class="edu-form-aside"><span class="edu-panel-icon">{{ icon('file', 31) }}</span><h2>One lesson. One useful step.</h2><p>Make the purpose clear, explain unfamiliar terms and give learners enough context to apply what they have read.</p><div class="edu-aside-divider"></div><h3>Accessible learning</h3><p>Include a written explanation alongside video resources. Use descriptive lesson titles and clear instructions for knowledge checks.</p></aside></div>
+{% endblock %}

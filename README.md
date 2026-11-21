@@ -7,6 +7,8 @@ capabilities are a later expansion once the community is established and trusted
 
 ## Documents
 
+- [Developer code guide](docs/CODE_GUIDE.md) — start here to understand the repository, request flows, permissions and maintenance conventions.
+- [Educator courses and live classrooms](docs/LIVE_LEARNING_ARCHITECTURE.md) — implementation architecture, camera/media technology, access controls, recordings and deployment setup.
 - [AI integration review and proposal](docs/AI_INTEGRATION_PROPOSAL_2026-11-17.md) —
   practical uses, recommended first pilot, architecture, costs and decisions for discussion.
 - [Private conversation files](docs/PRIVATE_MESSAGE_FILES.md) — supported types,

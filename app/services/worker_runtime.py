@@ -44,12 +44,14 @@ def _step(name, db):
         return run_next(db)
     from app.services.account_mail import mail_available
     from app.services.community_participation import run_next_activity
+    from app.services.education_notifications import queue_learning_reminders
     from app.services.notification_worker import run_next
     from app.services.opportunity_watch import generate_alerts
     from app.services.weekly_digest import enqueue
     from app.services.weekly_digest import run_next as run_digest
 
     generate_alerts(db)
+    queue_learning_reminders(db)
     activity = run_next_activity(db)
     enqueue(db)
     if activity:

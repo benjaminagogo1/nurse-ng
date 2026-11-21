@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{# Education routes provide education_page (catalog/mine/studio/review), user,
+   csrf_token and the page-specific context documented in the learning guide.
+   Keep assets scoped here so classroom SDKs never load on unrelated pages. #}
+{% block extra_head %}
+{{ super() }}
+<link rel="stylesheet" href="/static/css/education.css?v=1" />
+{% endblock %}
+{% block content %}
+<section class="edu-page{% block education_class %}{% endblock %}">
+  <nav class="edu-nav" aria-label="Professional learning">
+    <a class="edu-nav-brand" href="/learning/live">{{ icon('cap', 23) }}<span>Learning</span></a>
+    <div class="edu-nav-links">
+      <a href="/learning/live" {% if education_page == 'catalog' %}aria-current="page"{% endif %}>Explore</a>
+      {% if user %}<a href="/learning/live/mine" {% if education_page == 'mine' %}aria-current="page"{% endif %}>My learning</a>{% endif %}
+      {% if user %}<a href="/learning/live/studio" {% if education_page == 'studio' %}aria-current="page"{% endif %}>Educator studio</a>{% endif %}
+      {% if user and user.is_staff %}<a href="/staff/educators" {% if education_page == 'review' %}aria-current="page"{% endif %}>Educator review</a>{% endif %}
+    </div>
+  </nav>
+  {% if error %}<div class="edu-notice edu-notice-error" role="alert">{{ icon('info', 20) }}<p>{{ error }}</p></div>{% endif %}
+  {% block education_content %}{% endblock %}
+</section>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script src="/static/js/education.js?v=1" defer></script>
+{% block education_scripts %}{% endblock %}
+{% endblock %}

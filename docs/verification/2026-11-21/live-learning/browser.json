@@ -1,0 +1,224 @@
+{
+  "passed": true,
+  "artifacts": "/tmp/nurse-education-journeys-8gyqija9",
+  "checks": [
+    {
+      "page": "catalog",
+      "width": 1280,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "mine",
+      "width": 1280,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "course",
+      "width": 1280,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "quiz",
+      "width": 1280,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "session",
+      "width": 1280,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "room",
+      "width": 1280,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "catalog",
+      "width": 390,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "mine",
+      "width": 390,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "course",
+      "width": 390,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "quiz",
+      "width": 390,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "session",
+      "width": 390,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "room",
+      "width": 390,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "catalog",
+      "width": 320,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "mine",
+      "width": 320,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "course",
+      "width": 320,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "quiz",
+      "width": 320,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "session",
+      "width": 320,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "room",
+      "width": 320,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "studio",
+      "width": 1280,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "course-editor",
+      "width": 1280,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "quiz-editor",
+      "width": 1280,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "session-editor",
+      "width": 1280,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "studio",
+      "width": 390,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "course-editor",
+      "width": 390,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "quiz-editor",
+      "width": 390,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "session-editor",
+      "width": 390,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "studio",
+      "width": 320,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "course-editor",
+      "width": 320,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "quiz-editor",
+      "width": 320,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    },
+    {
+      "page": "session-editor",
+      "width": 320,
+      "horizontalOverflow": false,
+      "unlabeled": [],
+      "duplicateIds": []
+    }
+  ],
+  "enrollment_reading_quiz_registration": true,
+  "quiz_progress_percent": 100,
+  "educator_created_draft_through_form": true,
+  "linked_course_preserved_in_editor": true,
+  "provider_join_disabled_without_credentials": true,
+  "javascript_errors": [],
+  "unexpected_http_errors": [],
+  "real_provider_transport_verified": false
+}

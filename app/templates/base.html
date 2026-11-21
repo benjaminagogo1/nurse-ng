@@ -226,7 +226,7 @@ feedback_slot -%} {%- macro nav_link(href, key, label, name, current) -%}
             </li>
             <li>
               <a
-                href="/learning"
+                href="/learning/live"
                 {% if page == 'learning' %}
                 aria-current="page"
                 {%
@@ -379,7 +379,7 @@ feedback_slot -%} {%- macro nav_link(href, key, label, name, current) -%}
             {{ nav_link('/feed', 'feed', 'Community', 'globe', page) }} {{
             nav_link('/reels', 'reels', 'Reels', 'play', page) }} {{
             nav_link('/feed/discussions', 'discussion-follows', 'Followed discussions', 'feed', page) }} {{ nav_link('/communities', 'communities',
-            'Find communities', 'users', page) }} {{ nav_link('/learning',
+            'Find communities', 'users', page) }} {{ nav_link('/learning/live',
             'learning', 'Learning', 'book', page) }} {{ nav_link('/events',
             'events', 'Events', 'calendar', page) }} {{ nav_link('/resources',
             'resources', 'Resources', 'folder', page) }} {{

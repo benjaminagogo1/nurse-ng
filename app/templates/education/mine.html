@@ -1,0 +1,12 @@
+{% extends "education/base.html" %}
+{% from "education/_macros.html" import course_card, session_card, empty_state with context %}
+{% block title %}My learning — Nurse.ng{% endblock %}
+{% block education_content %}
+<header class="edu-page-heading"><div><p class="eyebrow">Your next chapter</p><h1>Make progress, your way.</h1><p class="edu-lede">Return to your courses, keep track of what you have learned and make time for your next live lecture.</p></div><a class="btn btn-secondary" href="/learning/live">Explore learning {{ icon('arrow', 17) }}</a></header>
+<section class="edu-section" aria-labelledby="edu-enrolled-heading"><div class="edu-section-heading"><h2 id="edu-enrolled-heading">Your courses</h2>{% if enrollments %}<span class="edu-result-count">{{ enrollments|length }} enrolled</span>{% endif %}</div>
+  {% if enrollments %}<div class="edu-course-grid">{% for enrollment in enrollments %}{% set enrolled_course = enrollment.course %}{{ course_card(enrolled_course, progress_by_course.get(enrolled_course.id)|default(none)) }}{% endfor %}</div>{% else %}{{ empty_state('Your learning starts with a little curiosity', 'Find a course that interests you and enroll. Your lessons and progress will stay together here.', '/learning/live#edu-courses', 'Find your first course') }}{% endif %}
+</section>
+<section class="edu-section" aria-labelledby="edu-registered-heading"><div class="edu-section-heading"><div><p class="eyebrow">Learn together</p><h2 id="edu-registered-heading">Your registered lectures</h2></div></div>
+  <div class="edu-session-list">{% for registration in registrations|default([]) %}{{ session_card(registration.session) }}{% else %}{{ empty_state('Make time for a new perspective', 'Register for a lecture to keep its date, educator and classroom details here.', '/learning/live#edu-lectures', 'Find a lecture', 'calendar') }}{% endfor %}</div>
+</section>
+{% endblock %}

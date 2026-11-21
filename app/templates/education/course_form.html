@@ -1,0 +1,20 @@
+{% extends "education/base.html" %}
+{% from "education/_macros.html" import field, textarea with context %}
+{% block title %}{{ 'Edit' if course else 'Create' }} course — Nurse.ng{% endblock %}
+{% block education_content %}
+<a class="edu-back-link" href="{{ '/learning/live/courses/' ~ course.id if course else '/learning/live/studio' }}">{{ icon('chevron', 15) }} {{ 'Course overview' if course else 'Educator studio' }}</a>
+<header class="edu-page-heading"><div><p class="eyebrow">Course authoring</p><h1>{{ 'Shape your course.' if course else 'A little structure. A lasting difference.' }}</h1><p class="edu-lede">Start with a clear purpose. Give learners a useful introduction, then organise your lessons into modules.</p></div></header>
+<div class="edu-form-layout"><form class="edu-form edu-panel" method="post" action="{{ action_url|default('/learning/live/courses') }}" data-pending-label="Saving course…">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+  <div class="edu-form-section"><h2>Course introduction</h2>
+    {{ field('title', 'Course title', values.get('title', ''), required=true, maxlength=180) }}
+    {{ textarea('summary', 'Short introduction', values.get('summary', ''), required=true, maxlength=500, rows=3, hint='A concise explanation of what this course helps learners understand or do.') }}
+    {{ textarea('description', 'About this course', values.get('description', ''), required=true, maxlength=15000, rows=7, hint='Explain your approach, what is included and any useful prerequisites.') }}
+  </div>
+  <div class="edu-form-section"><h2>Help learners find the right fit</h2><div class="edu-form-grid">
+    {{ field('category', 'Course topic', values.get('category', ''), required=true, maxlength=100) }}
+    <div class="edu-field"><label for="edu-level">Learning level</label><select id="edu-level" name="level">{% for value, label in [('all', 'All levels'), ('beginner', 'Foundational'), ('intermediate', 'Intermediate'), ('advanced', 'Advanced')] %}<option value="{{ value }}"{% if values.get('level', 'all') == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+  </div><p class="field-hint">Include your learning objectives and any prerequisites in the course description above.</p></div>
+  <div class="edu-form-actions"><button class="btn btn-primary" type="submit">{{ 'Save course details' if course else 'Create course draft' }} {{ icon('check', 17) }}</button><a class="btn btn-ghost" href="/learning/live/studio">Return to studio</a></div>
+</form><aside class="edu-form-aside"><span class="edu-panel-icon">{{ icon('book', 31) }}</span><h2>A clear promise to your learners.</h2><p>A focused title and practical objectives help people decide whether your course is right for them.</p><div class="edu-aside-divider"></div><h3>Build before you publish</h3><p>Your course starts as a draft. Add modules and lessons, check the learning experience, then publish it when it is ready.</p></aside></div>
+{% endblock %}

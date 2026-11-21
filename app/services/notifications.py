@@ -23,6 +23,10 @@ from app.models.notifications import Notification, NotificationPreference
 from app.models.user import User, UserStatus
 
 CATEGORIES = {
+    "learning": (
+        "Courses and live lectures",
+        "Reserved lectures, schedule changes and classroom reminders.",
+    ),
     "mentorship": ("Peer support", "Private support requests and changes to their status."),
     "community": ("Community learning", "Introductions for hosts and regular sessions you joined."),
     "replies": ("Conversations", "Replies to your posts, responses and followed discussions."),
@@ -308,7 +312,45 @@ def visible_condition():
         )
         .exists()
     )
+    from app.models.education import (
+        EducatorProfile,
+        LearningCourse,
+        LearningEnrollment,
+        LearningSession,
+        SessionRegistration,
+    )
     from app.services.opportunity_watch import job_notice_access
+
+    teacher = aliased(User)
+    learning_registration = select(SessionRegistration.user_id).where(
+        SessionRegistration.session_id == LearningSession.id,
+        SessionRegistration.user_id == Notification.recipient_id,
+        or_(SessionRegistration.status == "reserved", and_(
+            SessionRegistration.status == "cancelled",
+            Notification.kind == "learning_cancelled", LearningSession.status == "cancelled",
+        )),
+    ).correlate(LearningSession, Notification).exists()
+    learning_enrollment = select(LearningEnrollment.user_id).where(
+        LearningEnrollment.course_id == LearningSession.course_id,
+        LearningEnrollment.user_id == Notification.recipient_id,
+    ).correlate(LearningSession, Notification).exists()
+    # A withdrawn/removed learner, paused educator, unpublished course, or old
+    # schedule must not remain visible through an already queued reminder.
+    learning_access = select(LearningSession.id).join(EducatorProfile).join(
+        teacher, teacher.id == EducatorProfile.user_id,
+    ).outerjoin(LearningCourse, LearningCourse.id == LearningSession.course_id).where(
+        LearningSession.id == Notification.learning_session_id,
+        LearningSession.status != "draft", EducatorProfile.status == "approved",
+        teacher.is_active.is_(True), teacher.status == UserStatus.ACTIVE,
+        learning_registration,
+        or_(LearningSession.course_id.is_(None), and_(
+            LearningCourse.status == "published", learning_enrollment,
+        )),
+        or_(Notification.kind != "learning_reminder", and_(
+            Notification.deadline_at == LearningSession.starts_at,
+            LearningSession.status.in_(["scheduled", "live"]),
+        )),
+    ).correlate(Notification).exists()
 
     return or_(
         and_(
@@ -325,6 +367,7 @@ def visible_condition():
                 and_(Notification.category == "connections", connection_access),
                 and_(Notification.category == "messages", message_access),
                 and_(Notification.category == "applications", application_access),
+                and_(Notification.category == "learning", learning_access),
             ),
         ),
     )
@@ -404,6 +447,7 @@ def card(db: Session, notice: Notification) -> dict:
     name = (notice.actor.community_name if notice.actor else "") or "A member"
     heading, description, path = "New activity", "", "/notifications"
     icon = {
+        "learning": "book",
         "mentorship": "users",
         "community": "chat",
         "replies": "chat",
@@ -412,7 +456,18 @@ def card(db: Session, notice: Notification) -> dict:
         "applications": "briefcase",
         "opportunities": "briefcase",
     }[notice.category]
-    if notice.category == "mentorship":
+    if notice.category == "learning":
+        from app.models.education import LearningSession
+
+        session = db.get(LearningSession, notice.learning_session_id)
+        heading = {
+            "learning_cancelled": "A lecture you registered for was cancelled",
+            "learning_started": "Your lecture classroom is open",
+            "learning_updated": "Your lecture details have changed",
+        }.get(notice.kind, "Your reserved lecture starts soon")
+        description = session.title
+        path = f"/learning/live/sessions/{session.id}"
+    elif notice.category == "mentorship":
         heading = f"{name}: peer support {notice.kind.removeprefix('support_')}"
         description = "Open your private support request to review its current status."
         path = f"/mentorship/requests/{notice.mentorship_id}"

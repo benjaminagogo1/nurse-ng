@@ -134,6 +134,21 @@ class Settings(BaseSettings):
     reels_ffmpeg: str = ""
     reels_process_timeout_seconds: int = Field(default=300, ge=30, le=1200)
 
+    # Live learning uses a managed LiveKit media service. The web application
+    # issues restricted, short-lived grants; it never exposes this signing key.
+    livekit_url: str = ""
+    livekit_api_key: str = Field(default="", repr=False)
+    livekit_api_secret: str = Field(default="", repr=False)
+    livekit_token_seconds: int = Field(default=300, ge=60, le=600)
+    # Recording files belong to an operator-controlled PRIVATE S3-compatible
+    # bucket. Learners receive expiring GET signatures after course authorization.
+    learning_recording_s3_bucket: str = ""
+    learning_recording_s3_region: str = "us-east-1"
+    learning_recording_s3_endpoint: str = ""
+    learning_recording_s3_access_key: str = Field(default="", repr=False)
+    learning_recording_s3_secret_key: str = Field(default="", repr=False)
+    learning_recording_s3_force_path_style: bool = True
+
     # Optional search discovery. ROR directory discovery needs neither setting.
     # The agreement must permit retaining candidate URLs/results for this registry.
     recruitment_search_key: str = Field(default="", repr=False)
@@ -192,6 +207,66 @@ class Settings(BaseSettings):
         self.trusted_proxy_ips = ",".join(dict.fromkeys(proxies))
         from urllib.parse import urlsplit
 
+        livekit_values = (self.livekit_url, self.livekit_api_key, self.livekit_api_secret)
+        if any(livekit_values):
+            if not all(livekit_values):
+                raise ValueError(
+                    "Live learning requires LIVEKIT_URL, LIVEKIT_API_KEY "
+                    "and LIVEKIT_API_SECRET together."
+                )
+            media = urlsplit(self.livekit_url)
+            if (
+                media.scheme not in {"ws", "wss"}
+                or not media.hostname
+                or media.username
+                or media.password
+                or media.query
+                or media.fragment
+                or media.path not in {"", "/"}
+                or any(c.isspace() for c in self.livekit_url)
+            ):
+                raise ValueError(
+                    "NURSE_NG_LIVEKIT_URL must be a WebSocket origin without a path or credentials."
+                )
+            if production and media.scheme != "wss":
+                raise ValueError(
+                    "Production live learning requires a secure wss:// LiveKit origin."
+                )
+            normalize_origin(
+                f"{'https' if media.scheme == 'wss' else 'http'}://{media.netloc}",
+                public=production,
+            )
+            if len(self.livekit_api_secret) < 32:
+                raise ValueError("NURSE_NG_LIVEKIT_API_SECRET must contain at least 32 characters.")
+            self.livekit_url = self.livekit_url.rstrip("/")
+
+        recording_values = (
+            self.learning_recording_s3_bucket,
+            self.learning_recording_s3_access_key,
+            self.learning_recording_s3_secret_key,
+        )
+        if any(recording_values):
+            if not all(recording_values) or not all(livekit_values):
+                raise ValueError(
+                    "Learning recordings require LiveKit "
+                    "and complete private S3 bucket credentials."
+                )
+            if not re.fullmatch(
+                r"[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]", self.learning_recording_s3_bucket
+            ):
+                raise ValueError(
+                    "The learning recording bucket must be a DNS-compatible S3 bucket name."
+                )
+            if not re.fullmatch(r"[a-z0-9-]{1,40}", self.learning_recording_s3_region):
+                raise ValueError("Choose a valid recording S3 region.")
+            if self.learning_recording_s3_endpoint:
+                self.learning_recording_s3_endpoint = normalize_origin(
+                    self.learning_recording_s3_endpoint,
+                    public=production,
+                )
+                if not self.learning_recording_s3_endpoint.startswith("https://"):
+                    raise ValueError("Recording storage requires an HTTPS S3 endpoint.")
+
         endpoints = [
             v.strip().rstrip("/") for v in self.recruitment_searxng_urls.split(",") if v.strip()
         ]
@@ -225,21 +300,19 @@ class Settings(BaseSettings):
         self.public_base_url = normalize_origin(self.public_base_url, public=production)
         base = urlsplit(self.public_base_url)
         if production and base.hostname not in hosts:
-            raise ValueError(
-                "The public site hostname must be included in NURSE_NG_ALLOWED_HOSTS."
-            )
+            raise ValueError("The public site hostname must be included in NURSE_NG_ALLOWED_HOSTS.")
         if production and "database_url" not in self.model_fields_set:
-            raise ValueError(
-                "Set NURSE_NG_DATABASE_URL explicitly for the production database."
-            )
+            raise ValueError("Set NURSE_NG_DATABASE_URL explicitly for the production database.")
         try:
             database = make_url(self.database_url)
             if database.drivername in {"postgres", "postgresql"}:
                 database = database.set(drivername="postgresql+psycopg")
             if database.get_backend_name() not in {"sqlite", "postgresql"}:
                 raise ValueError
-            if production and database.get_backend_name() == "sqlite" and (
-                not database.database or database.database == ":memory:"
+            if (
+                production
+                and database.get_backend_name() == "sqlite"
+                and (not database.database or database.database == ":memory:")
             ):
                 raise ValueError
             self.database_url = database.render_as_string(hide_password=False)
@@ -251,11 +324,21 @@ class Settings(BaseSettings):
             if not value:
                 continue
             download = urlsplit(value)
-            if (any(char.isspace() for char in value) or "\\" in value
-                    or download.username or download.password
-                    or not ((download.scheme == "https" and download.hostname)
-                            or (value.startswith("/") and not value.startswith("//")
-                                and not download.scheme and not download.netloc))):
+            if (
+                any(char.isspace() for char in value)
+                or "\\" in value
+                or download.username
+                or download.password
+                or not (
+                    (download.scheme == "https" and download.hostname)
+                    or (
+                        value.startswith("/")
+                        and not value.startswith("//")
+                        and not download.scheme
+                        and not download.netloc
+                    )
+                )
+            ):
                 raise ValueError("Mobile app download links must use HTTPS or a local site path.")
             if download.scheme:
                 try:

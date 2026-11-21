@@ -1,0 +1,13 @@
+{% extends "education/base.html" %}
+{% from "education/_macros.html" import field, textarea with context %}
+{% block title %}{{ 'Edit' if module else 'Add' }} module — Nurse.ng{% endblock %}
+{% block education_content %}
+<a class="edu-back-link" href="/learning/live/courses/{{ course.id }}">{{ icon('chevron', 15) }} {{ course.title }}</a>
+<header class="edu-page-heading"><div><p class="eyebrow">Course outline</p><h1>{{ 'Edit this module.' if module else 'Bring your lessons together.' }}</h1><p class="edu-lede">A module gives a set of lessons a clear purpose and a sensible place in the course.</p></div></header>
+<form class="edu-form edu-panel edu-form-narrow" method="post" action="{{ action_url }}" data-pending-label="Saving module…"><input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+  {{ field('title', 'Module title', values.get('title', ''), required=true, maxlength=180) }}
+  {{ field('position', 'Position in course', values.get('position', 1), type='number', required=true, min=1, max=999, hint='Modules are presented from the lowest position to the highest.') }}
+  <div class="edu-form-actions"><button class="btn btn-primary" type="submit">{{ 'Save module' if module else 'Add module' }} {{ icon('check', 17) }}</button><a class="btn btn-ghost" href="/learning/live/courses/{{ course.id }}">Return to course</a></div>
+</form>
+{% if module %}<section class="edu-danger-panel"><div><h2>Remove this module</h2><p>Deleting a module also removes its lessons and their learner progress. This action cannot be undone.</p></div><form method="post" action="/learning/live/modules/{{ module.id }}/delete" data-pending-label="Deleting module…" data-education-confirm="Delete this module and all its lessons? Their learning content and learner progress will be removed."><input type="hidden" name="csrf_token" value="{{ csrf_token }}" /><button class="btn btn-secondary" type="submit">Delete module</button></form></section>{% endif %}
+{% endblock %}

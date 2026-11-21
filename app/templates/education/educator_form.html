@@ -1,0 +1,17 @@
+{% extends "education/base.html" %}
+{% from "education/_macros.html" import field, textarea with context %}
+{% block title %}{{ 'Edit educator profile' if educator else 'Apply to teach' }} — Nurse.ng{% endblock %}
+{% block education_content %}
+<a class="edu-back-link" href="/learning/live/studio">{{ icon('chevron', 15) }} Educator studio</a>
+<header class="edu-page-heading"><div><p class="eyebrow">A thoughtful introduction</p><h1>{{ 'Your educator profile' if educator else 'Share what you know.' }}</h1><p class="edu-lede">Help learners understand your background, your perspective and what you can help them learn.</p></div></header>
+<div class="edu-form-layout"><form class="edu-form edu-panel" method="post" action="{{ action_url|default('/learning/live/educator') }}" data-pending-label="Saving educator profile…">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+  <div class="edu-form-section"><h2>Your public introduction</h2><p>These details help learners choose an educator. Keep private contact and account information out of your introduction.</p>
+    {{ field('display_name', 'Educator display name', values.get('display_name', ''), required=true, maxlength=100) }}
+    {{ field('headline', 'Professional introduction', values.get('headline', ''), required=true, maxlength=160, hint='A short description of your teaching focus or professional background.') }}
+    {{ textarea('bio', 'About your teaching', values.get('bio', ''), required=true, maxlength=5000, hint='Describe your background, approach and the learners you hope to support.') }}
+    {{ field('subjects', 'Subjects and areas of expertise', values.get('subjects', ''), required=true, maxlength=500, hint='Separate your teaching subjects with commas.') }}
+  </div>
+  <div class="edu-form-actions"><button class="btn btn-primary" type="submit">{{ 'Save educator profile' if educator else 'Submit educator application' }} {{ icon('arrow', 17) }}</button><a class="btn btn-ghost" href="/learning/live/studio">Return to studio</a></div>
+</form><aside class="edu-form-aside"><span class="edu-panel-icon">{{ icon('cap', 31) }}</span><h2>Expertise deserves a clear introduction.</h2><p>Explain who your teaching is for, what you have experience in and how you will help learners make progress.</p><div class="edu-aside-divider"></div><h3>Publishing access</h3><p>Educator applications are reviewed before course publishing and live hosting become available. Educator access is separate from staff access.</p></aside></div>
+{% endblock %}

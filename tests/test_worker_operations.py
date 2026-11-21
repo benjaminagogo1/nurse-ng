@@ -106,7 +106,15 @@ def test_real_supervisor_recovers_a_killed_idle_worker(tmp_path, role):
     engine = create_engine(url)
     Base.metadata.create_all(engine)
     env = {**os.environ, 'NURSE_NG_DATABASE_URL': url, 'NURSE_NG_ACCOUNT_MAIL_BACKEND': 'disabled',
-           'NURSE_NG_REQUIRED_WORKERS': role}
+           'NURSE_NG_REQUIRED_WORKERS': role,
+           # Notification startup runs private-file maintenance. An empty test
+           # database must never make an operator's real files look orphaned.
+           'NURSE_NG_MESSAGE_MEDIA_DIR': str(tmp_path / 'messages'),
+           'NURSE_NG_COMMUNITY_MEDIA_DIR': str(tmp_path / 'community'),
+           'NURSE_NG_EVIDENCE_DIR': str(tmp_path / 'evidence'),
+           'NURSE_NG_AVATAR_DIR': str(tmp_path / 'avatars'),
+           'NURSE_NG_BACKUP_DIR': str(tmp_path / 'backups'),
+           'NURSE_NG_ACCOUNT_MAIL_DIR': str(tmp_path / 'mail')}
     log = (tmp_path / 'supervisor.log').open('w')
     process = subprocess.Popen(
         [sys.executable, '-m', 'app.cli', 'workers', '--roles', role],

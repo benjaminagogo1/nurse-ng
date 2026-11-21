@@ -1,0 +1,11 @@
+{
+  "verified_at": "2026-11-21T02:10:08.061772+00:00",
+  "database": "isolated loopback PostgreSQL",
+  "fresh_migration_and_metadata": "passed",
+  "historical_migration_and_metadata": "passed; existing member and notification preserved",
+  "concurrent_capacity": "one reservation for one seat",
+  "reminder_volume_and_dedupe": "202 due sessions; 202 committed notices after repeated passes",
+  "token_vs_revocation": "blocked, then denied after closure and approval change",
+  "start_vs_revocation": "blocked, then denied before provider room creation",
+  "media_transport": "mocked; no live provider calls"
+}
