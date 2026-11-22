@@ -1,0 +1,97 @@
+{
+  "theme": "dark",
+  "contrast": "high",
+  "surface": "#101b25",
+  "foreground": "#fff",
+  "rootBackground": "#080e14",
+  "dialogSurface": "#101b25",
+  "dialogForegroundToken": "#fff",
+  "bodySurface": "#101b25",
+  "bodyForeground": "#fff",
+  "bodyBackgroundToken": "#080e14",
+  "rootColourScheme": "dark",
+  "dialogColourScheme": "dark",
+  "dialogBackground": "rgb(16, 27, 37)",
+  "dialogForeground": "rgb(255, 255, 255)",
+  "bodyBackground": "rgb(8, 14, 20)",
+  "forcedColours": false,
+  "dialogForcedColorAdjust": "auto",
+  "animations": [
+    {
+      "playState": "running",
+      "currentTime": 0
+    },
+    {
+      "playState": "running",
+      "currentTime": 0
+    },
+    {
+      "playState": "running",
+      "currentTime": 0
+    },
+    {
+      "playState": "running",
+      "currentTime": 0
+    },
+    {
+      "playState": "running",
+      "currentTime": 0
+    },
+    {
+      "playState": "running",
+      "currentTime": 0
+    },
+    {
+      "playState": "running",
+      "currentTime": 0
+    },
+    {
+      "playState": "running",
+      "currentTime": 0
+    },
+    {
+      "playState": "running",
+      "currentTime": 0
+    },
+    {
+      "playState": "running",
+      "currentTime": 0
+    },
+    {
+      "playState": "running",
+      "currentTime": 0
+    },
+    {
+      "playState": "running",
+      "currentTime": 0
+    },
+    {
+      "playState": "running",
+      "currentTime": 0
+    },
+    {
+      "playState": "running",
+      "currentTime": 0
+    },
+    {
+      "playState": "running",
+      "currentTime": 0
+    },
+    {
+      "playState": "running",
+      "currentTime": 0
+    },
+    {
+      "playState": "running",
+      "currentTime": 0
+    },
+    {
+      "playState": "running",
+      "currentTime": 0
+    },
+    {
+      "playState": "running",
+      "currentTime": 0
+    }
+  ]
+}

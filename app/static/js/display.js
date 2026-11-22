@@ -67,14 +67,26 @@
       }
     };
     sync();
+    let returnFocusTo = null;
     document.querySelectorAll("[data-display-open]").forEach((button) => {
       button.hidden = false;
       button.addEventListener("click", () => {
         document.querySelectorAll(".header-popover[open]").forEach((menu) => {
           menu.open = false;
         });
+        const navigation = document.getElementById("mobile-navigation");
+        const fromNavigation = navigation?.open && navigation.contains(button);
+        returnFocusTo = fromNavigation
+          ? document.querySelector(".nav-toggle")
+          : button;
+        if (fromNavigation) navigation.close();
         if (!dialog.open) dialog.showModal();
       });
+    });
+    dialog.addEventListener("close", () => {
+      if (returnFocusTo?.isConnected && returnFocusTo.getClientRects().length)
+        returnFocusTo.focus();
+      returnFocusTo = null;
     });
     dialog.querySelectorAll("[data-display-close]").forEach((button) => {
       button.addEventListener("click", () => dialog.close());

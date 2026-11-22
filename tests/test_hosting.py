@@ -253,7 +253,7 @@ def test_backend_http_cannot_leak_into_assets_or_share_links(hosted_client, db_s
         },
     )
     assert page.status_code == 200
-    assert has_element(page, "script", src="/static/js/display.js")
+    assert has_element(page, "script", src="/static/js/display.js?v=2")
     assert has_element(page, "meta", property="og:url", content=ORIGIN + f"/topics/{topic.slug}")
     assert "internal-service" not in page.text and "attacker.example" not in page.text
     request = Request(

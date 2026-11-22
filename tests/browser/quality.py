@@ -408,7 +408,7 @@ try:
     navigate("/posts/new")
     assert js("document.querySelector('#body').value === ''"), "Published draft should be cleared"
     navigate("/settings")
-    js("document.querySelector('[data-display-open]').focus()")
+    js("document.querySelector('main [data-display-open]').focus()")
     key("Enter", 13)
     assert js("document.querySelector('#display-preferences').open")
     for _ in range(8):

@@ -549,6 +549,12 @@
     white-space: normal;
     max-width: 9rem;
   }
+}
+/* Use the same mobile range as the existing navigation dialog. */
+@media (max-width: 899px) {
+  .site-header .header-actions > :is(.display-trigger, .connectivity-link) {
+    display: none;
+  }
   .is-app .site-header .site-header-inner {
     flex-wrap: nowrap;
     gap: 8px;
@@ -567,10 +573,33 @@
   }
   .is-app .site-header .header-actions {
     flex-wrap: nowrap;
-    gap: 4px;
+    gap: 8px;
   }
-  .is-app .site-header .header-actions > .connectivity-link {
+  .is-app .site-header :is(.header-search, .header-messages) {
     display: none;
+  }
+  .is-app .site-header :is(.notification-bell, .nav-toggle) {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--fg);
+  }
+  .is-app .site-header :is(.notification-bell, .nav-toggle) > .icon {
+    width: 22px;
+    height: 22px;
+  }
+  .is-app .site-header .account-menu summary {
+    justify-content: center;
+    padding: 0;
+  }
+  .is-app .site-header .account-menu summary > :is(.account-label, .icon) {
+    display: none;
+  }
+  .is-app .site-header .account-menu .avatar {
+    width: 34px;
+    height: 34px;
   }
   .popover-content .account-connectivity {
     display: flex;
@@ -590,8 +619,5 @@
 @media (max-width: 359px) {
   .is-app .site-header .site-header-inner {
     padding-inline: 16px;
-  }
-  .is-app .site-header .brand > .icon {
-    display: none;
   }
 }

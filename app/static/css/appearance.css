@@ -673,6 +673,34 @@ dialog:is(.display-dialog, .reel-dialog) {
   gap: 12px;
   padding: 0 8px 12px;
 }
+.mobile-navigation-preferences {
+  margin-bottom: 12px;
+  padding: 0 8px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.mobile-navigation-preferences :is(button, a) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.mobile-navigation-preferences :is(button, a):hover {
+  background: var(--soft-surface);
+  text-decoration: none;
+}
+.mobile-navigation-preferences small {
+  display: block;
+  color: var(--muted);
+}
 .mobile-navigation .sidebar {
   position: static;
   transform: none;

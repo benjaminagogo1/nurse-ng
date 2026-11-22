@@ -26,6 +26,7 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--record", type=Path)
 parser.add_argument("--capture-only", action="store_true")
 parser.add_argument("--quick", action="store_true", help="Verify final mobile visual fixes and representative desktop layouts")
+parser.add_argument("--header-greeting", action="store_true", help="Verify shared header controls, theme access and professional dashboard greetings")
 args = parser.parse_args()
 artifacts = Path(tempfile.mkdtemp(prefix="nurse-mobile-layout-"))
 record = args.record or artifacts
@@ -80,14 +81,16 @@ with SessionLocal() as db:
     )
     member.email_verified_at = datetime.now(UTC)
     member.onboarding_completed_at = datetime.now(UTC)
-    db.add(NurseProfile(
+    profile = NurseProfile(
         user_id=member.id, display_name="Ada Nursing", location="Lagos",
         interests="Digital health", headline="Registered nurse",
         bio="Learning with my nursing community.", skills="Public health",
         qualification="Registered nurse", professional_status="registered",
         years_experience=3,
-    ))
+    )
+    db.add(profile)
     db.commit()
+    profile_id, member_id = profile.id, member.id
     transition(db, member, action="skip", revision=0, run_id=None)
     person(
         db, 902,
@@ -227,6 +230,219 @@ def layout_check(path, width, mode):
             assert result["headerHeight"] <= 70, result
 
 
+def header_greeting_check(path, width, mode):
+    layout_check(path, width, mode)
+    state = js("""(() => {
+      const visible = element => !!element?.getClientRects().length;
+      const header = document.querySelector('.site-header');
+      const actions = header.querySelector('.header-actions');
+      const controls = [...actions.children].filter(visible);
+      const bounds = controls.map(element => {
+        const target=element.matches('details')?element.querySelector('summary'):element;
+        const rect=target.getBoundingClientRect();
+        return {className:element.className,left:rect.left,right:rect.right,width:rect.width,height:rect.height};
+      });
+      const brand=header.querySelector('.brand');
+      const greeting=document.querySelector('.db-hello');
+      let greetingTextContained=true;
+      if(greeting) {
+        const heading=greeting.querySelector('h1'), rect=heading.getBoundingClientRect();
+        const range=document.createRange(); range.selectNodeContents(heading);
+        greetingTextContained=[...range.getClientRects()].every(text=>text.left>=rect.left-1 && text.right<=rect.right+1);
+      }
+      return {path:location.pathname,width:innerWidth,controls:bounds,
+        logoVisible:visible(brand.querySelector('svg')),brandText:brand.textContent.trim(),
+        themeVisible:visible(header.querySelector('[data-display-open]')),
+        statusVisible:visible(header.querySelector('.connectivity-link')),
+        searchVisible:visible(header.querySelector('.header-search')),
+        messagesVisible:visible(header.querySelector('.header-messages')),
+        profileImageVisible:visible(header.querySelector('.account-menu img')),
+        greeting:greeting?.querySelector('h1').textContent.trim().replace(/\\s+/g,' ')||null,
+        support:greeting?.querySelector('p:last-child').textContent.trim()||null,
+        greetingTextContained};
+    })()""")
+    state["mode"] = mode
+    if width <= 899:
+        assert state["logoVisible"] and state["brandText"] == "Nurse.ng", state
+        assert not state["themeVisible"] and not state["statusVisible"], state
+        assert not state["searchVisible"] and not state["messagesVisible"], state
+        assert len(state["controls"]) == 3, state
+        assert [control["className"] for control in state["controls"]] == [
+            "icon-button notification-bell", "header-popover account-menu", "nav-toggle",
+        ], state
+        assert all(control["width"] >= 44 and control["height"] >= 44 for control in state["controls"]), state
+        assert all(state["controls"][i+1]["left"]-state["controls"][i]["right"] >= 7 for i in range(2)), state
+        assert state["profileImageVisible"], state
+    else:
+        assert state["themeVisible"] and state["statusVisible"], state
+        assert state["searchVisible"] and state["messagesVisible"], state
+    if state["greeting"]:
+        assert state["greeting"] == "Welcome back, Ada.", state
+        assert state["support"] == "Here's what's happening in your nursing journey.", state
+        assert state["greetingTextContained"], state
+    header_checks.append(state)
+
+
+def open_mobile_theme():
+    js("document.querySelector('.nav-toggle').click()")
+    assert js("document.querySelector('#mobile-navigation').open"), "Mobile navigation opens"
+    assert js("!!document.querySelector('#mobile-navigation [data-display-open]').getClientRects().length"), "Theme control is visible in menu"
+    js("document.querySelector('#mobile-navigation [data-display-open]').click()")
+    assert js("document.querySelector('#display-preferences').open && !document.querySelector('#mobile-navigation').open"), "Menu closes before display dialog opens"
+
+
+def escape():
+    cdp("Input.dispatchKeyEvent", {"type":"keyDown", "key":"Escape", "code":"Escape", "windowsVirtualKeyCode":27})
+    cdp("Input.dispatchKeyEvent", {"type":"keyUp", "key":"Escape", "code":"Escape", "windowsVirtualKeyCode":27})
+
+
+def click(selector):
+    point=js(f"(() => {{ const rect=document.querySelector({json.dumps(selector)}).getBoundingClientRect(); return {{x:rect.left+rect.width/2,y:rect.top+rect.height/2}}; }})()")
+    cdp("Input.dispatchMouseEvent", {"type":"mousePressed","button":"left","clickCount":1,**point})
+    cdp("Input.dispatchMouseEvent", {"type":"mouseReleased","button":"left","clickCount":1,**point})
+
+
+def theme_palette():
+    return js("""(() => {
+      const root=getComputedStyle(document.documentElement), dialog=getComputedStyle(document.querySelector('#display-preferences')), body=getComputedStyle(document.body);
+      return {theme:document.documentElement.dataset.theme,contrast:document.documentElement.dataset.contrast,
+        surface:root.getPropertyValue('--surface').trim(),foreground:root.getPropertyValue('--fg').trim(),
+        rootBackground:root.getPropertyValue('--bg').trim(),
+        dialogSurface:dialog.getPropertyValue('--surface').trim(),dialogForegroundToken:dialog.getPropertyValue('--fg').trim(),
+        bodySurface:body.getPropertyValue('--surface').trim(),bodyForeground:body.getPropertyValue('--fg').trim(),bodyBackgroundToken:body.getPropertyValue('--bg').trim(),
+        rootColourScheme:root.colorScheme,dialogColourScheme:dialog.colorScheme,
+        dialogBackground:dialog.backgroundColor,dialogForeground:dialog.color,bodyBackground:body.backgroundColor,
+        forcedColours:matchMedia('(forced-colors: active)').matches,
+        dialogForcedColorAdjust:dialog.forcedColorAdjust,
+        animations:document.getAnimations().map(animation=>({playState:animation.playState,currentTime:animation.currentTime}))};
+    })()""")
+
+
+def run_header_greeting():
+    global header_checks
+    header_checks = []
+    functional_checks = []
+    navigate("/settings", "#profile-photo")
+    js("document.querySelector('[data-dismiss-install]')?.click()")
+    node = cdp("DOM.getDocument")["root"]["nodeId"]
+    input_id = cdp("DOM.querySelector", {"nodeId": node, "selector": "#profile-photo"})["nodeId"]
+    cdp("DOM.setFileInputFiles", {"nodeId": input_id, "files": [str(picture)]})
+    js("document.querySelector('form[action=\"/settings/photo\"]').requestSubmit()")
+    wait_for(lambda: js("!!document.querySelector('form[action=\"/settings/photo/remove\"]') && document.readyState === 'complete'"), "photo upload")
+
+    shared_pages = ["/auth/dashboard", "/settings", "/profile", "/notifications", "/messages", "/welcome/discover", "/nurses", "/activities", "/digest", "/jobs", "/learning"]
+    cases = [(360,"default",shared_pages)]
+    cases += [(width,"default",["/auth/dashboard"]) for width in [320,390,639,640,768,899,900,1440]]
+    cases += [(width,"large-high-contrast",["/auth/dashboard","/settings","/notifications"]) for width in [320,390,768,1440]]
+    if args.quick:
+        cases=[]
+        js("localStorage.setItem('nurse-ng-display',JSON.stringify({theme:'light',largeText:true,highContrast:true,reduceMotion:true}))")
+    for width, mode, paths in cases:
+        print(json.dumps({"stage":"header-greeting-mode","width":width,"mode":mode}), flush=True)
+        viewport(width)
+        preferences={"theme":"light","largeText":mode=="large-high-contrast","highContrast":mode=="large-high-contrast","reduceMotion":True}
+        js(f"localStorage.setItem('nurse-ng-display',{json.dumps(json.dumps(preferences))})")
+        for path in paths:
+            navigate(path)
+            header_greeting_check(path, width, mode)
+            if path == "/auth/dashboard" and (width,mode) in [(320,"default"),(360,"default"),(390,"large-high-contrast"),(1440,"default")]:
+                screenshot(f"dashboard-{width}-{mode}.png", ".db-top" if width < 900 else None)
+            if path == "/settings" and width == 360:
+                screenshot("settings-mobile.png")
+            if path == "/learning" and width == 360:
+                screenshot("learning-mobile.png")
+
+    viewport(360)
+    navigate("/auth/dashboard")
+    open_mobile_theme()
+    click('#display-form input[name="theme"][value="dark"] + span')
+    assert js("document.documentElement.dataset.theme==='dark' && JSON.parse(localStorage.getItem('nurse-ng-display')).theme==='dark'"), "Dark theme applies and persists"
+    def dark_palette_ready():
+        palette=theme_palette()
+        return palette if palette["dialogBackground"]=="rgb(16, 27, 37)" and palette["dialogForeground"]=="rgb(255, 255, 255)" and palette["bodyBackground"]=="rgb(8, 14, 20)" else None
+    theme_colours=wait_for(dark_palette_ready,"Visible dark theme colours",seconds=5)
+    (record/"theme-colours.json").write_text(json.dumps(theme_colours,indent=2)+"\n")
+    assert theme_colours["surface"].lower()=="#101b25" and theme_colours["foreground"].lower()=="#fff", theme_colours
+    assert theme_colours["dialogBackground"]=="rgb(16, 27, 37)" and theme_colours["dialogForeground"]=="rgb(255, 255, 255)", theme_colours
+    assert theme_colours["rootColourScheme"]=="dark" and theme_colours["dialogColourScheme"]=="dark", theme_colours
+    screenshot("theme-dialog-mobile.png")
+    escape()
+    wait_for(lambda: js("!document.querySelector('#display-preferences').open && document.activeElement.matches('.nav-toggle')"), "Theme Escape restores focus to navigation toggle")
+    open_mobile_theme()
+    click('#display-form input[name="theme"][value="system"] + span')
+    cdp("Emulation.setEmulatedMedia", {"features":[{"name":"prefers-color-scheme","value":"dark"}]})
+    wait_for(lambda: js("document.documentElement.dataset.theme==='dark'"), "System dark theme")
+    cdp("Emulation.setEmulatedMedia", {"features":[{"name":"prefers-color-scheme","value":"light"}]})
+    wait_for(lambda: js("document.documentElement.dataset.theme==='light'"), "System light theme")
+    click('#display-form input[name="theme"][value="light"] + span')
+    wait_for(lambda: theme_palette()["dialogBackground"]=="rgb(255, 255, 255)" and theme_palette()["bodyBackground"]=="rgb(245, 248, 252)","Visible light theme colours",seconds=5)
+    js("document.querySelector('#display-preferences [data-display-close]').click()")
+    wait_for(lambda: js("document.activeElement.matches('.nav-toggle')"), "Theme close restores focus")
+    functional_checks += ["menu theme access", "light/dark/system theme persistence", "theme dialog Escape and focus return"]
+
+    js("document.querySelector('.account-menu summary').click()")
+    assert js("document.querySelector('.account-menu').open"), "Profile account menu opens"
+    state=js("""(() => {
+      const rect=document.querySelector('.account-menu .popover-content').getBoundingClientRect();
+      return {left:rect.left,right:rect.right,width:innerWidth,status:document.querySelector('.account-connectivity [data-connectivity]').textContent.trim()};
+    })()""")
+    assert state["left"] >= 0 and state["right"] <= state["width"]+1 and state["status"], state
+    cdp("Network.emulateNetworkConditions", {"offline":True,"latency":0,"downloadThroughput":-1,"uploadThroughput":-1})
+    wait_for(lambda: js("document.querySelector('.account-connectivity [data-connectivity]').textContent.startsWith('Offline')"), "Offline status still updates")
+    screenshot("account-menu-mobile.png")
+    cdp("Network.emulateNetworkConditions", {"offline":False,"latency":0,"downloadThroughput":-1,"uploadThroughput":-1})
+    wait_for(lambda: js("document.querySelector('.account-connectivity [data-connectivity]').textContent.startsWith('Online')"), "Online status recovers")
+    js("document.querySelector('.account-menu a[href=\"/profile\"]').click()")
+    wait_for(lambda: js("location.pathname==='/profile' && document.readyState==='complete'"), "Profile navigation")
+    js("document.querySelector('[data-notification-bell]').click()")
+    wait_for(lambda: js("location.pathname==='/notifications' && document.readyState==='complete'"), "Notification navigation")
+    functional_checks += ["profile image and account navigation", "notification navigation", "online/offline status in account menu"]
+
+    navigate("/auth/dashboard")
+    cdp("Network.setBlockedURLs", {"urls":["*/static/js/*"]})
+    navigate("/auth/dashboard")
+    assert js("document.querySelector('.db-hello h1').textContent.trim().replace(/\\s+/g,' ')==='Welcome back, Ada.'"), "Greeting is correct without application JavaScript"
+    functional_checks.append("server-rendered greeting without application JavaScript")
+    cdp("Network.setBlockedURLs", {"urls":[]})
+
+    from app.models.user import User
+    long_name = "ElizabethChiamakaNwankwoAlexandra"
+    with SessionLocal() as db:
+        db.get(NurseProfile, profile_id).display_name=long_name
+        db.commit()
+    viewport(320)
+    navigate("/auth/dashboard")
+    assert js(f"document.querySelector('.db-hello h1').textContent.trim().replace(/\\s+/g,' ') === {json.dumps('Welcome back, '+long_name+'.')}")
+    assert js("document.documentElement.scrollWidth<=innerWidth+1"), "Long dynamic name wraps without horizontal scrolling"
+    screenshot("dashboard-long-name-mobile.png", ".db-top")
+    with SessionLocal() as db:
+        db.get(NurseProfile, profile_id).display_name=""
+        db.get(User, member_id).full_name=""
+        db.get(User, member_id).community_name=""
+        db.commit()
+    navigate("/auth/dashboard")
+    assert js("document.querySelector('.db-hello h1').textContent.trim()==='Welcome back.'"), "Empty name has no stray punctuation"
+    functional_checks += ["dynamic profile name", "long name wrapping", "empty name fallback"]
+
+    js("document.querySelector('.account-menu summary').click();document.querySelector('.account-menu form[action=\"/auth/logout\"]').requestSubmit()")
+    wait_for(lambda: js("document.readyState==='complete' && !!document.body && !document.body.classList.contains('is-app')"), "Sign out")
+    viewport(360)
+    for path in ["/", "/jobs", "/nurses"]:
+        navigate(path)
+        assert js("!document.querySelector('.site-header [data-display-open]').getClientRects().length && !document.querySelector('.site-header .connectivity-link').getClientRects().length"), (path,"public mobile header simplification")
+        assert js("document.documentElement.scrollWidth<=innerWidth+1"), (path,"public horizontal overflow")
+        open_mobile_theme()
+        js("document.querySelector('#display-preferences [data-display-close]').click()")
+        wait_for(lambda: js("document.activeElement.matches('.nav-toggle')"), path+" public menu focus")
+    navigate("/auth/login")
+    assert js("!!document.querySelector('.site-header [data-display-open]').getClientRects().length"), "Auth header keeps accessible theme control"
+    functional_checks += ["public shared-header theme access", "uncrowded auth header theme access"]
+    assert not errors, errors
+    result={"checks":checks,"headerChecks":header_checks,"functionalChecks":functional_checks,"themeColours":theme_colours,"javascriptErrors":errors}
+    (record/"browser.json").write_text(json.dumps(result,indent=2)+"\n")
+    print(json.dumps({"ok":True,"layouts":len(checks),"headerChecks":len(header_checks),"functionalChecks":len(functional_checks),"record":str(record)}),flush=True)
+
+
 try:
     for name, command_line in [
         ("server", [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", str(port), "--log-level", "warning"]),
@@ -246,6 +462,9 @@ try:
     navigate("/auth/login", "#phone")
     js(f"document.querySelector('#phone').value={json.dumps(phone)};document.querySelector('#password').value={json.dumps(password)};document.querySelector('form[action=\"/auth/login\"]').requestSubmit()")
     wait_for(lambda: js("location.pathname === '/' && document.readyState === 'complete'"), "sign in")
+    if args.header_greeting:
+        run_header_greeting()
+        raise SystemExit(0)
     navigate("/settings", "#profile-photo")
     js("document.querySelector('[data-dismiss-install]')?.click()")
     layout_check("/settings", 360, "default-no-photo")

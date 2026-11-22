@@ -1,7 +1,7 @@
-{% from "_icons.html" import icon %} {% macro display_button() -%}
+{% from "_icons.html" import icon %} {% macro display_button(labelled=false) -%}
 <button
   type="button"
-  class="icon-button display-trigger"
+  class="{% if labelled %}menu-display-trigger{% else %}icon-button display-trigger{% endif %}"
   data-display-open
   aria-label="Display and accessibility"
   aria-haspopup="dialog"
@@ -10,6 +10,7 @@
   hidden
 >
   {{ icon('appearance', 21) }}
+  {% if labelled %}<span>Display &amp; accessibility</span>{% endif %}
 </button>
 {%- endmacro %} {% macro display_dialog() -%}
 <dialog

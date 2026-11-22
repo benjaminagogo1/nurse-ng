@@ -29,12 +29,8 @@ Nurse.ng{% endblock %} {% block content %}
   <div class="db-top">
     <div class="db-hello">
       <p class="eyebrow">Your career at a glance</p>
-      <h1>
-        <span><span data-greeting>Welcome</span>{% if greeting_name %}, {{
-        greeting_name }}{% endif %}</span>
-        <span class="greeting-wave" aria-hidden="true">👋</span>
-      </h1>
-      <p>Keep going — you're making a difference.</p>
+      <h1>Welcome back{% if greeting_name %}, {{ greeting_name }}{% endif %}.</h1>
+      <p>Here's what's happening in your nursing journey.</p>
     </div>
     {% if user.account_type == 'employer' %}
     <div class="db-card completion-card">

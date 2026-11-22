@@ -99,15 +99,6 @@
       button.setAttribute("aria-pressed", String(visible));
     });
   });
-  document.querySelectorAll("[data-greeting]").forEach((label) => {
-    const hour = new Date().getHours();
-    label.textContent =
-      hour < 12
-        ? "Good morning"
-        : hour < 17
-          ? "Good afternoon"
-          : "Good evening";
-  });
   document.querySelectorAll('.slot input[type="file"]').forEach((input) => {
     input.addEventListener("change", () => {
       const slot = input.closest(".slot");

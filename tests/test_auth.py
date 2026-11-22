@@ -167,7 +167,7 @@ def test_dashboard_requires_sign_in(client):
     assert response.headers["location"] == "/auth/login"
 
 
-def test_dashboard_shows_the_signed_in_user(client):
+def test_dashboard_shows_the_signed_in_user(client, db_session):
     token = csrf_from(client.get("/auth/register"))
     client.post(
         "/auth/register",
@@ -179,3 +179,11 @@ def test_dashboard_shows_the_signed_in_user(client):
 
     assert response.status_code == 200
     assert "+2348012345678" in response.text
+    assert "<h1>Welcome back.</h1>" in response.text
+    assert "Here's what's happening in your nursing journey." in response.text
+    assert "👋" not in response.text
+
+    user = db_session.scalar(select(User).where(User.phone == "+2348012345678"))
+    user.full_name = "Benjamin Okoye"
+    db_session.commit()
+    assert "<h1>Welcome back, Benjamin.</h1>" in client.get("/auth/dashboard").text
