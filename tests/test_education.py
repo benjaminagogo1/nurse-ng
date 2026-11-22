@@ -8,6 +8,7 @@ an existing pre-education database through upgrade/downgrade without losing it.
 import os
 import secrets
 import subprocess
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
@@ -780,7 +781,7 @@ def test_education_migration_upgrade_downgrade_and_existing_notification_survive
 
     def migrate(target):
         result = subprocess.run(
-            ["venv/bin/alembic", "upgrade", target],
+            [sys.executable, "-m", "alembic", "upgrade", target],
             env=env,
             capture_output=True,
             text=True,
@@ -816,7 +817,7 @@ def test_education_migration_upgrade_downgrade_and_existing_notification_survive
         for column in inspect(engine).get_columns("notifications")
     )
     result = subprocess.run(
-        ["venv/bin/alembic", "downgrade", "e6480j0f6527"],
+        [sys.executable, "-m", "alembic", "downgrade", "e6480j0f6527"],
         env=env,
         capture_output=True,
         text=True,
@@ -841,7 +842,7 @@ def test_education_migration_upgrade_downgrade_and_existing_notification_survive
             {"user": user_id},
         )
     refused = subprocess.run(
-        ["venv/bin/alembic", "downgrade", "e6480j0f6527"],
+        [sys.executable, "-m", "alembic", "downgrade", "e6480j0f6527"],
         env=env,
         capture_output=True,
         text=True,

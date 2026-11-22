@@ -93,7 +93,7 @@ def environment(database, storage):
 def migrate(env, *arguments):
     """Exercise the deployment's Alembic entry point against one isolated schema."""
     result = subprocess.run(
-        [str(ROOT / "venv/bin/alembic"), *arguments],
+        [sys.executable, "-m", "alembic", *arguments],
         cwd=ROOT,
         env=env,
         capture_output=True,
