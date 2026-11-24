@@ -1,4 +1,9 @@
-"""Revocable personal invitations and aggregate, owner-only adoption counts."""
+"""Revocable personal invitations and aggregate, owner-only adoption counts.
+
+Personal invitations are signed, expiring and revocable. Attribution applies
+to a valid new-account signup journey; existing sign-ins are not new referrals.
+Owners see aggregates, never referred members' private activity histories.
+"""
 
 import hashlib
 import hmac
@@ -29,6 +34,7 @@ def invitation_link(item):
 
 
 def create_invitation(db, user, *, destination, label="", now=None):
+    """Save an active member's expiring personal link to a valid public destination."""
     _active(user)
     if not public_site_ready():
         raise CommunityError("Invitations will be available when the community is online.")
@@ -62,6 +68,7 @@ def create_invitation(db, user, *, destination, label="", now=None):
 
 
 def resolve(db, token, *, now=None):
+    """Verify the invitation signature, lifetime, owner and current destination availability."""
     if not isinstance(token, str) or len(token) > 256:
         return None
     try:
@@ -84,6 +91,7 @@ def resolve(db, token, *, now=None):
 
 def record_visit(db, request, item, token):
     # Session randomness identifies browsers without IP addresses or fingerprinting.
+    """Persist an approximate browser receipt without collecting IP/fingerprint identity."""
     seed = request.session.setdefault("referral_browser", secrets.token_urlsafe(24))
     browser_hash = hmac.new(settings.secret_key.encode(), seed.encode(), hashlib.sha256).hexdigest()
     db.execute(
@@ -110,6 +118,7 @@ def attribute_signup(db, request, user):
 
 
 def revoke(db, user, identifier):
+    """Let the invitation owner stop future use of the personal link."""
     item = db.get(ReferralInvitation, identifier)
     if not item or item.owner_id != user.id:
         raise CommunityError("This invitation is unavailable.")
@@ -118,6 +127,7 @@ def revoke(db, user, identifier):
 
 
 def summaries(db, user, *, page=1):
+    """Return only owner-visible aggregate invitation outcomes, not referred identities."""
     items = list(
         db.scalars(
             select(ReferralInvitation)

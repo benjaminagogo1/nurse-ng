@@ -14,6 +14,8 @@
   let requested = root.dataset.motion !== "reduce";
   let inView = true;
 
+  
+
   const updatePause = () => {
     pause.setAttribute("aria-label", requested ? "Pause automatic slides" : "Play automatic slides");
     pause.querySelector("[data-hero-pause-label]").textContent = requested ? "Pause" : "Play";

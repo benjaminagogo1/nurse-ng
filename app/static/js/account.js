@@ -1,3 +1,7 @@
+/**
+ * Preview account photos and move email credential tokens from URL fragments into forms.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 (() => {
   "use strict";
   const tokenInput = document.querySelector("[data-account-token]");

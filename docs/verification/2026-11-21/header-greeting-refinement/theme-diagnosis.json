@@ -1,0 +1,416 @@
+{
+  "before": {
+    "theme": "light",
+    "contrast": "high",
+    "surface": "#fff",
+    "foreground": "#071827",
+    "rootBackground": "#f5f8fc",
+    "dialogSurface": "#fff",
+    "dialogForegroundToken": "#071827",
+    "bodySurface": "#fff",
+    "bodyForeground": "#071827",
+    "bodyBackgroundToken": "#f5f8fc",
+    "rootColourScheme": "light",
+    "dialogColourScheme": "light",
+    "dialogBackground": "rgb(255, 255, 255)",
+    "dialogForeground": "rgb(7, 24, 39)",
+    "bodyBackground": "rgb(245, 248, 252)",
+    "forcedColours": false,
+    "dialogForcedColorAdjust": "auto",
+    "animations": []
+  },
+  "afterFrames": {
+    "theme": "dark",
+    "contrast": "high",
+    "surface": "#101b25",
+    "foreground": "#fff",
+    "rootBackground": "#080e14",
+    "dialogSurface": "#101b25",
+    "dialogForegroundToken": "#fff",
+    "bodySurface": "#101b25",
+    "bodyForeground": "#fff",
+    "bodyBackgroundToken": "#080e14",
+    "rootColourScheme": "dark",
+    "dialogColourScheme": "dark",
+    "dialogBackground": "rgb(16, 27, 37)",
+    "dialogForeground": "rgb(255, 255, 255)",
+    "bodyBackground": "rgb(8, 14, 20)",
+    "forcedColours": false,
+    "dialogForcedColorAdjust": "auto",
+    "animations": [
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      }
+    ]
+  },
+  "afterSecond": {
+    "theme": "dark",
+    "contrast": "high",
+    "surface": "#101b25",
+    "foreground": "#fff",
+    "rootBackground": "#080e14",
+    "dialogSurface": "#101b25",
+    "dialogForegroundToken": "#fff",
+    "bodySurface": "#101b25",
+    "bodyForeground": "#fff",
+    "bodyBackgroundToken": "#080e14",
+    "rootColourScheme": "dark",
+    "dialogColourScheme": "dark",
+    "dialogBackground": "rgb(16, 27, 37)",
+    "dialogForeground": "rgb(255, 255, 255)",
+    "bodyBackground": "rgb(8, 14, 20)",
+    "forcedColours": false,
+    "dialogForcedColorAdjust": "auto",
+    "animations": []
+  },
+  "matchedRules": {
+    "body": [
+      {
+        "selector": "body",
+        "origin": "user-agent",
+        "properties": []
+      },
+      {
+        "selector": "*",
+        "origin": "regular",
+        "properties": []
+      },
+      {
+        "selector": "body",
+        "origin": "regular",
+        "properties": []
+      },
+      {
+        "selector": "body",
+        "origin": "regular",
+        "properties": [
+          {
+            "name": "background",
+            "value": "var(--bg)",
+            "implicit": false,
+            "text": "background: var(--bg);",
+            "disabled": false,
+            "range": {
+              "startLine": 56,
+              "startColumn": 2,
+              "endLine": 56,
+              "endColumn": 24
+            }
+          },
+          {
+            "name": "background-color",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "selector": "body, .is-auth, :root[data-theme=\"dark\"] .is-landing",
+        "origin": "regular",
+        "properties": [
+          {
+            "name": "background",
+            "value": "var(--bg)",
+            "implicit": false,
+            "text": "background: var(--bg);",
+            "disabled": false,
+            "range": {
+              "startLine": 99,
+              "startColumn": 2,
+              "endLine": 99,
+              "endColumn": 24
+            }
+          },
+          {
+            "name": "color",
+            "value": "var(--fg)",
+            "implicit": false,
+            "text": "color: var(--fg);",
+            "disabled": false,
+            "range": {
+              "startLine": 100,
+              "startColumn": 2,
+              "endLine": 100,
+              "endColumn": 19
+            }
+          },
+          {
+            "name": "background-color",
+            "value": ""
+          },
+          {
+            "name": "color",
+            "value": "var(--fg)"
+          }
+        ]
+      },
+      {
+        "selector": "body:has(dialog[open])",
+        "origin": "regular",
+        "properties": []
+      },
+      {
+        "selector": ":root[data-motion=\"reduce\"] *, :root[data-motion=\"reduce\"] ::before, :root[data-motion=\"reduce\"] ::after",
+        "origin": "regular",
+        "properties": []
+      }
+    ],
+    "#display-preferences": [
+      {
+        "selector": "dialog",
+        "origin": "user-agent",
+        "properties": [
+          {
+            "name": "background-color",
+            "value": "canvas"
+          },
+          {
+            "name": "color",
+            "value": "canvastext"
+          }
+        ]
+      },
+      {
+        "selector": "dialog:where(:modal)",
+        "origin": "user-agent",
+        "properties": []
+      },
+      {
+        "selector": "dialog:-internal-dialog-in-top-layer",
+        "origin": "user-agent",
+        "properties": []
+      },
+      {
+        "selector": "dialog[open], [popover]:popover-open",
+        "origin": "user-agent",
+        "properties": []
+      },
+      {
+        "selector": "dialog:modal, [popover]:popover-open",
+        "origin": "user-agent",
+        "properties": []
+      },
+      {
+        "selector": "*",
+        "origin": "regular",
+        "properties": []
+      },
+      {
+        "selector": "dialog",
+        "origin": "regular",
+        "properties": [
+          {
+            "name": "color",
+            "value": "var(--fg)",
+            "implicit": false,
+            "text": "color: var(--fg);",
+            "disabled": false,
+            "range": {
+              "startLine": 522,
+              "startColumn": 2,
+              "endLine": 522,
+              "endColumn": 19
+            }
+          },
+          {
+            "name": "background",
+            "value": "var(--surface)",
+            "implicit": false,
+            "text": "background: var(--surface);",
+            "disabled": false,
+            "range": {
+              "startLine": 523,
+              "startColumn": 2,
+              "endLine": 523,
+              "endColumn": 29
+            }
+          },
+          {
+            "name": "color",
+            "value": "var(--fg)"
+          },
+          {
+            "name": "background-color",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "selector": ".display-dialog",
+        "origin": "regular",
+        "properties": []
+      },
+      {
+        "selector": ".display-dialog",
+        "origin": "regular",
+        "properties": []
+      },
+      {
+        "selector": "dialog:is(.display-dialog, .reel-dialog)",
+        "origin": "regular",
+        "properties": []
+      },
+      {
+        "selector": ":root[data-motion=\"reduce\"] *, :root[data-motion=\"reduce\"] ::before, :root[data-motion=\"reduce\"] ::after",
+        "origin": "regular",
+        "properties": []
+      }
+    ]
+  },
+  "modalReopened": {
+    "theme": "dark",
+    "contrast": "high",
+    "surface": "#101b25",
+    "foreground": "#fff",
+    "rootBackground": "#080e14",
+    "dialogSurface": "#101b25",
+    "dialogForegroundToken": "#fff",
+    "bodySurface": "#101b25",
+    "bodyForeground": "#fff",
+    "bodyBackgroundToken": "#080e14",
+    "rootColourScheme": "dark",
+    "dialogColourScheme": "dark",
+    "dialogBackground": "rgb(16, 27, 37)",
+    "dialogForeground": "rgb(255, 255, 255)",
+    "bodyBackground": "rgb(8, 14, 20)",
+    "forcedColours": false,
+    "dialogForcedColorAdjust": "auto",
+    "animations": []
+  },
+  "bodyClassAdded": {
+    "theme": "dark",
+    "contrast": "high",
+    "surface": "#101b25",
+    "foreground": "#fff",
+    "rootBackground": "#080e14",
+    "dialogSurface": "#101b25",
+    "dialogForegroundToken": "#fff",
+    "bodySurface": "#101b25",
+    "bodyForeground": "#fff",
+    "bodyBackgroundToken": "#080e14",
+    "rootColourScheme": "dark",
+    "dialogColourScheme": "dark",
+    "dialogBackground": "rgb(16, 27, 37)",
+    "dialogForeground": "rgb(255, 255, 255)",
+    "bodyBackground": "rgb(8, 14, 20)",
+    "forcedColours": false,
+    "dialogForcedColorAdjust": "auto",
+    "animations": []
+  },
+  "inlineBackground": {
+    "theme": "dark",
+    "contrast": "high",
+    "surface": "#101b25",
+    "foreground": "#fff",
+    "rootBackground": "#080e14",
+    "dialogSurface": "#101b25",
+    "dialogForegroundToken": "#fff",
+    "bodySurface": "#101b25",
+    "bodyForeground": "#fff",
+    "bodyBackgroundToken": "#080e14",
+    "rootColourScheme": "dark",
+    "dialogColourScheme": "dark",
+    "dialogBackground": "rgb(16, 27, 37)",
+    "dialogForeground": "rgb(255, 255, 255)",
+    "bodyBackground": "rgb(8, 14, 20)",
+    "forcedColours": false,
+    "dialogForcedColorAdjust": "auto",
+    "animations": []
+  },
+  "themeSelectorRule": {
+    "theme": "dark",
+    "contrast": "high",
+    "surface": "#101b25",
+    "foreground": "#fff",
+    "rootBackground": "#080e14",
+    "dialogSurface": "#101b25",
+    "dialogForegroundToken": "#fff",
+    "bodySurface": "#101b25",
+    "bodyForeground": "#fff",
+    "bodyBackgroundToken": "#080e14",
+    "rootColourScheme": "dark",
+    "dialogColourScheme": "dark",
+    "dialogBackground": "rgb(16, 27, 37)",
+    "dialogForeground": "rgb(255, 255, 255)",
+    "bodyBackground": "rgb(8, 14, 20)",
+    "forcedColours": false,
+    "dialogForcedColorAdjust": "auto",
+    "animations": []
+  }
+}

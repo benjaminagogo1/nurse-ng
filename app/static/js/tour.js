@@ -1,3 +1,7 @@
+/**
+ * Render the server-defined account tour and submit transitions; the browser cannot invent steps or completion.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 /* Account-backed, cross-page walkthrough. The server owns steps and progress. */
 (() => {
   "use strict";

@@ -7,7 +7,10 @@ capabilities are a later expansion once the community is established and trusted
 
 ## Documents
 
+- [Complete documentation index](docs/README.md) — architecture, every module/route/table/asset,
+  maintenance instructions, test navigation and feature guides.
 - [Developer code guide](docs/CODE_GUIDE.md) — start here to understand the repository, request flows, permissions and maintenance conventions.
+- [Dashboard next-step reminder](docs/DASHBOARD_ONBOARDING.md) — what hides it and why ordinary saving can show it again.
 - [Educator courses and live classrooms](docs/LIVE_LEARNING_ARCHITECTURE.md) — implementation architecture, camera/media technology, access controls, recordings and deployment setup.
 - [AI integration review and proposal](docs/AI_INTEGRATION_PROPOSAL_2026-11-17.md) —
   practical uses, recommended first pilot, architecture, costs and decisions for discussion.
@@ -48,7 +51,12 @@ capabilities are a later expansion once the community is established and trusted
 - [O1 verification-source memo](docs/O1_VERIFICATION_SOURCE_MEMO.md): draft research protocol for the Phase 0 kill gate; findings pending
 - [Work log](docs/WORK_LOG.md): every step, including blocked and unverified work
 
-## Status
+## Feature history and verification
+
+The notes below record feature delivery and earlier checks. Their schema revisions
+and test counts belong to those deliveries. For the current code, setup and
+maintenance contracts, use the [documentation index](docs/README.md) and
+`venv/bin/alembic heads`; upgrade the intended installation to `head`.
 
 **Offline & sync** now supports selected saved information, explicit contribution
 drafts and queued changes, with resumable Reel uploads. Upgrade through

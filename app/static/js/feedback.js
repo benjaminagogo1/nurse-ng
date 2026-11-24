@@ -1,3 +1,7 @@
+/**
+ * Enhance opted-in HTML forms with pending/error/success feedback from server-confirmed responses.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 (() => {
   "use strict";
   const panel = document.querySelector("[data-feedback-panel]");

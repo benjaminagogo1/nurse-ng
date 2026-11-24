@@ -10,6 +10,7 @@ from app.db.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
 
 class CommunityEvent(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Staff-authored event with publication state, scheduling and external meeting details."""
     __tablename__ = "community_events"
 
     title: Mapped[str] = mapped_column(String(160))
@@ -28,6 +29,7 @@ class CommunityEvent(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class EventAttendance(Base):
+    """Private member RSVP choice; it does not prove actual event attendance."""
     __tablename__ = "event_attendance"
 
     event_id: Mapped[UUID] = mapped_column(

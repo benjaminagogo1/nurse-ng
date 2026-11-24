@@ -1,4 +1,9 @@
-"""Reproducible automatic source checks; ambiguous evidence stays in staff review."""
+"""Reproducible automatic source checks; ambiguous evidence stays in staff review.
+
+Assessment consumes recorded observations and explicit policy inputs.
+Ambiguous authority or reuse evidence stays reviewable; an automatic assessment
+must not overwrite protected staff decisions or silently broaden approved scope.
+"""
 
 import base64
 import re

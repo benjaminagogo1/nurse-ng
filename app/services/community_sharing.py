@@ -1,4 +1,9 @@
-"""Reusable public invitations and tightly scoped sign-in destinations."""
+"""Reusable public invitations and tightly scoped sign-in destinations.
+
+These are destination invitations without personal referral attribution.
+member_invitations owns personal links and aggregate growth counts. Return
+destinations are allowlisted community paths, not arbitrary redirect URLs.
+"""
 
 import re
 from urllib.parse import urlencode, urlsplit

@@ -1,3 +1,7 @@
+/**
+ * Recover opt-in scoped post/reply drafts; remove only the version acknowledged by the server.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 // Community text stays in this tab; only session-change signals are shared between tabs.
 (() => {
   "use strict";

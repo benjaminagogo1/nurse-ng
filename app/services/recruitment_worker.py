@@ -1,4 +1,9 @@
-"""Durable discovery queue with leases, fencing and a hard network-process deadline."""
+"""Durable discovery queue with leases, fencing and a hard network-process deadline.
+
+A claim token fences stale workers before results update source/vacancy
+state. Network execution runs in a disposable child with a deadline. Restarted
+workers recover eligible leases; search observations never directly grant trust.
+"""
 
 import logging
 import multiprocessing
@@ -230,6 +235,7 @@ def enqueue_due(db: Session) -> int:
 
 
 def claim_next(db: Session) -> DiscoveryTask | None:
+    """Atomically claim one eligible discovery task with a fresh fencing token and bounded lease."""
     timestamp = now()
     for expired in list(
         db.scalars(
@@ -376,6 +382,7 @@ def _child_execute(pipe, kind: str, payload: dict) -> None:
 
 
 def isolated_execute(kind: str, payload: dict) -> dict:
+    """Run network discovery in a disposable child process with a hard deadline."""
     context = multiprocessing.get_context("spawn")
     receiving, sending = context.Pipe(duplex=False)
     process = context.Process(target=_child_execute, args=(sending, kind, payload), daemon=True)
@@ -668,6 +675,7 @@ def apply_result(db: Session, task_id, token: str, payload: dict, result: dict) 
 
 
 def run_next(db: Session, *, executor=None) -> DiscoveryTask | None:
+    """Claim, execute and apply one task; stale claims cannot overwrite current state."""
     task = claim_next(db)
     if task is None:
         return None

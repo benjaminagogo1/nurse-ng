@@ -23,12 +23,14 @@ from app.models.user import User
 
 
 class ContentStatus(StrEnum):
+    """Publication lifecycle shared by community posts and replies."""
     PROCESSING = "processing"
     PUBLISHED = "published"
     REMOVED = "removed"
 
 
 class MediaKind(StrEnum):
+    """Stored media role, including private Reel source and generated playback variants."""
     IMAGE = "image"
     VIDEO = "video"
     REEL_SOURCE = "reel_source"
@@ -37,12 +39,14 @@ class MediaKind(StrEnum):
 
 
 class ReportStatus(StrEnum):
+    """Open or reviewed state of a community moderation report."""
     OPEN = "open"
     RESOLVED = "resolved"
     DISMISSED = "dismissed"
 
 
 class ReportReason(StrEnum):
+    """Allowed community safety-report categories."""
     SPAM = "spam"
     HARASSMENT = "harassment"
     MISINFORMATION = "misinformation"
@@ -51,12 +55,14 @@ class ReportReason(StrEnum):
 
 
 class ConnectionStatus(StrEnum):
+    """Mutual-network request state; only accepted connections enable private messaging."""
     PENDING = "pending"
     ACCEPTED = "accepted"
     DECLINED = "declined"
 
 
 class CommunityTopic(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Public community, its rules and host; joining is a separate private membership choice."""
     __tablename__ = "community_topics"
 
     slug: Mapped[str] = mapped_column(String(80), unique=True, index=True)
@@ -74,6 +80,7 @@ class CommunityTopic(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class CommunityPost(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Shared public discussion/question/activity record, also the social identity of a Reel."""
     __tablename__ = "community_posts"
 
     author_id: Mapped[uuid.UUID] = mapped_column(
@@ -172,6 +179,7 @@ class CommunityAnswer(Base):
 
 
 class CommunityMedia(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Opaque file reference and media metadata attached to one community post."""
     __tablename__ = "community_media"
 
     post_id: Mapped[uuid.UUID] = mapped_column(
@@ -189,6 +197,7 @@ class CommunityMedia(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class CommunityReply(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Moderatable response with an optional parent reply in the same discussion."""
     __tablename__ = "community_replies"
 
     post_id: Mapped[uuid.UUID] = mapped_column(
@@ -251,6 +260,7 @@ class DiscussionReplyRead(Base):
 
 
 class ContentReport(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """One post-or-reply complaint plus review outcome; open_key prevents duplicate open reports."""
     __tablename__ = "content_reports"
 
     reporter_id: Mapped[uuid.UUID | None] = mapped_column(
@@ -292,6 +302,7 @@ class ContentReport(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class Follow(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Directional people subscription; it does not grant mutual messaging access."""
     __tablename__ = "community_follows"
 
     follower_user_id: Mapped[uuid.UUID] = mapped_column(
@@ -315,6 +326,7 @@ class Follow(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class Connection(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Canonical unordered account pair with request direction and mutual-acceptance state."""
     __tablename__ = "community_connections"
 
     requester_user_id: Mapped[uuid.UUID] = mapped_column(

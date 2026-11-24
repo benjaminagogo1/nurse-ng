@@ -1,3 +1,7 @@
+/**
+ * Load selected reply context without overwriting the composer; abort stale context requests.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 // Keep a response's context visible without replacing text already in the composer.
 (() => {
   "use strict";

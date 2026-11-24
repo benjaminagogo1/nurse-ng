@@ -1,3 +1,7 @@
+/**
+ * Unread bell/badge, private inbox cards and notification preference controls.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 .notification-bell {
   position: relative;
   flex-shrink: 0;

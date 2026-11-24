@@ -25,18 +25,21 @@ from app.db.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
 
 class UserStatus(StrEnum):
+    """Persisted account lifecycle states checked before authenticated access."""
     ACTIVE = "active"
     SUSPENDED = "suspended"
     DEACTIVATED = "deactivated"
 
 
 class AccountType(StrEnum):
+    """Member-selected account category; selecting one does not grant staff or employer approval."""
     NURSE = "nurse"
     EMPLOYER = "employer"
     PARTNER = "partner"
 
 
 class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Login identity and private account data; public identity and staff authority are separate."""
     __tablename__ = "users"
 
     phone: Mapped[str] = mapped_column(String(16), unique=True, index=True)

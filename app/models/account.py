@@ -10,6 +10,7 @@ from app.db.base import Base, UUIDPrimaryKeyMixin
 
 
 class AccountToken(UUIDPrimaryKeyMixin, Base):
+    """Hashed, expiring, single-use email credential bound to a purpose and session version."""
     __tablename__ = "account_tokens"
 
     user_id: Mapped[uuid.UUID] = mapped_column(
@@ -25,6 +26,7 @@ class AccountToken(UUIDPrimaryKeyMixin, Base):
 
 
 class FileDeletion(UUIDPrimaryKeyMixin, Base):
+    """Durable disk-cleanup task that survives deletion of the owning account."""
     __tablename__ = "account_file_deletions"
 
     kind: Mapped[str] = mapped_column(String(20))

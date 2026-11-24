@@ -1,0 +1,1609 @@
+{
+  "checks": [
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/auth/dashboard",
+      "mode": "default"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/settings",
+      "mode": "default"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/profile",
+      "mode": "default"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/notifications",
+      "mode": "default"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/messages",
+      "mode": "default"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/welcome/discover",
+      "mode": "default"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/nurses",
+      "mode": "default"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/activities",
+      "mode": "default"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": 62,
+      "issues": [],
+      "path": "/digest",
+      "mode": "default"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/jobs",
+      "mode": "default"
+    },
+    {
+      "width": 360,
+      "scrollWidth": 360,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/learning",
+      "mode": "default"
+    },
+    {
+      "width": 320,
+      "scrollWidth": 320,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/auth/dashboard",
+      "mode": "default"
+    },
+    {
+      "width": 390,
+      "scrollWidth": 390,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/auth/dashboard",
+      "mode": "default"
+    },
+    {
+      "width": 639,
+      "scrollWidth": 639,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/auth/dashboard",
+      "mode": "default"
+    },
+    {
+      "width": 640,
+      "scrollWidth": 640,
+      "headerHeight": 69,
+      "digestGap": null,
+      "issues": [],
+      "path": "/auth/dashboard",
+      "mode": "default"
+    },
+    {
+      "width": 768,
+      "scrollWidth": 768,
+      "headerHeight": 69,
+      "digestGap": null,
+      "issues": [],
+      "path": "/auth/dashboard",
+      "mode": "default"
+    },
+    {
+      "width": 899,
+      "scrollWidth": 899,
+      "headerHeight": 69,
+      "digestGap": null,
+      "issues": [],
+      "path": "/auth/dashboard",
+      "mode": "default"
+    },
+    {
+      "width": 900,
+      "scrollWidth": 885,
+      "headerHeight": 79,
+      "digestGap": null,
+      "issues": [],
+      "path": "/auth/dashboard",
+      "mode": "default"
+    },
+    {
+      "width": 1440,
+      "scrollWidth": 1425,
+      "headerHeight": 79,
+      "digestGap": null,
+      "issues": [],
+      "path": "/auth/dashboard",
+      "mode": "default"
+    },
+    {
+      "width": 320,
+      "scrollWidth": 320,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/auth/dashboard",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 320,
+      "scrollWidth": 320,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/settings",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 320,
+      "scrollWidth": 320,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/notifications",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 390,
+      "scrollWidth": 390,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/auth/dashboard",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 390,
+      "scrollWidth": 390,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/settings",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 390,
+      "scrollWidth": 390,
+      "headerHeight": 65,
+      "digestGap": null,
+      "issues": [],
+      "path": "/notifications",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 768,
+      "scrollWidth": 768,
+      "headerHeight": 69,
+      "digestGap": null,
+      "issues": [],
+      "path": "/auth/dashboard",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 768,
+      "scrollWidth": 768,
+      "headerHeight": 69,
+      "digestGap": null,
+      "issues": [],
+      "path": "/settings",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 768,
+      "scrollWidth": 768,
+      "headerHeight": 69,
+      "digestGap": null,
+      "issues": [],
+      "path": "/notifications",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 1440,
+      "scrollWidth": 1425,
+      "headerHeight": 79,
+      "digestGap": null,
+      "issues": [],
+      "path": "/auth/dashboard",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 1440,
+      "scrollWidth": 1425,
+      "headerHeight": 79,
+      "digestGap": null,
+      "issues": [],
+      "path": "/settings",
+      "mode": "large-high-contrast"
+    },
+    {
+      "width": 1440,
+      "scrollWidth": 1425,
+      "headerHeight": 79,
+      "digestGap": null,
+      "issues": [],
+      "path": "/notifications",
+      "mode": "large-high-contrast"
+    }
+  ],
+  "headerChecks": [
+    {
+      "path": "/auth/dashboard",
+      "width": 360,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 192,
+          "right": 236,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 244,
+          "right": 288,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 296,
+          "right": 340,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": "Welcome back, Ada.",
+      "support": "Here's what's happening in your nursing journey.",
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/settings",
+      "width": 360,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 192,
+          "right": 236,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 244,
+          "right": 288,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 296,
+          "right": 340,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": null,
+      "support": null,
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/profile",
+      "width": 360,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 192,
+          "right": 236,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 244,
+          "right": 288,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 296,
+          "right": 340,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": null,
+      "support": null,
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/notifications",
+      "width": 360,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 192,
+          "right": 236,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 244,
+          "right": 288,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 296,
+          "right": 340,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": null,
+      "support": null,
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/messages",
+      "width": 360,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 192,
+          "right": 236,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 244,
+          "right": 288,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 296,
+          "right": 340,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": null,
+      "support": null,
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/welcome/discover",
+      "width": 360,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 192,
+          "right": 236,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 244,
+          "right": 288,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 296,
+          "right": 340,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": null,
+      "support": null,
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/nurses",
+      "width": 360,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 192,
+          "right": 236,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 244,
+          "right": 288,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 296,
+          "right": 340,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": null,
+      "support": null,
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/activities",
+      "width": 360,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 192,
+          "right": 236,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 244,
+          "right": 288,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 296,
+          "right": 340,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": null,
+      "support": null,
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/digest",
+      "width": 360,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 192,
+          "right": 236,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 244,
+          "right": 288,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 296,
+          "right": 340,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": null,
+      "support": null,
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/jobs",
+      "width": 360,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 192,
+          "right": 236,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 244,
+          "right": 288,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 296,
+          "right": 340,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": null,
+      "support": null,
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/learning",
+      "width": 360,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 192,
+          "right": 236,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 244,
+          "right": 288,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 296,
+          "right": 340,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": null,
+      "support": null,
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/auth/dashboard",
+      "width": 320,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 156,
+          "right": 200,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 208,
+          "right": 252,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 260,
+          "right": 304,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": "Welcome back, Ada.",
+      "support": "Here's what's happening in your nursing journey.",
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/auth/dashboard",
+      "width": 390,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 222,
+          "right": 266,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 274,
+          "right": 318,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 326,
+          "right": 370,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": "Welcome back, Ada.",
+      "support": "Here's what's happening in your nursing journey.",
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/auth/dashboard",
+      "width": 639,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 471,
+          "right": 515,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 523,
+          "right": 567,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 575,
+          "right": 619,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": "Welcome back, Ada.",
+      "support": "Here's what's happening in your nursing journey.",
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/auth/dashboard",
+      "width": 640,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 472,
+          "right": 516,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 524,
+          "right": 568,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 576,
+          "right": 620,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": "Welcome back, Ada.",
+      "support": "Here's what's happening in your nursing journey.",
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/auth/dashboard",
+      "width": 768,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 600,
+          "right": 644,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 652,
+          "right": 696,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 704,
+          "right": 748,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": "Welcome back, Ada.",
+      "support": "Here's what's happening in your nursing journey.",
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/auth/dashboard",
+      "width": 899,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 731,
+          "right": 775,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 783,
+          "right": 827,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 835,
+          "right": 879,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": "Welcome back, Ada.",
+      "support": "Here's what's happening in your nursing journey.",
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/auth/dashboard",
+      "width": 900,
+      "controls": [
+        {
+          "className": "connectivity-link",
+          "left": 573.28125,
+          "right": 607,
+          "width": 33.71875,
+          "height": 17.359375
+        },
+        {
+          "className": "icon-button display-trigger",
+          "left": 621,
+          "right": 665,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "icon-button notification-bell",
+          "left": 679,
+          "right": 723,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "icon-button header-messages",
+          "left": 737,
+          "right": 781,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 795,
+          "right": 865,
+          "width": 70,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": true,
+      "statusVisible": true,
+      "searchVisible": true,
+      "messagesVisible": true,
+      "profileImageVisible": true,
+      "greeting": "Welcome back, Ada.",
+      "support": "Here's what's happening in your nursing journey.",
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/auth/dashboard",
+      "width": 1440,
+      "controls": [
+        {
+          "className": "connectivity-link",
+          "left": 1037.21875,
+          "right": 1070.9375,
+          "width": 33.71875,
+          "height": 17.359375
+        },
+        {
+          "className": "icon-button display-trigger",
+          "left": 1084.9375,
+          "right": 1128.9375,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "icon-button notification-bell",
+          "left": 1142.9375,
+          "right": 1186.9375,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "icon-button header-messages",
+          "left": 1200.9375,
+          "right": 1244.9375,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 1258.9375,
+          "right": 1405,
+          "width": 146.0625,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": true,
+      "statusVisible": true,
+      "searchVisible": true,
+      "messagesVisible": true,
+      "profileImageVisible": true,
+      "greeting": "Welcome back, Ada.",
+      "support": "Here's what's happening in your nursing journey.",
+      "greetingTextContained": true,
+      "mode": "default"
+    },
+    {
+      "path": "/auth/dashboard",
+      "width": 320,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 156,
+          "right": 200,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 208,
+          "right": 252,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 260,
+          "right": 304,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": "Welcome back, Ada.",
+      "support": "Here's what's happening in your nursing journey.",
+      "greetingTextContained": true,
+      "mode": "large-high-contrast"
+    },
+    {
+      "path": "/settings",
+      "width": 320,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 156,
+          "right": 200,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 208,
+          "right": 252,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 260,
+          "right": 304,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": null,
+      "support": null,
+      "greetingTextContained": true,
+      "mode": "large-high-contrast"
+    },
+    {
+      "path": "/notifications",
+      "width": 320,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 156,
+          "right": 200,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 208,
+          "right": 252,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 260,
+          "right": 304,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": null,
+      "support": null,
+      "greetingTextContained": true,
+      "mode": "large-high-contrast"
+    },
+    {
+      "path": "/auth/dashboard",
+      "width": 390,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 222,
+          "right": 266,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 274,
+          "right": 318,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 326,
+          "right": 370,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": "Welcome back, Ada.",
+      "support": "Here's what's happening in your nursing journey.",
+      "greetingTextContained": true,
+      "mode": "large-high-contrast"
+    },
+    {
+      "path": "/settings",
+      "width": 390,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 222,
+          "right": 266,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 274,
+          "right": 318,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 326,
+          "right": 370,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": null,
+      "support": null,
+      "greetingTextContained": true,
+      "mode": "large-high-contrast"
+    },
+    {
+      "path": "/notifications",
+      "width": 390,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 222,
+          "right": 266,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 274,
+          "right": 318,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 326,
+          "right": 370,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": null,
+      "support": null,
+      "greetingTextContained": true,
+      "mode": "large-high-contrast"
+    },
+    {
+      "path": "/auth/dashboard",
+      "width": 768,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 600,
+          "right": 644,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 652,
+          "right": 696,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 704,
+          "right": 748,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": "Welcome back, Ada.",
+      "support": "Here's what's happening in your nursing journey.",
+      "greetingTextContained": true,
+      "mode": "large-high-contrast"
+    },
+    {
+      "path": "/settings",
+      "width": 768,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 600,
+          "right": 644,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 652,
+          "right": 696,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 704,
+          "right": 748,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": null,
+      "support": null,
+      "greetingTextContained": true,
+      "mode": "large-high-contrast"
+    },
+    {
+      "path": "/notifications",
+      "width": 768,
+      "controls": [
+        {
+          "className": "icon-button notification-bell",
+          "left": 600,
+          "right": 644,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 652,
+          "right": 696,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "nav-toggle",
+          "left": 704,
+          "right": 748,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": false,
+      "statusVisible": false,
+      "searchVisible": false,
+      "messagesVisible": false,
+      "profileImageVisible": true,
+      "greeting": null,
+      "support": null,
+      "greetingTextContained": true,
+      "mode": "large-high-contrast"
+    },
+    {
+      "path": "/auth/dashboard",
+      "width": 1440,
+      "controls": [
+        {
+          "className": "connectivity-link",
+          "left": 1008.59375,
+          "right": 1051.96875,
+          "width": 43.375,
+          "height": 22.328125
+        },
+        {
+          "className": "icon-button display-trigger",
+          "left": 1065.96875,
+          "right": 1109.96875,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "icon-button notification-bell",
+          "left": 1123.96875,
+          "right": 1167.96875,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "icon-button header-messages",
+          "left": 1181.96875,
+          "right": 1225.96875,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 1239.96875,
+          "right": 1405,
+          "width": 165.03125,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": true,
+      "statusVisible": true,
+      "searchVisible": true,
+      "messagesVisible": true,
+      "profileImageVisible": true,
+      "greeting": "Welcome back, Ada.",
+      "support": "Here's what's happening in your nursing journey.",
+      "greetingTextContained": true,
+      "mode": "large-high-contrast"
+    },
+    {
+      "path": "/settings",
+      "width": 1440,
+      "controls": [
+        {
+          "className": "connectivity-link",
+          "left": 1008.59375,
+          "right": 1051.96875,
+          "width": 43.375,
+          "height": 22.328125
+        },
+        {
+          "className": "icon-button display-trigger",
+          "left": 1065.96875,
+          "right": 1109.96875,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "icon-button notification-bell",
+          "left": 1123.96875,
+          "right": 1167.96875,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "icon-button header-messages",
+          "left": 1181.96875,
+          "right": 1225.96875,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 1239.96875,
+          "right": 1405,
+          "width": 165.03125,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": true,
+      "statusVisible": true,
+      "searchVisible": true,
+      "messagesVisible": true,
+      "profileImageVisible": true,
+      "greeting": null,
+      "support": null,
+      "greetingTextContained": true,
+      "mode": "large-high-contrast"
+    },
+    {
+      "path": "/notifications",
+      "width": 1440,
+      "controls": [
+        {
+          "className": "connectivity-link",
+          "left": 1008.59375,
+          "right": 1051.96875,
+          "width": 43.375,
+          "height": 22.328125
+        },
+        {
+          "className": "icon-button display-trigger",
+          "left": 1065.96875,
+          "right": 1109.96875,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "icon-button notification-bell",
+          "left": 1123.96875,
+          "right": 1167.96875,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "icon-button header-messages",
+          "left": 1181.96875,
+          "right": 1225.96875,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "className": "header-popover account-menu",
+          "left": 1239.96875,
+          "right": 1405,
+          "width": 165.03125,
+          "height": 44
+        }
+      ],
+      "logoVisible": true,
+      "brandText": "Nurse.ng",
+      "themeVisible": true,
+      "statusVisible": true,
+      "searchVisible": true,
+      "messagesVisible": true,
+      "profileImageVisible": true,
+      "greeting": null,
+      "support": null,
+      "greetingTextContained": true,
+      "mode": "large-high-contrast"
+    }
+  ],
+  "functionalChecks": [
+    "menu theme access",
+    "light/dark/system theme persistence",
+    "theme dialog Escape and focus return",
+    "profile image and account navigation",
+    "notification navigation",
+    "online/offline status in account menu",
+    "server-rendered greeting without application JavaScript",
+    "dynamic profile name",
+    "long name wrapping",
+    "empty name fallback",
+    "public shared-header theme access",
+    "uncrowded auth header theme access"
+  ],
+  "themeColours": {
+    "theme": "dark",
+    "contrast": "high",
+    "surface": "#101b25",
+    "foreground": "#fff",
+    "rootBackground": "#080e14",
+    "dialogSurface": "#101b25",
+    "dialogForegroundToken": "#fff",
+    "bodySurface": "#101b25",
+    "bodyForeground": "#fff",
+    "bodyBackgroundToken": "#080e14",
+    "rootColourScheme": "dark",
+    "dialogColourScheme": "dark",
+    "dialogBackground": "rgb(16, 27, 37)",
+    "dialogForeground": "rgb(255, 255, 255)",
+    "bodyBackground": "rgb(8, 14, 20)",
+    "forcedColours": false,
+    "dialogForcedColorAdjust": "auto",
+    "animations": [
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      },
+      {
+        "playState": "running",
+        "currentTime": 0
+      }
+    ]
+  },
+  "javascriptErrors": []
+}

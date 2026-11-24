@@ -1,4 +1,9 @@
-"""Private saves, explicit matching choices and durable opportunity notifications."""
+"""Private saves, explicit matching choices and durable opportunity notifications.
+
+Bookmarks, matching criteria and reminders belong to the account. Alert
+creation uses durable receipt keys; notification visibility and delivery
+recheck current eligibility. See docs/NIGERIAN_OPPORTUNITIES.md.
+"""
 
 from datetime import UTC, datetime, timedelta
 
@@ -33,6 +38,7 @@ def saved_ids(db, user, ids):
 
 
 def save_job(db, user, job, *, remind=True):
+    """Set the account's private bookmark/reminder state for a currently eligible opportunity."""
     job = retained_job(db, job)
     if not job or not db.scalar(select(Job.id).where(Job.id == job.id, open_job_condition())):
         raise JobError("This opportunity is no longer available to save.")
@@ -83,6 +89,7 @@ def preferences(db, user):
 
 
 def save_preferences(db, user, *, keyword, location, job_type, country_code, enabled):
+    """Validate and save private opportunity matching and reminder choices."""
     keyword, location = keyword.strip(), location.strip()
     if len(keyword) > 120 or len(location) > 100:
         raise JobError("Keep the keyword within 120 characters and location within 100.")

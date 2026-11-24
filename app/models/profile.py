@@ -35,12 +35,14 @@ from app.models.user import User
 
 
 class Visibility(StrEnum):
+    """Explicit field-sharing levels; a missing FieldVisibility row stays private."""
     PRIVATE = "private"
     EMPLOYERS = "employers"
     PUBLIC = "public"
 
 
 class ProfessionalStatus(StrEnum):
+    """Member-declared nursing career-stage vocabulary, not verification evidence."""
     STUDENT = "student"
     GRADUATE = "graduate"
     REGISTERED = "registered"
@@ -48,12 +50,14 @@ class ProfessionalStatus(StrEnum):
 
 
 class ProfileStatus(StrEnum):
+    """Private professional-profile lifecycle, independent of account active status."""
     DRAFT = "draft"
     ACTIVE = "active"
     ARCHIVED = "archived"
 
 
 class ClaimType(StrEnum):
+    """Supported kinds of professional credential claims."""
     REGISTRATION = "registration"
     LICENCE = "licence"
     QUALIFICATION = "qualification"
@@ -62,6 +66,7 @@ class ClaimType(StrEnum):
 
 
 class ClaimStatus(StrEnum):
+    """Credential trust vocabulary; stronger claims require corresponding verification decisions."""
     SELF_DECLARED = "self_declared"
     SUBMITTED = "submitted"
     UNDER_REVIEW = "under_review"
@@ -74,6 +79,9 @@ class ClaimStatus(StrEnum):
 
 
 class NurseProfile(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Owner-managed professional record; public reads must apply field visibility and opt-in
+    rules.
+    """
     __tablename__ = "nurse_profiles"
 
     user_id: Mapped[uuid.UUID] = mapped_column(
@@ -131,6 +139,9 @@ class NurseProfile(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class CredentialClaim(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Professional assertion with verification state; document review alone is not source
+    confirmation.
+    """
     __tablename__ = "credential_claims"
 
     profile_id: Mapped[uuid.UUID] = mapped_column(
@@ -154,6 +165,7 @@ class CredentialClaim(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class FieldVisibility(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Explicit sharing level for one named field of one profile."""
     __tablename__ = "field_visibilities"
 
     profile_id: Mapped[uuid.UUID] = mapped_column(

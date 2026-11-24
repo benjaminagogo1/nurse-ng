@@ -1,4 +1,9 @@
-"""Salary facts from explicitly labelled remuneration, without guessing currency or period."""
+"""Salary facts from explicitly labelled remuneration, without guessing currency or period.
+
+Return only stated amounts, currency and pay period. Missing currency or
+period stays unknown rather than becoming an assumed Nigerian/monthly salary.
+The extractor and job-card presentation reuse these facts.
+"""
 
 import re
 from decimal import Decimal

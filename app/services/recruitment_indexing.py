@@ -1,4 +1,9 @@
-"""Staff-selected factual sources and their bounded collection addresses."""
+"""Staff-selected factual sources and their bounded collection addresses.
+
+Factual indexing and full-content reuse have different authorization scopes.
+Collection addresses must match the stored publisher scope. Search results
+cannot choose arbitrary fetch destinations or broaden staff-selected authority.
+"""
 
 from urllib.parse import urlsplit, urlunsplit
 

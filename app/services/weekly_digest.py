@@ -1,4 +1,10 @@
-"""Opt-in weekly highlights with durable claims and live eligibility checks."""
+"""Opt-in weekly highlights with durable claims and live eligibility checks.
+
+Email requires verified-address opt-in. Receipts are per account/local week,
+store no content snapshot, and recheck current membership/content before sending.
+Changing preferences cancels queued claims; terminal receipts have bounded
+retention. SMTP acceptance followed by a crash can still cause a retry.
+"""
 
 import hashlib
 import secrets
@@ -43,6 +49,7 @@ def save_preferences(
     timezone="Africa/Lagos",
     now=None,
 ):
+    """Persist verified-email opt-in/scheduling choices and cancel superseded queued claims."""
     _active(user)
     if weekday not in range(7):
         raise CommunityError("Choose a delivery day.")
@@ -107,6 +114,7 @@ def unsubscribe(db, identifier, token):
 
 
 def enqueue(db, *, now=None):
+    """Create at most one eligible digest receipt per account and local calendar week."""
     now = now or datetime.now(UTC)
     prefs = list(
         db.scalars(
@@ -141,6 +149,9 @@ def enqueue(db, *, now=None):
 
 
 def highlights(db, user, pref, *, now=None):
+    """Select currently accessible joined-community and opportunity facts without storing a mail
+    snapshot.
+    """
     now = now or datetime.now(UTC)
     statement = (
         select(CommunityPost)
@@ -235,6 +246,7 @@ def eligible(db, item, token):
 
 
 def run_next(db, *, now=None):
+    """Claim one weekly digest and recheck eligibility/content before optional SMTP delivery."""
     now = now or datetime.now(UTC)
     identifier = db.scalar(
         select(WeeklyDigest.id)

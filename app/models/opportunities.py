@@ -10,6 +10,7 @@ from app.db.base import Base, TimestampMixin
 
 
 class SavedOpportunity(TimestampMixin, Base):
+    """Private account/job bookmark with member-selected reminder state."""
     __tablename__ = "saved_opportunities"
 
     user_id: Mapped[uuid.UUID] = mapped_column(
@@ -23,6 +24,7 @@ class SavedOpportunity(TimestampMixin, Base):
 
 
 class OpportunityPreference(TimestampMixin, Base):
+    """Private matching interests and reminder choices used by opportunity alerts."""
     __tablename__ = "opportunity_preferences"
 
     user_id: Mapped[uuid.UUID] = mapped_column(

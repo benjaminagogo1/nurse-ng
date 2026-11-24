@@ -1,3 +1,7 @@
+/**
+ * Initialize shared NurseOffline state, verified session scope and bounded network/connectivity handling.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 (() => {
   "use strict";
   const store = window.NurseOfflineStore;

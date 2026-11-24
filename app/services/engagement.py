@@ -1,4 +1,9 @@
-"""Set the desired like state so retries cannot create duplicates or undo a like."""
+"""Set the desired like state so retries cannot create duplicates or undo a like.
+
+Likes are keyed by member and shared community post, including Reel posts.
+Use set_like with an explicit desired state so a repeated request cannot toggle
+the state back. Aggregate display still checks current public content.
+"""
 
 from sqlalchemy import delete, func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -11,6 +16,7 @@ from app.models.user import UserStatus
 
 
 def like_summaries(db, post_ids, user=None):
+    """Read eligible aggregate counts and viewer state for shared post/Reel like controls."""
     result = {post_id: {"likes": 0, "liked": False} for post_id in post_ids}
     if not result:
         return result
@@ -27,6 +33,7 @@ def like_summaries(db, post_ids, user=None):
 
 
 def set_like(db, user, post_id, *, liked):
+    """Persist the member's desired like state on eligible public content without retry toggles."""
     post = db.get(CommunityPost, post_id)
     reel = db.get(Reel, post_id)
     if (not post or post.status != ContentStatus.PUBLISHED

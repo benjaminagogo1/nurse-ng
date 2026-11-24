@@ -1,3 +1,7 @@
+/**
+ * Submit explicit desired like state and reconcile counts from the server; repeated requests do not toggle.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 (() => {
   "use strict";
   if (!window.fetch || !window.AbortController) return;

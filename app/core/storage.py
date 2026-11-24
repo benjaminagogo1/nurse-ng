@@ -1,4 +1,9 @@
-"""Private evidence: bounded parsing, quarantine, and fail-closed malware scanning."""
+"""Private evidence: bounded parsing, quarantine, and fail-closed malware scanning.
+
+Opaque filenames live outside app/static. A file that cannot be validated or
+scanned is not released. Verification/evidence services own access audit and
+retention; see docs/EMPLOYER_AND_EVIDENCE_OPERATIONS.md.
+"""
 
 import hashlib
 import os

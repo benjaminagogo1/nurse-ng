@@ -1,4 +1,9 @@
-"""Shared, bounded interest vocabulary for profiles and discovery."""
+"""Shared, bounded interest vocabulary for profiles and discovery.
+
+Interest choices guide suggestions and opportunity matching. They do not
+change account permissions, prove a qualification or publish private profile
+fields. Onboarding and account settings reuse the same interest vocabulary.
+"""
 
 INTEREST_TERMS = {
     "Public health": ("public health", "epidemiology", "disease control"),
@@ -19,10 +24,12 @@ MAX_INTERESTS = 6
 
 
 def interest_values(value: str) -> list[str]:
+    """Split the stored comma-separated vocabulary into selected interest labels."""
     return [item.strip() for item in (value or "").split(",") if item.strip()]
 
 
 def clean_interests(value: str) -> str:
+    """Reject unknown/too-many interests and persist them in stable vocabulary order."""
     selected = set(interest_values(value))
     if not selected.issubset(INTEREST_OPTIONS):
         raise ValueError("Choose interests from the available options.")

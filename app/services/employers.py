@@ -1,4 +1,9 @@
-"""Organization approval never follows from public role selection or a matching name."""
+"""Organization approval never follows from public role selection or a matching name.
+
+Membership, organization approval and active account state are checked together
+at use time. Selecting an employer account type never grants organization access
+or access to another employer's applications.
+"""
 
 from urllib.parse import urlsplit
 

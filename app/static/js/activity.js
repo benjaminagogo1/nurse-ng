@@ -1,3 +1,7 @@
+/**
+ * Send bounded member activity signals while visible; polling is not a fabricated page visit.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 /* Minimal first-party usage: trusted interaction on a visible, signed-in page. */
 (() => {
   "use strict";

@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% block extra_head %}
+{# Reel presentation extends the shared shell; the server processing lifecycle owns public readiness, not the player. #}{% extends 'base.html' %} {% block extra_head %}
 <link
   rel="stylesheet"
   href="{{ url_for('static', path='/css/reels.css') }}?v=8"

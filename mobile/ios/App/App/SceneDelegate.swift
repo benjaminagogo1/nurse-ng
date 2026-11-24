@@ -1,3 +1,7 @@
+// Native scene/Capacitor integration and same-origin offline recovery.
+// The bundle contains neutral HTML/assets; account records stay in the existing
+// encrypted WebView workspace. Preserve downstream navigation policy and keep
+// authorization, certificate and failed POST responses visible. See mobile/README.md.
 import UIKit
 import Capacitor
 import WebKit

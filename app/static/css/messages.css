@@ -1,3 +1,7 @@
+/**
+ * Private inbox, conversation layout and attachment presentation using shared theme tokens.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 .messages-page {
   max-width: 1120px;
   margin-inline: auto;

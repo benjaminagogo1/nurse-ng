@@ -1,4 +1,9 @@
-"""Account photos, verified email recovery and deletion with durable file cleanup."""
+"""Account photos, verified email recovery and deletion with durable file cleanup.
+
+Token consumption binds purpose, expiry, verified email and auth_version.
+Account deletion persists cleanup work before removing account-owned records,
+so interrupted filesystem removal can be retried. See docs/ACCOUNT_MANAGEMENT.md.
+"""
 
 import hashlib
 import re
@@ -51,6 +56,7 @@ def verify_current_password(db: Session, user: User, password: str) -> None:
 def request_account_email(
     db: Session, *, purpose: str, user: User | None = None, phone: str = "", dispatch=None
 ) -> bool:
+    """Create a purpose-specific expiring email credential after validating the active account."""
     if purpose not in {"verify", "reset"}:
         raise ValueError("Unsupported account email purpose")
     if not mail_available():
@@ -115,6 +121,9 @@ def request_account_email(
 
 
 def consume_account_token(db: Session, token: str, purpose: str, *, password: str = "") -> None:
+    """Atomically consume a valid purpose/email/session-bound credential and apply its account
+    change.
+    """
     if not re.fullmatch(r"[A-Za-z0-9_-]{43}", token):
         raise AuthError(TOKEN_ERROR)
     if purpose == "reset":
@@ -216,11 +225,13 @@ def prepare_photo(data: bytes) -> bytes:
 
 
 def queue_file_deletion(db: Session, kind: str, name: str) -> None:
+    """Append durable file cleanup work to the current database transaction."""
     if name:
         db.add(FileDeletion(kind=kind, storage_name=name))
 
 
 def cleanup_account_files(db: Session, *, limit: int = 100) -> dict:
+    """Retry persisted file deletions; completed disk cleanup removes its queue entry."""
     from app.core.message_storage import attachment_path
     removed = 0
     for item in list(
@@ -243,6 +254,7 @@ def cleanup_account_files(db: Session, *, limit: int = 100) -> dict:
 
 
 def set_photo(db: Session, user: User, *, data: bytes | None, public: bool = False) -> None:
+    """Replace the owner's validated account photo and coordinate removal of superseded files."""
     previous = user.photo_storage_name
     name = uuid.uuid4().hex if data is not None else ""
     if data is not None:
@@ -287,6 +299,7 @@ def set_photo(db: Session, user: User, *, data: bytes | None, public: bool = Fal
 
 
 def delete_account(db: Session, user: User, *, password: str) -> None:
+    """Remove the authorized account while retaining durable cleanup work for its private files."""
     verify_current_password(db, user, password)
     # Lock the owner before enumerating files. Concurrent uploads must either
     # finish first or fail their owner update after this transaction deletes it.

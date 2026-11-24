@@ -1,4 +1,10 @@
-"""Voluntary peer support with private requests and explicit mutual consent."""
+"""Voluntary peer support with private requests and explicit mutual consent.
+
+Requests move through pending, accepted and terminal states. Capacity is
+checked during acceptance; acceptance reuses/creates a mutual messaging
+connection. Ending support does not remove that separately controlled connection.
+Only involved members and authorized report review can see a private goal.
+"""
 
 from datetime import UTC, datetime
 
@@ -43,6 +49,7 @@ def save_offer(
     accepting=False,
     show_completed=False,
 ):
+    """Save the active member's explicit public peer-support listing and bounded capacity."""
     _active(user)
     if not user.community_name:
         raise CommunityError("Choose your public display name in Community settings first.")
@@ -137,6 +144,7 @@ def offer_card(db, offer, account):
 
 
 def request_support(db, user, mentor_id, *, topic, goal):
+    """Create/reuse one private open support request after checking the current offer."""
     _active(user)
     if mentor_id == user.id:
         raise CommunityError("Choose another colleague for support.")
@@ -212,6 +220,9 @@ def owned_request(db, user, identifier, *, staff=False):
 
 
 def respond(db, user, identifier, action):
+    """Apply an authorized request transition, checking capacity and connection state during
+    acceptance.
+    """
     _active(user)
     item = owned_request(db, user, identifier)
     old = item.status
@@ -309,6 +320,7 @@ def requests(db, user, *, page=1):
 
 
 def report(db, user, identifier, *, reason, details):
+    """Record a participant's private concern for staff review without exposing unreported goals."""
     item = owned_request(db, user, identifier)
     if reason not in {"harassment", "privacy", "misinformation", "spam", "other"}:
         raise CommunityError("Choose a report reason.")
@@ -326,6 +338,7 @@ def report(db, user, identifier, *, reason, details):
 
 
 def review_report(db, staff, identifier, action):
+    """Record an authorized staff report decision and any requested offer pause."""
     _active(staff)
     if not staff.is_staff or action not in {"resolve", "dismiss", "pause"}:
         raise CommunityError("Staff access and a valid review action are required.")

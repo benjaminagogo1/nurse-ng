@@ -1,4 +1,10 @@
-"""Community publishing, moderation, and member-relationship rules."""
+"""Community publishing, moderation, and member-relationship rules.
+
+Posts, replies, people follows and accepted connections share this domain.
+A follow is not a connection and does not grant private messaging. Public reads
+filter current publication/account state; moderation can revoke availability.
+Media writes need reconciliation because disk and database commits are separate.
+"""
 
 import re
 import unicodedata

@@ -1,3 +1,5 @@
+"""Regression coverage for login probe; see tests/README.md for isolation and runner setup."""
+
 from tests.helpers import CSRF_RE, register_and_sign_in
 
 

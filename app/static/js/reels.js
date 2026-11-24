@@ -1,3 +1,7 @@
+/**
+ * Enhance Reel playback, captions, visibility, uploads and explicit drafts; server processing decides readiness.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 (() => {
   "use strict";
   const notice = document.querySelector("[data-reel-notice]");

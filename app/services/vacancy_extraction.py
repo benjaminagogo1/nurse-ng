@@ -1,4 +1,9 @@
-"""Conservative schema.org JobPosting extraction. No model calls or inferred credentials."""
+"""Conservative schema.org JobPosting extraction. No model calls or inferred credentials.
+
+Structured content produces explicit facts and validation issues. Missing
+requirements are not guessed. Extraction does not grant source authority or
+publish a Job; vacancies owns those decisions.
+"""
 
 import base64
 import hashlib

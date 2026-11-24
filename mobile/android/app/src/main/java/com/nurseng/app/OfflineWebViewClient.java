@@ -17,6 +17,12 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
 /** Recover the existing origin's workspace without a service worker or cached HTML. */
+/**
+ * Preserve Capacitor navigation policy and load the bundled neutral workspace
+ * only for recoverable same-site GET failures. Retain the site's WebView origin
+ * and storage; TLS errors, rejected authorization and failed POSTs remain errors.
+ * See mobile/README.md and docs/FRONTEND_GUIDE.md for the shared offline contract.
+ */
 final class OfflineWebViewClient extends BridgeWebViewClient {
     private final Bridge bridge;
     private final String origin;

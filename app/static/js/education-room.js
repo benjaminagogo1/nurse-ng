@@ -1,3 +1,7 @@
+/**
+ * Connect authorized LiveKit classroom media, synchronize room state and release media/timers on exit.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 /*
  * Integrated classroom controller, pinned to LiveKit browser SDK 2.25.0.
  *

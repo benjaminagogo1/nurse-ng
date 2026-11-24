@@ -7,9 +7,11 @@ Usage::
     python -m app.cli cleanup-community-media --dry-run
     python -m app.cli check-config
 
-Staff accounts can open the document-review queue. There is deliberately no
-web route for granting the flag: it is an operator action, recorded in the
-access audit when the reviewer opens evidence (DECISIONS L49).
+Staff accounts can open the document-review queue. These commands provide
+operator bootstrap/recovery access to the configured installation. Existing
+administrators can separately manage staff access through staff_routes and its
+audited staff service. CLI commands must not be run against member data merely
+to explore the application; use --help and isolated test fixtures instead.
 """
 
 import argparse
@@ -44,6 +46,9 @@ def _set_staff(phone: str, *, enabled: bool) -> int:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    """Parse an explicit operator command and return its exit code; commands can mutate the
+    configured installation.
+    """
     parser = argparse.ArgumentParser(prog="python -m app.cli")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser(

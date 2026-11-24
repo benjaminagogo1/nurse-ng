@@ -1,3 +1,5 @@
+"""Regression coverage for home; see tests/README.md for isolation and runner setup."""
+
 def test_home_renders(client):
     response = client.get("/")
 

@@ -1,4 +1,9 @@
-"""Engine and session factory."""
+"""Engine and session factory.
+
+One synchronous SQLAlchemy session is yielded per request. Closing the session
+does not commit: each owning service/caller must explicitly commit its writes.
+SQLite connections enable foreign keys individually; production uses PostgreSQL.
+"""
 
 from collections.abc import Generator
 
@@ -34,6 +39,7 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 
 def get_db() -> Generator[Session, None, None]:
+    """Yield a request-owned session and close it; the owning service must commit mutations."""
     db = SessionLocal()
     try:
         yield db

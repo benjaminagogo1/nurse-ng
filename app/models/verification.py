@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 
 
 class CaseStatus(StrEnum):
+    """Submission/reviewer lifecycle for a document-review case."""
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
@@ -28,12 +29,14 @@ class CaseStatus(StrEnum):
 
 
 class EvidenceKind(StrEnum):
+    """Required private licence/certificate and government-identity document types."""
     LICENCE = "licence"
     GOVERNMENT_ID = "government_id"
     NURSING_CERTIFICATE = "nursing_certificate"
     ADDITIONAL_CERT = "additional_cert"
 
 class VerificationCase(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Document/name review request and staff decision; it does not query regulator records."""
     __tablename__ = "verification_cases"
 
     profile_id: Mapped[uuid.UUID] = mapped_column(
@@ -68,6 +71,7 @@ class VerificationCase(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class EvidenceDocument(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Private evidence object metadata, validation/scanning state and retention dates."""
     __tablename__ = "evidence_documents"
 
     case_id: Mapped[uuid.UUID] = mapped_column(

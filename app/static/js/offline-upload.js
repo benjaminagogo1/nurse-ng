@@ -1,3 +1,7 @@
+/**
+ * Resume staged Reel byte transfer and recover its publication receipt; transfer is not ready playback.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 (() => {
   "use strict";
   const app = window.NurseOffline,

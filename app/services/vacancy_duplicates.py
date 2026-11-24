@@ -1,4 +1,9 @@
-"""Consolidate legacy URL aliases while retaining job links and collection evidence."""
+"""Consolidate legacy URL aliases while retaining job links and collection evidence.
+
+Member saves/applications and retired job links are reconciled before
+consolidating duplicate announcement aliases. Dry-run reports proposed work.
+Keep provenance and original evidence available for review.
+"""
 
 from collections import defaultdict
 

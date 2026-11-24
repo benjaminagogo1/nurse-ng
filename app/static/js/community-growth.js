@@ -1,3 +1,7 @@
+/**
+ * Enhance public sharing/copy fallbacks and conditionally reveal learning-activity form fields.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 (() => {
   "use strict";
   document.querySelectorAll("[data-share-url]").forEach((container) => {

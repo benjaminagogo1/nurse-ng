@@ -1,4 +1,4 @@
-{%- from "_icons.html" import icon -%} {%- from "_display.html" import
+{# Shared document/context contract: web.templating.render supplies CSRF, feedback, draft scope, notifications and tour state. Preserve offline deferred-script order; see docs/FRONTEND_GUIDE.md. #}{%- from "_icons.html" import icon -%} {%- from "_display.html" import
 display_button, display_dialog -%} {%- from "_feedback.html" import
 feedback_slot -%} {%- macro nav_link(href, key, label, name, current) -%}
 <li>

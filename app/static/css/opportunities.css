@@ -1,3 +1,7 @@
+/**
+ * Private saves, matching-preference controls and opportunity navigation.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 .opportunity-nav {
   display: flex;
   flex-wrap: wrap;

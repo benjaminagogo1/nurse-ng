@@ -1,3 +1,7 @@
+/**
+ * Shared post/Reel like controls, pressed state and accessible feedback.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 .post-like { margin: 0; min-width: 0; }
 .post-like button, .post-like-guest {
   display: inline-flex; align-items: center; justify-content: center; gap: 7px;

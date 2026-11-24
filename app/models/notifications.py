@@ -11,6 +11,7 @@ from app.models.user import User
 
 
 class NotificationPreference(TimestampMixin, Base):
+    """Per-account/category channel choices; email requires separate verified-address opt-in."""
     __tablename__ = "notification_preferences"
 
     user_id: Mapped[uuid.UUID] = mapped_column(
@@ -22,6 +23,7 @@ class NotificationPreference(TimestampMixin, Base):
 
 
 class Notification(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Private record-reference notice and durable optional-email claim/retry state."""
     __tablename__ = "notifications"
 
     recipient_id: Mapped[uuid.UUID] = mapped_column(

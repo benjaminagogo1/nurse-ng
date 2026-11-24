@@ -1,3 +1,7 @@
+/**
+ * Apply browser-local theme/text/contrast/motion preferences before CSS loads to prevent theme flash.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 // Run before stylesheets so a saved dark theme is applied before first paint.
 (() => {
   "use strict";

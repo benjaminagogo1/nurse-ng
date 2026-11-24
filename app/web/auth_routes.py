@@ -1,4 +1,9 @@
-"""Registration, sign-in, sign-out, and the authenticated account page."""
+"""Registration, sign-in, sign-out, and the authenticated account page.
+
+Session creation stores user_id and persisted auth_version. The dashboard
+aggregates owner data and reads MemberJourney dismissal independently of profile
+completion and the guided tour. See docs/DASHBOARD_ONBOARDING.md.
+"""
 
 from datetime import UTC, datetime, timedelta
 from math import ceil
@@ -283,6 +288,7 @@ def dashboard(
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ) -> Response:
+    """Render owner-scoped account/community summaries with explicit next-step reminder state."""
     from app.services.community_participation import progress
 
     profile = get_profile_for_user(db, user.id)

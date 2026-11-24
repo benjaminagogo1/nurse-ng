@@ -1,4 +1,9 @@
-"""Operational Nigerian coverage, without treating discovered sites as active vacancies."""
+"""Operational Nigerian coverage, without treating discovered sites as active vacancies.
+
+Coverage distinguishes candidate publishers, approved collectors and eligible
+public jobs. An observed recruitment page is not a confirmed hiring campaign.
+Use this report to explain gaps without inventing listings.
+"""
 
 import re
 

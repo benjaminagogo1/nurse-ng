@@ -1,3 +1,7 @@
+/**
+ * Render prepared encrypted snapshots and recover explicit drafts in the neutral offline workspace.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 /* Explicit drafts and deferred sending integrated with the existing forms. */
 (() => {
   "use strict";

@@ -1,3 +1,7 @@
+/**
+ * Shared navigation, focus handling, password visibility and file-input presentation in base.html.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 (() => {
   "use strict";
   const toggle = document.querySelector(".nav-toggle");

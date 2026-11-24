@@ -1,4 +1,9 @@
-"""Legacy document checks and durable, scheduled removal of expired private evidence."""
+"""Legacy document checks and durable, scheduled removal of expired private evidence.
+
+Retention removes private document objects and updates their availability.
+A historical review decision may remain after its evidence expires; these are
+different lifecycle records. Dry-run maintenance reports without deleting.
+"""
 
 import hashlib
 from datetime import UTC, datetime, timedelta

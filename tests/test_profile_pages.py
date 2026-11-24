@@ -1,3 +1,5 @@
+"""Regression coverage for profile pages; see tests/README.md for isolation and runner setup."""
+
 import pytest
 from sqlalchemy import select
 

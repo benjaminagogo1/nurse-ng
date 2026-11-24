@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% block content %}<section class="community-page conversation-space participation-page">
+{# Submitter contract: dismiss=yes hides the dashboard reminder; ordinary saving clears dismissal. Introduction is a separate public-consent form. #}{% extends "base.html" %}{% block content %}<section class="community-page conversation-space participation-page">
 <p class="eyebrow">From your first day in nursing school to professorship</p><h1>{{ title }}</h1><p class="lede">Find people who understand your next step. A small conversation can be a useful beginning.</p>
 {% include "participation/_nav.html" %}
 <form method="post" action="/community/start/preferences" class="participation-form participation-card" data-feedback-form><input type="hidden" name="csrf_token" value="{{ csrf_token }}" />

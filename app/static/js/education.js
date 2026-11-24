@@ -1,4 +1,8 @@
 /**
+ * Enhance lesson authoring fields and learning-page controls; domain authorization remains server-side.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
+/**
  * Progressive enhancement for professional learning pages.
  *
  * Native form posts, server validation and persisted learning state remain the

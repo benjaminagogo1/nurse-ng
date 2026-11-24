@@ -1,3 +1,5 @@
+"""Regression coverage for health; see tests/README.md for isolation and runner setup."""
+
 def test_healthz_returns_ok(client):
     response = client.get("/healthz")
 

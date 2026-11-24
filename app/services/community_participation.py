@@ -1,4 +1,11 @@
-"""Newcomer welcomes, recurring activities and private participation records."""
+"""Newcomer welcomes, recurring activities and private participation records.
+
+The dashboard reminder is controlled only by MemberJourney.dismissed_at.
+Saving with dismiss=False clears dismissal; community progress never auto-hides
+it. Introduction publication requires consent at the HTTP boundary and creates
+ordinary public content. The notifications worker advances recurring sessions.
+See docs/DASHBOARD_ONBOARDING.md and docs/COMMUNITY_PARTICIPATION.md.
+"""
 
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
@@ -82,6 +89,13 @@ def zone(value):
 
 
 def save_journey(db, user, *, goal="", show_recognition=False, dismiss=False):
+    """Persist optional private choices and replace the dashboard dismissal state.
+
+    A blank goal is valid. dismiss=True records the current UTC time;
+    dismiss=False writes NULL, including when updating an already hidden
+    reminder. No membership, post, recognition or tour milestone is required.
+    The account-keyed upsert commits here. See docs/DASHBOARD_ONBOARDING.md.
+    """
     _active(user)
     if goal and goal not in GOALS:
         raise CommunityError("Choose one of the listed goals.")
@@ -106,6 +120,9 @@ def save_journey(db, user, *, goal="", show_recognition=False, dismiss=False):
 
 
 def progress(db, user):
+    """Read saved choices and actual eligible community counts; this does not dismiss the reminder.
+
+    """
     journey = db.get(MemberJourney, user.id)
     joined = (
         db.scalar(
@@ -181,6 +198,9 @@ def progress(db, user):
 
 
 def introduce(db, user, *, topic_id, body):
+    """Publish/reuse a member introduction and join the chosen community; the route verifies
+    consent.
+    """
     _active(user)
     db.scalar(select(User).where(User.id == user.id).with_for_update())
     existing = db.scalar(
@@ -213,6 +233,7 @@ def introduce(db, user, *, topic_id, body):
 
 
 def welcome_queue(db, user, topic, *, page=1):
+    """List outstanding introductions only for the current community host or staff."""
     if not can_manage_community(user, topic):
         raise CommunityError("Only the community host or staff can view its welcome queue.")
     return list(
@@ -232,6 +253,7 @@ def welcome_queue(db, user, topic, *, page=1):
 
 
 def acknowledge_welcome(db, user, post_id):
+    """Complete a welcome after a real published host reply, rather than generating a greeting."""
     post = get_published_post(db, post_id)
     if not post or not can_manage_community(user, post.topic):
         raise CommunityError("Only the community host or staff can welcome this member.")
@@ -254,6 +276,7 @@ def acknowledge_welcome(db, user, post_id):
 
 def next_start(value, interval, timezone):
     # Preserve local wall-clock time through seasonal timezone changes.
+    """Calculate the next local-time recurrence while preserving its timezone schedule."""
     return (utc(value).astimezone(zone(timezone)) + timedelta(days=interval)).astimezone(UTC)
 
 
@@ -271,6 +294,9 @@ def create_series(
     interval=7,
     now=None,
 ):
+    """Validate host ownership and create a retry-safe recurring activity with its first
+    discussion.
+    """
     _active(user)
     if interval not in {7, 14, 28} or activity_format not in ACTIVITY_FORMATS:
         raise CommunityError("Choose a valid activity format and repeat interval.")
@@ -333,6 +359,7 @@ def create_series(
 
 
 def set_series_active(db, user, identifier, active):
+    """Let an authorized host pause/resume future recurring publication."""
     _active(user)
     series = db.get(ActivitySeries, identifier)
     if not series or (
@@ -362,6 +389,7 @@ def advance(value, series, now):
 
 
 def run_next_activity(db, *, now=None):
+    """Publish one due eligible recurring session from the notifications worker."""
     now = now or datetime.now(UTC)
     # Prepare sessions one day before they start so members can join in advance.
     series = db.scalar(
@@ -439,6 +467,7 @@ def run_next_activity(db, *, now=None):
 
 
 def attendance(db, user, post_id, *, attending):
+    """Set a member's private activity participation; joining also follows discussion replies."""
     _active(user)
     post = get_published_post(db, post_id)
     if not post or post.post_kind != "activity":

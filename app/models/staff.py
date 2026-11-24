@@ -11,6 +11,7 @@ from app.models.user import User
 
 
 class StaffRoleEvent(UUIDPrimaryKeyMixin, Base):
+    """Audit of administrator grants/revocations with acting and affected account references."""
     __tablename__ = "staff_role_events"
 
     actor_id: Mapped[uuid.UUID | None] = mapped_column(

@@ -1,4 +1,9 @@
-"""Publish, discover and save short videos without a second social graph."""
+"""Publish, discover and save short videos without a second social graph.
+
+A Reel uses a CommunityPost for public identity, replies, likes and moderation.
+Upload acceptance creates queued work; reel_worker must finish processing before
+playback is public. Saved Reels are private bookmarks.
+"""
 
 import re
 import unicodedata

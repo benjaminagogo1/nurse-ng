@@ -1,4 +1,9 @@
-"""Source registry with staff decisions and separately evaluated automatic activation."""
+"""Source registry with staff decisions and separately evaluated automatic activation.
+
+Discovery observations, staff approval, automatic activation and reuse scope
+are distinct states. HTTP requests enqueue work rather than fetching websites.
+Append-only source events explain decisions. See docs/RECRUITMENT_SOURCE_OPERATIONS.md.
+"""
 
 import hashlib
 import re

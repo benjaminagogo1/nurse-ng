@@ -1,4 +1,9 @@
-"""Resolve a retired vacancy only to its recorded, matching announcement."""
+"""Resolve a retired vacancy only to its recorded, matching announcement.
+
+Aliases preserve saved links after duplicate consolidation. Matching stored
+announcement identity is required; this resolver must not redirect one role
+to an unrelated vacancy.
+"""
 
 from uuid import UUID
 

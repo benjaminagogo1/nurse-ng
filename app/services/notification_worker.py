@@ -29,6 +29,9 @@ def ready(now):
 
 
 def eligible_for_delivery(db, notice, token):
+    """Recheck claim ownership, unread state, active account, verified address and current content
+    access.
+    """
     recipient = notice.recipient
     return bool(
         notice.email_lease_token == token
@@ -47,6 +50,7 @@ def eligible_for_delivery(db, notice, token):
 
 
 def deliver_notification(notice, identifier):
+    """Send a generic private-inbox link with a stable Message-ID and sanitized retry outcome."""
     mail = EmailMessage()
     mail["From"] = settings.smtp_from or "Nurse.ng <no-reply@localhost>"
     mail["To"] = notice.email_to
@@ -67,6 +71,9 @@ def deliver_notification(notice, identifier):
 
 
 def run_next(db, *, now=None):
+    """Claim one email, persist its attempt, recheck eligibility and save a bounded retry/terminal
+    outcome.
+    """
     now = now or datetime.now(UTC)
     identifier = db.scalar(
         select(Notification.id)

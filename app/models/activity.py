@@ -10,6 +10,7 @@ from app.db.base import Base
 
 
 class UserDailyActivity(Base):
+    """Private aggregate of one account's usage on one Nigerian calendar day."""
     __tablename__ = "user_daily_activity"
 
     user_id: Mapped[uuid.UUID] = mapped_column(

@@ -1,3 +1,12 @@
+"""Assemble the ASGI application; run with ``uvicorn app.main:app``.
+
+Importing this module validates settings and creates the configured database
+engine. It does not migrate or seed the database. Middleware handles host checks,
+signed sessions and message body limits; routers own feature HTTP interfaces.
+Web and CLI workers share domain services and the database, not process memory.
+See docs/CODE_GUIDE.md for the request lifecycle and feature map.
+"""
+
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -47,6 +56,9 @@ BASE_DIR = Path(__file__).resolve().parent
 
 
 def create_app() -> FastAPI:
+    """Register safe error rendering, host/session/body middleware, public assets and feature
+    routers.
+    """
     app = FastAPI(title=settings.app_name, debug=settings.debug)
     app.add_exception_handler(HTTPException, http_error)
     app.add_exception_handler(RequestValidationError, validation_error)

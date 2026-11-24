@@ -1,4 +1,9 @@
-"""Approved-source vacancy ingestion and explicit exception review, in one transaction."""
+"""Approved-source vacancy ingestion and explicit exception review, in one transaction.
+
+Snapshot, normalized record, review outcome and public Job are distinct
+records. Publication requires current collection authority and usable facts.
+Stable announcement keys and duplicate review preserve links/history on retries.
+"""
 
 import base64
 import hashlib

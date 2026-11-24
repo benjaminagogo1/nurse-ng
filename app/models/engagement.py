@@ -10,6 +10,7 @@ from app.db.base import Base
 
 
 class PostLike(Base):
+    """Unique account/post desired like state shared by community posts and Reels."""
     __tablename__ = "community_post_likes"
 
     post_id: Mapped[uuid.UUID] = mapped_column(

@@ -1,4 +1,9 @@
-"""Public communities, learning participation and useful-answer recognition."""
+"""Public communities, learning participation and useful-answer recognition.
+
+Joining, Helpful recognition and selected answers are separate records.
+Desired-state writes tolerate retries. Membership choices remain private;
+recognition is community feedback, not credential verification.
+"""
 
 from datetime import UTC, datetime
 from uuid import UUID
@@ -194,6 +199,7 @@ def _community_values(name, description, welcome_text, rules, interest):
 
 
 def can_manage_community(user: User | None, topic: CommunityTopic) -> bool:
+    """Check current host/staff authority without treating community membership as host access."""
     return bool(
         user
         and user.is_active
@@ -236,6 +242,7 @@ def update_community(db: Session, user: User, topic: CommunityTopic, **values) -
 
 
 def membership(db: Session, user: User, topic: CommunityTopic, *, joined: bool) -> None:
+    """Set the active member's desired private community membership state."""
     _active(user)
     current = db.scalar(
         select(CommunityTopic)
@@ -396,6 +403,9 @@ def _public_reply(db: Session, reply_id: UUID) -> tuple[CommunityReply, Communit
 
 
 def recognize_reply(db: Session, user: User, reply_id: UUID, *, marked: bool) -> CommunityReply:
+    """Set one member's Helpful state on an eligible public reply; repeats preserve desired state.
+
+    """
     _active(user)
     reply, _ = _public_reply(db, reply_id)
     if reply.author_id == user.id:
@@ -417,6 +427,7 @@ def recognize_reply(db: Session, user: User, reply_id: UUID, *, marked: bool) ->
 
 
 def select_answer(db: Session, user: User, reply_id: UUID, *, selected: bool) -> CommunityReply:
+    """Let the question author select/clear an eligible answer independently of Helpful votes."""
     _active(user)
     reply, post = _public_reply(db, reply_id)
     if post.post_kind != "question" or post.author_id != user.id:

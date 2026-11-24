@@ -1,4 +1,9 @@
-"""Private, paginated conversations with idempotent sending and bounded read receipts."""
+"""Private, paginated conversations with idempotent sending and bounded read receipts.
+
+Both message reads and sends require a currently accepted connection. Client
+keys support retry handling; delivery and read state come from saved records.
+Attachment processing/storage lives in message_attachments and core stores.
+"""
 
 import uuid
 from datetime import UTC, datetime
@@ -18,6 +23,7 @@ PAGE_SIZE = 40
 
 
 def can_message(db: Session, user: User, recipient: User) -> bool:
+    """Require both active accounts and a currently accepted mutual connection."""
     if any(
         not person.is_active or person.status != UserStatus.ACTIVE for person in (user, recipient)
     ):
@@ -54,6 +60,7 @@ def send_message(
     attachment_ids=None,
     auth_version=None,
 ) -> DirectMessage:
+    """Save a private message only after rechecking the active mutual connection and retry key."""
     if not can_message(db, user, recipient):
         raise ValueError("Connect with this nurse before sending a message.")
     body = body.strip()
@@ -104,6 +111,9 @@ def send_message(
 
 
 def thread_query(user, recipient):
+    """Build the two-direction message query; the caller must first check current connection
+    access.
+    """
     return select(DirectMessage).where(
         or_(
             and_(DirectMessage.sender_id == user.id, DirectMessage.recipient_id == recipient.id),
@@ -120,6 +130,9 @@ def _cursor(db, query, identifier):
 
 
 def conversation_page(db, user, recipient, *, before=None):
+    """Authorize and read one stable cursor page, returning display order and older-page
+    cursor.
+    """
     if not can_message(db, user, recipient):
         raise ValueError("This conversation is not available.")
     query = thread_query(user, recipient)
@@ -144,10 +157,14 @@ def conversation_page(db, user, recipient, *, before=None):
 
 
 def conversation(db: Session, user: User, recipient: User) -> list[DirectMessage]:
+    """Return the latest authorized conversation page."""
     return conversation_page(db, user, recipient)[0]
 
 
 def updates(db, user, recipient, *, after=None):
+    """Read newer messages plus unseen incoming replay; clients deduplicate by saved message
+    ID.
+    """
     if not can_message(db, user, recipient):
         raise ValueError("This conversation is not available.")
     query = thread_query(user, recipient)
@@ -181,6 +198,9 @@ def updates(db, user, recipient, *, after=None):
 
 
 def mark_read(db: Session, user: User, sender: User, ids=None) -> None:
+    """Authorize and mark only this recipient's selected incoming IDs and linked notices
+    read.
+    """
     if not can_message(db, user, sender):
         raise ValueError("This conversation is not available.")
     if ids is None:
@@ -213,6 +233,7 @@ def mark_read(db: Session, user: User, sender: User, ids=None) -> None:
 
 
 def unread_count(db: Session, user: User) -> int:
+    """Count persisted unread incoming records; conversation access is checked separately."""
     return (
         db.scalar(
             select(func.count(DirectMessage.id)).where(
@@ -224,6 +245,9 @@ def unread_count(db: Session, user: User) -> int:
 
 
 def message_data(message, user):
+    """Serialize a message for its authorized viewer without exposing another sender's retry
+    key.
+    """
     from app.services.message_attachments import attachment_data
 
     timestamp = message.created_at

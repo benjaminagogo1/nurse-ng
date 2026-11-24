@@ -11,6 +11,9 @@ from app.models.community import CommunityPost
 
 
 class Reel(TimestampMixin, Base):
+    """Video extension keyed to a community post, with upload identity and leased processing state.
+
+    """
     __tablename__ = "reels"
 
     post_id: Mapped[uuid.UUID] = mapped_column(

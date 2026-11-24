@@ -1,4 +1,9 @@
-"""Shared, readable timestamps without changing their recorded clock or date."""
+"""Shared, readable timestamps without changing their recorded clock or date.
+
+The saved UTC instant is formatted without mutating its value. The browser
+NurseTime formatter follows the same display convention; calendar-date-only
+formatting is a separate template filter.
+"""
 
 from datetime import datetime
 

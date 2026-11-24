@@ -1,4 +1,9 @@
-"""Original Nurse.ng guides that may be downloaded without third-party fetching."""
+"""Original Nurse.ng guides that may be downloaded without third-party fetching.
+
+This registry supplies original downloadable help content to offline services.
+It is distinct from educator-authored courses in education.py. Material keys
+are stable identifiers used by offline snapshots.
+"""
 
 MATERIALS = {
     "application-checklist": {

@@ -1,4 +1,10 @@
-"""Production web/worker entry point, including a single-service hosting option."""
+"""Production web/worker entry point, including a single-service hosting option.
+
+This process launcher validates configuration, then execs web or supervised
+workers. Separate web/workers roles need a prior migration step. The single-host
+all role applies migrations before launching both process groups. --check
+validates startup arguments without migrating or starting services.
+"""
 
 import argparse
 import json

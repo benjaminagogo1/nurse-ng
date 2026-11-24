@@ -23,6 +23,7 @@ from app.models.user import User
 
 
 class JobType(StrEnum):
+    """Supported employment types for listing validation and filters."""
     FULL_TIME = "full_time"
     PART_TIME = "part_time"
     CONTRACT = "contract"
@@ -32,12 +33,14 @@ class JobType(StrEnum):
 
 
 class WorkMode(StrEnum):
+    """Supported on-site, remote or field working modes."""
     ON_SITE = "on_site"
     REMOTE = "remote"
     FIELD = "field"
 
 
 class JobStatus(StrEnum):
+    """Persisted listing state; services also check closing date and source authority."""
     OPEN = "open"
     CLOSED = "closed"
     UNCONFIRMED = "unconfirmed"
@@ -45,6 +48,7 @@ class JobStatus(StrEnum):
 
 
 class Job(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Public listing projection for an employer job or an authorized external vacancy."""
     __tablename__ = "jobs"
 
     employer_user_id: Mapped[uuid.UUID | None] = mapped_column(

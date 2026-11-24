@@ -1,3 +1,7 @@
+/**
+ * Enhance staff charts and filters from authorized analytics responses; chart data stays staff-only.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 /* Refresh staff analytics without generating member activity or losing selection. */
 (() => {
   "use strict";

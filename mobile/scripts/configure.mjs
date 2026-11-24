@@ -1,3 +1,4 @@
+/** Validate the target origin and generate Capacitor configuration plus the neutral offline bundle. See mobile/README.md. */
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';

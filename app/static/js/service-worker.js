@@ -1,3 +1,7 @@
+/**
+ * Cache public assets and the neutral shell only; authenticated documents/private files remain uncached.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 /* Only public application assets and the neutral shell belong in this cache. */
 "use strict";
 const CACHE = "nurse-offline-shell-v41";

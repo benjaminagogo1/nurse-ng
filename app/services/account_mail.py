@@ -1,4 +1,9 @@
-"""Account email delivery. Development messages are private files, never logs."""
+"""Account email delivery. Development messages are private files, never logs.
+
+The disabled/file/SMTP backend is selected by settings. File delivery is a
+private development artifact, not proof of SMTP delivery. Feature services own
+token or outbox state; this adapter only delivers the supplied message.
+"""
 
 import smtplib
 import ssl

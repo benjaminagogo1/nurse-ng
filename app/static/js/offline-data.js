@@ -1,3 +1,7 @@
+/**
+ * Prepare consented member-readable snapshots/materials with bounded expiry; no third-party scraping.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 (() => {
   "use strict";
   const app = window.NurseOffline,

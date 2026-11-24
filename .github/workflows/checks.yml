@@ -53,7 +53,8 @@ jobs:
           python-version: '3.12'
           cache: pip
       - run: python -m pip install -r requirements.lock
-      - run: ruff check app tests
+      - run: ruff check app tests tools
+      - run: python tools/build_code_reference.py --check
       - uses: actions/setup-node@v4
         with:
           node-version: '22'

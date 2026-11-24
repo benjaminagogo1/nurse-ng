@@ -1,4 +1,9 @@
-"""Python search orchestration; search services are separate from public-page fetching."""
+"""Python search orchestration; search services are separate from public-page fetching.
+
+Search services are operator-configured adapters, not member-submitted fetch
+URLs. Returned candidates still pass publisher/source validation. Search
+availability alone does not establish collection rights or current vacancies.
+"""
 
 import http.client
 import json

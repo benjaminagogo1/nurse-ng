@@ -1,4 +1,10 @@
-"""Job listings: posting by employer accounts and public reads."""
+"""Job listings: posting by employer accounts and public reads.
+
+Native employer jobs accept consented applications; external vacancies direct
+members to the original publisher. Current eligibility predicates determine
+public visibility, including source trust and closing dates. Application reads
+require the applicant or a currently authorized employer.
+"""
 
 import re
 import uuid
@@ -84,6 +90,7 @@ def create_job(
     country_code: str = "",
     closing_date: str = "",
 ) -> Job:
+    """Validate an authorized employer listing and commit its native-job record."""
     if user.account_type != AccountType.EMPLOYER.value:
         raise JobError("Only employer accounts can post jobs.")
     approved = next((org for org in approved_organizations(db, user)
@@ -154,6 +161,7 @@ def list_open_jobs(
     international_only: bool = False,
     location: str = "",
 ) -> list[Job]:
+    """Query currently eligible public listings with member-supplied search/filter values."""
     statement = select(Job).where(open_job_condition())
     if international_only:
         statement = statement.where(Job.country_code.not_in(["NG", ""]))
@@ -183,6 +191,7 @@ def list_open_jobs(
 
 
 def open_job_condition():
+    """Build the shared current-public-job predicate, including channel authority and dates."""
     timestamp = datetime.now(UTC)
     return and_(
         Job.status == JobStatus.OPEN,
@@ -258,6 +267,7 @@ def open_job_condition():
 
 
 def effective_job_status(job: Job) -> str:
+    """Present stored lifecycle together with effective deadline/source availability."""
     timestamp = datetime.now(UTC)
     if not job.source_id:
         if job.closes_at and utc(job.closes_at) <= timestamp:
@@ -281,6 +291,9 @@ def effective_job_status(job: Job) -> str:
 
 
 def salary_label(job: Job) -> str:
+    """Format stated salary facts for display without inventing unknown currency or pay
+    periods.
+    """
     if job.source_id:
         data = job.normalized_data.get("salary", {})
         if not data:
@@ -311,6 +324,7 @@ def salary_label(job: Job) -> str:
 
 
 def posted_label(job: Job) -> str:
+    """Format the recorded job publication date for a listing card."""
     posted = job.posted_at
     if posted.tzinfo is None:
         posted = posted.replace(tzinfo=UTC)
@@ -321,6 +335,7 @@ def posted_label(job: Job) -> str:
 
 
 def job_card(job: Job) -> dict[str, object]:
+    """Build shared public listing presentation from recorded facts and eligibility state."""
     return {
         "id": job.id,
         "title": job.title,
@@ -373,6 +388,7 @@ def job_card(job: Job) -> dict[str, object]:
 
 
 def application_for_job(db: Session, user: User, job: Job) -> JobApplication | None:
+    """Read the requesting member's saved application for one job."""
     return db.scalar(
         select(JobApplication).where(
             JobApplication.job_id == job.id, JobApplication.applicant_user_id == user.id
@@ -381,6 +397,9 @@ def application_for_job(db: Session, user: User, job: Job) -> JobApplication | N
 
 
 def apply_for_job(db: Session, user: User, job: Job, *, cover_note: str) -> JobApplication:
+    """Save a consented native-job application with the member's submitted contact
+    details.
+    """
     if job.source_id:
         raise JobError("Follow the original announcement for this vacancy's application process.")
     if user.account_type != AccountType.NURSE.value:
@@ -424,12 +443,14 @@ def apply_for_job(db: Session, user: User, job: Job, *, cover_note: str) -> JobA
 
 
 def can_access_applicants(db: Session, user: User, job: Job) -> bool:
+    """Check current employer/organization authority before revealing private applicants."""
     return user.id == job.employer_user_id and authorized(
         db, user.id, job.employer_organization_id
     )
 
 
 def list_applications(db: Session, user: User) -> list[JobApplication]:
+    """List member submissions or authorized employer-owned job applicants, newest first."""
     statement = select(JobApplication).options(joinedload(JobApplication.job))
     if user.account_type == AccountType.EMPLOYER.value:
         statement = statement.join(Job).where(
@@ -444,6 +465,7 @@ def list_applications(db: Session, user: User) -> list[JobApplication]:
 def change_application_status(
     db: Session, user: User, application: JobApplication, new_status: str
 ) -> None:
+    """Save an authorized employer status change or the applicant's withdrawal."""
     owner = can_access_applicants(db, user, application.job)
     applicant = application.applicant_user_id == user.id
     if not (owner or applicant):

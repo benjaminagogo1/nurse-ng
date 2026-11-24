@@ -1,4 +1,10 @@
-"""Recovering worker loops and process supervision with bounded restart delays."""
+"""Recovering worker loops and process supervision with bounded restart delays.
+
+The notifications role also creates opportunity/lecture reminders, publishes
+recurring activities, queues digests and maintains private message files. These
+in-app jobs run even with mail disabled. Supervision restarts failed/stuck process
+groups and reports progress to readiness. See docs/WORKER_OPERATIONS.md.
+"""
 
 import os
 import signal
@@ -67,6 +73,9 @@ def _signals(stop):
 
 
 def run_worker(name, *, once=False, max_tasks=10, stop=None):
+    """Run one role with fresh database sessions, progress reports, bounded backoff and graceful
+    shutdown.
+    """
     if name not in COMMANDS or not 1 <= max_tasks <= 100:
         raise ValueError("Invalid worker or task limit.")
     stop = stop or threading.Event()
@@ -215,6 +224,9 @@ class Supervisor:
 
 
 def run_supervisor(roles):
+    """Start and recover configured worker process groups using their persisted progress deadlines.
+
+    """
     names = worker_names(roles)
     if not names:
         raise ValueError("Choose at least one worker to supervise.")

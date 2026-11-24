@@ -1,6 +1,10 @@
 """Directory/search adapters and bounded recruitment-page inspection.
 
 Adapters return observations, never source approval or vacancy publication.
+
+Network work runs through the isolated recruitment worker. Directory/search
+observations are candidates; recruitment_activation and vacancies separately
+decide whether a source may collect or publish.
 """
 
 import hashlib

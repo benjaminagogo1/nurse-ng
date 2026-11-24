@@ -1,3 +1,5 @@
+// Capacitor lifecycle entry point and URL/universal-link forwarding.
+// Custom WebView offline recovery and resume synchronization live in SceneDelegate.swift.
 import UIKit
 import Capacitor
 

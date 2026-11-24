@@ -1,3 +1,7 @@
+/**
+ * Refresh the signed-in inbox/badge and reconcile read actions; notification access is rechecked by the server.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 (() => {
   "use strict";
   const bell = document.querySelector("[data-notification-bell]");

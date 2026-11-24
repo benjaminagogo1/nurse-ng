@@ -1,4 +1,9 @@
-"""Member journeys for peer support, welcomes, sessions, invitations and digests."""
+"""Member journeys for peer support, welcomes, sessions, invitations and digests.
+
+Text forms are bounded and mutations use session identity plus CSRF.
+/community/start/preferences maps the clicked dismiss=yes button directly to
+save_journey; no progress-based dismissal is inferred. See docs/DASHBOARD_ONBOARDING.md.
+"""
 
 from uuid import UUID, uuid4
 
@@ -378,6 +383,9 @@ def review_support_report(
 
 
 def start_context(db, user):
+    """Build the next-step page from saved private choices, real counts and suggested communities.
+
+    """
     return {
         "progress": participation.progress(db, user),
         "goals": participation.GOALS,
@@ -387,6 +395,7 @@ def start_context(db, user):
 
 @router.get("/community/start")
 def start(request: Request, user: User = Depends(require_user), db: Session = Depends(get_db)):
+    """Render optional community next steps for the signed-in member."""
     return page(
         request, "start", user, title="Find your place in nursing", **start_context(db, user)
     )
@@ -399,6 +408,7 @@ async def save_start(
     _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
 ):
+    """Save choices; only the dismiss=yes submit button requests dashboard reminder dismissal."""
     form = await read_form(request)
     try:
         participation.save_journey(
@@ -433,6 +443,9 @@ async def introduction(
     _: None = Depends(verify_csrf),
     db: Session = Depends(get_db),
 ):
+    """Require explicit public consent before publishing an introduction and joining its community.
+
+    """
     limit(user)
     posting_limit(user)
     form = await read_form(request)

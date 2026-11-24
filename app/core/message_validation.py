@@ -1,4 +1,9 @@
-"""Inspect conversation files in a bounded child process before release."""
+"""Inspect conversation files in a bounded child process before release.
+
+The parent storage layer invokes this parser as a child process. Type checks
+examine actual bytes rather than trusting extensions; passing validation is
+separate from malware scanning and permission to download.
+"""
 
 import io
 import json

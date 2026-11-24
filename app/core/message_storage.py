@@ -1,4 +1,9 @@
-"""Opaque private attachment objects, released only after validation and scanning."""
+"""Opaque private attachment objects, released only after validation and scanning.
+
+Filesystem writes cannot share a database transaction. Attachment services
+coordinate object ownership, quotas and crash cleanup. Public static-file serving
+must never expose this storage directory.
+"""
 
 import hashlib
 import json

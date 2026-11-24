@@ -1,4 +1,10 @@
-"""Private staging, bounded upload usage, authorized file access and cleanup."""
+"""Private staging, bounded upload usage, authorized file access and cleanup.
+
+Files stage privately, validate/scan, then attach to an authorized message.
+Ownership, per-file/window quotas and release state are checked server-side.
+Maintenance handles unfinished uploads and disk remnants; an opaque filename
+by itself never authorizes download. See docs/PRIVATE_MESSAGE_FILES.md.
+"""
 
 import re
 import uuid
@@ -26,6 +32,9 @@ def utc(value):
 
 
 def lock_participants(db, user, recipient, *, auth_version=None):
+    """Lock active accounts in stable order, check auth_version and recheck the mutual
+    connection.
+    """
     expected_version = user.auth_version if auth_version is None else auth_version
     for identifier in sorted([user.id, recipient.id], key=str):
         statement = update(User).where(
@@ -53,6 +62,9 @@ def lock_participants(db, user, recipient, *, auth_version=None):
 
 
 def upload_key(value):
+    """Normalize a client-generated UUID upload identity or reject a malformed retry
+    reference.
+    """
     try:
         return str(uuid.UUID(value))
     except (ValueError, TypeError, AttributeError):
@@ -60,6 +72,7 @@ def upload_key(value):
 
 
 def existing_upload(db, user, recipient, key, name, size, digest):
+    """Resolve an owner retry key only if recipient, filename, size and digest still match."""
     item = db.scalar(
         select(MessageAttachment).where(
             MessageAttachment.sender_id == user.id, MessageAttachment.upload_key == key
@@ -76,6 +89,9 @@ def existing_upload(db, user, recipient, key, name, size, digest):
 
 
 def upload_attachment(db, user, recipient, source, filename, key, *, auth_version=None):
+    """Validate/store a private connection file, reserve quota and persist owner-bound retry
+    state.
+    """
     expected_version = user.auth_version if auth_version is None else auth_version
     if not can_message(db, user, recipient):
         raise AttachmentError("This conversation is no longer available.")
@@ -164,6 +180,9 @@ def upload_attachment(db, user, recipient, source, filename, key, *, auth_versio
 
 
 def resolve_attachments(db, user, recipient, identifiers):
+    """Validate owned, recipient-bound, available files before binding them to a sent
+    message.
+    """
     if len(identifiers) > settings.message_attachment_max_files or len(set(identifiers)) != len(
         identifiers
     ):
@@ -194,6 +213,7 @@ def resolve_attachments(db, user, recipient, identifiers):
 
 
 def attachment_data(item):
+    """Expose safe attachment presentation metadata, not a filesystem path."""
     size = item.size_bytes
     label = (
         f"{size / (1024 * 1024):.1f} MB"
@@ -213,6 +233,8 @@ def attachment_data(item):
 
 
 def accessible_attachment(db, user, identifier):
+    """Check current participant/connection and staging/message ownership before download.
+    """
     item = db.get(MessageAttachment, identifier)
     if not item or user.id not in {item.sender_id, item.recipient_id}:
         return None
@@ -235,6 +257,9 @@ def accessible_attachment(db, user, identifier):
 
 
 def discard_attachment(db, user, identifier):
+    """Remove only the owner's unfinished attachment; sent files use message lifecycle
+    cleanup.
+    """
     from app.services.accounts import cleanup_account_files, queue_file_deletion
 
     item = db.scalar(
@@ -253,6 +278,7 @@ def discard_attachment(db, user, identifier):
 
 
 def maintain_message_files(db, *, dry_run=False, now=None):
+    """Reconcile expired staging and orphan disk files; dry_run reports without deleting."""
     from app.services.accounts import cleanup_account_files, queue_file_deletion
 
     now = now or datetime.now(UTC)

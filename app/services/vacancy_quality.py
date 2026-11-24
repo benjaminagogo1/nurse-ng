@@ -1,4 +1,9 @@
-"""Conservative exclusions for pages that do not describe individual opportunities."""
+"""Conservative exclusions for pages that do not describe individual opportunities.
+
+Canonical URL/record identities reduce duplicate aliases. Exclusions reject
+category pages, old portal instructions and unrelated announcements; these
+heuristics are conservative filters rather than proof of a vacancy.
+"""
 
 import re
 from urllib.parse import unquote, urlsplit, urlunsplit

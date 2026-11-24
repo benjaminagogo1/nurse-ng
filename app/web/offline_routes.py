@@ -1,4 +1,9 @@
-"""Integrated offline workspace and a neutral, credential-free navigation shell."""
+"""Integrated offline workspace and a neutral, credential-free navigation shell.
+
+The neutral shell contains no account data. Authenticated endpoints expose
+a scope for encrypted browser records and validate supported queued operations.
+A pending local action is never presented as a confirmed server write.
+"""
 
 import hashlib
 from datetime import UTC, datetime

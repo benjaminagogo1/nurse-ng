@@ -1,3 +1,5 @@
+"""Regression coverage for auth; see tests/README.md for isolation and runner setup."""
+
 from sqlalchemy import select
 
 from app.models.user import User

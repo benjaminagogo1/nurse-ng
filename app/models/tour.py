@@ -10,6 +10,7 @@ from app.db.base import Base
 
 
 class UserTour(Base):
+    """Private account/version progress for the server-defined guided interface tour."""
     __tablename__ = "user_tours"
 
     user_id: Mapped[UUID] = mapped_column(

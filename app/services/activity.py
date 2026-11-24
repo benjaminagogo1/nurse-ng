@@ -1,4 +1,9 @@
-"""Account usage counts, independent of public profiles and notification polling."""
+"""Account usage counts, independent of public profiles and notification polling.
+
+Usage rows use Nigerian calendar days and are separate from public profile
+visibility. Page navigation and meaningful member actions count; polling does
+not create fabricated activity. See docs/MEMBER_ANALYTICS.md.
+"""
 
 import logging
 from datetime import UTC, date, datetime, time, timedelta

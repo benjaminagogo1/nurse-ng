@@ -1,4 +1,9 @@
-"""Existing administrators can grant or revoke another account's administrator role."""
+"""Existing administrators can grant or revoke another account's administrator role.
+
+Only a current administrator may change another account's administrator flag.
+Role events record actor and outcome; ordinary account types and educator or
+employer approval remain independent permission domains.
+"""
 
 from sqlalchemy import exists, select, update
 from sqlalchemy.orm import aliased

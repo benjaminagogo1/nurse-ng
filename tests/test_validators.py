@@ -1,3 +1,5 @@
+"""Regression coverage for validators; see tests/README.md for isolation and runner setup."""
+
 import pytest
 
 from app.core.validators import normalize_phone

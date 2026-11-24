@@ -19,6 +19,7 @@ from app.db.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
 
 class DirectMessage(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Private connection-scoped message with client retry identity and persisted read state."""
     __tablename__ = "direct_messages"
 
     sender_id: Mapped[uuid.UUID] = mapped_column(
@@ -45,6 +46,7 @@ class DirectMessage(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class MessageAttachment(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Private upload ownership, validation/release state and optional sent-message binding."""
     __tablename__ = "message_attachments"
 
     message_id: Mapped[uuid.UUID | None] = mapped_column(
@@ -78,6 +80,7 @@ class MessageAttachment(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class MessageUploadUsage(Base):
+    """Persisted account upload-window counter used in attachment quota enforcement."""
     __tablename__ = "message_upload_usage"
     user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), primary_key=True

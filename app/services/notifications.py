@@ -1,4 +1,9 @@
-"""Transactional activity notifications with live permission checks."""
+"""Transactional activity notifications with live permission checks.
+
+emit appends to its caller's transaction and does not deliver mail. Current
+record access is recalculated for listing and delivery, so old notifications
+cannot bypass revoked access. notification_worker owns SMTP claims/retries.
+"""
 
 import uuid
 from datetime import UTC, datetime
@@ -42,6 +47,7 @@ PAGE_SIZE = 20
 
 
 def preferences(db: Session, user: User) -> dict:
+    """Merge saved per-category choices with the default in-app/email preferences."""
     rows = {
         p.category: p
         for p in db.scalars(
@@ -60,6 +66,7 @@ def preferences(db: Session, user: User) -> dict:
 
 
 def save_preferences(db: Session, user: User, values: dict) -> None:
+    """Persist explicit category/channel choices and reconcile obsolete email work."""
     insert = sqlite_insert if db.bind.dialect.name == "sqlite" else pg_insert
     for category in CATEGORIES:
         value = values[category]
@@ -163,6 +170,7 @@ def emit(
 
 
 def notify_reply(db: Session, reply: CommunityReply, post: CommunityPost) -> None:
+    """Append eligible discussion-reply notices within the publishing transaction."""
     recipients = set(
         db.scalars(
             select(DiscussionFollow.user_id).where(
@@ -187,6 +195,7 @@ def notify_reply(db: Session, reply: CommunityReply, post: CommunityPost) -> Non
 
 
 def notify_connection(db: Session, connection: Connection, *, accepted: bool = False) -> None:
+    """Append private request/acceptance notices within the connection transaction."""
     actor = connection.recipient_user_id if accepted else connection.requester_user_id
     recipient = connection.requester_user_id if accepted else connection.recipient_user_id
     if not accepted:
@@ -374,6 +383,7 @@ def visible_condition():
 
 
 def inbox_query(user: User):
+    """Build an owner-scoped eligible in-app notification query."""
     return select(Notification).where(
         Notification.recipient_id == user.id,
         Notification.in_app.is_(True),
@@ -382,6 +392,7 @@ def inbox_query(user: User):
 
 
 def unread_count(db: Session, user: User) -> int:
+    """Count currently eligible unread in-app notices for one account."""
     return (
         db.scalar(
             inbox_query(user)
@@ -396,6 +407,7 @@ def unread_count(db: Session, user: User) -> int:
 
 
 def inbox_page(db: Session, user: User, *, category="", unread=False, before=None):
+    """Read a stable private notification page with optional category/unread filters."""
     query = inbox_query(user)
     if category:
         query = query.where(Notification.category == category)
@@ -426,10 +438,12 @@ def inbox_page(db: Session, user: User, *, category="", unread=False, before=Non
 
 
 def get_notice(db: Session, user: User, identifier: uuid.UUID) -> Notification | None:
+    """Resolve an eligible notification only for its current recipient."""
     return db.scalar(inbox_query(user).where(Notification.id == identifier))
 
 
 def mark_read(db: Session, user: User, ids) -> None:
+    """Mark the recipient's eligible selected notices read and commit the change."""
     db.execute(
         update(Notification)
         .where(

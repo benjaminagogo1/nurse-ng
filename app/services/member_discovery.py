@@ -1,4 +1,9 @@
-"""Explainable suggestions using the viewer's choices and other members' public fields."""
+"""Explainable suggestions using the viewer's choices and other members' public fields.
+
+Directory cards combine opted-in public profile fields and community identity.
+Search must not reveal private profile/contact fields. Reuse the shared
+visibility predicates instead of querying profile columns directly.
+"""
 
 from datetime import UTC, datetime
 

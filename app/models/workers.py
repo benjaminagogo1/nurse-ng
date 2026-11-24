@@ -9,6 +9,7 @@ from app.db.base import Base
 
 
 class WorkerHeartbeat(Base):
+    """Role/instance progress report used for readiness and recovery of stalled workers."""
     __tablename__ = "worker_heartbeats"
 
     name: Mapped[str] = mapped_column(String(20), primary_key=True)

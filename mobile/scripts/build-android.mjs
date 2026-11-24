@@ -1,3 +1,4 @@
+/** Configure, build and copy Android artifacts; release requires explicit origin and private signing inputs. See mobile/README.md. */
 import { spawnSync } from 'node:child_process';
 import { copyFile, mkdir, readdir } from 'node:fs/promises';
 import { resolve, join } from 'node:path';

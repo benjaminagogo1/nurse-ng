@@ -1,3 +1,7 @@
+/**
+ * Next-step, peer-support, recurring-session, invitation and digest layouts.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 .participation-page { overflow-wrap: anywhere; }
 .participation-page h1 { max-width: 26ch; }
 .participation-page .section-tabs { margin-block: 1.4rem; }

@@ -1,4 +1,9 @@
-"""Repeatable aggregate coverage measurement using the public eligibility predicate."""
+"""Repeatable aggregate coverage measurement using the public eligibility predicate.
+
+Counts reuse the public-job eligibility predicate. Candidate sources and
+held records must not be reported as available jobs; measurement is not a
+live end-to-end check of an external application process.
+"""
 
 from collections import Counter
 from datetime import UTC, datetime

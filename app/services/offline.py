@@ -1,4 +1,9 @@
-"""Conflict-aware changes and receipts committed in the existing database."""
+"""Conflict-aware changes and receipts committed in the existing database.
+
+Supported operations have account-scoped IDs and payload hashes. A matching
+retry returns its saved receipt; reusing an ID with different content conflicts.
+Normal domain services still validate access and state. See docs/OFFLINE_ARCHITECTURE.md.
+"""
 
 import hashlib
 import hmac
@@ -33,6 +38,9 @@ class SyncError(ValueError):
 
 
 def profile_snapshot(db, user):
+    """Capture owner profile fields as a conflict-check baseline for a supported offline
+    edit.
+    """
     profile = get_profile_for_user(db, user.id)
     values = (
         {field: getattr(profile, field) for field in SHAREABLE_FIELD_NAMES}
@@ -47,6 +55,7 @@ def profile_snapshot(db, user):
 
 
 def bookmark_snapshot(db, user, job_id):
+    """Read private saved/reminder state used as the baseline for a queued bookmark change."""
     item = db.get(SavedOpportunity, (user.id, job_id))
     return {"saved": item is not None, "remind": bool(item and item.remind)}
 
@@ -173,6 +182,13 @@ HANDLERS = {"profile": _profile, "bookmark": _bookmark}
 
 
 def synchronize(db, user, operation_id, kind, payload, *, session_scope=""):
+    """Apply one supported account-scoped operation and return its confirmed receipt.
+
+    Reel operations also hold the upload lock during publication/cleanup. The inner
+    transaction checks stable operation ID/payload identity and current domain access;
+    a matching saved receipt recovers a lost response. SyncError carries conflicts
+    or unsupported/invalid actions. Ordinary account-security changes require online forms.
+    """
     if kind == "reel":
         from app.services.offline_uploads import remove_chunks, upload_lock
 

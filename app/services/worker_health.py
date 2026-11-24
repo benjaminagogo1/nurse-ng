@@ -1,4 +1,9 @@
-"""Bounded progress deadlines, shared by workers, the supervisor and readiness checks."""
+"""Bounded progress deadlines, shared by workers, the supervisor and readiness checks.
+
+Readiness compares last progress to each role's bounded work deadline. An
+alive PID alone is not healthy progress. Share these limits with supervision
+when changing network/FFmpeg/mail timeouts.
+"""
 
 import os
 from datetime import UTC, datetime, timedelta

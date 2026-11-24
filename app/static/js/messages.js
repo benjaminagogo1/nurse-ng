@@ -1,3 +1,7 @@
+/**
+ * Render authorized private conversation updates, reply context and attachment upload/send progress.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 (() => {
   "use strict";
   const thread = document.querySelector("[data-conversation]");

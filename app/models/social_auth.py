@@ -10,6 +10,7 @@ from app.db.base import Base
 
 
 class SocialIdentity(Base):
+    """Unique provider/subject identity explicitly linked to a Nurse.ng account."""
     __tablename__ = "social_identities"
 
     provider: Mapped[str] = mapped_column(String(20), primary_key=True)
@@ -19,6 +20,7 @@ class SocialIdentity(Base):
 
 
 class SocialAuthAttempt(Base):
+    """Expiring browser-bound OIDC state, nonce and PKCE verifier for login or linking."""
     __tablename__ = "social_auth_attempts"
 
     token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
@@ -33,6 +35,7 @@ class SocialAuthAttempt(Base):
 
 
 class SocialEnrollment(Base):
+    """Temporary verified-provider claims awaiting completion of first-time local registration."""
     __tablename__ = "social_enrollments"
 
     token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)

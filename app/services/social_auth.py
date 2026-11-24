@@ -1,4 +1,9 @@
-"""Authorization-code sign-in with fixed OIDC providers and signed ID tokens."""
+"""Authorization-code sign-in with fixed OIDC providers and signed ID tokens.
+
+Only fixed Google/LinkedIn OIDC providers are supported. Signed ID-token
+claims are validated before linking; provider email alone does not merge an
+existing account. social_routes owns browser binding and enrollment completion.
+"""
 
 import base64
 import hashlib
@@ -121,6 +126,7 @@ def exchange_token(provider, code, verifier):
 
 
 def verified_claims(provider, code, nonce, verifier):
+    """Validate a provider-issued signed ID token before trusting its subject/email claims."""
     client_id, _ = credentials(provider)
     try:
         tokens = exchange_token(provider, code, verifier)
@@ -169,6 +175,9 @@ def linked_user(db, provider, subject):
 
 
 def link(db, user, provider, subject):
+    """Bind an explicit verified provider identity to an eligible local account without automatic
+    email merging.
+    """
     if not eligible(user):
         raise SocialAuthError("This account cannot sign in. Please use another account.")
     identity = db.get(SocialIdentity, (provider, subject))

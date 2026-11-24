@@ -10,6 +10,9 @@ from app.db.base import Base, TimestampMixin
 
 
 class OfflineUpload(TimestampMixin, Base):
+    """Account-scoped resumable byte staging bound to session scope, expiry and publication
+    receipt.
+    """
     __tablename__ = "offline_uploads"
 
     user_id: Mapped[UUID] = mapped_column(

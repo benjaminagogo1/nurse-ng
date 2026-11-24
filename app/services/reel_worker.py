@@ -1,4 +1,9 @@
-"""Durable, leased video processing. Run with ``python -m app.cli reels-worker``."""
+"""Durable, leased video processing. Run with ``python -m app.cli reels-worker``.
+
+Claims use lease tokens; FFmpeg has a bounded runtime and writes playback
+variants before a Reel becomes ready. Failures are retryable within policy.
+The worker and web process require the same persistent media volume.
+"""
 
 import logging
 import subprocess
@@ -108,6 +113,7 @@ def transcode(source: Path, directory: Path, cover_seconds: int) -> list[tuple[s
 
 
 def claim_next(db: Session) -> tuple[uuid.UUID, str] | None:
+    """Lease one queued/expired Reel processing job so stale workers cannot publish it."""
     now = datetime.now(UTC)
     available = or_(Reel.state == "queued", (Reel.state == "processing") &
                     (Reel.lease_until < now))
@@ -137,6 +143,7 @@ def claim_next(db: Session) -> tuple[uuid.UUID, str] | None:
 
 
 def run_next(db: Session) -> tuple[str, str] | None:
+    """Process one leased Reel and save ready/failed state using its current token."""
     claimed = claim_next(db)
     if claimed is None:
         return None

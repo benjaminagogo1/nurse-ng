@@ -1,4 +1,9 @@
-"""Parse untrusted documents in a short-lived process with memory and CPU limits."""
+"""Parse untrusted documents in a short-lived process with memory and CPU limits.
+
+Invoked by the private evidence store in a disposable process. Resource limits
+protect the web process from hostile image/PDF parsers; malware scanning and
+reviewer access are separate checks.
+"""
 
 import io
 import sys

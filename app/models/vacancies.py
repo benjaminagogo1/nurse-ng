@@ -11,6 +11,7 @@ from app.models.recruitment import RecruitmentSource
 
 
 class VacancySnapshot(UUIDPrimaryKeyMixin, Base):
+    """Original authorized collection evidence retained separately from normalized public facts."""
     __tablename__ = "vacancy_snapshots"
 
     source_id: Mapped[uuid.UUID] = mapped_column(
@@ -26,6 +27,7 @@ class VacancySnapshot(UUIDPrimaryKeyMixin, Base):
 
 
 class VacancyRecord(UUIDPrimaryKeyMixin, Base):
+    """Normalized announcement, validation/review state and optional published Job reference."""
     __tablename__ = "vacancy_records"
 
     source_id: Mapped[uuid.UUID] = mapped_column(
@@ -51,6 +53,7 @@ class VacancyRecord(UUIDPrimaryKeyMixin, Base):
 
 
 class VacancyEvent(UUIDPrimaryKeyMixin, Base):
+    """Append-only ingestion/review history explaining a vacancy record's state."""
     __tablename__ = "vacancy_events"
 
     record_id: Mapped[uuid.UUID] = mapped_column(

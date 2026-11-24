@@ -22,6 +22,7 @@ from app.db.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
 
 class MentorOffer(TimestampMixin, Base):
+    """Opt-in public peer-support introduction with bounded concurrent-request capacity."""
     __tablename__ = "mentor_offers"
     user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
@@ -36,6 +37,7 @@ class MentorOffer(TimestampMixin, Base):
 
 
 class Mentorship(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Private support request; open_pair prevents competing open requests for the same pair."""
     __tablename__ = "mentorship_requests"
     requester_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), index=True
@@ -62,6 +64,7 @@ class Mentorship(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class MentorReport(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Private concern about one support request with staff review and duplicate-open protection."""
     __tablename__ = "mentorship_reports"
     request_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("mentorship_requests.id", ondelete="CASCADE"), index=True
@@ -83,6 +86,7 @@ class MentorReport(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class ActivitySeries(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Host-owned recurring discussion schedule using a local wall-clock time and timezone."""
     __tablename__ = "community_activity_series"
     topic_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("community_topics.id", ondelete="CASCADE"), index=True
@@ -104,6 +108,7 @@ class ActivitySeries(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class ActivityOccurrence(Base):
+    """One generated series session and its public discussion, unique within the schedule."""
     __tablename__ = "community_activity_occurrences"
     series_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("community_activity_series.id", ondelete="CASCADE"), primary_key=True
@@ -115,6 +120,7 @@ class ActivityOccurrence(Base):
 
 
 class ActivityAttendance(Base):
+    """Private choice to join a discussion activity; public display exposes aggregates only."""
     __tablename__ = "community_activity_attendance"
     post_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("community_posts.id", ondelete="CASCADE"), primary_key=True
@@ -126,6 +132,9 @@ class ActivityAttendance(Base):
 
 
 class MemberJourney(TimestampMixin, Base):
+    """Private next-step goal, Helpful visibility choice and explicit dashboard dismissal
+    timestamp.
+    """
     __tablename__ = "member_journeys"
     user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
@@ -136,6 +145,7 @@ class MemberJourney(TimestampMixin, Base):
 
 
 class CommunityIntroduction(Base):
+    """Saved public introduction reference and host welcome completion state."""
     __tablename__ = "community_introductions"
     post_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("community_posts.id", ondelete="CASCADE"), primary_key=True
@@ -148,6 +158,7 @@ class CommunityIntroduction(Base):
 
 
 class ReferralInvitation(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Owner-scoped expiring/revocable personal link to an existing public destination."""
     __tablename__ = "referral_invitations"
     owner_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), index=True
@@ -160,6 +171,7 @@ class ReferralInvitation(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class ReferralVisit(Base):
+    """Approximate browser visit receipt for an invitation, without IP/fingerprint identity."""
     __tablename__ = "referral_visits"
     invitation_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("referral_invitations.id", ondelete="CASCADE"), primary_key=True
@@ -171,6 +183,7 @@ class ReferralVisit(Base):
 
 
 class MemberReferral(Base):
+    """New-account attribution to a valid personal invitation, used for aggregate growth counts."""
     __tablename__ = "member_referrals"
     user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
@@ -186,6 +199,7 @@ class MemberReferral(Base):
 
 
 class DigestPreference(TimestampMixin, Base):
+    """Verified-email weekly digest opt-in, content choices, weekday and timezone."""
     __tablename__ = "weekly_digest_preferences"
     user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
@@ -202,6 +216,7 @@ class DigestPreference(TimestampMixin, Base):
 
 
 class WeeklyDigest(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Per-account/local-week email receipt with expiring claim and bounded retry state."""
     __tablename__ = "weekly_digests"
     user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), index=True

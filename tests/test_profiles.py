@@ -1,3 +1,5 @@
+"""Regression coverage for profiles; see tests/README.md for isolation and runner setup."""
+
 import pytest
 from sqlalchemy.exc import IntegrityError
 

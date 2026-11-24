@@ -1,4 +1,9 @@
-"""Host-scoped missing intermediates; system roots remain the trust anchors."""
+"""Host-scoped missing intermediates; system roots remain the trust anchors.
+
+Only the documented LSHSC hostnames receive the bundled intermediate. System
+roots and hostname checks remain active; this is not a global TLS-verification
+bypass. See app/certificates/README.md.
+"""
 
 import ssl
 from pathlib import Path

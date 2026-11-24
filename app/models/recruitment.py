@@ -20,6 +20,7 @@ from app.db.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
 
 class RecruitmentOrganization(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Discovered publisher identity and supporting directory evidence."""
     __tablename__ = "recruitment_organizations"
 
     identity_key: Mapped[str] = mapped_column(String(160), unique=True)
@@ -31,6 +32,9 @@ class RecruitmentOrganization(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class RecruitmentSource(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Candidate recruitment URL with explicit approval, authority/reuse scope and activation
+    evidence.
+    """
     __tablename__ = "recruitment_sources"
 
     organization_id: Mapped[uuid.UUID] = mapped_column(
@@ -91,6 +95,7 @@ class RecruitmentSource(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class DiscoverySchedule(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Operator-controlled recurring source-search/inspection schedule."""
     __tablename__ = "recruitment_discovery_schedules"
 
     name: Mapped[str] = mapped_column(String(120), unique=True)
@@ -111,6 +116,7 @@ class DiscoverySchedule(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class DiscoveryTask(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Durable discovery queue item with claim lease, attempts and saved outcome."""
     __tablename__ = "recruitment_discovery_tasks"
 
     kind: Mapped[str] = mapped_column(String(20))
@@ -149,6 +155,7 @@ class DiscoveryTask(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class SourceEvent(UUIDPrimaryKeyMixin, Base):
+    """Append-only source observation or approval/activation decision history."""
     __tablename__ = "recruitment_source_events"
 
     source_id: Mapped[uuid.UUID] = mapped_column(

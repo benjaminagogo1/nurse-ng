@@ -1,4 +1,9 @@
-"""Shared relevance rules for health jobs and Nigerian early-career opportunities."""
+"""Shared relevance rules for health jobs and Nigerian early-career opportunities.
+
+Relevance is a classification rule for explicit opportunity facts. Discovery
+is not source approval, and relevance is not proof that a vacancy is open.
+Publication eligibility is owned by jobs/vacancies.
+"""
 
 import re
 

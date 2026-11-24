@@ -1,3 +1,12 @@
+"""Typed environment configuration and startup validation.
+
+All application settings use the NURSE_NG_ prefix. Production reads process
+environment variables, while development may load .env. Settings are cached at
+import time: restart web and workers after changing configuration. Validation
+rejects unsafe production hosts, origins, cookies and signing keys before serving
+traffic. Secret fields must never appear in logs or documentation output.
+"""
+
 import os
 import re
 import secrets
@@ -31,6 +40,9 @@ def _validate_host(host: str) -> None:
 
 
 class Settings(BaseSettings):
+    """Validated NURSE_NG_ environment contract; secrets are excluded from field repr where
+    configured.
+    """
     model_config = SettingsConfigDict(
         env_file=".env",
         env_prefix="NURSE_NG_",
@@ -163,6 +175,12 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_security_settings(self) -> Self:
+        """Normalize host/proxy/worker settings and reject unsafe or incomplete provider config.
+
+        Validation runs before the module exposes cached settings. Development
+        convenience defaults do not bypass production HTTPS, secret, database,
+        cookie or exact-host requirements. Errors name settings, not secret values.
+        """
         roles = [role.strip() for role in self.required_workers.split(",") if role.strip()]
         if set(roles) - {"recruitment", "reels", "notifications"}:
             raise ValueError("Required workers must be recruitment, reels, or notifications.")
@@ -367,6 +385,7 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     # Hosting configuration comes from the process environment, never a copied local .env.
+    """Load and cache validated settings; production ignores the development .env file."""
     if os.environ.get("NURSE_NG_ENVIRONMENT") == "production":
         return Settings(_env_file=None)
     return Settings()

@@ -1,4 +1,9 @@
-"""Bound multipart parsing and request bytes on private message endpoints."""
+"""Bound multipart parsing and request bytes on private message endpoints.
+
+Reject oversized bodies before multipart buffering and constrain field/file
+counts at route parsing. This transport limit complements, rather than replaces,
+attachment-service validation and account storage quotas.
+"""
 
 import json
 import re

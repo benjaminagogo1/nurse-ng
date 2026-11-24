@@ -1,3 +1,7 @@
+/**
+ * Own encrypted IndexedDB records, account scope, non-exportable keys, expiry and cross-tab fencing.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 /* Encrypted browser storage. Persist non-exportable keys, never raw key bytes. */
 (() => {
   "use strict";

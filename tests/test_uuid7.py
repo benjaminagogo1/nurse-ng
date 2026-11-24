@@ -1,3 +1,5 @@
+"""Regression coverage for uuid7; see tests/README.md for isolation and runner setup."""
+
 import uuid
 
 from app.core.uuid import uuid7

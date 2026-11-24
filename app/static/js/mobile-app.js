@@ -1,3 +1,7 @@
+/**
+ * Manage browser installation/help and browser-local reminder dismissal; native hosts hide the prompt.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 (() => {
   "use strict";
   const native = window.Capacitor?.isNativePlatform?.() === true;

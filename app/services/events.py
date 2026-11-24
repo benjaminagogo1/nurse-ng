@@ -1,4 +1,9 @@
-"""Event validation and portable calendar downloads."""
+"""Event validation and portable calendar downloads.
+
+Staff routes own publication authority and member routes own private RSVPs.
+Calendar text is escaped for iCalendar output. An RSVP records intent; it is
+not evidence of attendance, study progress or accreditation.
+"""
 
 from datetime import UTC, datetime
 from urllib.parse import urlsplit

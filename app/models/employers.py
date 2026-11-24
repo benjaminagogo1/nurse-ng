@@ -10,6 +10,7 @@ from app.models.user import User
 
 
 class EmployerOrganization(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Organization identity and staff approval state, separate from member account types."""
     __tablename__ = "employer_organizations"
 
     name: Mapped[str] = mapped_column(String(160))
@@ -19,6 +20,7 @@ class EmployerOrganization(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class EmployerMembership(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Account-to-organization authorization requiring individual and organization approval."""
     __tablename__ = "employer_memberships"
 
     organization_id: Mapped[uuid.UUID] = mapped_column(
@@ -36,6 +38,7 @@ class EmployerMembership(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class EmployerReviewEvent(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Recorded staff decision on organization membership/approval."""
     __tablename__ = "employer_review_events"
 
     organization_id: Mapped[uuid.UUID] = mapped_column(

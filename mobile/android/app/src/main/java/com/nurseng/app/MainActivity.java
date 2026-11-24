@@ -4,6 +4,7 @@ import android.os.Bundle;
 import androidx.activity.OnBackPressedCallback;
 import com.getcapacitor.BridgeActivity;
 
+/** Capacitor host: install offline navigation, follow Back history and request sync on resume. */
 public class MainActivity extends BridgeActivity {
     private OfflineWebViewClient offlineClient;
 

@@ -1,3 +1,7 @@
+/**
+ * Replay explicit supported operations with stable IDs; reconcile receipts after lost responses.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 /* Only explicit, server-idempotent operations enter this queue. */
 (() => {
   "use strict";

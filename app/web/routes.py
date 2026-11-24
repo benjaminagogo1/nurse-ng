@@ -1,3 +1,10 @@
+"""Public landing page, liveness, database/worker readiness and robots policy.
+
+The root path delegates signed-in visitors to the account dashboard. Liveness
+does not query data; readiness checks the database and required worker progress.
+Neither probe is a deployment, schema migration or external-provider test.
+"""
+
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import JSONResponse, PlainTextResponse
 from sqlalchemy.exc import SQLAlchemyError
@@ -45,6 +52,7 @@ def home(
     user: User | None = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> Response:
+    """Show the public landing page or delegate an authenticated visitor to their dashboard."""
     if user is not None:
         return dashboard(request, user, db)
     return render(request, "home.html", {"title": "Nurse.ng", "user": user})

@@ -1,4 +1,9 @@
-"""Deferred contributions use the same validation, permissions and rate limits as forms."""
+"""Deferred contributions use the same validation, permissions and rate limits as forms.
+
+Snapshots contain only content the member may currently read and original
+downloadable materials. It does not scrape third-party pages. Browser consent,
+encryption and expiry are implemented by the offline-store/data scripts.
+"""
 
 from uuid import UUID
 

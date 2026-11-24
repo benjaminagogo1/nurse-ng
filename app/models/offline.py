@@ -9,6 +9,7 @@ from app.db.base import Base, TimestampMixin
 
 
 class OfflineOperation(TimestampMixin, Base):
+    """Account/operation receipt tying payload hash to a confirmed result for safe retries."""
     __tablename__ = "offline_operations"
 
     user_id: Mapped[UUID] = mapped_column(

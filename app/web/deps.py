@@ -1,4 +1,9 @@
-"""Request dependencies: current user and CSRF validation."""
+"""Request dependencies: current user and CSRF validation.
+
+Signed cookie contents are not sufficient: load the account and compare its
+current auth_version/active status. Authorization dependencies and CSRF protect
+different boundaries; hiding a template button does neither.
+"""
 
 import uuid
 from hmac import compare_digest

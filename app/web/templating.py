@@ -1,4 +1,9 @@
-"""Template rendering and CSRF tokens."""
+"""Template rendering and CSRF tokens.
+
+Shared rendering injects CSRF, feedback, draft scope, unread counts and tour
+context. Successful member page navigations record activity; polling/fragments
+do not. Signed-in pages use no-store rather than service-worker HTML caching.
+"""
 
 import secrets
 from datetime import date, datetime

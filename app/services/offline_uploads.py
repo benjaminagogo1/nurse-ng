@@ -1,4 +1,9 @@
-"""Bounded resumable staging on the application's existing private local media volume."""
+"""Bounded resumable staging on the application's existing private local media volume.
+
+Byte ranges, session scope, ownership and expiry protect resumable staging.
+Publication delegates to the regular Reel pipeline; receiving all chunks is
+not successful public publication. Receipts recover lost responses.
+"""
 
 import fcntl
 import hashlib

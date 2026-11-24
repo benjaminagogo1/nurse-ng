@@ -1,3 +1,7 @@
+/**
+ * Browser install reminder and native-download/help panels using shared theme tokens.
+ * Maintainer map: docs/FRONTEND_GUIDE.md and docs/reference/FRONTEND.md.
+ */
 .mobile-install-card {
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr) 44px;
