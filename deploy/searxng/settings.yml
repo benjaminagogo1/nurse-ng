@@ -2,7 +2,14 @@
 # Keep a small, explicitly maintained set of engines; unavailable engines are suspended.
 use_default_settings:
   engines:
-    keep_only: [bing, duckduckgo, google, brave]
+    keep_only: [yahoo, google, duckduckgo]
+engines:
+  - name: yahoo
+    disabled: false
+  - name: google
+    disabled: false
+  - name: duckduckgo
+    disabled: false
 general:
   debug: false
   instance_name: Nurse.ng private search

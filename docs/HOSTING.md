@@ -116,10 +116,14 @@ is at the repository root; `mobile/` is the separate native mobile project.
 For the **free plan**, use this **Build Command**:
 
 ```sh
-pip install -r requirements.lock
+bash deploy/render-build.sh
 ```
 
-This avoids the failed APT package download and the memory needed by ClamAV's
+This installs the application and a pinned private SearXNG service in separate
+Python environments. Search needs no API key and listens only on localhost;
+the recruitment worker creates six six-hour vacancy-search schedules on startup.
+Existing pauses and query cursors are preserved. No dependency installation
+runs during service startup. This also avoids APT downloads and ClamAV's
 full signatures. Set community scanning to `required` as shown below; evidence,
 community media and private message attachments that require scanning will be
 rejected while the scanner is unavailable. Pages and text discussions work.
@@ -130,9 +134,10 @@ Use this **Start Command** for one web service:
 python deploy/start.py all
 ```
 
-It validates production configuration, applies migrations, then runs the web
-server and required background workers together. It forwards shutdown to both
-and exits if either service stops so Render can restart the service. Keep pip
+It validates production configuration, applies migrations, waits for private
+search to become ready, then runs the web server and required background workers.
+It forwards shutdown to all process groups and exits if any service stops so
+Render can restart the service. Keep pip
 installs, package downloads and signature downloads in the build command; a
 command ending in `deploy/clamav-local update` does not start the website.
 Choose `/healthz` as the Render health check path and check `/readyz` after
@@ -149,6 +154,7 @@ NURSE_NG_SESSION_HTTPS_ONLY=true
 NURSE_NG_PUBLIC_BASE_URL=https://YOUR-SERVICE.onrender.com
 NURSE_NG_ALLOWED_HOSTS=YOUR-SERVICE.onrender.com
 NURSE_NG_REQUIRED_WORKERS=recruitment,reels,notifications
+NURSE_NG_BUNDLED_SEARCH=required
 NURSE_NG_COMMUNITY_MALWARE_SCAN_MODE=required
 ```
 
@@ -166,6 +172,20 @@ commands and environment updated in Render's dashboard. Push the local deploymen
 changes to the branch Render builds before redeploying; `render.yaml` does not
 automatically change a manually created service.
 
+For `nurse-ng.onrender.com`, change the existing service's Build Command to
+`bash deploy/render-build.sh` after pushing these files. Its Start Command
+remains `python deploy/start.py all`. Without an external search configuration,
+the prepared private service is selected automatically. Set
+`NURSE_NG_BUNDLED_SEARCH=required` to fail clearly if a later build omits search.
+The default `auto` mode uses bundled search when installed. `off` disables the
+bundled process; operator-configured SearXNG URLs or Brave credentials take
+precedence and do not start an extra local process.
+
+After deployment, check `/readyz` and **Staff → Recruitment sources**. Search
+tasks should be queued and their results inspected before listings appear in
+`/jobs`. Finding a source is not proof of an open vacancy. Source identity,
+access rules, factual extraction, expiry and freshness checks still apply.
+
 The pip upgrade notice and Node version selection are informational; neither
 caused the missing-package build failure. The Python web application does not
 require a mobile build or a pip upgrade.
@@ -180,7 +200,7 @@ storage, which is not supplied by the free web service.
 
 ClamAV with full signatures can exceed a free service's memory allowance. For
 a preview of pages and text discussions, use **Build Command**
-`pip install -r requirements.lock` and keep community scanning set to
+`bash deploy/render-build.sh` and keep community scanning set to
 `required`; private and community file uploads then fail closed when the scanner
 is unavailable. Installing the scanner does not address the storage or memory
 limits. Local signatures also need a recurring update before the wrapper's
@@ -188,6 +208,8 @@ limits. Local signatures also need a recurring update before the wrapper's
 
 The `all` startup option supplies the process manager and migrations in the
 single free web service, without a separate paid worker or pre-deploy step.
+Private search adds memory and upstream network work; monitor the service's
+memory usage and move search to a separately hosted instance if necessary.
 Workers stop when Render spins down the idle free service; background tasks
 resume when it wakes. The existing `web` and `workers` startup options still
 support separate services on hosting plans with shared persistent storage.

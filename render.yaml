@@ -5,7 +5,7 @@ services:
     name: nurse-ng
     runtime: python
     plan: free
-    buildCommand: pip install -r requirements.lock
+    buildCommand: bash deploy/render-build.sh
     startCommand: python deploy/start.py all
     healthCheckPath: /healthz
     envVars:
@@ -19,6 +19,8 @@ services:
         value: "true"
       - key: NURSE_NG_REQUIRED_WORKERS
         value: recruitment,reels,notifications
+      - key: NURSE_NG_BUNDLED_SEARCH
+        value: required
       - key: NURSE_NG_COMMUNITY_MALWARE_SCAN_MODE
         value: required
       - key: NURSE_NG_SECRET_KEY

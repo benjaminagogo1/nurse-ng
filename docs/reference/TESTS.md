@@ -66,6 +66,7 @@ Return to the [documentation index](../README.md) or [code guide](../CODE_GUIDE.
 | [tests/test_health.py](../../tests/test_health.py) | Regression coverage for health; see tests/README.md for isolation and runner setup. | 2 |
 | [tests/test_home.py](../../tests/test_home.py) | Regression coverage for home; see tests/README.md for isolation and runner setup. | 2 |
 | [tests/test_hosted_processes.py](../../tests/test_hosted_processes.py) | Check migration ordering and real child-process cleanup for one-service hosting. | 2 |
+| [tests/test_hosted_search.py](../../tests/test_hosted_search.py) | Private hosted search starts before workers, stays private and preserves operator choices. | 9 |
 | [tests/test_hosting.py](../../tests/test_hosting.py) | Real hosting boundaries: canonical links, proxy navigation and safe startup. | 13 |
 | [tests/test_likes.py](../../tests/test_likes.py) | Real authorization, shared counts and safe retries for video reactions. | 4 |
 | [tests/test_local_opportunities.py](../../tests/test_local_opportunities.py) | Nigerian priority in the feed and queue, with wider early-career coverage. | 8 |
@@ -89,7 +90,7 @@ Return to the [documentation index](../README.md) or [code guide](../CODE_GUIDE.
 | [tests/test_quality_feedback.py](../../tests/test_quality_feedback.py) | Server-confirmed results and correctable errors across ordinary and enhanced forms. | 4 |
 | [tests/test_recruitment.py](../../tests/test_recruitment.py) | Discovery observations, review gates, durable work and private administration. | 21 |
 | [tests/test_recruitment_fetch.py](../../tests/test_recruitment_fetch.py) | Outbound source checks must not reach private networks or bypass access policies. | 9 |
-| [tests/test_recruitment_search.py](../../tests/test_recruitment_search.py) | Real HTTP SearXNG contract, fallback and persistent discovery integration. | 12 |
+| [tests/test_recruitment_search.py](../../tests/test_recruitment_search.py) | Real HTTP SearXNG contract, fallback and persistent discovery integration. | 13 |
 | [tests/test_recruitment_tls.py](../../tests/test_recruitment_tls.py) | Exercise certificate verification with real TLS handshakes and no network sockets. | 5 |
 | [tests/test_reels.py](../../tests/test_reels.py) | Reels publishing, privacy, real video processing and shared community rules. | 18 |
 | [tests/test_reply_context.py](../../tests/test_reply_context.py) | Specific-response context remains public, current, and within one conversation. | 6 |
@@ -498,6 +499,18 @@ Return to the [documentation index](../README.md) or [code guide](../CODE_GUIDE.
 - [`test_all_startup_migrates_before_launch`](../../tests/test_hosted_processes.py#L19)
 - [`test_hosted_group_stops_on_signal_or_either_child_exit`](../../tests/test_hosted_processes.py#L59)
 
+### test_hosted_search.py
+
+- [`test_missing_installation_and_external_providers_are_explicit`](../../tests/test_hosted_search.py#L33)
+- [`test_search_binds_localhost_and_does_not_inherit_application_secrets`](../../tests/test_hosted_search.py#L49)
+- [`test_invalid_or_conflicting_search_ports_fail_before_start`](../../tests/test_hosted_search.py#L65)
+- [`test_build_rejects_modified_archive_before_extraction`](../../tests/test_hosted_search.py#L71)
+- [`test_search_template_explicitly_enables_maintained_engines`](../../tests/test_hosted_search.py#L82)
+- [`test_health_wait_uses_local_service_without_querying_engines`](../../tests/test_hosted_search.py#L91)
+- [`test_search_failure_stops_all_started_processes`](../../tests/test_hosted_search.py#L123)
+- [`test_worker_initializes_all_searches_and_preserves_paused_schedules`](../../tests/test_hosted_search.py#L143)
+- [`test_worker_does_not_queue_searches_without_a_provider`](../../tests/test_hosted_search.py#L158)
+
 ### test_hosting.py
 
 - [`test_production_cannot_generate_local_or_invalid_public_links`](../../tests/test_hosting.py#L90)
@@ -795,16 +808,17 @@ Return to the [documentation index](../README.md) or [code guide](../CODE_GUIDE.
 
 - [`test_searxng_http_json_without_key_and_deduplicated_safe_results`](../../tests/test_recruitment_search.py#L59)
 - [`test_failed_instance_falls_back_without_brave`](../../tests/test_recruitment_search.py#L83)
-- [`test_errors_are_bounded_and_redirects_are_not_followed`](../../tests/test_recruitment_search.py#L102)
-- [`test_brave_is_optional_fallback_and_key_stays_server_side`](../../tests/test_recruitment_search.py#L114)
-- [`test_worker_registers_search_results_and_direct_monitoring_survives_search_outage`](../../tests/test_recruitment_search.py#L141)
-- [`test_service_configuration_rejects_credentials_and_ambiguous_endpoints`](../../tests/test_recruitment_search.py#L190)
-- [`test_unconfigured_service_cannot_be_called`](../../tests/test_recruitment_search.py#L195)
-- [`test_content_length_close_is_a_successful_complete_response`](../../tests/test_recruitment_search.py#L200)
-- [`test_invalid_and_oversized_responses_fail_closed`](../../tests/test_recruitment_search.py#L210)
-- [`test_search_cannot_duplicate_or_reopen_a_known_rejected_url`](../../tests/test_recruitment_search.py#L221)
-- [`test_new_nigerian_search_target_runs_before_old_failed_directory_checks`](../../tests/test_recruitment_search.py#L246)
-- [`test_worker_recovers_expired_sqlite_lease_after_restart`](../../tests/test_recruitment_search.py#L290)
+- [`test_malformed_search_links_try_next_instance_instead_of_reporting_empty_success`](../../tests/test_recruitment_search.py#L98)
+- [`test_errors_are_bounded_and_redirects_are_not_followed`](../../tests/test_recruitment_search.py#L119)
+- [`test_brave_is_optional_fallback_and_key_stays_server_side`](../../tests/test_recruitment_search.py#L131)
+- [`test_worker_registers_search_results_and_direct_monitoring_survives_search_outage`](../../tests/test_recruitment_search.py#L158)
+- [`test_service_configuration_rejects_credentials_and_ambiguous_endpoints`](../../tests/test_recruitment_search.py#L207)
+- [`test_unconfigured_service_cannot_be_called`](../../tests/test_recruitment_search.py#L212)
+- [`test_content_length_close_is_a_successful_complete_response`](../../tests/test_recruitment_search.py#L217)
+- [`test_invalid_and_oversized_responses_fail_closed`](../../tests/test_recruitment_search.py#L227)
+- [`test_search_cannot_duplicate_or_reopen_a_known_rejected_url`](../../tests/test_recruitment_search.py#L238)
+- [`test_new_nigerian_search_target_runs_before_old_failed_directory_checks`](../../tests/test_recruitment_search.py#L263)
+- [`test_worker_recovers_expired_sqlite_lease_after_restart`](../../tests/test_recruitment_search.py#L307)
 
 ### test_recruitment_tls.py
 

@@ -14,8 +14,25 @@ Small operator commands.
 
 | Symbol | Role |
 | --- | --- |
-| [`_set_staff(phone: str, *, enabled: bool) -> int`](../../app/cli.py#L32) |  |
+| [`_set_staff(phone: str, *, enabled: bool) -> int`](../../app/cli.py#L30) |  |
 | [`main(argv: Sequence[str] \| None=None) -> int`](../../app/cli.py#L48) | Parse an explicit operator command and return its exit code; commands can mutate the configured installation. |
+
+## deploy/search.py
+
+[deploy/search.py](../../deploy/search.py)
+
+Build and supervise a private, isolated SearXNG service for hosted discovery.
+
+| Symbol | Role |
+| --- | --- |
+| [`SearchService`](../../deploy/search.py#L27) |  |
+| [`paths(root=ROOT)`](../../deploy/search.py#L34) |  |
+| [`verify_archive(archive)`](../../deploy/search.py#L39) | Reject unpinned source before any extraction or installation. |
+| [`download_archive(destination)`](../../deploy/search.py#L47) | Fetch a bounded archive atomically; interrupted builds cannot retain a partial file. |
+| [`install(root=ROOT)`](../../deploy/search.py#L68) | Prepare pinned source, separate dependencies and private settings during the build. |
+| [`configured_service(root=ROOT, environ=None)`](../../deploy/search.py#L106) | Use bundled search when installed and no external search provider is configured. |
+| [`wait_until_ready(service, process, stop, timeout=30)`](../../deploy/search.py#L148) | Wait for local health before starting workers; do not query upstream engines. |
+| [`main()`](../../deploy/search.py#L166) |  |
 
 ## deploy/start.py
 
@@ -26,8 +43,8 @@ Production web/worker entry point, including a single-service hosting option.
 | Symbol | Role |
 | --- | --- |
 | [`command_for(settings, role, port)`](../../deploy/start.py#L22) |  |
-| [`run_together(commands)`](../../deploy/start.py#L61) | Exit if either service stops, and forward shutdown to both process groups. |
-| [`main()`](../../deploy/start.py#L100) |  |
+| [`run_together(commands, search=None, worker_roles='')`](../../deploy/start.py#L61) | Wait for private search, supervise every service and forward shutdown to all groups. |
+| [`main()`](../../deploy/start.py#L127) |  |
 
 ## migrations/env.py
 
@@ -87,7 +104,7 @@ Build deterministic maintainer maps from source without importing the applicatio
 | [`configuration() -> str`](../../tools/build_code_reference.py#L431) |  |
 | [`tests() -> str`](../../tools/build_code_reference.py#L494) |  |
 | [`infrastructure() -> str`](../../tools/build_code_reference.py#L531) |  |
-| [`main() -> int`](../../tools/build_code_reference.py#L690) | Generate all pages, or check exact freshness without writing files. |
+| [`main() -> int`](../../tools/build_code_reference.py#L693) | Generate all pages, or check exact freshness without writing files. |
 
 ## CLI commands
 
@@ -164,7 +181,8 @@ The parent column describes the source graph. Use alembic heads/current against 
 | Source | Responsibility |
 | --- | --- |
 | [Dockerfile](../../Dockerfile) | Python/web/worker runtime image, scanner/media dependencies and process entry. |
-| [render.yaml](../../render.yaml) | Render single-service deployment definition; startup all applies migrations then launches services. |
+| [render.yaml](../../render.yaml) | Render single-service build with private search; startup all applies migrations then supervises search, web and workers. |
+| [deploy/render-build.sh](../../deploy/render-build.sh) | Build application and pinned, isolated private-search dependencies before startup. |
 | [deploy/production.env.example](../../deploy/production.env.example) | Setting names and operator guidance for production; no runtime secrets. |
 | [deploy/install-local-clamav.sh](../../deploy/install-local-clamav.sh) | Workstation malware-scanner setup; platform/privilege requirements in deployment guide. |
 | [deploy/install-local-search.sh](../../deploy/install-local-search.sh) | Workstation SearXNG setup, separate from application web requests. |

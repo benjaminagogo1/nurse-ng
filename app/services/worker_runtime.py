@@ -29,9 +29,12 @@ COMMANDS = {"recruitment": "recruitment-worker", "reels": "reels-worker",
 
 def _startup(name, db):
     if name == "recruitment":
-        from app.services.recruitment import ensure_search_schedule
+        from app.services.recruitment import ensure_search_schedule, expand_opportunity_discovery
+        from app.services.recruitment_search import search_available
 
-        ensure_search_schedule(db)
+        if search_available():
+            ensure_search_schedule(db)
+            expand_opportunity_discovery(db)
     elif name == "reels":
         from app.services.reel_worker import ffmpeg_binary
 

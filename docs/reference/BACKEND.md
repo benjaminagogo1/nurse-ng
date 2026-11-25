@@ -180,7 +180,7 @@ Application imports: `app.core.config`, `app.core.public_urls`, `app.core.valida
 
 | Symbol / declared inputs | Responsibility | Literal calls (excerpt) |
 | --- | --- | --- |
-| [`_set_staff(phone: str, *, enabled: bool) -> int`](../../app/cli.py#L32) |  | `SessionLocal`, `db.commit`, `db.scalar`, `normalize_phone`, `print`, `select` … |
+| [`_set_staff(phone: str, *, enabled: bool) -> int`](../../app/cli.py#L30) |  | `SessionLocal`, `db.commit`, `db.scalar`, `normalize_phone`, `print`, `select` … |
 | [`main(argv: Sequence[str] \| None=None) -> int`](../../app/cli.py#L48) | Parse an explicit operator command and return its exit code; commands can mutate the configured installation. | `','.join`, `COMMANDS.items`, `SessionLocal`, `_set_staff`, `argparse.ArgumentParser`, `backup_lock` … |
 
 ## app/core/community_storage.py
@@ -2412,21 +2412,21 @@ recurring activities, queues digests and maintains private message files. These
 in-app jobs run even with mail disabled. Supervision restarts failed/stuck process
 groups and reports progress to readiness. See docs/WORKER_OPERATIONS.md.
 
-Application imports: `app.db.session`, `app.models.workers`, `app.services.account_mail`, `app.services.community_participation`, `app.services.education_notifications`, `app.services.message_attachments`, `app.services.notification_worker`, `app.services.opportunity_watch`, `app.services.recruitment`, `app.services.recruitment_worker`, `app.services.reel_worker`, `app.services.weekly_digest`, `app.services.worker_health`.
+Application imports: `app.db.session`, `app.models.workers`, `app.services.account_mail`, `app.services.community_participation`, `app.services.education_notifications`, `app.services.message_attachments`, `app.services.notification_worker`, `app.services.opportunity_watch`, `app.services.recruitment`, `app.services.recruitment_search`, `app.services.recruitment_worker`, `app.services.reel_worker`, `app.services.weekly_digest`, `app.services.worker_health`.
 
 | Symbol / declared inputs | Responsibility | Literal calls (excerpt) |
 | --- | --- | --- |
-| [`_startup(name, db)`](../../app/services/worker_runtime.py#L30) |  | `ensure_search_schedule`, `ffmpeg_binary` |
-| [`_step(name, db)`](../../app/services/worker_runtime.py#L41) |  | `enqueue`, `enqueue_due`, `generate_alerts`, `mail_available`, `queue_learning_reminders`, `run_digest` … |
-| [`_signals(stop)`](../../app/services/worker_runtime.py#L68) |  | `signal.signal`, `stop.set` |
-| [`run_worker(name, *, once=False, max_tasks=10, stop=None)`](../../app/services/worker_runtime.py#L75) | Run one role with fresh database sessions, progress reports, bounded backoff and graceful shutdown. | `SessionLocal`, `ValueError`, `_signals`, `_startup`, `_step`, `datetime.now` … |
-| [`class Child`](../../app/services/worker_runtime.py#L146) |  | Class declaration. |
-| [`stop_process(process)`](../../app/services/worker_runtime.py#L155) | Stop the entire worker group, including a network checker or FFmpeg child. | `os.killpg`, `process.wait` |
-| [`class Supervisor`](../../app/services/worker_runtime.py#L173) |  | Class declaration. |
-| [`Supervisor.__init__(self, names, *, popen=subprocess.Popen, clock=time.monotonic)`](../../app/services/worker_runtime.py#L174) |  | `Child` |
-| [`Supervisor.tick(self, db)`](../../app/services/worker_runtime.py#L178) |  | `child.process.poll`, `datetime.now`, `db.commit`, `db.rollback`, `db.scalars`, `print` … |
-| [`Supervisor.close(self)`](../../app/services/worker_runtime.py#L220) |  | `stop_process` |
-| [`run_supervisor(roles)`](../../app/services/worker_runtime.py#L226) | Start and recover configured worker process groups using their persisted progress deadlines. | `', '.join`, `SessionLocal`, `Supervisor`, `ValueError`, `_signals`, `handlers.items` … |
+| [`_startup(name, db)`](../../app/services/worker_runtime.py#L30) |  | `ensure_search_schedule`, `expand_opportunity_discovery`, `ffmpeg_binary`, `search_available` |
+| [`_step(name, db)`](../../app/services/worker_runtime.py#L44) |  | `enqueue`, `enqueue_due`, `generate_alerts`, `mail_available`, `queue_learning_reminders`, `run_digest` … |
+| [`_signals(stop)`](../../app/services/worker_runtime.py#L71) |  | `signal.signal`, `stop.set` |
+| [`run_worker(name, *, once=False, max_tasks=10, stop=None)`](../../app/services/worker_runtime.py#L78) | Run one role with fresh database sessions, progress reports, bounded backoff and graceful shutdown. | `SessionLocal`, `ValueError`, `_signals`, `_startup`, `_step`, `datetime.now` … |
+| [`class Child`](../../app/services/worker_runtime.py#L149) |  | Class declaration. |
+| [`stop_process(process)`](../../app/services/worker_runtime.py#L158) | Stop the entire worker group, including a network checker or FFmpeg child. | `os.killpg`, `process.wait` |
+| [`class Supervisor`](../../app/services/worker_runtime.py#L176) |  | Class declaration. |
+| [`Supervisor.__init__(self, names, *, popen=subprocess.Popen, clock=time.monotonic)`](../../app/services/worker_runtime.py#L177) |  | `Child` |
+| [`Supervisor.tick(self, db)`](../../app/services/worker_runtime.py#L181) |  | `child.process.poll`, `datetime.now`, `db.commit`, `db.rollback`, `db.scalars`, `print` … |
+| [`Supervisor.close(self)`](../../app/services/worker_runtime.py#L223) |  | `stop_process` |
+| [`run_supervisor(roles)`](../../app/services/worker_runtime.py#L229) | Start and recover configured worker process groups using their persisted progress deadlines. | `', '.join`, `SessionLocal`, `Supervisor`, `ValueError`, `_signals`, `handlers.items` … |
 
 ## app/web/__init__.py
 

@@ -24,12 +24,12 @@ from sqlalchemy import select
 from app.core.config import settings
 from app.core.validators import normalize_phone
 from app.db.session import SessionLocal
-from app.models.user import User
-from app.services.community import reconcile_community_media
 from app.services.worker_health import WORKERS
 
 
 def _set_staff(phone: str, *, enabled: bool) -> int:
+    from app.models.user import User
+
     normalised = normalize_phone(phone)
     with SessionLocal() as db:
         user = db.scalar(select(User).where(User.phone == normalised))
@@ -277,6 +277,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             result = initialize_discovery(db)
         print(f"Created {result['schedules']} schedules and {result['sources']} pending sources.")
         return 0
+    from app.services.community import reconcile_community_media
+
     with SessionLocal() as db:
         result = reconcile_community_media(db, dry_run=args.dry_run)
     mode = "Would remove" if args.dry_run else "Removed"

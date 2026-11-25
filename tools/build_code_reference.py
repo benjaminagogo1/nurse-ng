@@ -631,8 +631,11 @@ def infrastructure() -> str:
             "Python/web/worker runtime image, scanner/media dependencies and process entry."
         ),
         "render.yaml": (
-            "Render single-service deployment definition; startup all "
-            "applies migrations then launches services."
+            "Render single-service build with private search; startup all "
+            "applies migrations then supervises search, web and workers."
+        ),
+        "deploy/render-build.sh": (
+            "Build application and pinned, isolated private-search dependencies before startup."
         ),
         "deploy/production.env.example": (
             "Setting names and operator guidance for production; no runtime secrets."

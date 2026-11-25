@@ -30,8 +30,9 @@ NURSE_NG_RECRUITMENT_SEARCH_PERMISSION_REFERENCE=
 ```
 
 Run `venv/bin/alembic upgrade head`, then restart `venv/bin/python -m app.cli recruitment-worker`.
-Startup creates the Nigerian general-search schedule if configured and absent. It runs every
-six hours, rotating national/state/category queries. Existing schedule pauses are preserved.
+Startup creates the Nigerian general-search schedule and five themed searches if configured
+and absent. They run every six hours, rotating national/state/category queries. Existing
+schedule pauses and cursors are preserved.
 Staff can add further schedules at `/recruitment`. A healthy empty result is not an error and
 does not trigger a potentially paid fallback.
 
@@ -98,7 +99,8 @@ contradictory or ambiguous dates, source authorization and freshness checks stil
 
 ## Continuing discovery across more websites
 
-Run these commands after configuring a working search provider:
+The recruitment worker now initializes these five searches automatically whenever a
+provider is configured. These commands also support explicit preview/setup:
 
 ```sh
 venv/bin/python -m app.cli expand-opportunity-discovery --dry-run
@@ -142,6 +144,42 @@ The machine and user service manager must be running. Search engines may still r
 rate limits, CAPTCHAs or incomplete results; direct source collection runs independently.
 Inspect service failures with `journalctl --user -u nurse-ng-search.service`.
 
+## Private search on Render
+
+Set the service's Build Command to `bash deploy/render-build.sh` and its Start
+Command to `python deploy/start.py all`. The build uses upstream revision
+`3a3dd15bfafcb645a1b45c2c6c0798a8f786aaaf` and verifies the archive's SHA-256 before
+extraction. SearXNG and Granian dependencies remain in `.local-tools/searxng/venv`,
+separate from the application. Its generated settings are private and excluded
+from Git. The [upstream source](https://github.com/searxng/searxng/tree/3a3dd15bfafcb645a1b45c2c6c0798a8f786aaaf)
+and AGPL licence are retained in that source directory.
+
+The launcher binds search to `127.0.0.1:8888`, waits for its local `/healthz`,
+and supplies that address to web/workers before their configuration is loaded.
+Application environment variables, including database and signing credentials,
+are removed from the search process's environment. Its cache files live in a
+private directory for this installation. Search has one worker and
+four blocking threads. Search exit stops the hosted service so Render restarts
+the entire group; all services receive shutdown together. The launcher embeds
+the existing worker supervisor, avoiding an extra Python supervisor process on
+the free plan while retaining worker restart and heartbeat deadlines.
+
+The hosted configuration explicitly enables Yahoo, Google and DuckDuckGo. The current
+Brave web adapter can emit malformed redirect URLs; these are rejected and count
+as a provider extraction failure if none of its results are usable. A healthy
+empty search still remains an empty result and does not trigger paid fallback.
+
+`NURSE_NG_BUNDLED_SEARCH` accepts `auto` (default), `required`, or `off`.
+Required mode reports a missing build installation before opening the database.
+External SearXNG configuration or configured Brave credentials take precedence.
+`NURSE_NG_BUNDLED_SEARCH_PORT` changes the private port if needed; it must differ
+from the public web `PORT`. These are launcher variables, not member preferences.
+
+Search and source discovery run in the background. Inspect search tasks and
+source collection results at `/recruitment`, and measure eligible listings at
+`/recruitment/coverage`. Engine throttling, source access failures and a lack of
+current announcements can still yield zero jobs even while processes are healthy.
+
 ## Local verification — 9 November 2026
 
 - Started upstream SearXNG revision `3a3dd15bfafcb645a1b45c2c6c0798a8f786aaaf` in a separate Python environment on `127.0.0.1:8888`. The local `.env` points to this instance; the Brave key is empty. The source archive's missing Git metadata is a non-fatal version-reporting warning.
@@ -151,12 +189,10 @@ Inspect service failures with `journalctl --user -u nurse-ng-search.service`.
 - Migration `b715a203ce46` was checked on a database clone and applied locally with all original rows preserved, no foreign-key violations and no metadata drift. Private backup: `/tmp/nurse-notifications-migration-cslmxexi/backup.sqlite`.
 - The full pytest suite passed. Focused checks cover the final queue/change-tracking refinements. Isolated browser journeys passed at 320, 390 and 1280px, including saves, reminders, matching, worker-generated alerts and the coverage screen. Browser artifacts: `/tmp/nurse-opportunities-browser-_oelkysp/`.
 
-At the 9 November verification, the local SearXNG process was a development service, not a supervised
-production deployment. Docker is installed but this user lacks daemon access, so the supplied
-container configuration has not been launched here. Production still needs persistent service
-hosting/supervision, a tested image pin, appropriate network access controls, monitoring and
-optionally another independently hosted instance. The Python integration is not dependent on
-this particular local process or a single instance address.
+At the 9 November verification, the local SearXNG process was a development service.
+The Render build/launcher now supports a supervised private installation as described
+above. The supplied standalone container configuration has not been launched here.
+The Python integration also supports separately hosted instances.
 
 Final live refresh: the persistent worker published the EHA Clinics vacancy at
 `2026-11-09 00:19:50 UTC` and reconfirmed the same job at `00:27:10 UTC`, with no

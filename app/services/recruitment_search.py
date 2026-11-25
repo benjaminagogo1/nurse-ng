@@ -193,6 +193,10 @@ def general_search(payload, fetcher, *, key="", permission=""):
                 provider="searxng",
                 target_country=payload.get("country_code", ""),
             )
+            if data["results"] and not candidates:
+                raise FetchError(
+                    "extraction_error", "Search returned no usable public result URLs."
+                )
             return {
                 "ok": True,
                 "outcome": "search_checked",

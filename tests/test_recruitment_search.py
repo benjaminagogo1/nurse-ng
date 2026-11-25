@@ -95,6 +95,23 @@ def test_failed_instance_falls_back_without_brave(monkeypatch):
     assert first not in result["message"]
 
 
+def test_malformed_search_links_try_next_instance_instead_of_reporting_empty_success(monkeypatch):
+    with (
+        instance(data={"results": [
+            {"url": "http:///go/v1/provider-redirect", "title": "Nursing vacancies"},
+            {"url": "http://127.0.0.1/private", "title": "Unsafe result"},
+        ]}) as (first, first_calls),
+        instance(data={"results": [
+            {"url": "https://health.example.gov.ng/jobs", "title": "Health jobs"},
+        ]}) as (second, second_calls),
+    ):
+        monkeypatch.setattr(settings, "recruitment_searxng_urls", first + "," + second)
+        result = execute_discovery("search", {"query": "Nigeria nursing vacancies"})
+    assert result["ok"] and len(result["candidates"]) == 1
+    assert len(first_calls) == len(second_calls) == 1
+    assert result["provider_failures"][0]["outcome"] == "extraction_error"
+
+
 @pytest.mark.parametrize(
     "status,expected",
     [(403, "configuration_needed"), (429, "rate_limited"), (302, "search_unavailable")],
