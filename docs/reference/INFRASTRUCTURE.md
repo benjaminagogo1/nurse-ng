@@ -75,19 +75,19 @@ Build deterministic maintainer maps from source without importing the applicatio
 | [`link(path: Path, label: str \| None=None, line: int \| None=None) -> str`](../../tools/build_code_reference.py#L84) |  |
 | [`summary(node: ast.AST) -> str`](../../tools/build_code_reference.py#L90) | Use the entire first paragraph, including wrapped docstring summaries. |
 | [`signature(node: ast.FunctionDef \| ast.AsyncFunctionDef) -> str`](../../tools/build_code_reference.py#L96) |  |
-| [`declared_calls(node: ast.AST) -> str`](../../tools/build_code_reference.py#L102) | Show a few literal call names, not inferred authorization or side effects. |
-| [`heading(title: str, note: str) -> list[str]`](../../tools/build_code_reference.py#L133) |  |
-| [`python_files(folder: str) -> list[Path]`](../../tools/build_code_reference.py#L149) |  |
-| [`backend() -> str`](../../tools/build_code_reference.py#L153) |  |
-| [`dependencies(node: ast.FunctionDef \| ast.AsyncFunctionDef) -> str`](../../tools/build_code_reference.py#L205) |  |
-| [`routes() -> str`](../../tools/build_code_reference.py#L221) |  |
-| [`schema() -> str`](../../tools/build_code_reference.py#L280) |  |
-| [`header_comment(path: Path) -> str`](../../tools/build_code_reference.py#L352) |  |
-| [`frontend() -> str`](../../tools/build_code_reference.py#L364) |  |
-| [`configuration() -> str`](../../tools/build_code_reference.py#L419) |  |
-| [`tests() -> str`](../../tools/build_code_reference.py#L482) |  |
-| [`infrastructure() -> str`](../../tools/build_code_reference.py#L519) |  |
-| [`main() -> int`](../../tools/build_code_reference.py#L678) | Generate all pages, or check exact freshness without writing files. |
+| [`declared_calls(node: ast.AST, source_text: str) -> str`](../../tools/build_code_reference.py#L102) | Show a few literal call names, not inferred authorization or side effects. |
+| [`heading(title: str, note: str) -> list[str]`](../../tools/build_code_reference.py#L137) |  |
+| [`python_files(folder: str) -> list[Path]`](../../tools/build_code_reference.py#L153) |  |
+| [`backend() -> str`](../../tools/build_code_reference.py#L157) |  |
+| [`dependencies(node: ast.FunctionDef \| ast.AsyncFunctionDef) -> str`](../../tools/build_code_reference.py#L215) |  |
+| [`routes() -> str`](../../tools/build_code_reference.py#L231) |  |
+| [`schema() -> str`](../../tools/build_code_reference.py#L292) |  |
+| [`header_comment(path: Path) -> str`](../../tools/build_code_reference.py#L364) |  |
+| [`frontend() -> str`](../../tools/build_code_reference.py#L376) |  |
+| [`configuration() -> str`](../../tools/build_code_reference.py#L431) |  |
+| [`tests() -> str`](../../tools/build_code_reference.py#L494) |  |
+| [`infrastructure() -> str`](../../tools/build_code_reference.py#L531) |  |
+| [`main() -> int`](../../tools/build_code_reference.py#L690) | Generate all pages, or check exact freshness without writing files. |
 
 ## CLI commands
 

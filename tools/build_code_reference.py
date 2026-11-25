@@ -99,12 +99,16 @@ def signature(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
     return f"{prefix}{node.name}({ast.unparse(node.args)}){result}"
 
 
-def declared_calls(node: ast.AST) -> str:
+def declared_calls(node: ast.AST, source_text: str) -> str:
     """Show a few literal call names, not inferred authorization or side effects."""
+    # Python patch releases can change f-string quoting in ast.unparse.
+    # Preserve source spelling for those expressions to keep CI output stable.
     statements = node.body if isinstance(node, (*FUNCTIONS, ast.ClassDef)) else [node]
     calls = sorted(
         {
-            ast.unparse(item.func)
+            ast.get_source_segment(source_text, item.func)
+            if any(isinstance(part, ast.JoinedStr) for part in ast.walk(item.func))
+            else ast.unparse(item.func)
             for statement in statements
             for item in ast.walk(statement)
             if isinstance(item, ast.Call)
@@ -165,6 +169,7 @@ def backend() -> str:
         lines.append(f"| {link(path)} | {summary(tree(path))} |")
     for path in files:
         module = tree(path)
+        source_text = source(path)
         lines += ["", f"## {path.relative_to(ROOT).as_posix()}", "", link(path), ""]
         doc = ast.get_docstring(module)
         if doc:
@@ -188,7 +193,11 @@ def backend() -> str:
             ]
         for node in nodes:
             label = signature(node) if isinstance(node, FUNCTIONS) else "class " + node.name
-            calls = declared_calls(node) if isinstance(node, FUNCTIONS) else "Class declaration."
+            calls = (
+                declared_calls(node, source_text)
+                if isinstance(node, FUNCTIONS)
+                else "Class declaration."
+            )
             lines.append(f"| {link(path, code(label), node.lineno)} | {summary(node)} | {calls} |")
             if isinstance(node, ast.ClassDef):
                 for method in node.body:
@@ -197,7 +206,8 @@ def backend() -> str:
                             path, code(node.name + "." + signature(method)), method.lineno
                         )
                         lines.append(
-                            f"| {method_link} | {summary(method)} | {declared_calls(method)} |"
+                            f"| {method_link} | {summary(method)} "
+                            f"| {declared_calls(method, source_text)} |"
                         )
     return "\n".join(lines) + "\n"
 
@@ -229,6 +239,7 @@ def routes() -> str:
     )
     for path in python_files("app/web"):
         module = tree(path)
+        source_text = source(path)
         prefixes = {}
         for node in module.body:
             if isinstance(node, ast.Assign) and isinstance(node.value, ast.Call):
@@ -260,10 +271,11 @@ def routes() -> str:
                     continue
                 router_name = ast.unparse(decorator.func.value)
                 url = prefixes.get(router_name, "") + str(decorator.args[0].value)
+                description = summary(node) or "Literal calls: " + declared_calls(node, source_text)
                 rows.append(
                     f"| {method.upper()} {code(url)} | {link(path, node.name, node.lineno)} "
                     f"| {code(dependencies(node)) if dependencies(node) else '—'} "
-                    f"| {summary(node) or ('Literal calls: ' + declared_calls(node))} |"
+                    f"| {description} |"
                 )
         if rows:
             lines += [
