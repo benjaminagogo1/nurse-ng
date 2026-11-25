@@ -6,20 +6,25 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 from app.core.config import settings
-from deploy import start
+from deploy import search, start
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 @pytest.mark.parametrize("migration_code", [0, 7])
-def test_all_startup_migrates_before_launch(monkeypatch, migration_code):
+@pytest.mark.parametrize("bundled_search", [False, True])
+def test_all_startup_migrates_before_launch(monkeypatch, migration_code, bundled_search):
     monkeypatch.setenv("NURSE_NG_ENVIRONMENT", "production")
     monkeypatch.setattr(settings, "environment", "production")
     monkeypatch.setattr(settings, "required_workers", "recruitment,reels,notifications")
+    monkeypatch.setenv("NURSE_NG_RECRUITMENT_SEARXNG_URLS", "")
+    service = SimpleNamespace(url="http://127.0.0.1:18888") if bundled_search else None
+    monkeypatch.setattr(search, "configured_service", lambda: service)
     monkeypatch.setattr(sys, "argv", ["deploy/start.py", "all"])
     # main changes cwd, sys.path and umask for the hosted process. Isolate those
     # process-global mutations when checking it in the test runner.
@@ -33,11 +38,13 @@ def test_all_startup_migrates_before_launch(monkeypatch, migration_code):
         steps.append("migration")
         return subprocess.CompletedProcess(command, migration_code)
 
-    def launch(commands):
+    def launch(commands, search_service, worker_roles):
         steps.append("launch")
         web = commands["web"]
         assert web[web.index("--workers") + 1] == "1"
         assert commands["workers"][-2:] == ["app.cli", "workers"]
+        assert search_service is service
+        assert worker_roles == "recruitment,reels,notifications"
         return 0
 
     monkeypatch.setattr(start.subprocess, "run", migrate)

@@ -496,8 +496,8 @@ Return to the [documentation index](../README.md) or [code guide](../CODE_GUIDE.
 
 ### test_hosted_processes.py
 
-- [`test_all_startup_migrates_before_launch`](../../tests/test_hosted_processes.py#L19)
-- [`test_hosted_group_stops_on_signal_or_either_child_exit`](../../tests/test_hosted_processes.py#L59)
+- [`test_all_startup_migrates_before_launch`](../../tests/test_hosted_processes.py#L21)
+- [`test_hosted_group_stops_on_signal_or_either_child_exit`](../../tests/test_hosted_processes.py#L66)
 
 ### test_hosted_search.py
 
