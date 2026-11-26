@@ -495,8 +495,7 @@ document.activeElement.matches('[data-display-open]')"""
         audit(path, 320, True)
     navigate("/recruitment")
     assert js(
-        "document.querySelector('a[href=\"/recruitment/vacancies?state=pending\"]')"
-        ".textContent.includes('Review pending vacancies')"
+        "!!document.querySelector('a[href=\"/recruitment/vacancies?state=pending\"]')"
     )
     js("document.querySelector('a[href=\"/recruitment/vacancies?state=pending\"]').click()")
     wait_for(

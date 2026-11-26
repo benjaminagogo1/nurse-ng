@@ -1,23 +1,60 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon %}
 {% block title %}Recruitment sources — Nurse.ng{% endblock %}
 {% block content %}
-<section class="form-page recruitment-page">
-  <p class="eyebrow">Staff only</p>
-  <p><a href="/recruitment/coverage" class="text-link">Nigerian coverage and collection gaps →</a></p>
-  <h1>Recruitment sources</h1>
-  <div class="button-row"><a class="button-primary" href="/recruitment/vacancies?state=pending">Review pending vacancies ({{ pending_records }})</a><a href="/jobs">View published vacancies ({{ public_jobs }})</a><a href="#add-source">Add a source URL</a><a href="#worker-health">Worker health</a></div>
-  <p>Nigeria is the discovery priority: federal and state recruitment, private employers, public and digital health, youth fellowships, internships, and graduate programmes. When both queues have work, four of every five worker attempts prefer Nigerian sources.</p>
-  <p class="lede">Discover institutions, check their recruitment channels, and record the evidence needed for approval.</p>
-  <p class="field-hint">The background worker activates sources that pass automatic evidence checks. Uncertain cases need review. Source activation does not verify individual vacancies. Valid vacancies publish automatically; exceptions go to vacancy review.</p>
+<section class="form-page recruitment-page recruitment-dashboard">
+  <header class="recruitment-heading">
+    <div>
+      <p class="eyebrow">Recruitment workspace</p>
+      <h1>Recruitment sources</h1>
+      <p class="recruitment-intro">Find sources, review vacancies and monitor collection.</p>
+    </div>
+    <a class="btn btn-primary" href="#add-source">{{ icon('plus', 17) }} Add a source</a>
+  </header>
+
+  <div class="recruitment-overview" aria-label="Recruitment overview">
+    <a class="recruitment-metric" href="#source-results">
+      <div class="recruitment-metric-value"><strong>{{ total }}</strong>{{ icon('building', 21) }}</div>
+      <span>{{ 'Matching sources' if query or status or country else 'Tracked sources' }}</span>
+    </a>
+    <a class="recruitment-metric" href="/recruitment/vacancies?state=pending">
+      <div class="recruitment-metric-value"><strong>{{ pending_records or 0 }}</strong>{{ icon('review', 21) }}</div>
+      <span>Vacancies to review</span>
+    </a>
+    <a class="recruitment-metric" href="/jobs">
+      <div class="recruitment-metric-value"><strong>{{ public_jobs or 0 }}</strong>{{ icon('briefcase', 21) }}</div>
+      <span>Published vacancies</span>
+    </a>
+  </div>
+
+  <nav class="recruitment-tools" aria-label="Recruitment tools">
+    <a href="/recruitment/coverage">{{ icon('globe', 17) }} Coverage &amp; gaps</a>
+    <a href="#worker-health">{{ icon('clock', 17) }} Worker health</a>
+    <a href="#schedules">{{ icon('calendar', 17) }} Discovery schedules</a>
+  </nav>
+
   {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
-  <form method="get" class="source-filters">
-    <label>Find a source<input name="q" value="{{ query }}" maxlength="200" placeholder="Organisation or URL"></label>
-    <label>Status<select name="status"><option value="">All statuses</option>{% for option in ['pending', 'approved', 'rejected', 'revoked'] %}<option value="{{ option }}" {% if status == option %}selected{% endif %}>{{ option|capitalize }}</option>{% endfor %}</select></label>
-    <label>Country code<input name="country" value="{{ country }}" maxlength="2" placeholder="NG"></label>
-    <button class="button-primary" type="submit">Filter</button>
+  <form method="get" class="source-filters recruitment-filters" aria-label="Filter recruitment sources">
+    <label class="recruitment-filter-search" for="recruitment-query">Find a source<input id="recruitment-query" name="q" value="{{ query }}" maxlength="200" placeholder="Name or URL"></label>
+    <label for="recruitment-status">Status<select id="recruitment-status" name="status"><option value="">All statuses</option>{% for option in ['pending', 'approved', 'rejected', 'revoked'] %}<option value="{{ option }}" {% if status == option %}selected{% endif %}>{{ option|capitalize }}</option>{% endfor %}</select></label>
+    <label for="recruitment-country">Country code<input id="recruitment-country" name="country" value="{{ country }}" maxlength="2" placeholder="NG"></label>
+    <div class="recruitment-filter-actions">
+      <button class="btn btn-primary" type="submit">Apply filters</button>
+      {% if query or status or country %}<a class="recruitment-filter-reset" href="/recruitment">Clear filters</a>{% endif %}
+    </div>
   </form>
-  <p><a href="/recruitment/vacancies">Review vacancy exceptions</a></p>
-  <h2>{{ total }} source{{ '' if total == 1 else 's' }}</h2>
+
+  <details class="recruitment-guidance">
+    <summary>How discovery works</summary>
+    <div>
+      <p>Nigeria is the discovery priority: federal and state recruitment, private employers, public and digital health, youth fellowships, internships, and graduate programmes. When both queues have work, four of every five worker attempts prefer Nigerian sources.</p>
+      <p>Discover institutions, check their recruitment channels, and record the evidence needed for approval.</p>
+      <p>The background worker activates sources that pass automatic evidence checks. Uncertain cases need review. Source activation does not verify individual vacancies. Valid vacancies publish automatically; exceptions go to vacancy review.</p>
+      <a href="/recruitment/vacancies">Review vacancy exceptions {{ icon('arrow', 15) }}</a>
+    </div>
+  </details>
+
+  <h2 id="source-results" class="recruitment-results-heading">{{ total }} source{{ '' if total == 1 else 's' }}</h2>
   <div class="source-list">
   {% for source in sources %}
     <article class="source-card">

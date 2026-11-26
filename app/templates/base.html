@@ -49,7 +49,7 @@ feedback_slot -%} {%- macro nav_link(href, key, label, name, current) -%}
     />
     <link
       rel="stylesheet"
-      href="{{ url_for('static', path='/css/design.css') }}?v=12"
+      href="{{ url_for('static', path='/css/design.css') }}?v=13"
     />
     <link
       rel="stylesheet"
@@ -420,7 +420,7 @@ feedback_slot -%} {%- macro nav_link(href, key, label, name, current) -%}
         tabindex="-1"
         class="{% if user %}app-main{% else %}site-main{% endif %}"
       >
-        {% if user and request.url.path != '/app' and page != 'messages' %}
+        {% if user and request.url.path != '/app' and page != 'messages' and not request.url.path.startswith('/recruitment') %}
         <aside class="mobile-install-card" data-mobile-install aria-labelledby="mobile-install-title" hidden>
           <img src="/static/img/favicon.svg" width="44" height="44" alt="" />
           <div><strong id="mobile-install-title">Nurse.ng, wherever you go</strong>
